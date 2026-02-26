@@ -22,7 +22,6 @@ body{
     align-items:center;
     justify-content:center;
     overflow:hidden;
-
     background:
         linear-gradient(rgba(10,20,25,.75), rgba(10,20,25,.75)),
         url("solar.jpg");
@@ -195,11 +194,11 @@ p{
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
-let ar=true;
-const wa=document.getElementById("wa");
+let ar = true; // الوضع الافتراضي: عربي
+const wa = document.getElementById("wa");
 
 function toggleLang(){
-    ar=!ar;
+    ar = !ar;
     document.documentElement.lang = ar ? "ar" : "en";
 
     document.getElementById("badge").innerText = ar ? "🚧 الموقع قيد الإنشاء" : "🚧 COMING SOON";
@@ -217,7 +216,6 @@ function toggleLang(){
         "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية." :
         "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20solutions.";
 }
-toggleLang();
 </script>
 
 </body>
