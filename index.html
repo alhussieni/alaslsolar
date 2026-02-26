@@ -22,112 +22,100 @@ body{
     display:flex;
     align-items:center;
     justify-content:center;
-    overflow:hidden;
     background:
-        linear-gradient(rgba(10,20,25,.75), rgba(10,20,25,.75)),
-        url("solar.jpg");
+    linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),
+    url("solar.jpg");
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
-    transition:.4s;
 }
 
-.overlay{
-    width:100%;
-    height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:40px;
-    backdrop-filter: blur(3px);
+/* زر اللغة */
+.lang-btn{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:rgba(0,0,0,.85);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:30px;
+    cursor:pointer;
+    font-size:14px;
+    z-index:99999;
 }
 
+/* المحتوى */
 .container{
-    max-width:900px;
     text-align:center;
-    animation:fadeUp 1.2s ease forwards;
-}
-
-@keyframes fadeUp{
-    from{opacity:0;transform:translateY(40px)}
-    to{opacity:1;transform:translateY(0)}
+    max-width:900px;
+    padding:20px;
 }
 
 .logo img{
     max-width:160px;
     margin-bottom:20px;
-    filter:drop-shadow(0 8px 18px rgba(0,0,0,.6));
 }
 
 .badge{
     display:inline-block;
     padding:8px 22px;
     border-radius:30px;
-    background:rgba(255,255,255,.12);
+    background:rgba(255,255,255,.15);
     margin-bottom:20px;
     font-size:14px;
 }
 
 h1{
     font-size:48px;
-    letter-spacing:3px;
     margin-bottom:15px;
 }
 
 h2{
     font-weight:300;
-    margin-bottom:30px;
-    opacity:.9;
+    margin-bottom:25px;
 }
 
 p{
     font-size:20px;
-    line-height:1.7;
-    opacity:.9;
-    margin-bottom:40px;
+    margin-bottom:30px;
 }
 
-.contact span, .contact a{
+.contact span,
+.contact a{
     display:block;
-    font-size:18px;
-    margin:8px 0;
-    color:white;
+    margin:6px 0;
+    color:#fff;
     text-decoration:none;
 }
 
-.contact a:hover{
-    text-decoration:underline;
-}
-
 .social{
-    margin-top:30px;
+    margin-top:25px;
 }
 
 .social a{
     margin:0 10px;
-    font-size:28px;
-    color:white;
+    font-size:26px;
+    color:#fff;
     text-decoration:none;
     transition:.3s;
 }
 
 .social a:hover{
     color:#f9c74f;
-    transform:scale(1.15);
 }
 
 .footer{
-    margin-top:60px;
+    margin-top:40px;
     font-size:14px;
     opacity:.6;
 }
 
+/* زر واتساب */
 .whatsapp{
     position:fixed;
     bottom:25px;
     right:25px;
     background:#25d366;
-    color:#fff;
     width:60px;
     height:60px;
     border-radius:50%;
@@ -135,115 +123,93 @@ p{
     align-items:center;
     justify-content:center;
     font-size:28px;
+    color:#fff;
     text-decoration:none;
-    box-shadow:0 8px 20px rgba(0,0,0,.4);
-    z-index:10;
+    z-index:99999;
 }
-
-.lang{
-    position:fixed;
-    top:20px;
-    right:20px;
-    font-size:14px;
-    cursor:pointer;
-    opacity:.8;
-    background:rgba(0,0,0,.4);
-    padding:6px 12px;
-    border-radius:20px;
-}
-.lang:hover{opacity:1}
 
 @media(max-width:600px){
-    h1{font-size:38px}
-    p{font-size:18px}
+    h1{font-size:36px;}
+    p{font-size:18px;}
 }
 </style>
 </head>
 
 <body>
 
-<div class="lang" id="langBtn">AR | EN</div>
+<div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 
-<div class="overlay">
 <div class="container">
 
 <div class="logo">
-    <img src="logo.png" alt="Al Asl Solar Logo">
+<img src="logo.png" alt="Logo">
 </div>
 
 <div class="badge" id="badge"></div>
 
 <h1>AL ASL SOLAR</h1>
-
 <h2 id="subtitle"></h2>
-
 <p id="desc"></p>
 
 <div class="contact">
-    <span>🇪🇬 +20 120 007 4344</span>
-    <span>🇪🇬 +20 120 878 7702</span>
-    <span>🇸🇦 +966 56 127 4344</span>
-    <a href="mailto:INF@ALASLSOLAR.COM">📧 INF@ALASLSOLAR.COM</a>
+<span>🇪🇬 +20 120 007 4344</span>
+<span>🇪🇬 +20 120 878 7702</span>
+<span>🇸🇦 +966 56 127 4344</span>
+<a href="mailto:INF@ALASLSOLAR.COM">INF@ALASLSOLAR.COM</a>
 </div>
 
 <div class="social">
-    <a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-    <a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-    <a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
-    <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
+<a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+<a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+<a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
+<a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
 </div>
 
 <div class="footer" id="footer"></div>
 
 </div>
-</div>
 
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
-const wa = document.getElementById("wa");
-const langBtn = document.getElementById("langBtn");
+let currentLang = "en";
 
-let ar = localStorage.getItem("lang") === "ar";
+function applyLang(){
 
-function setLanguage(){
+if(currentLang === "en"){
 
-    document.documentElement.lang = ar ? "ar" : "en";
-    document.documentElement.dir = ar ? "rtl" : "ltr";
+document.documentElement.lang="en";
+document.documentElement.dir="ltr";
 
-    if(ar){
-        langBtn.innerText = "EN | AR";
-        document.getElementById("badge").innerText = "🚧 الموقع قيد الإنشاء";
-        document.getElementById("subtitle").innerText =
-            "طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
-        document.getElementById("desc").innerText =
-            "نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية. يسعدنا التواصل معكم.";
-        document.getElementById("footer").innerText =
-            "© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
-        wa.href =
-            "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية.";
-    }else{
-        langBtn.innerText = "AR | EN";
-        document.getElementById("badge").innerText = "🚧 COMING SOON";
-        document.getElementById("subtitle").innerText =
-            "Clean Energy • Smart Solutions • Long-Term Value";
-        document.getElementById("desc").innerText =
-            "We provide professional solar energy solutions for farms, homes, and industrial projects. We are happy to assist you.";
-        document.getElementById("footer").innerText =
-            "© 2026 Al Asl Solar. All Rights Reserved.";
-        wa.href =
-            "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20solutions.";
-    }
+document.getElementById("badge").innerText="🚧 COMING SOON";
+document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
+document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
+document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
 
-    localStorage.setItem("lang", ar ? "ar" : "en");
+document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
+
+}else{
+
+document.documentElement.lang="ar";
+document.documentElement.dir="rtl";
+
+document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
+document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
+document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
+document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+
+document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
+
 }
 
-setLanguage();
+}
 
-langBtn.addEventListener("click", function(){
-    ar = !ar;
-    setLanguage();
-});
+function toggleLang(){
+currentLang = (currentLang === "en") ? "ar" : "en";
+applyLang();
+}
+
+applyLang();
 </script>
 
 </body>
