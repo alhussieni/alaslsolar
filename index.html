@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,31 +17,26 @@
 
 body{
     height:100vh;
-    background:linear-gradient(-45deg,#0f2027,#203a43,#2c5364,#111);
-    background-size:400% 400%;
-    animation:bg 14s ease infinite;
     color:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
     overflow:hidden;
-}
-
-@keyframes bg{
-    0%{background-position:0% 50%}
-    50%{background-position:100% 50%}
-    100%{background-position:0% 50%}
+    background:
+        linear-gradient(rgba(10,20,25,.75),rgba(10,20,25,.75)),
+        url("https://images.unsplash.com/photo-1509395176047-4a66953fd231");
+    background-size:cover;
+    background-position:center;
 }
 
 .overlay{
-    background:rgba(0,0,0,.55);
-    backdrop-filter:blur(6px);
     width:100%;
     height:100%;
     display:flex;
     justify-content:center;
     align-items:center;
     padding:40px;
+    backdrop-filter: blur(3px);
 }
 
 .container{
@@ -55,41 +50,31 @@ body{
     to{opacity:1;transform:translateY(0)}
 }
 
-.logo{
-    margin-bottom:25px;
-    animation:logoFade 1.6s ease forwards;
-}
-
 .logo img{
-    max-width:180px;
-    width:100%;
-    height:auto;
-    filter:drop-shadow(0 8px 20px rgba(0,0,0,.5));
-}
-
-@keyframes logoFade{
-    from{opacity:0;transform:translateY(-20px) scale(.9)}
-    to{opacity:1;transform:translateY(0) scale(1)}
+    max-width:160px;
+    margin-bottom:20px;
+    filter:drop-shadow(0 8px 18px rgba(0,0,0,.6));
 }
 
 .badge{
     display:inline-block;
     padding:8px 22px;
     border-radius:30px;
-    background:rgba(255,255,255,.1);
+    background:rgba(255,255,255,.12);
     margin-bottom:20px;
     font-size:14px;
-    letter-spacing:1px;
 }
 
 h1{
-    font-size:52px;
+    font-size:48px;
     letter-spacing:3px;
+    margin-bottom:15px;
 }
 
 h2{
     font-weight:300;
-    margin:15px 0 30px;
+    margin-bottom:30px;
+    opacity:.9;
 }
 
 p{
@@ -102,32 +87,29 @@ p{
 .contact span{
     display:block;
     font-size:18px;
-    line-height:2;
+    margin:8px 0;
+}
+
+.social{
+    margin-top:30px;
+}
+
+.social a{
+    margin:0 10px;
+    font-size:22px;
+    text-decoration:none;
     transition:.3s;
 }
 
-.contact span:hover{
+.social a:hover{
     color:#f9c74f;
-    transform:scale(1.05);
+    transform:scale(1.15);
 }
 
 .footer{
     margin-top:60px;
     font-size:14px;
     opacity:.6;
-}
-
-.glow{
-    position:absolute;
-    width:520px;
-    height:520px;
-    background:radial-gradient(circle,rgba(255,193,7,.35),transparent 70%);
-    animation:pulse 6s infinite alternate;
-}
-
-@keyframes pulse{
-    from{transform:scale(.9);opacity:.4}
-    to{transform:scale(1.1);opacity:.7}
 }
 
 .whatsapp{
@@ -142,40 +124,30 @@ p{
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:30px;
+    font-size:28px;
     text-decoration:none;
     box-shadow:0 8px 20px rgba(0,0,0,.4);
-    transition:.3s;
     z-index:10;
-}
-
-.whatsapp:hover{
-    transform:scale(1.1);
 }
 
 .lang{
     position:fixed;
-    top:25px;
-    right:25px;
-    cursor:pointer;
+    top:20px;
+    right:20px;
     font-size:14px;
+    cursor:pointer;
     opacity:.8;
-    z-index:10;
 }
-
 .lang:hover{opacity:1}
 
-@media (max-width:600px){
-    h1{font-size:40px}
+@media(max-width:600px){
+    h1{font-size:38px}
     p{font-size:18px}
-    .logo img{max-width:140px}
 }
 </style>
 </head>
 
 <body>
-
-<div class="glow"></div>
 
 <div class="lang" onclick="toggleLang()">AR | EN</div>
 
@@ -186,24 +158,33 @@ p{
     <img src="logo.png" alt="Al Asl Solar Logo">
 </div>
 
-<div class="badge" id="badge">🚧 COMING SOON</div>
+<div class="badge" id="badge">🚧 الموقع قيد الإنشاء</div>
 
 <h1>AL ASL SOLAR</h1>
-<h2 id="subtitle">Clean Energy • Smart Solutions • Long-Term Value</h2>
+
+<h2 id="subtitle">طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد</h2>
 
 <p id="desc">
-We provide professional solar energy solutions for farms, homes, and industrial projects.
-Our mission is to reduce fuel dependency and deliver sustainable power.
+نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.
+يسعدنا التواصل معكم.
 </p>
 
 <div class="contact">
-    <span>📞 +20 120 007 4344</span>
-    <span>📞 +20 120 878 7702</span>
+    <span>🇪🇬 +20 120 007 4344</span>
+    <span>🇪🇬 +20 120 878 7702</span>
+    <span>🇸🇦 +966 55 000 0000</span>
     <span>📧 info@alaslsolar.com</span>
 </div>
 
+<div class="social">
+    <a href="https://www.facebook.com/AlaslSolar/" target="_blank">📘</a>
+    <a href="https://www.linkedin.com/company/alaslsolar" target="_blank">💼</a>
+    <a href="https://www.youtube.com/@alaslsolar" target="_blank">▶️</a>
+    <a href="https://www.tiktok.com/@alaslsolar" target="_blank">🎵</a>
+</div>
+
 <div class="footer" id="footer">
-© 2026 Al Asl Solar. All Rights Reserved.
+© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.
 </div>
 
 </div>
@@ -212,7 +193,7 @@ Our mission is to reduce fuel dependency and deliver sustainable power.
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
-let ar=false;
+let ar=true;
 const wa=document.getElementById("wa");
 
 function toggleLang(){
@@ -225,14 +206,14 @@ function toggleLang(){
         "Clean Energy • Smart Solutions • Long-Term Value";
     document.getElementById("desc").innerText = ar ?
         "نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية. يسعدنا التواصل معكم." :
-        "We provide professional solar energy solutions for farms, homes, and industrial projects. Our mission is to reduce fuel dependency and deliver sustainable power.";
+        "We provide professional solar energy solutions for farms, homes, and industrial projects. We are happy to assist you.";
     document.getElementById("footer").innerText = ar ?
         "© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة." :
         "© 2026 Al Asl Solar. All Rights Reserved.";
 
     wa.href = ar ?
-        "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية%20والتكلفة." :
-        "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20stations%20and%20pricing.";
+        "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية." :
+        "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20solutions.";
 }
 toggleLang();
 </script>
