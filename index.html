@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,16 +171,13 @@ p{
     <img src="logo.png" alt="Al Asl Solar Logo">
 </div>
 
-<div class="badge" id="badge">🚧 الموقع قيد الإنشاء</div>
+<div class="badge" id="badge"></div>
 
 <h1>AL ASL SOLAR</h1>
 
-<h2 id="subtitle">طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد</h2>
+<h2 id="subtitle"></h2>
 
-<p id="desc">
-نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.
-يسعدنا التواصل معكم.
-</p>
+<p id="desc"></p>
 
 <div class="contact">
     <span>🇪🇬 +20 120 007 4344</span>
@@ -196,9 +193,7 @@ p{
     <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
 </div>
 
-<div class="footer" id="footer">
-© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.
-</div>
+<div class="footer" id="footer"></div>
 
 </div>
 </div>
@@ -206,41 +201,48 @@ p{
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
-let ar = true;
-
 const wa = document.getElementById("wa");
 const langBtn = document.getElementById("langBtn");
 
-wa.href = "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية.";
+let ar = localStorage.getItem("lang") === "ar";
 
-langBtn.addEventListener("click", function(){
-
-    ar = !ar;
+function setLanguage(){
 
     document.documentElement.lang = ar ? "ar" : "en";
     document.documentElement.dir = ar ? "rtl" : "ltr";
 
-    langBtn.innerText = ar ? "AR | EN" : "EN | AR";
+    if(ar){
+        langBtn.innerText = "EN | AR";
+        document.getElementById("badge").innerText = "🚧 الموقع قيد الإنشاء";
+        document.getElementById("subtitle").innerText =
+            "طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
+        document.getElementById("desc").innerText =
+            "نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية. يسعدنا التواصل معكم.";
+        document.getElementById("footer").innerText =
+            "© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+        wa.href =
+            "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية.";
+    }else{
+        langBtn.innerText = "AR | EN";
+        document.getElementById("badge").innerText = "🚧 COMING SOON";
+        document.getElementById("subtitle").innerText =
+            "Clean Energy • Smart Solutions • Long-Term Value";
+        document.getElementById("desc").innerText =
+            "We provide professional solar energy solutions for farms, homes, and industrial projects. We are happy to assist you.";
+        document.getElementById("footer").innerText =
+            "© 2026 Al Asl Solar. All Rights Reserved.";
+        wa.href =
+            "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20solutions.";
+    }
 
-    document.getElementById("badge").innerText = ar ? 
-        "🚧 الموقع قيد الإنشاء" : 
-        "🚧 COMING SOON";
+    localStorage.setItem("lang", ar ? "ar" : "en");
+}
 
-    document.getElementById("subtitle").innerText = ar ?
-        "طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد" :
-        "Clean Energy • Smart Solutions • Long-Term Value";
+setLanguage();
 
-    document.getElementById("desc").innerText = ar ?
-        "نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية. يسعدنا التواصل معكم." :
-        "We provide professional solar energy solutions for farms, homes, and industrial projects. We are happy to assist you.";
-
-    document.getElementById("footer").innerText = ar ?
-        "© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة." :
-        "© 2026 Al Asl Solar. All Rights Reserved.";
-
-    wa.href = ar ?
-        "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية." :
-        "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20solutions.";
+langBtn.addEventListener("click", function(){
+    ar = !ar;
+    setLanguage();
 });
 </script>
 
