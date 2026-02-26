@@ -3,115 +3,152 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Al Asl Solar</title>
+<title>Al Asl Solar | Coming Soon</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-body {
+* {
     margin: 0;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    color: white;
-    transition: 0.4s;
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-    url('solar.jpg') no-repeat center center/cover;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1b1b1b);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.overlay {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    padding: 80px 30px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .container {
-    padding: 80px 20px;
+    max-width: 900px;
+    text-align: center;
+    animation: fadeUp 1.5s ease forwards;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 30px;
+    background: rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    font-size: 14px;
 }
 
 h1 {
-    font-size: 48px;
+    font-size: 56px;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
 }
 
-button {
-    padding: 8px 15px;
-    margin-top: 15px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
+h2 {
+    font-weight: 300;
+    margin-bottom: 30px;
+    color: #f4f4f4;
+}
+
+p {
+    font-size: 20px;
+    line-height: 1.7;
+    opacity: 0.9;
+    margin-bottom: 40px;
 }
 
 .contact {
-    margin-top: 25px;
-    line-height: 1.8;
+    font-size: 18px;
+    line-height: 2;
 }
 
-.social a {
-    margin: 8px;
-    color: #ffd700;
-    text-decoration: none;
-    font-weight: bold;
+.contact span {
+    display: block;
+    transition: 0.3s;
+}
+
+.contact span:hover {
+    color: #f9c74f;
+    transform: scale(1.05);
 }
 
 .footer {
-    margin-top: 50px;
+    margin-top: 60px;
     font-size: 14px;
-    opacity: 0.8;
+    opacity: 0.6;
+}
+
+/* Solar glow effect */
+.glow {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255,193,7,0.35), transparent 70%);
+    animation: pulse 6s infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(0.9); opacity: 0.4; }
+    to { transform: scale(1.1); opacity: 0.7; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="glow"></div>
 
-<button onclick="toggleLanguage()">AR / EN</button>
+<div class="overlay">
+    <div class="container">
+        <div class="badge">🚧 COMING SOON</div>
 
-<h1 id="title">UNDER CONSTRUCTION</h1>
-<h2 id="company">Al Asl Solar Solutions</h2>
+        <h1>AL ASL SOLAR</h1>
+        <h2>Clean Energy • Smart Solutions • Long-Term Value</h2>
 
-<p id="desc">
-We specialize in the installation and maintenance of high-efficiency solar energy systems.
-Our mission is to provide clean, reliable, and cost-effective renewable energy solutions.
-</p>
+        <p>
+            We specialize in professional solar energy solutions for farms, homes, and industrial projects.
+            Our mission is to reduce fuel dependency and deliver sustainable power with guaranteed performance.
+        </p>
 
-<div class="contact">
-<strong id="contactTitle">Contact Us:</strong><br>
-EGYPT 🇪🇬 +20 120 007 4344<br>
-KSA 🇸🇦 +966 56 127 4344<br>
-Email: INF@ALASLSOLAR.COM
+        <div class="contact">
+            <span>📞 +20 120 007 4344</span>
+            <span>📞 +20 120 878 7702</span>
+            <span>📧 info@alaslsolar.com</span>
+        </div>
+
+        <div class="footer">
+            © 2026 Al Asl Solar. All Rights Reserved.
+        </div>
+    </div>
 </div>
-
-<div class="social">
-<a href="https://www.facebook.com/alaslsolar" target="_blank">Facebook</a>
-<a href="https://www.tiktok.com/@alaslsolar" target="_blank">TikTok</a>
-<a href="https://www.youtube.com/@alaslsolar" target="_blank">YouTube</a>
-<a href="https://www.linkedin.com/company/AlaslSolar/" target="_blank">LinkedIn</a>
-<a href="https://linktr.ee/alaslsolar" target="_blank">All Links</a>
-</div>
-
-<div class="footer">
-© 2026 Al Asl Solar. All Rights Reserved.
-</div>
-
-</div>
-
-<script>
-let arabic = false;
-
-function toggleLanguage() {
-    arabic = !arabic;
-
-    if (arabic) {
-        document.documentElement.lang = "ar";
-        document.body.style.direction = "rtl";
-        document.getElementById("title").innerText = "الموقع تحت الإنشاء";
-        document.getElementById("company").innerText = "الأصل للطاقة الشمسية";
-        document.getElementById("desc").innerText =
-        "نحن متخصصون في تركيب وصيانة أنظمة الطاقة الشمسية عالية الكفاءة، ونهدف إلى توفير حلول طاقة نظيفة وموثوقة وبتكلفة مناسبة.";
-        document.getElementById("contactTitle").innerText = "تواصل معنا:";
-    } else {
-        document.documentElement.lang = "en";
-        document.body.style.direction = "ltr";
-        document.getElementById("title").innerText = "UNDER CONSTRUCTION";
-        document.getElementById("company").innerText = "Al Asl Solar Solutions";
-        document.getElementById("desc").innerText =
-        "We specialize in the installation and maintenance of high-efficiency solar energy systems. Our mission is to provide clean, reliable, and cost-effective renewable energy solutions.";
-        document.getElementById("contactTitle").innerText = "Contact Us:";
-    }
-}
-</script>
 
 </body>
 </html>
