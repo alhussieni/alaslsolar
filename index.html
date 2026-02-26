@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Al Asl Solar | Coming Soon</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-<!-- Font Awesome للرموز الرسمية لمواقع التواصل -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -31,6 +29,7 @@ body{
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
+    transition:.4s;
 }
 
 .overlay{
@@ -46,7 +45,7 @@ body{
 .container{
     max-width:900px;
     text-align:center;
-    animation:fadeUp 1.4s ease forwards;
+    animation:fadeUp 1.2s ease forwards;
 }
 
 @keyframes fadeUp{
@@ -148,6 +147,9 @@ p{
     font-size:14px;
     cursor:pointer;
     opacity:.8;
+    background:rgba(0,0,0,.4);
+    padding:6px 12px;
+    border-radius:20px;
 }
 .lang:hover{opacity:1}
 
@@ -160,7 +162,7 @@ p{
 
 <body>
 
-<div class="lang">AR | EN</div>
+<div class="lang" id="langBtn">AR | EN</div>
 
 <div class="overlay">
 <div class="container">
@@ -184,7 +186,7 @@ p{
     <span>🇪🇬 +20 120 007 4344</span>
     <span>🇪🇬 +20 120 878 7702</span>
     <span>🇸🇦 +966 56 127 4344</span>
-    <a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
+    <a href="mailto:INF@ALASLSOLAR.COM">📧 INF@ALASLSOLAR.COM</a>
 </div>
 
 <div class="social">
@@ -204,34 +206,41 @@ p{
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    let ar = true;
-    const wa = document.getElementById("wa");
-    const langBtn = document.querySelector(".lang");
+let ar = true;
 
-    // تعيين رابط WhatsApp الافتراضي
-    wa.setAttribute('href', "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية.");
+const wa = document.getElementById("wa");
+const langBtn = document.getElementById("langBtn");
 
-    langBtn.addEventListener("click", function() {
-        ar = !ar;
-        document.documentElement.lang = ar ? "ar" : "en";
+wa.href = "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية.";
 
-        document.getElementById("badge").innerText = ar ? "🚧 الموقع قيد الإنشاء" : "🚧 COMING SOON";
-        document.getElementById("subtitle").innerText = ar ?
-            "طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد" :
-            "Clean Energy • Smart Solutions • Long-Term Value";
-        document.getElementById("desc").innerText = ar ?
-            "نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية. يسعدنا التواصل معكم." :
-            "We provide professional solar energy solutions for farms, homes, and industrial projects. We are happy to assist you.";
-        document.getElementById("footer").innerText = ar ?
-            "© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة." :
-            "© 2026 Al Asl Solar. All Rights Reserved.";
+langBtn.addEventListener("click", function(){
 
-        // تحديث رابط WhatsApp
-        wa.setAttribute('href', ar ?
-            "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية." :
-            "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20solutions.");
-    });
+    ar = !ar;
+
+    document.documentElement.lang = ar ? "ar" : "en";
+    document.documentElement.dir = ar ? "rtl" : "ltr";
+
+    langBtn.innerText = ar ? "AR | EN" : "EN | AR";
+
+    document.getElementById("badge").innerText = ar ? 
+        "🚧 الموقع قيد الإنشاء" : 
+        "🚧 COMING SOON";
+
+    document.getElementById("subtitle").innerText = ar ?
+        "طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد" :
+        "Clean Energy • Smart Solutions • Long-Term Value";
+
+    document.getElementById("desc").innerText = ar ?
+        "نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية. يسعدنا التواصل معكم." :
+        "We provide professional solar energy solutions for farms, homes, and industrial projects. We are happy to assist you.";
+
+    document.getElementById("footer").innerText = ar ?
+        "© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة." :
+        "© 2026 Al Asl Solar. All Rights Reserved.";
+
+    wa.href = ar ?
+        "https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية،%20حابب%20أستفسر%20عن%20محطات%20الطاقة%20الشمسية." :
+        "https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar,%20I%20would%20like%20to%20inquire%20about%20solar%20power%20solutions.";
 });
 </script>
 
