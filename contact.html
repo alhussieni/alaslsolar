@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Us | Al Asl Solar</title>
+<title>Contact Us | Alasl Solar</title>
 
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
@@ -14,28 +14,71 @@
 html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
 body{background:#f4f4f4;color:#333;line-height:1.7;padding:0 20px;overflow-x:hidden;transition: font-family 0.3s;}
 
-/* Hamburger + Overlay */
+/* Hamburger Button */
 .menu-btn{
-  position:fixed; top:20px; left:20px; font-size:30px; cursor:pointer; color:#ff7a00; z-index:10002; transition:.3s;
+    position:fixed;
+    top:20px;
+    left:20px;
+    font-size:30px;
+    cursor:pointer;
+    color:#ff7a00;
+    z-index:10002;
+    transition:0.3s;
 }
 .menu-btn:hover{ transform:scale(1.1); }
 
+/* Overlay */
 .overlay{
-  position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
-  opacity:0; visibility:hidden; transition:opacity .3s ease, visibility .3s ease; z-index:9998;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    opacity:0;
+    visibility:hidden;
+    transition: opacity .3s ease, visibility .3s ease;
+    z-index:9998;
 }
 
 /* Menu */
 .menu{
-  position:fixed; top:0; left:-280px; width:280px; height:100%; background:#222; display:flex; flex-direction:column; padding:80px 20px; transition:left .4s ease; z-index:10000;
+    position:fixed;
+    top:0;
+    left:-280px;
+    width:280px;
+    height:100%;
+    background:#222;
+    display:flex;
+    flex-direction:column;
+    padding:80px 20px;
+    transition: left 0.4s ease;
+    z-index:10000;
 }
-.menu.show{ left:0; }
-
+.menu.show{left:0;}
 .menu a, .menu .lang-btn{
-  color:#fff; text-decoration:none; padding:12px 0; font-size:18px; opacity:0; transform:translateY(20px); transition: all 0.4s ease;
+    color:#fff;
+    text-decoration:none;
+    padding:12px 0;
+    font-size:18px;
+    opacity:0;
+    transform:translateX(-20px);
+    transition: all 0.3s ease;
 }
-.menu.show a, .menu.show .lang-btn{ opacity:1; transform:translateY(0); }
-.menu a:hover, .menu .lang-btn:hover{ color:#f9c74f; transform:translateY(-2px); }
+.menu.show a, .menu.show .lang-btn{opacity:1; transform:translateX(0);}
+.menu a:hover, .menu .lang-btn:hover{color:#f9c74f; transform:translateX(5px);}
+
+/* Language Button inside menu */
+.lang-btn{
+    margin-top:20px;
+    padding:10px 18px;
+    border-radius:30px;
+    background:rgba(0,0,0,.85);
+    color:#fff;
+    font-size:14px;
+    cursor:pointer;
+    align-self:flex-start;
+    transition:0.3s;
+}
+.lang-btn:hover{background:rgba(0,0,0,.95); transform:scale(1.05);}
 
 /* Header */
 header{background:#ff7a00;color:white;text-align:center;padding:40px 20px;}
@@ -72,12 +115,12 @@ footer{text-align:center; margin-top:40px; padding:20px; background:#222; color:
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
 
 <nav class="menu" id="menu">
-  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
   <a href="index.html">Home</a>
   <a href="about.html">About Us</a>
   <a href="services.html">Our Services</a>
   <a href="projects.html">Our Projects</a>
   <a href="contact.html">Contact Us</a>
+  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 </nav>
 
 <header>
@@ -117,49 +160,56 @@ footer{text-align:center; margin-top:40px; padding:20px; background:#222; color:
   </div>
 </div>
 
-<footer>© 2026 Al Asl Solar. All Rights Reserved.</footer>
+<footer>© 2026 Alasl Solar. All Rights Reserved.</footer>
 <a class="whatsapp" href="https://wa.me/201200074344" target="_blank">💬</a>
 
 <script>
 let currentLang="en";
+let menuLinks;
 
-/* Toggle Menu */
-function toggleMenu(){
-  const menu=document.getElementById("menu");
-  const overlay=document.getElementById("overlay");
-  menu.classList.toggle("show");
-  overlay.style.opacity=menu.classList.contains("show")?"1":"0";
-  overlay.style.visibility=menu.classList.contains("show")?"visible":"hidden";
-  const items=[...menu.querySelectorAll("a, .lang-btn")];
-  if(menu.classList.contains("show")){
-    items.forEach((el,i)=>{ el.style.transitionDelay=`${i*0.08}s`; el.style.transform='translateY(0)'; el.style.opacity='1'; });
-  }else{
-    items.forEach(el=>{ el.style.transitionDelay='0s'; el.style.transform='translateY(20px)'; el.style.opacity='0'; });
-  }
+/* Apply Language */
+function applyLang(){
+    if(currentLang==="en"){
+        document.documentElement.lang="en"; document.documentElement.dir="ltr";
+        mainTitle.innerText="Contact Us";
+        subtitle.innerText="Get in touch with us for professional solar solutions";
+        labelName.innerText="Name";
+        labelEmail.innerText="Email";
+        labelMessage.innerText="Message";
+        submitBtn.innerText="Send Message";
+        menuLinks=["Home","About Us","Our Services","Our Projects","Contact Us"];
+        document.querySelector('.menu .lang-btn').innerText="AR | EN";
+    }else{
+        document.documentElement.lang="ar"; document.documentElement.dir="rtl";
+        mainTitle.innerText="اتصل بنا";
+        subtitle.innerText="تواصل معنا للحصول على حلول طاقة شمسية احترافية";
+        labelName.innerText="الاسم";
+        labelEmail.innerText="البريد الإلكتروني";
+        labelMessage.innerText="رسالتك";
+        submitBtn.innerText="إرسال الرسالة";
+        menuLinks=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
+        document.querySelector('.menu .lang-btn').innerText="EN | AR";
+    }
+    const menuA=document.querySelectorAll(".menu a");
+    menuA.forEach((link,i)=>{ link.innerText=menuLinks[i]; link.style.transitionDelay=`${i*0.08}s`; });
 }
 
 /* Toggle Language */
-function toggleLang(){
-  currentLang=(currentLang==="en")?"ar":"en";
-  if(currentLang==="en"){
-    document.documentElement.lang="en"; document.documentElement.dir="ltr";
-    mainTitle.innerText="Contact Us";
-    subtitle.innerText="Get in touch with us for professional solar solutions";
-    labelName.innerText="Name";
-    labelEmail.innerText="Email";
-    labelMessage.innerText="Message";
-    submitBtn.innerText="Send Message";
-    document.querySelector('.menu .lang-btn').innerText="AR | EN";
-  }else{
-    document.documentElement.lang="ar"; document.documentElement.dir="rtl";
-    mainTitle.innerText="اتصل بنا";
-    subtitle.innerText="تواصل معنا للحصول على حلول طاقة شمسية احترافية";
-    labelName.innerText="الاسم";
-    labelEmail.innerText="البريد الإلكتروني";
-    labelMessage.innerText="رسالتك";
-    submitBtn.innerText="إرسال الرسالة";
-    document.querySelector('.menu .lang-btn').innerText="EN | AR";
-  }
+function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
+
+/* Toggle Menu */
+function toggleMenu(){
+    const menu=document.getElementById("menu");
+    const overlay=document.getElementById("overlay");
+    menu.classList.toggle("show");
+    if(menu.classList.contains("show")){
+        overlay.style.opacity="1"; overlay.style.visibility="visible";
+        const items=[...menu.querySelectorAll("a, .lang-btn")];
+        items.forEach((el,i)=>{ el.style.transitionDelay=`${i*0.08}s`; el.style.transform='translateX(0)'; el.style.opacity='1'; });
+    }else{
+        overlay.style.opacity="0"; overlay.style.visibility="hidden";
+        menu.querySelectorAll("a, .lang-btn").forEach(el=>{ el.style.transitionDelay='0s'; el.style.transform='translateX(-20px)'; el.style.opacity='0'; });
+    }
 }
 
 /* Close menu when clicking a link */
@@ -170,6 +220,8 @@ document.getElementById("contactForm").addEventListener("submit", function(e){
   e.preventDefault();
   alert(document.documentElement.lang==="en"?"Message sent successfully!":"تم إرسال الرسالة بنجاح!");
 });
+
+applyLang();
 </script>
 
 </body>
