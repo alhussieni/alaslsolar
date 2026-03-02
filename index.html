@@ -14,17 +14,15 @@
 html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
 
 body{
-  min-height:100vh;
+  height:100vh;
   color:#fff;
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
   background: linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)), url("solar.jpg");
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
-  overflow-x:hidden;
   transition: font-family 0.3s;
 }
 
@@ -38,6 +36,7 @@ body{
   z-index:10002;
   transition:.3s;
 }
+/* موقع الهامبرغر حسب اللغة */
 html[lang="en"] .menu-btn{ left:20px; }
 html[lang="ar"] .menu-btn{ right:20px; }
 
@@ -65,7 +64,7 @@ html[lang="ar"] .menu-btn{ right:20px; }
   background:rgba(0,0,0,0.5);
   opacity:0;
   visibility:hidden;
-  transition:opacity .4s ease, visibility .4s ease;
+  transition:opacity .3s ease, visibility .3s ease;
   z-index:9998;
 }
 .overlay.show{ opacity:1; visibility:visible; }
@@ -74,8 +73,8 @@ html[lang="ar"] .menu-btn{ right:20px; }
 .menu{
   position:fixed;
   top:0;
-  left:-260px;
-  width:260px;
+  left:-250px;
+  width:250px;
   height:100%;
   background:#222;
   display:flex;
@@ -97,9 +96,6 @@ html[lang="ar"] .menu-btn{ right:20px; }
 
 /* Container */
 .container{ text-align:center; max-width:900px; padding:20px; }
-.container section{ opacity:0; transform:translateY(20px); transition: all 0.6s ease; margin-bottom:40px; background:rgba(255,255,255,.05); padding:20px; border-radius:10px; }
-.container section.show{ opacity:1; transform:translateY(0); }
-
 .logo img{ max-width:160px; margin-bottom:20px; }
 .badge{ display:inline-block; padding:8px 22px; border-radius:30px; background:rgba(255,255,255,.15); margin-bottom:20px; font-size:14px; }
 h1{ font-size:48px; margin-bottom:15px; }
@@ -136,6 +132,7 @@ p{ font-size:20px; margin-bottom:30px; }
 }
 .whatsapp:hover{ transform:scale(1.1); }
 
+/* Responsive */
 @media(max-width:600px){ h1{font-size:36px;} p{font-size:18px;} }
 </style>
 </head>
@@ -162,15 +159,6 @@ p{ font-size:20px; margin-bottom:30px; }
   <p id="desc"></p>
   <a href="about.html" class="about-btn" id="aboutBtn"></a>
 
-  <section>
-    <h2>Section 1</h2>
-    <p>Some introduction text here.</p>
-  </section>
-  <section>
-    <h2>Section 2</h2>
-    <p>Some information text here.</p>
-  </section>
-
   <div class="contact">
     <span>🇪🇬 +20 120 007 4344</span>
     <span>🇪🇬 +20 120 878 7702</span>
@@ -195,7 +183,7 @@ p{ font-size:20px; margin-bottom:30px; }
 <script>
 let currentLang="en";
 
-/* Toggle Language */
+/* تطبيق اللغة */
 function applyLang(){
   const menuLinksEN=["Home","About Us","Our Services","Our Projects","Contact Us"];
   const menuLinksAR=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
@@ -221,9 +209,11 @@ function applyLang(){
     menuLinksAR.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
   }
 }
+
+/* Toggle Language */
 function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
 
-/* Toggle Menu with link animation */
+/* Toggle Menu with delay animation */
 function toggleMenu(){
   const menu=document.getElementById("menu");
   const overlay=document.getElementById("overlay");
@@ -236,13 +226,6 @@ function toggleMenu(){
 }
 function closeMenu(){ document.getElementById("menu").classList.remove("show"); document.getElementById("overlay").classList.remove("show"); }
 document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click', closeMenu); });
-
-/* Animate sections on load */
-window.addEventListener('load',()=>{
-  document.querySelectorAll('.container section').forEach((sec,i)=>{
-    setTimeout(()=>{ sec.classList.add('show'); }, i*200);
-  });
-});
 
 applyLang();
 </script>
