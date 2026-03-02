@@ -10,101 +10,39 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-*{margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; transition: font-family 0.3s;}
-html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition: font-family 0.3s;}
+html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
 body{
-  height:100vh;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  height:100vh; color:#fff; display:flex; align-items:center; justify-content:center;
   background: linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)), url("solar.jpg");
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
+  background-size:cover; background-position:center; background-repeat:no-repeat;
   transition: font-family 0.3s;
 }
 
-/* Hamburger ثابت */
+/* Hamburger + Overlay من about.html */
 .menu-btn{
-  position:fixed;
-  top:20px;
-  left:20px;
-  font-size:30px;
-  cursor:pointer;
-  color:#fff;
-  z-index:10002;
-  transition:.3s;
+  position:fixed; top:20px; left:20px; font-size:30px; cursor:pointer; color:#fff; z-index:10002; transition:.3s;
 }
 .menu-btn:hover{ transform:scale(1.1); }
 
-/* Overlay */
 .overlay{
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.5);
-  opacity:0;
-  visibility:hidden;
-  transition:opacity .3s ease, visibility .3s ease;
-  z-index:9998;
+  position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
+  opacity:0; visibility:hidden; transition:opacity .3s ease, visibility .3s ease; z-index:9998;
 }
-.overlay.show{ opacity:1; visibility:visible; }
 
-/* Menu */
 .menu{
-  position:fixed;
-  top:0;
-  left:-250px;
-  width:250px;
-  height:100%;
-  background:#222;
-  display:flex;
-  flex-direction:column;
-  padding:80px 20px;
-  transition:left .4s ease;
-  z-index:10000;
+  position:fixed; top:0; left:-250px; width:250px; height:100%; background:#222; display:flex; flex-direction:column; padding:80px 20px; transition:left .4s ease; z-index:10000;
 }
 .menu.show{ left:0; }
 
-/* روابط القائمة + زر اللغة داخل القائمة */
 .menu a, .menu .lang-btn{
-  color:#fff; text-decoration:none; padding:12px 0; font-size:18px;
-  opacity:0; transform:translateY(20px);
-  transition: all 0.4s ease;
+  color:#fff; text-decoration:none; padding:12px 0; font-size:18px; opacity:0; transform:translateY(20px); transition: all 0.4s ease;
 }
-.menu.show a, .menu.show .lang-btn{
-  opacity:1; transform:translateY(0);
-}
-.menu a:hover, .menu .lang-btn:hover{ 
-  color:#f9c74f; 
-  text-shadow: 0 2px 5px rgba(0,0,0,0.3); 
-  transform:translateY(-2px);
-}
+.menu.show a, .menu.show .lang-btn{ opacity:1; transform:translateY(0); }
+.menu a:hover, .menu .lang-btn:hover{ color:#f9c74f; text-shadow: 0 2px 5px rgba(0,0,0,0.3); transform:translateY(-2px); }
 
 /* Container */
 .container{ text-align:center; max-width:900px; padding:20px; }
-/* Animate main elements */
-.container > .logo,
-.container > .badge,
-.container > h1,
-.container > h2,
-.container > p,
-.container > .about-btn,
-.container > .contact,
-.container > .social,
-.container > .footer{
-  opacity:0;
-  transform:translateY(20px);
-  transition: all 0.6s ease;
-}
-.container.show > *{
-  opacity:1;
-  transform:translateY(0);
-}
-
-/* Layout styling */
 .logo img{ max-width:160px; margin-bottom:20px; }
 .badge{ display:inline-block; padding:8px 22px; border-radius:30px; background:rgba(255,255,255,.15); margin-bottom:20px; font-size:14px; }
 h1{ font-size:48px; margin-bottom:15px; }
@@ -113,35 +51,18 @@ p{ font-size:20px; margin-bottom:30px; }
 .about-btn{ display:inline-block; margin-top:10px; padding:12px 28px; border-radius:30px; background:#f9c74f; color:#000; text-decoration:none; font-weight:600; transition:.3s; }
 .about-btn:hover{ background:#ffd166; }
 
-/* Contact Info */
 .contact span, .contact a{ display:block; margin:6px 0; color:#fff; text-decoration:none; }
 .contact a:hover{ text-decoration:underline; }
 
-/* Social horizontal */
 .social{ margin-top:25px; display:flex; justify-content:center; gap:15px; }
 .social a{ font-size:26px; color:#fff; transition:.3s; }
 .social a:hover{ color:#f9c74f; transform:scale(1.1); }
 
-/* Footer */
 .footer{ margin-top:40px; font-size:14px; opacity:.6; }
 
-/* WhatsApp Button */
-.whatsapp{
-  position:fixed;
-  bottom:25px;
-  right:25px;
-  background:#25d366;
-  width:60px; height:60px;
-  border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:28px; color:#fff;
-  text-decoration:none;
-  z-index:99999;
-  transition:.3s;
-}
+.whatsapp{ position:fixed; bottom:25px; right:25px; background:#25d366; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; text-decoration:none; z-index:99999; transition:.3s; }
 .whatsapp:hover{ transform:scale(1.1); }
 
-/* Responsive */
 @media(max-width:600px){ h1{font-size:36px;} p{font-size:18px;} }
 </style>
 </head>
@@ -164,7 +85,7 @@ p{ font-size:20px; margin-bottom:30px; }
 <div class="container">
   <div class="logo"><img src="logo.png" alt="Logo"></div>
   <div class="badge" id="badge"></div>
-  <h1 id="mainTitle">AL ASL SOLAR</h1>
+  <h1 id="mainTitle"></h1>
   <h2 id="subtitle"></h2>
   <p id="desc"></p>
   <a href="about.html" class="about-btn" id="aboutBtn"></a>
@@ -198,33 +119,22 @@ function toggleMenu(){
   const menu=document.getElementById("menu");
   const overlay=document.getElementById("overlay");
   menu.classList.toggle("show");
-  overlay.classList.toggle("show");
+  overlay.style.opacity=menu.classList.contains("show")?"1":"0";
+  overlay.style.visibility=menu.classList.contains("show")?"visible":"hidden";
   const items=[...menu.querySelectorAll("a, .lang-btn")];
   if(menu.classList.contains("show")){
-    items.forEach((el,i)=>{
-      el.style.transitionDelay=`${i*0.08}s`;
-      el.style.transform='translateY(0)';
-      el.style.opacity='1';
-    });
+    items.forEach((el,i)=>{ el.style.transitionDelay=`${i*0.08}s`; el.style.transform='translateY(0)'; el.style.opacity='1'; });
   }else{
-    items.forEach(el=>{
-      el.style.transitionDelay='0s';
-      el.style.transform='translateY(20px)';
-      el.style.opacity='0';
-    });
+    items.forEach(el=>{ el.style.transitionDelay='0s'; el.style.transform='translateY(20px)'; el.style.opacity='0'; });
   }
 }
-
 function closeMenu(){
   const menu=document.getElementById("menu");
   const overlay=document.getElementById("overlay");
   menu.classList.remove("show");
-  overlay.classList.remove("show");
-  menu.querySelectorAll("a, .lang-btn").forEach(el=>{
-    el.style.transitionDelay='0s';
-    el.style.transform='translateY(20px)';
-    el.style.opacity='0';
-  });
+  overlay.style.opacity='0';
+  overlay.style.visibility='hidden';
+  menu.querySelectorAll("a, .lang-btn").forEach(el=>{ el.style.transitionDelay='0s'; el.style.transform='translateY(20px)'; el.style.opacity='0'; });
 }
 document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click', closeMenu); });
 
@@ -232,33 +142,34 @@ document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('clic
 function applyLang(){
   const menuLinksEN=["Home","About Us","Our Services","Our Projects","Contact Us"];
   const menuLinksAR=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
+
   if(currentLang==="en"){
     document.documentElement.lang="en"; document.documentElement.dir="ltr";
-    document.getElementById("mainTitle").innerText="AL ASL SOLAR";
-    document.getElementById("badge").innerText="🚧 COMING SOON";
-    document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
-    document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
-    document.getElementById("aboutBtn").innerText="About Us";
-    document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
-    document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
+    mainTitle.innerText="AL ASL SOLAR";
+    badge.innerText="🚧 COMING SOON";
+    subtitle.innerText="Clean Energy • Smart Solutions • Long-Term Value";
+    desc.innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
+    aboutBtn.innerText="About Us";
+    footer.innerText="© 2026 Al Asl Solar. All Rights Reserved.";
+    wa.href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
     menuLinksEN.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
     document.querySelector('.menu .lang-btn').innerText="AR | EN";
   }else{
     document.documentElement.lang="ar"; document.documentElement.dir="rtl";
-    document.getElementById("mainTitle").innerText="شركة الأصل للطاقة الشمسية";
-    document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
-    document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
-    document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
-    document.getElementById("aboutBtn").innerText="من نحن";
-    document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
-    document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
+    mainTitle.innerText="شركة الأصل للطاقة الشمسية";
+    badge.innerText="🚧 الموقع قيد الإنشاء";
+    subtitle.innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
+    desc.innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
+    aboutBtn.innerText="من نحن";
+    footer.innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+    wa.href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
     menuLinksAR.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
     document.querySelector('.menu .lang-btn').innerText="EN | AR";
   }
 }
 function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
 
-/* Animate container on load */
+/* Animate container */
 window.addEventListener('load',()=>{ setTimeout(()=>{ document.querySelector('.container').classList.add('show'); },200); });
 
 applyLang();
