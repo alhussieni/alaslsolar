@@ -10,15 +10,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* ===== Reset ===== */
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins',sans-serif;
-}
+*{margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; transition: font-family 0.3s;}
 
-/* ===== Body ===== */
+/* Body */
 body{
   height:100vh;
   color:#fff;
@@ -32,23 +26,20 @@ body{
   transition: font-family 0.3s;
 }
 
-/* Arabic font */
-html[lang="ar"] body{
-  font-family:'Cairo', Arial, sans-serif;
-}
+html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
 
-/* ===== Hamburger Menu ===== */
+/* Hamburger */
 .menu-btn{
   position:fixed;
   top:20px;
   font-size:30px;
   cursor:pointer;
   color:#fff;
-  z-index:10000;
-  transition:0.3s;
+  z-index:10002;
+  transition:.3s;
 }
 
-/* ===== Language Button ===== */
+/* Language Button */
 .lang-btn{
   position:fixed;
   top:20px;
@@ -58,17 +49,32 @@ html[lang="ar"] body{
   color:#fff;
   font-size:14px;
   cursor:pointer;
-  z-index:10001;
+  z-index:10003;
+  transition:.3s;
 }
 
 /* ترتيب حسب اللغة */
 html[lang="en"] .menu-btn{ left:20px; }
 html[lang="en"] .lang-btn{ right:20px; }
-
 html[lang="ar"] .menu-btn{ right:20px; }
 html[lang="ar"] .lang-btn{ left:20px; }
 
-/* Menu container */
+/* Overlay */
+.overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .3s ease, visibility .3s ease;
+  z-index:9998;
+}
+.overlay.show{ opacity:1; visibility:visible; }
+
+/* Menu */
 .menu{
   position:fixed;
   top:0;
@@ -79,111 +85,31 @@ html[lang="ar"] .lang-btn{ left:20px; }
   display:flex;
   flex-direction:column;
   padding:60px 20px;
-  transition:0.3s;
-  z-index:9999;
+  transition:left .3s ease;
+  z-index:10000;
 }
+.menu.show{ left:0; }
+.menu a{ color:#fff; text-decoration:none; padding:12px 0; font-size:18px; transition: color .2s; }
+.menu a:hover{ color:#f9c74f; }
 
-.menu a{
-  color:#fff;
-  text-decoration:none;
-  padding:12px 0;
-  font-size:18px;
-  transition:0.2s;
-}
+/* Container */
+.container{ text-align:center; max-width:900px; padding:20px; }
+.logo img{ max-width:160px; margin-bottom:20px; }
+.badge{ display:inline-block; padding:8px 22px; border-radius:30px; background:rgba(255,255,255,.15); margin-bottom:20px; font-size:14px; }
+h1{ font-size:48px; margin-bottom:15px; }
+h2{ font-weight:300; margin-bottom:25px; }
+p{ font-size:20px; margin-bottom:30px; }
+.about-btn{ display:inline-block; margin-top:10px; padding:12px 28px; border-radius:30px; background:#f9c74f; color:#000; text-decoration:none; font-weight:600; transition:.3s; }
+.about-btn:hover{ background:#ffd166; }
+.contact span, .contact a{ display:block; margin:6px 0; color:#fff; text-decoration:none; }
+.contact a:hover{ text-decoration:underline; }
 
-.menu a:hover{
-  color:#f9c74f;
-}
+/* Social horizontal */
+.social{ margin-top:25px; display:flex; justify-content:center; gap:15px; }
+.social a{ font-size:26px; color:#fff; text-decoration:none; transition:.3s; }
+.social a:hover{ color:#f9c74f; }
 
-.menu.show{
-  left:0;
-}
-
-/* ===== Container ===== */
-.container{
-  text-align:center;
-  max-width:900px;
-  padding:20px;
-}
-
-.logo img{
-  max-width:160px;
-  margin-bottom:20px;
-}
-
-.badge{
-  display:inline-block;
-  padding:8px 22px;
-  border-radius:30px;
-  background:rgba(255,255,255,.15);
-  margin-bottom:20px;
-  font-size:14px;
-}
-
-h1{
-  font-size:48px;
-  margin-bottom:15px;
-}
-
-h2{
-  font-weight:300;
-  margin-bottom:25px;
-}
-
-p{
-  font-size:20px;
-  margin-bottom:30px;
-}
-
-.about-btn{
-  display:inline-block;
-  margin-top:10px;
-  padding:12px 28px;
-  border-radius:30px;
-  background:#f9c74f;
-  color:#000;
-  text-decoration:none;
-  font-weight:600;
-  transition:.3s;
-}
-
-.about-btn:hover{
-  background:#ffd166;
-}
-
-.contact span,
-.contact a{
-  display:block;
-  margin:6px 0;
-  color:#fff;
-  text-decoration:none;
-}
-
-.contact a:hover{
-  text-decoration:underline;
-}
-
-.social{
-  margin-top:25px;
-}
-
-.social a{
-  margin:0 10px;
-  font-size:26px;
-  color:#fff;
-  text-decoration:none;
-  transition:.3s;
-}
-
-.social a:hover{
-  color:#f9c74f;
-}
-
-.footer{
-  margin-top:40px;
-  font-size:14px;
-  opacity:.6;
-}
+.footer{ margin-top:40px; font-size:14px; opacity:.6; }
 
 .whatsapp{
   position:fixed;
@@ -202,20 +128,20 @@ p{
   z-index:99999;
 }
 
-@media(max-width:600px){
-  h1{font-size:36px;}
-  p{font-size:18px;}
-}
+@media(max-width:600px){ h1{font-size:36px;} p{font-size:18px;} }
 </style>
 </head>
 
 <body>
 
-<!-- Hamburger Menu Button -->
+<!-- Hamburger -->
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
 
-<!-- Language Button -->
+<!-- Language -->
 <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <!-- Menu Links -->
 <nav class="menu" id="menu">
@@ -227,25 +153,17 @@ p{
 </nav>
 
 <div class="container">
-  <div class="logo">
-    <img src="logo.png" alt="Logo">
-  </div>
-
+  <div class="logo"><img src="logo.png" alt="Logo"></div>
   <div class="badge" id="badge"></div>
-
   <h1 id="mainTitle">AL ASL SOLAR</h1>
-
   <h2 id="subtitle"></h2>
-
   <p id="desc"></p>
-
   <a href="about.html" class="about-btn" id="aboutBtn"></a>
 
   <div class="contact">
     <span>🇪🇬 +20 120 007 4344</span>
     <span>🇪🇬 +20 120 878 7702</span>
     <span>🇸🇦 +966 56 127 4344</span>
-
     <a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
     <a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
     <a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
@@ -259,7 +177,6 @@ p{
   </div>
 
   <div class="footer" id="footer"></div>
-
 </div>
 
 <a class="whatsapp" id="wa" target="_blank">💬</a>
@@ -267,40 +184,30 @@ p{
 <script>
 let currentLang = "en";
 
-/* تطبيق اللغة */
 function applyLang(){
-  if(currentLang === "en"){
-    document.documentElement.lang="en";
-    document.documentElement.dir="ltr";
-
-    document.getElementById("mainTitle").innerText = "AL ASL SOLAR";
+  if(currentLang==="en"){
+    document.documentElement.lang="en"; document.documentElement.dir="ltr";
+    document.getElementById("mainTitle").innerText="AL ASL SOLAR";
     document.getElementById("badge").innerText="🚧 COMING SOON";
     document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
     document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
     document.getElementById("aboutBtn").innerText="About Us";
     document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
-
-    /* قائمة الهامبرغر */
     document.getElementById("menuHome").innerText="Home";
     document.getElementById("menuAbout").innerText="About Us";
     document.getElementById("menuServices").innerText="Our Services";
     document.getElementById("menuProjects").innerText="Our Projects";
     document.getElementById("menuContact").innerText="Contact Us";
-
   }else{
-    document.documentElement.lang="ar";
-    document.documentElement.dir="rtl";
-
-    document.getElementById("mainTitle").innerText = "شركة الأصل للطاقة الشمسية";
+    document.documentElement.lang="ar"; document.documentElement.dir="rtl";
+    document.getElementById("mainTitle").innerText="شركة الأصل للطاقة الشمسية";
     document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
     document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
     document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
     document.getElementById("aboutBtn").innerText="من نحن";
     document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
-
-    /* قائمة الهامبرغر */
     document.getElementById("menuHome").innerText="الرئيسية";
     document.getElementById("menuAbout").innerText="من نحن";
     document.getElementById("menuServices").innerText="خدماتنا";
@@ -309,23 +216,20 @@ function applyLang(){
   }
 }
 
-/* Toggle اللغة */
-function toggleLang(){
-  currentLang = (currentLang==="en")?"ar":"en";
-  applyLang();
-}
+function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
 
-/* Toggle Hamburger */
 function toggleMenu(){
   document.getElementById("menu").classList.toggle("show");
+  document.getElementById("overlay").classList.toggle("show");
 }
 
-/* إغلاق القائمة عند الضغط على أي رابط */
-document.querySelectorAll('.menu a').forEach(link=>{
-  link.addEventListener('click',()=>{document.getElementById("menu").classList.remove("show");});
-});
+function closeMenu(){
+  document.getElementById("menu").classList.remove("show");
+  document.getElementById("overlay").classList.remove("show");
+}
 
-/* تطبيق اللغة عند بداية التحميل */
+document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click', closeMenu); });
+
 applyLang();
 </script>
 
