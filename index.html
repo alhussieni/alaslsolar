@@ -41,23 +41,38 @@ html[lang="ar"] body{
 .menu-btn{
   position:fixed;
   top:20px;
-  right:20px;
   font-size:30px;
   cursor:pointer;
   color:#fff;
   z-index:10000;
+  transition:0.3s;
 }
 
-html[dir="rtl"] .menu-btn{
-  right:auto;
-  left:20px;
+/* ===== Language Button ===== */
+.lang-btn{
+  position:fixed;
+  top:20px;
+  padding:10px 18px;
+  border-radius:30px;
+  background:rgba(0,0,0,.85);
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+  z-index:10001;
 }
+
+/* ترتيب حسب اللغة */
+html[lang="en"] .menu-btn{ left:20px; }
+html[lang="en"] .lang-btn{ right:20px; }
+
+html[lang="ar"] .menu-btn{ right:20px; }
+html[lang="ar"] .lang-btn{ left:20px; }
 
 /* Menu container */
 .menu{
   position:fixed;
   top:0;
-  left:-250px; /* مخفي افتراضياً */
+  left:-250px;
   width:250px;
   height:100%;
   background:#222;
@@ -80,7 +95,6 @@ html[dir="rtl"] .menu-btn{
   color:#f9c74f;
 }
 
-/* تظهر عند تفعيل القائمة */
 .menu.show{
   left:0;
 }
@@ -200,6 +214,9 @@ p{
 <!-- Hamburger Menu Button -->
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
 
+<!-- Language Button -->
+<div class="lang-btn" onclick="toggleLang()">AR | EN</div>
+
 <!-- Menu Links -->
 <nav class="menu" id="menu">
   <a href="index.html" id="menuHome">Home</a>
@@ -252,45 +269,44 @@ let currentLang = "en";
 
 /* تطبيق اللغة */
 function applyLang(){
+  if(currentLang === "en"){
+    document.documentElement.lang="en";
+    document.documentElement.dir="ltr";
 
-if(currentLang === "en"){
-  document.documentElement.lang="en";
-  document.documentElement.dir="ltr";
+    document.getElementById("mainTitle").innerText = "AL ASL SOLAR";
+    document.getElementById("badge").innerText="🚧 COMING SOON";
+    document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
+    document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
+    document.getElementById("aboutBtn").innerText="About Us";
+    document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
+    document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
 
-  document.getElementById("mainTitle").innerText = "AL ASL SOLAR";
-  document.getElementById("badge").innerText="🚧 COMING SOON";
-  document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
-  document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
-  document.getElementById("aboutBtn").innerText="About Us";
-  document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
-  document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
+    /* قائمة الهامبرغر */
+    document.getElementById("menuHome").innerText="Home";
+    document.getElementById("menuAbout").innerText="About Us";
+    document.getElementById("menuServices").innerText="Our Services";
+    document.getElementById("menuProjects").innerText="Our Projects";
+    document.getElementById("menuContact").innerText="Contact Us";
 
-  /* قائمة الهامبرغر */
-  document.getElementById("menuHome").innerText="Home";
-  document.getElementById("menuAbout").innerText="About Us";
-  document.getElementById("menuServices").innerText="Our Services";
-  document.getElementById("menuProjects").innerText="Our Projects";
-  document.getElementById("menuContact").innerText="Contact Us";
+  }else{
+    document.documentElement.lang="ar";
+    document.documentElement.dir="rtl";
 
-}else{
-  document.documentElement.lang="ar";
-  document.documentElement.dir="rtl";
+    document.getElementById("mainTitle").innerText = "شركة الأصل للطاقة الشمسية";
+    document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
+    document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
+    document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
+    document.getElementById("aboutBtn").innerText="من نحن";
+    document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+    document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
 
-  document.getElementById("mainTitle").innerText = "شركة الأصل للطاقة الشمسية";
-  document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
-  document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
-  document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
-  document.getElementById("aboutBtn").innerText="من نحن";
-  document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
-  document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
-
-  /* قائمة الهامبرغر */
-  document.getElementById("menuHome").innerText="الرئيسية";
-  document.getElementById("menuAbout").innerText="من نحن";
-  document.getElementById("menuServices").innerText="خدماتنا";
-  document.getElementById("menuProjects").innerText="مشاريعنا";
-  document.getElementById("menuContact").innerText="اتصل بنا";
-}
+    /* قائمة الهامبرغر */
+    document.getElementById("menuHome").innerText="الرئيسية";
+    document.getElementById("menuAbout").innerText="من نحن";
+    document.getElementById("menuServices").innerText="خدماتنا";
+    document.getElementById("menuProjects").innerText="مشاريعنا";
+    document.getElementById("menuContact").innerText="اتصل بنا";
+  }
 }
 
 /* Toggle اللغة */
