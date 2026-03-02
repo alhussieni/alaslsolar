@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +14,7 @@
 html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
 body{background:#f4f4f4;color:#333;line-height:1.7;overflow-x:hidden;transition: font-family 0.3s ease;}
 
-/* Hamburger */
+/* Hamburger Button */
 .menu-btn{
     position:fixed;
     top:20px;
@@ -54,6 +53,7 @@ body{background:#f4f4f4;color:#333;line-height:1.7;overflow-x:hidden;transition:
     z-index:10000;
 }
 .menu.show{left:0;}
+
 .menu a{
     color:#fff;
     text-decoration:none;
@@ -165,7 +165,7 @@ footer{
 <!-- Overlay -->
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-<!-- Hamburger -->
+<!-- Hamburger Button -->
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
 
 <!-- Menu -->
@@ -175,6 +175,8 @@ footer{
     <a href="services.html" id="menuServices">Our Services</a>
     <a href="projects.html" id="menuProjects">Our Projects</a>
     <a href="contact.html" id="menuContact">Contact Us</a>
+    
+    <!-- Language Button inside menu -->
     <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 </nav>
 
