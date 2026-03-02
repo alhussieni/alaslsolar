@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Al Asl Solar | Coming Soon</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<!-- Google Fonts: Poppins + Cairo -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-
 *{
 margin:0;
 padding:0;
@@ -29,6 +29,11 @@ url("solar.jpg");
 background-size:cover;
 background-position:center;
 background-repeat:no-repeat;
+}
+
+/* Arabic font */
+html[lang="ar"] body{
+    font-family:'Cairo', Arial, sans-serif;
 }
 
 .lang-btn{
@@ -78,8 +83,6 @@ p{
 font-size:20px;
 margin-bottom:30px;
 }
-
-/* زر about */
 
 .about-btn{
 display:inline-block;
@@ -152,7 +155,6 @@ z-index:99999;
 h1{font-size:36px;}
 p{font-size:18px;}
 }
-
 </style>
 </head>
 
@@ -168,7 +170,7 @@ p{font-size:18px;}
 
 <div class="badge" id="badge"></div>
 
-<h1>AL ASL SOLAR</h1>
+<h1 id="mainTitle">AL ASL SOLAR</h1>
 
 <h2 id="subtitle"></h2>
 
@@ -177,7 +179,6 @@ p{font-size:18px;}
 <a href="about.html" class="about-btn" id="aboutBtn"></a>
 
 <div class="contact">
-
 <span>🇪🇬 +20 120 007 4344</span>
 <span>🇪🇬 +20 120 878 7702</span>
 <span>🇸🇦 +966 56 127 4344</span>
@@ -185,19 +186,13 @@ p{font-size:18px;}
 <a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
 <a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
 <a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
-
 </div>
 
 <div class="social">
-
 <a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-
 <a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-
 <a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
-
 <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
-
 </div>
 
 <div class="footer" id="footer"></div>
@@ -207,7 +202,6 @@ p{font-size:18px;}
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
-
 let currentLang = "en";
 
 function applyLang(){
@@ -217,16 +211,12 @@ if(currentLang === "en"){
 document.documentElement.lang="en";
 document.documentElement.dir="ltr";
 
+document.getElementById("mainTitle").innerText = "AL ASL SOLAR";
 document.getElementById("badge").innerText="🚧 COMING SOON";
-
 document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
-
 document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
-
 document.getElementById("aboutBtn").innerText="About Us";
-
 document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
-
 document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
 
 }else{
@@ -234,16 +224,12 @@ document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%2
 document.documentElement.lang="ar";
 document.documentElement.dir="rtl";
 
+document.getElementById("mainTitle").innerText = "شركة الأصل للطاقة الشمسية";
 document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
-
 document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
-
 document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
-
 document.getElementById("aboutBtn").innerText="من نحن";
-
 document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
-
 document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
 
 }
@@ -251,15 +237,11 @@ document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً
 }
 
 function toggleLang(){
-
 currentLang = (currentLang === "en") ? "ar" : "en";
-
 applyLang();
-
 }
 
 applyLang();
-
 </script>
 
 </body>
