@@ -1,127 +1,276 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About Us - Alasl Solar</title>
+
+<title>About Us | Alasl Solar</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-body{
-font-family: Arial, sans-serif;
+
+*{
 margin:0;
-line-height:1.6;
-background:#f5f5f5;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#f4f4f4;
+color:#333;
+line-height:1.7;
 }
 
 header{
-background:#0b3d2e;
+background:#ff7a00;
 color:white;
-padding:30px;
+padding:40px;
 text-align:center;
 }
 
-section{
+.lang-btn{
+position:fixed;
+top:20px;
+right:20px;
+background:#000;
+color:#fff;
+padding:10px 18px;
+border-radius:30px;
+cursor:pointer;
+font-size:14px;
+z-index:999;
+}
+
+.container{
 max-width:1000px;
 margin:auto;
 padding:40px 20px;
-background:white;
-margin-top:20px;
-border-radius:8px;
+}
+
+section{
+margin-bottom:40px;
+background:#fff;
+padding:30px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,.05);
 }
 
 h2{
-color:#0b3d2e;
+color:#ff7a00;
+margin-bottom:15px;
 }
 
 ul{
 padding-left:20px;
 }
 
+li{
+margin-bottom:10px;
+}
+
+.home-btn{
+display:inline-block;
+margin-top:30px;
+padding:12px 28px;
+border-radius:30px;
+background:#ff7a00;
+color:white;
+text-decoration:none;
+font-weight:600;
+}
+
+.home-btn:hover{
+background:#e66d00;
+}
+
 footer{
 text-align:center;
-padding:20px;
 margin-top:40px;
+padding:20px;
 background:#222;
-color:white;
+color:#fff;
 }
+
 </style>
 
 </head>
 
 <body>
 
+<div class="lang-btn" onclick="toggleLang()">AR | EN</div>
+
 <header>
+
 <h1>Alasl Solar</h1>
-<p>Quality Guaranteed. Sustainability Achieved.</p>
+
+<p id="tagline"></p>
+
 </header>
 
+<div class="container">
+
 <section>
-<h2>Who We Are</h2>
 
-<p>
-Alasl Solar delivers reliable and innovative solar energy solutions designed to help farmers,
-businesses, and investors reduce energy costs and achieve long-term sustainability.
-</p>
+<h2 id="aboutTitle"></h2>
 
-<p>
-With extensive experience in designing and implementing solar systems,
-we help our clients transition toward clean energy with confidence.
-</p>
+<p id="aboutText"></p>
 
 </section>
 
+
 <section>
 
-<h2>Our Vision</h2>
+<h2 id="visionTitle"></h2>
 
-<p>
-To become the leading provider of solar and renewable energy solutions,
-driving the transition toward a future powered by clean and sustainable energy.
-</p>
+<p id="visionText"></p>
 
 </section>
 
+
 <section>
 
-<h2>Our Mission</h2>
+<h2 id="missionTitle"></h2>
 
-<p>
-To provide efficient solar energy solutions that enable our clients to reduce reliance
-on traditional fuels while improving operational efficiency.
-</p>
+<p id="missionText"></p>
 
 </section>
 
+
 <section>
 
-<h2>Our Services</h2>
+<h2 id="servicesTitle"></h2>
 
-<ul>
+<ul id="servicesList"></ul>
+
+</section>
+
+
+<section>
+
+<h2 id="whyTitle"></h2>
+
+<ul id="whyList"></ul>
+
+</section>
+
+<a href="index.html" class="home-btn" id="homeBtn"></a>
+
+</div>
+
+<footer id="footer"></footer>
+
+<script>
+
+let currentLang="en";
+
+function applyLang(){
+
+if(currentLang==="en"){
+
+document.documentElement.lang="en";
+document.documentElement.dir="ltr";
+
+tagline.innerText="Quality Guaranteed • Sustainable Energy Solutions";
+
+aboutTitle.innerText="Who We Are";
+
+aboutText.innerText="Alasl Solar delivers reliable and innovative solar energy solutions designed to help farmers, businesses, and investors reduce energy costs and achieve long-term sustainability. With strong experience in solar system design and implementation, we help our clients transition toward clean and efficient energy solutions.";
+
+visionTitle.innerText="Our Vision";
+
+visionText.innerText="To become the leading provider of solar and renewable energy solutions and to contribute to the transition toward a clean and sustainable energy future.";
+
+missionTitle.innerText="Our Mission";
+
+missionText.innerText="To deliver efficient solar energy solutions that help our clients reduce dependence on traditional fuels and improve operational efficiency.";
+
+servicesTitle.innerText="Our Services";
+
+servicesList.innerHTML=`
 <li>Solar irrigation systems</li>
 <li>Energy storage solutions</li>
 <li>Solar systems for homes and businesses</li>
 <li>PV–Diesel Hybrid systems</li>
-</ul>
+`;
 
-</section>
+whyTitle.innerText="Why Choose Alasl Solar";
 
-<section>
-
-<h2>Why Choose Alasl Solar</h2>
-
-<ul>
-<li>Strong experience in agricultural solar projects</li>
-<li>Customized energy solutions</li>
-<li>High-quality solar components</li>
+whyList.innerHTML=`
+<li>Extensive experience in agricultural solar projects</li>
+<li>Customized solar solutions for each client</li>
+<li>High-quality components ensuring reliable performance</li>
 <li>Latest solar technologies</li>
-<li>Long-term warranties and maintenance</li>
-</ul>
+<li>Long-term warranties and professional maintenance services</li>
+`;
 
-</section>
+homeBtn.innerText="Back to Home";
 
-<footer>
-<p>© 2026 Alasl Solar. All rights reserved.</p>
-</footer>
+footer.innerText="© 2026 Alasl Solar. All Rights Reserved.";
+
+}
+
+else{
+
+document.documentElement.lang="ar";
+document.documentElement.dir="rtl";
+
+tagline.innerText="نضمن الجودة • حلول طاقة مستدامة";
+
+aboutTitle.innerText="من نحن";
+
+aboutText.innerText="شركة الأصل للطاقة الشمسية تقدم حلول طاقة شمسية مبتكرة وموثوقة تساعد المزارعين والشركات والمستثمرين على خفض تكاليف الطاقة وتحقيق الاستدامة. نعتمد على خبرة قوية في تصميم وتنفيذ أنظمة الطاقة الشمسية لتحقيق أفضل أداء وكفاءة.";
+
+visionTitle.innerText="رؤيتنا";
+
+visionText.innerText="أن نكون الخيار الأول في تنفيذ حلول الطاقة الشمسية والطاقة المتجددة والمساهمة في التحول نحو مستقبل يعتمد على الطاقة النظيفة والمستدامة.";
+
+missionTitle.innerText="رسالتنا";
+
+missionText.innerText="تقديم حلول طاقة شمسية فعالة تساعد عملاءنا على تقليل الاعتماد على الوقود التقليدي وتحسين كفاءة أعمالهم.";
+
+servicesTitle.innerText="خدماتنا";
+
+servicesList.innerHTML=`
+<li>أنظمة الطاقة الشمسية للري الزراعي</li>
+<li>حلول تخزين الطاقة</li>
+<li>أنظمة طاقة شمسية للمنازل والشركات</li>
+<li>أنظمة هجينة PV–Diesel Hybrid</li>
+`;
+
+whyTitle.innerText="لماذا تختارنا";
+
+whyList.innerHTML=`
+<li>خبرة واسعة في مشروعات الطاقة الشمسية الزراعية</li>
+<li>حلول مخصصة حسب احتياجات كل عميل</li>
+<li>مكونات عالية الجودة لضمان الأداء الموثوق</li>
+<li>استخدام أحدث تقنيات الطاقة الشمسية</li>
+<li>ضمانات طويلة الأمد وخدمات صيانة احترافية</li>
+`;
+
+homeBtn.innerText="العودة للصفحة الرئيسية";
+
+footer.innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+
+}
+
+}
+
+function toggleLang(){
+
+currentLang=(currentLang==="en")?"ar":"en";
+
+applyLang();
+
+}
+
+applyLang();
+
+</script>
 
 </body>
+
 </html>
