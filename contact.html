@@ -10,7 +10,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* ===== Reset ===== */
 *{
   margin:0;
   padding:0;
@@ -18,17 +17,16 @@
   font-family:'Poppins',sans-serif;
 }
 
-/* Arabic font */
 html[lang="ar"] body{
   font-family:'Cairo', Arial, sans-serif;
 }
 
-/* ===== Body ===== */
 body{
   background:#f4f4f4;
   color:#333;
   line-height:1.7;
   padding:0 20px;
+  position:relative;
 }
 
 /* ===== Header ===== */
@@ -59,12 +57,57 @@ header p{
   border-radius:30px;
   cursor:pointer;
   font-size:14px;
-  z-index:999;
+  z-index:10001;
+  transition:0.3s;
 }
 
 html[lang="ar"] .lang-btn{
   right:auto;
   left:20px;
+}
+
+/* ===== Hamburger Menu ===== */
+.menu-btn{
+  position:fixed;
+  top:20px;
+  font-size:30px;
+  cursor:pointer;
+  color:#fff;
+  z-index:10002;
+  transition:0.3s;
+}
+
+html[lang="en"] .menu-btn{ left:20px; }
+html[lang="ar"] .menu-btn{ right:20px; }
+
+.menu{
+  position:fixed;
+  top:0;
+  left:-250px;
+  width:250px;
+  height:100%;
+  background:#222;
+  display:flex;
+  flex-direction:column;
+  padding:60px 20px;
+  transition:0.3s;
+  z-index:10000;
+}
+
+.menu a{
+  color:#fff;
+  text-decoration:none;
+  padding:12px 0;
+  font-size:18px;
+  transition:0.2s;
+}
+
+.menu a:hover{
+  color:#f9c74f;
+}
+
+.menu.show{
+  left:0;
 }
 
 /* ===== Container ===== */
@@ -130,15 +173,18 @@ form button:hover{
   text-decoration:underline;
 }
 
+/* ===== Social Icons Horizontal ===== */
 .social{
   margin-top:20px;
+  display:flex;
+  gap:15px;  /* المسافة بين كل أيقونة */
 }
 
 .social a{
-  margin-right:10px;
   font-size:24px;
   color:#ff7a00;
   text-decoration:none;
+  transition:.3s;
 }
 
 .social a:hover{
@@ -152,11 +198,30 @@ footer{
   background:#222;
   color:#fff;
 }
+
+@media(max-width:600px){
+  header h1{font-size:28px;}
+  header p{font-size:16px;}
+  form input, form textarea{font-size:14px;}
+}
 </style>
 </head>
 <body>
 
+<!-- Hamburger Menu -->
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+<!-- Language Button -->
 <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
+
+<!-- Menu Links -->
+<nav class="menu" id="menu">
+  <a href="index.html" id="menuHome">Home</a>
+  <a href="about.html" id="menuAbout">About Us</a>
+  <a href="services.html" id="menuServices">Our Services</a>
+  <a href="projects.html" id="menuProjects">Our Projects</a>
+  <a href="contact.html" id="menuContact">Contact Us</a>
+</nav>
 
 <header>
   <h1 id="mainTitle">Contact Us</h1>
@@ -200,9 +265,9 @@ footer{
 <script>
 let currentLang = "en";
 
-/* تبديل اللغة */
+/* تطبيق اللغة */
 function applyLang(){
-  if(currentLang === "en"){
+  if(currentLang==="en"){
     document.documentElement.lang="en";
     document.documentElement.dir="ltr";
 
@@ -216,7 +281,14 @@ function applyLang(){
     document.getElementById("message").placeholder="Write your message";
     document.getElementById("submitBtn").innerText="Send Message";
     document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
-  } else {
+
+    document.getElementById("menuHome").innerText="Home";
+    document.getElementById("menuAbout").innerText="About Us";
+    document.getElementById("menuServices").innerText="Our Services";
+    document.getElementById("menuProjects").innerText="Our Projects";
+    document.getElementById("menuContact").innerText="Contact Us";
+
+  }else{
     document.documentElement.lang="ar";
     document.documentElement.dir="rtl";
 
@@ -230,21 +302,38 @@ function applyLang(){
     document.getElementById("message").placeholder="اكتب رسالتك";
     document.getElementById("submitBtn").innerText="إرسال";
     document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+
+    document.getElementById("menuHome").innerText="الرئيسية";
+    document.getElementById("menuAbout").innerText="من نحن";
+    document.getElementById("menuServices").innerText="خدماتنا";
+    document.getElementById("menuProjects").innerText="مشاريعنا";
+    document.getElementById("menuContact").innerText="اتصل بنا";
   }
 }
 
+/* Toggle اللغة */
 function toggleLang(){
-  currentLang = (currentLang==="en")?"ar":"en";
+  currentLang=(currentLang==="en")?"ar":"en";
   applyLang();
 }
 
-applyLang();
+/* Toggle Hamburger */
+function toggleMenu(){
+  document.getElementById("menu").classList.toggle("show");
+}
 
-/* لمنع الفورم من الإرسال الفعلي (يمكنك إضافة إرسال عبر API لاحقًا) */
+/* إغلاق القائمة عند الضغط على أي رابط */
+document.querySelectorAll('.menu a').forEach(link=>{
+  link.addEventListener('click',()=>{document.getElementById("menu").classList.remove("show");});
+});
+
+/* منع الفورم من الإرسال الفعلي */
 document.getElementById("contactForm").addEventListener("submit", function(e){
   e.preventDefault();
   alert(currentLang==="en"?"Message sent successfully!":"تم إرسال الرسالة بنجاح!");
 });
+
+applyLang();
 </script>
 
 </body>
