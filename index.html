@@ -96,6 +96,27 @@ html[lang="ar"] .menu-btn{ right:20px; }
 
 /* Container */
 .container{ text-align:center; max-width:900px; padding:20px; }
+/* Animate main elements */
+.container > .logo,
+.container > .badge,
+.container > h1,
+.container > h2,
+.container > p,
+.container > .about-btn{
+  opacity:0;
+  transform:translateY(20px);
+  transition: all 0.6s ease;
+}
+.container.show > .logo,
+.container.show > .badge,
+.container.show > h1,
+.container.show > h2,
+.container.show > p,
+.container.show > .about-btn{
+  opacity:1;
+  transform:translateY(0);
+}
+
 .logo img{ max-width:160px; margin-bottom:20px; }
 .badge{ display:inline-block; padding:8px 22px; border-radius:30px; background:rgba(255,255,255,.15); margin-bottom:20px; font-size:14px; }
 h1{ font-size:48px; margin-bottom:15px; }
@@ -213,7 +234,7 @@ function applyLang(){
 /* Toggle Language */
 function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
 
-/* Toggle Menu with delay animation */
+/* Toggle Menu with animation delay */
 function toggleMenu(){
   const menu=document.getElementById("menu");
   const overlay=document.getElementById("overlay");
@@ -221,11 +242,38 @@ function toggleMenu(){
   overlay.classList.toggle("show");
   if(menu.classList.contains("show")){
     const links=menu.querySelectorAll("a");
-    links.forEach((link,i)=>{ link.style.transitionDelay=`${i*0.08}s`; });
+    links.forEach((link,i)=>{
+      link.style.transitionDelay=`${i*0.08}s`;
+      link.style.transform='translateX(0)';
+      link.style.opacity='1';
+    });
+  }else{
+    menu.querySelectorAll("a").forEach(link=>{
+      link.style.transitionDelay='0s';
+      link.style.transform='translateX(-20px)';
+      link.style.opacity='0';
+    });
   }
 }
-function closeMenu(){ document.getElementById("menu").classList.remove("show"); document.getElementById("overlay").classList.remove("show"); }
+
+function closeMenu(){
+  const menu=document.getElementById("menu");
+  const overlay=document.getElementById("overlay");
+  menu.classList.remove("show");
+  overlay.classList.remove("show");
+  menu.querySelectorAll("a").forEach(link=>{
+    link.style.transitionDelay='0s';
+    link.style.transform='translateX(-20px)';
+    link.style.opacity='0';
+  });
+}
 document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click', closeMenu); });
+
+/* Animate container on load */
+window.addEventListener('load',()=>{
+  const container=document.querySelector('.container');
+  setTimeout(()=>{ container.classList.add('show'); },200);
+});
 
 applyLang();
 </script>
