@@ -9,10 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- Menu CSS -->
-<link rel="stylesheet" href="menu.css">
-
 <style>
+*{margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; transition: font-family 0.3s;}
+html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
+
 body{
   height:100vh;
   color:#fff;
@@ -24,9 +24,64 @@ body{
   background-position:center;
   background-repeat:no-repeat;
   transition: font-family 0.3s;
-  font-family:'Poppins',sans-serif;
 }
-html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
+
+/* Hamburger ثابت */
+.menu-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  font-size:30px;
+  cursor:pointer;
+  color:#fff;
+  z-index:10002;
+  transition:.3s;
+}
+.menu-btn:hover{ transform:scale(1.1); }
+
+/* Overlay */
+.overlay{
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .3s ease, visibility .3s ease;
+  z-index:9998;
+}
+.overlay.show{ opacity:1; visibility:visible; }
+
+/* Menu */
+.menu{
+  position:fixed;
+  top:0;
+  left:-250px;
+  width:250px;
+  height:100%;
+  background:#222;
+  display:flex;
+  flex-direction:column;
+  padding:80px 20px;
+  transition:left .4s ease;
+  z-index:10000;
+}
+.menu.show{ left:0; }
+
+/* روابط القائمة + زر اللغة داخل القائمة */
+.menu a, .menu .lang-btn{
+  color:#fff; text-decoration:none; padding:12px 0; font-size:18px;
+  opacity:0; transform:translateY(20px);
+  transition: all 0.4s ease;
+}
+.menu.show a, .menu.show .lang-btn{
+  opacity:1; transform:translateY(0);
+}
+.menu a:hover, .menu .lang-btn:hover{ 
+  color:#f9c74f; 
+  text-shadow: 0 2px 5px rgba(0,0,0,0.3); 
+  transform:translateY(-2px);
+}
 
 /* Container */
 .container{ text-align:center; max-width:900px; padding:20px; }
@@ -93,8 +148,18 @@ p{ font-size:20px; margin-bottom:30px; }
 
 <body>
 
-<!-- Load Hamburger Menu -->
-<div id="menu-container"></div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+<nav class="menu" id="menu">
+  <!-- زر اللغة داخل القائمة -->
+  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
+  <a href="index.html" id="menuHome">Home</a>
+  <a href="about.html" id="menuAbout">About Us</a>
+  <a href="services.html" id="menuServices">Our Services</a>
+  <a href="projects.html" id="menuProjects">Our Projects</a>
+  <a href="contact.html" id="menuContact">Contact Us</a>
+</nav>
 
 <div class="container">
   <div class="logo"><img src="logo.png" alt="Logo"></div>
@@ -125,9 +190,6 @@ p{ font-size:20px; margin-bottom:30px; }
 
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
-<!-- Load Hamburger JS -->
-<script src="menu.js"></script>
-
 <script>
 let currentLang="en";
 
@@ -144,8 +206,8 @@ function applyLang(){
     document.getElementById("aboutBtn").innerText="About Us";
     document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
-    menuLinksEN.forEach((txt,i)=>document.querySelectorAll('#menu a')[i].innerText=txt);
-    document.querySelector('#menu .lang-btn').innerText="AR | EN";
+    menuLinksEN.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
+    document.querySelector('.menu .lang-btn').innerText="AR | EN";
   }else{
     document.documentElement.lang="ar"; document.documentElement.dir="rtl";
     document.getElementById("mainTitle").innerText="شركة الأصل للطاقة الشمسية";
@@ -155,10 +217,48 @@ function applyLang(){
     document.getElementById("aboutBtn").innerText="من نحن";
     document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
-    menuLinksAR.forEach((txt,i)=>document.querySelectorAll('#menu a')[i].innerText=txt);
-    document.querySelector('#menu .lang-btn').innerText="EN | AR";
+    menuLinksAR.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
+    document.querySelector('.menu .lang-btn').innerText="EN | AR";
   }
 }
+
+/* Toggle Language */
+function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
+
+/* Toggle Menu with stagger animation */
+function toggleMenu(){
+  const menu=document.getElementById("menu");
+  const overlay=document.getElementById("overlay");
+  menu.classList.toggle("show");
+  overlay.classList.toggle("show");
+  const items=[...menu.querySelectorAll("a, .lang-btn")];
+  if(menu.classList.contains("show")){
+    items.forEach((el,i)=>{
+      el.style.transitionDelay=`${i*0.08}s`;
+      el.style.transform='translateY(0)';
+      el.style.opacity='1';
+    });
+  }else{
+    items.forEach(el=>{
+      el.style.transitionDelay='0s';
+      el.style.transform='translateY(20px)';
+      el.style.opacity='0';
+    });
+  }
+}
+
+function closeMenu(){
+  const menu=document.getElementById("menu");
+  const overlay=document.getElementById("overlay");
+  menu.classList.remove("show");
+  overlay.classList.remove("show");
+  menu.querySelectorAll("a, .lang-btn").forEach(el=>{
+    el.style.transitionDelay='0s';
+    el.style.transform='translateY(20px)';
+    el.style.opacity='0';
+  });
+}
+document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click', closeMenu); });
 
 /* Animate container on load */
 window.addEventListener('load',()=>{
