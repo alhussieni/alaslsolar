@@ -2,7 +2,6 @@
 <html lang="en" dir="ltr">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -12,7 +11,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-
 /* ===== Reset ===== */
 *{
     margin:0;
@@ -112,9 +110,7 @@ footer{
     background:#222;
     color:#fff;
 }
-
 </style>
-
 </head>
 
 <body>
@@ -122,7 +118,7 @@ footer{
 <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 
 <header>
-    <h1>Alasl Solar</h1>
+    <h1 id="mainTitle"></h1>
     <p id="tagline"></p>
 </header>
 
@@ -160,7 +156,6 @@ footer{
 <footer id="footer"></footer>
 
 <script>
-
 let currentLang = "en";
 
 function applyLang(){
@@ -170,6 +165,7 @@ function applyLang(){
         document.documentElement.lang = "en";
         document.documentElement.dir  = "ltr";
 
+        mainTitle.innerText = "Alasl Solar";
         tagline.innerText = "Quality Guaranteed • Sustainable Energy Solutions";
 
         aboutTitle.innerText = "Who We Are";
@@ -206,6 +202,7 @@ function applyLang(){
         document.documentElement.lang = "ar";
         document.documentElement.dir  = "rtl";
 
+        mainTitle.innerText = "شركة الأصل للطاقة الشمسية";
         tagline.innerText = "نضمن الجودة • حلول طاقة مستدامة";
 
         aboutTitle.innerText = "من نحن";
@@ -246,7 +243,6 @@ function toggleLang(){
 }
 
 applyLang();
-
 </script>
 
 </body>
