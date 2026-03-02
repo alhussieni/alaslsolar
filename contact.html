@@ -10,222 +10,74 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins',sans-serif;
-}
-
-html[lang="ar"] body{
-  font-family:'Cairo', Arial, sans-serif;
-}
-
-body{
-  background:#f4f4f4;
-  color:#333;
-  line-height:1.7;
-  padding:0 20px;
-  position:relative;
-}
-
-/* ===== Header ===== */
-header{
-  background:#ff7a00;
-  color:white;
-  text-align:center;
-  padding:40px 20px;
-}
-
-header h1{
-  font-size:36px;
-  margin-bottom:10px;
-}
-
-header p{
-  font-size:18px;
-}
-
-/* ===== Language Button ===== */
-.lang-btn{
-  position:fixed;
-  top:20px;
-  right:20px;
-  background:#000;
-  color:#fff;
-  padding:10px 18px;
-  border-radius:30px;
-  cursor:pointer;
-  font-size:14px;
-  z-index:10002;
-  transition:0.3s;
-}
-
-html[lang="ar"] .lang-btn{
-  right:auto;
-  left:20px;
-}
+*{margin:0;padding:0;box-sizing:border-box;transition:all .3s;}
+html[lang="ar"] body{ font-family:'Cairo',Arial,sans-serif; }
+body{background:#f4f4f4;color:#333;line-height:1.7;padding:0 20px;position:relative;overflow-x:hidden;}
 
 /* ===== Hamburger Menu ===== */
 .menu-btn{
-  position:fixed;
-  top:20px;
-  font-size:30px;
-  cursor:pointer;
-  color:#fff;
-  z-index:10002;
-  transition:0.3s;
+  position:fixed; top:20px; left:20px; font-size:30px; cursor:pointer; color:#fff; z-index:10002;
 }
-
-html[lang="en"] .menu-btn{ left:20px; }
-html[lang="ar"] .menu-btn{ right:20px; }
-
-/* ===== Overlay ===== */
 .menu-overlay{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.5);
-  z-index:10000;
-  display:none;
+  position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); opacity:0; visibility:hidden; transition:opacity .3s ease, visibility .3s ease; z-index:10000;
 }
 
-/* ===== Menu Links ===== */
+/* ===== Menu ===== */
 .menu{
-  position:fixed;
-  top:0;
-  left:-250px;
-  width:250px;
-  height:100%;
-  background:#222;
-  display:flex;
-  flex-direction:column;
-  padding:60px 20px;
-  transition:0.3s;
-  z-index:10001;
+  position:fixed; top:0; left:-250px; width:250px; height:100%; background:#222; display:flex; flex-direction:column; padding:60px 20px; transition:left .4s ease; z-index:10001;
 }
-
+.menu.show{left:0;}
 .menu a{
-  color:#fff;
-  text-decoration:none;
-  padding:12px 0;
-  font-size:18px;
-  transition:0.2s;
+  color:#fff; text-decoration:none; padding:12px 0; font-size:18px;
+  opacity:0; transform:translateX(-20px); transition:all 0.3s ease;
 }
+.menu.show a{opacity:1; transform:translateX(0);}
+.menu a:hover{color:#f9c74f; transform:translateX(5px);}
 
-.menu a:hover{
-  color:#f9c74f;
+/* ===== Language Button Inside Menu ===== */
+.lang-btn{
+  margin-top:20px; padding:10px 18px; border-radius:30px; background:rgba(255,255,255,.1); color:#fff; font-size:14px; cursor:pointer; text-align:center; transition:.3s;
 }
+.lang-btn:hover{background:rgba(255,255,255,.2); transform:scale(1.05);}
 
-.menu.show{
-  left:0;
-}
+/* ===== Header ===== */
+header{background:#ff7a00; color:white; text-align:center; padding:40px 20px;}
+header h1{font-size:36px; margin-bottom:10px;}
+header p{font-size:18px;}
 
 /* ===== Container ===== */
 .container{
-  max-width:900px;
-  margin:auto;
-  padding:40px 20px;
-  background:#fff;
-  border-radius:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,.1);
+  max-width:900px; margin:auto; padding:40px 20px; background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.1);
 }
 
 /* ===== Form ===== */
-form{
-  display:flex;
-  flex-direction:column;
-}
-
-form label{
-  margin-bottom:5px;
-  font-weight:600;
-}
-
-form input, form textarea{
-  margin-bottom:20px;
-  padding:12px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  font-size:16px;
-  resize:none;
-}
-
-form button{
-  padding:12px 28px;
-  background:#ff7a00;
-  color:white;
-  border:none;
-  border-radius:30px;
-  cursor:pointer;
-  font-size:16px;
-  font-weight:600;
-  transition:.3s;
-}
-
-form button:hover{
-  background:#e66d00;
-}
+form{display:flex; flex-direction:column;}
+form label{margin-bottom:5px; font-weight:600;}
+form input, form textarea{margin-bottom:20px; padding:12px; border-radius:6px; border:1px solid #ccc; font-size:16px; resize:none;}
+form button{padding:12px 28px; background:#ff7a00; color:white; border:none; border-radius:30px; cursor:pointer; font-size:16px; font-weight:600; transition:.3s;}
+form button:hover{background:#e66d00;}
 
 /* ===== Contact Info ===== */
-.contact-info{
-  margin-top:30px;
-}
+.contact-info{margin-top:30px;}
+.contact-info span, .contact-info a{display:block; margin-bottom:10px; color:#333; text-decoration:none;}
+.contact-info a:hover{text-decoration:underline;}
 
-.contact-info span,
-.contact-info a{
-  display:block;
-  margin-bottom:10px;
-  color:#333;
-  text-decoration:none;
-}
+/* ===== Social Icons ===== */
+.social{margin-top:20px; display:flex; gap:15px;}
+.social a{font-size:24px; color:#ff7a00; transition:.3s;}
+.social a:hover{color:#e66d00; transform:scale(1.1);}
 
-.contact-info a:hover{
-  text-decoration:underline;
-}
+/* ===== Footer ===== */
+footer{text-align:center; margin-top:40px; padding:20px; background:#222; color:#fff;}
 
-/* ===== Social Icons Horizontal ===== */
-.social{
-  margin-top:20px;
-  display:flex;
-  gap:15px;
-}
-
-.social a{
-  font-size:24px;
-  color:#ff7a00;
-  text-decoration:none;
-  transition:.3s;
-}
-
-.social a:hover{
-  color:#e66d00;
-}
-
-footer{
-  text-align:center;
-  margin-top:40px;
-  padding:20px;
-  background:#222;
-  color:#fff;
-}
-
-@media(max-width:600px){
-  header h1{font-size:28px;}
-  header p{font-size:16px;}
-  form input, form textarea{font-size:14px;}
-}
+/* Responsive */
+@media(max-width:600px){header h1{font-size:28px;} header p{font-size:16px;} form input, form textarea{font-size:14px;}}
 </style>
 </head>
 <body>
 
 <!-- Hamburger Menu -->
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-<!-- Language Button -->
-<div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 
 <!-- Overlay -->
 <div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -237,6 +89,7 @@ footer{
   <a href="services.html" id="menuServices">Our Services</a>
   <a href="projects.html" id="menuProjects">Our Projects</a>
   <a href="contact.html" id="menuContact">Contact Us</a>
+  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 </nav>
 
 <header>
@@ -281,28 +134,23 @@ footer{
 <script>
 let currentLang = "en";
 
-/* تطبيق اللغة */
+/* Apply Language */
 function applyLang(){
+  const menuA=document.querySelectorAll(".menu a");
   if(currentLang==="en"){
     document.documentElement.lang="en";
     document.documentElement.dir="ltr";
 
     document.getElementById("mainTitle").innerText="Contact Us";
     document.getElementById("subtitle").innerText="Get in touch with us for professional solar solutions";
-    document.getElementById("labelName").innerText="Name";
-    document.getElementById("name").placeholder="Enter your name";
-    document.getElementById("labelEmail").innerText="Email";
-    document.getElementById("email").placeholder="Enter your email";
-    document.getElementById("labelMessage").innerText="Message";
-    document.getElementById("message").placeholder="Write your message";
+    document.getElementById("labelName").innerText="Name"; document.getElementById("name").placeholder="Enter your name";
+    document.getElementById("labelEmail").innerText="Email"; document.getElementById("email").placeholder="Enter your email";
+    document.getElementById("labelMessage").innerText="Message"; document.getElementById("message").placeholder="Write your message";
     document.getElementById("submitBtn").innerText="Send Message";
     document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
 
-    document.getElementById("menuHome").innerText="Home";
-    document.getElementById("menuAbout").innerText="About Us";
-    document.getElementById("menuServices").innerText="Our Services";
-    document.getElementById("menuProjects").innerText="Our Projects";
-    document.getElementById("menuContact").innerText="Contact Us";
+    menuA[0].innerText="Home"; menuA[1].innerText="About Us"; menuA[2].innerText="Our Services";
+    menuA[3].innerText="Our Projects"; menuA[4].innerText="Contact Us";
 
   }else{
     document.documentElement.lang="ar";
@@ -310,41 +158,44 @@ function applyLang(){
 
     document.getElementById("mainTitle").innerText="اتصل بنا";
     document.getElementById("subtitle").innerText="تواصل معنا للحصول على حلول طاقة شمسية احترافية";
-    document.getElementById("labelName").innerText="الاسم";
-    document.getElementById("name").placeholder="أدخل اسمك";
-    document.getElementById("labelEmail").innerText="البريد الإلكتروني";
-    document.getElementById("email").placeholder="أدخل بريدك الإلكتروني";
-    document.getElementById("labelMessage").innerText="الرسالة";
-    document.getElementById("message").placeholder="اكتب رسالتك";
+    document.getElementById("labelName").innerText="الاسم"; document.getElementById("name").placeholder="أدخل اسمك";
+    document.getElementById("labelEmail").innerText="البريد الإلكتروني"; document.getElementById("email").placeholder="أدخل بريدك الإلكتروني";
+    document.getElementById("labelMessage").innerText="الرسالة"; document.getElementById("message").placeholder="اكتب رسالتك";
     document.getElementById("submitBtn").innerText="إرسال";
     document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
 
-    document.getElementById("menuHome").innerText="الرئيسية";
-    document.getElementById("menuAbout").innerText="من نحن";
-    document.getElementById("menuServices").innerText="خدماتنا";
-    document.getElementById("menuProjects").innerText="مشاريعنا";
-    document.getElementById("menuContact").innerText="اتصل بنا";
+    menuA[0].innerText="الرئيسية"; menuA[1].innerText="من نحن"; menuA[2].innerText="خدماتنا";
+    menuA[3].innerText="مشاريعنا"; menuA[4].innerText="اتصل بنا";
   }
+
+  /* Animate links */
+  menuA.forEach((link,i)=>{ link.style.transitionDelay=`${i*0.08}s`; });
 }
 
-/* Toggle اللغة */
+/* Toggle Language */
 function toggleLang(){
   currentLang=(currentLang==="en")?"ar":"en";
   applyLang();
 }
 
-/* Toggle Hamburger */
+/* Toggle Menu */
 function toggleMenu(){
-  document.getElementById("menu").classList.toggle("show");
-  document.getElementById("overlay").style.display = document.getElementById("menu").classList.contains("show") ? "block" : "none";
+  const menu=document.getElementById("menu");
+  const overlay=document.getElementById("overlay");
+  menu.classList.toggle("show");
+  if(menu.classList.contains("show")){
+    overlay.style.display="block";
+    setTimeout(()=>{ overlay.style.opacity="1"; overlay.style.visibility="visible"; },10);
+  }else{
+    overlay.style.opacity="0"; overlay.style.visibility="hidden";
+    setTimeout(()=>{ overlay.style.display="none"; },300);
+  }
 }
 
-/* إغلاق القائمة عند الضغط على أي رابط */
-document.querySelectorAll('.menu a').forEach(link=>{
-  link.addEventListener('click',()=>{toggleMenu();});
-});
+/* Close menu when clicking a link */
+document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click',()=>{toggleMenu();}); });
 
-/* منع الفورم من الإرسال الفعلي */
+/* Prevent actual form submission */
 document.getElementById("contactForm").addEventListener("submit", function(e){
   e.preventDefault();
   alert(currentLang==="en"?"Message sent successfully!":"تم إرسال الرسالة بنجاح!");
