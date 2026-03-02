@@ -9,36 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<!-- Menu CSS -->
+<link rel="stylesheet" href="menu.css">
+
 <style>
+/* ===== Body ===== */
 *{margin:0;padding:0;box-sizing:border-box;transition:all .3s;}
 html[lang="ar"] body{ font-family:'Cairo',Arial,sans-serif; }
 body{background:#f4f4f4;color:#333;line-height:1.7;padding:0 20px;position:relative;overflow-x:hidden;}
-
-/* ===== Hamburger Menu ===== */
-.menu-btn{
-  position:fixed; top:20px; left:20px; font-size:30px; cursor:pointer; color:#fff; z-index:10002;
-}
-.menu-overlay{
-  position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); opacity:0; visibility:hidden; transition:opacity .3s ease, visibility .3s ease; z-index:10000;
-}
-
-/* ===== Menu ===== */
-.menu{
-  position:fixed; top:0; left:-250px; width:250px; height:100%; background:#222; display:flex; flex-direction:column; padding:60px 20px; transition:left .4s ease; z-index:10001;
-}
-.menu.show{left:0;}
-.menu a{
-  color:#fff; text-decoration:none; padding:12px 0; font-size:18px;
-  opacity:0; transform:translateX(-20px); transition:all 0.3s ease;
-}
-.menu.show a{opacity:1; transform:translateX(0);}
-.menu a:hover{color:#f9c74f; transform:translateX(5px);}
-
-/* ===== Language Button Inside Menu ===== */
-.lang-btn{
-  margin-top:20px; padding:10px 18px; border-radius:30px; background:rgba(255,255,255,.1); color:#fff; font-size:14px; cursor:pointer; text-align:center; transition:.3s;
-}
-.lang-btn:hover{background:rgba(255,255,255,.2); transform:scale(1.05);}
 
 /* ===== Header ===== */
 header{background:#ff7a00; color:white; text-align:center; padding:40px 20px;}
@@ -70,27 +48,14 @@ form button:hover{background:#e66d00;}
 /* ===== Footer ===== */
 footer{text-align:center; margin-top:40px; padding:20px; background:#222; color:#fff;}
 
-/* Responsive */
+/* ===== Responsive ===== */
 @media(max-width:600px){header h1{font-size:28px;} header p{font-size:16px;} form input, form textarea{font-size:14px;}}
 </style>
 </head>
 <body>
 
-<!-- Hamburger Menu -->
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-<!-- Overlay -->
-<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
-
-<!-- Menu Links -->
-<nav class="menu" id="menu">
-  <a href="index.html" id="menuHome">Home</a>
-  <a href="about.html" id="menuAbout">About Us</a>
-  <a href="services.html" id="menuServices">Our Services</a>
-  <a href="projects.html" id="menuProjects">Our Projects</a>
-  <a href="contact.html" id="menuContact">Contact Us</a>
-  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
-</nav>
+<!-- Menu Placeholder -->
+<div id="menu-container"></div>
 
 <header>
   <h1 id="mainTitle">Contact Us</h1>
@@ -131,77 +96,23 @@ footer{text-align:center; margin-top:40px; padding:20px; background:#222; color:
 
 <footer id="footer">© 2026 Al Asl Solar. All Rights Reserved.</footer>
 
+<!-- Menu JS -->
 <script>
-let currentLang = "en";
-
-/* Apply Language */
-function applyLang(){
-  const menuA=document.querySelectorAll(".menu a");
-  if(currentLang==="en"){
-    document.documentElement.lang="en";
-    document.documentElement.dir="ltr";
-
-    document.getElementById("mainTitle").innerText="Contact Us";
-    document.getElementById("subtitle").innerText="Get in touch with us for professional solar solutions";
-    document.getElementById("labelName").innerText="Name"; document.getElementById("name").placeholder="Enter your name";
-    document.getElementById("labelEmail").innerText="Email"; document.getElementById("email").placeholder="Enter your email";
-    document.getElementById("labelMessage").innerText="Message"; document.getElementById("message").placeholder="Write your message";
-    document.getElementById("submitBtn").innerText="Send Message";
-    document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
-
-    menuA[0].innerText="Home"; menuA[1].innerText="About Us"; menuA[2].innerText="Our Services";
-    menuA[3].innerText="Our Projects"; menuA[4].innerText="Contact Us";
-
-  }else{
-    document.documentElement.lang="ar";
-    document.documentElement.dir="rtl";
-
-    document.getElementById("mainTitle").innerText="اتصل بنا";
-    document.getElementById("subtitle").innerText="تواصل معنا للحصول على حلول طاقة شمسية احترافية";
-    document.getElementById("labelName").innerText="الاسم"; document.getElementById("name").placeholder="أدخل اسمك";
-    document.getElementById("labelEmail").innerText="البريد الإلكتروني"; document.getElementById("email").placeholder="أدخل بريدك الإلكتروني";
-    document.getElementById("labelMessage").innerText="الرسالة"; document.getElementById("message").placeholder="اكتب رسالتك";
-    document.getElementById("submitBtn").innerText="إرسال";
-    document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
-
-    menuA[0].innerText="الرئيسية"; menuA[1].innerText="من نحن"; menuA[2].innerText="خدماتنا";
-    menuA[3].innerText="مشاريعنا"; menuA[4].innerText="اتصل بنا";
-  }
-
-  /* Animate links */
-  menuA.forEach((link,i)=>{ link.style.transitionDelay=`${i*0.08}s`; });
-}
-
-/* Toggle Language */
-function toggleLang(){
-  currentLang=(currentLang==="en")?"ar":"en";
-  applyLang();
-}
-
-/* Toggle Menu */
-function toggleMenu(){
-  const menu=document.getElementById("menu");
-  const overlay=document.getElementById("overlay");
-  menu.classList.toggle("show");
-  if(menu.classList.contains("show")){
-    overlay.style.display="block";
-    setTimeout(()=>{ overlay.style.opacity="1"; overlay.style.visibility="visible"; },10);
-  }else{
-    overlay.style.opacity="0"; overlay.style.visibility="hidden";
-    setTimeout(()=>{ overlay.style.display="none"; },300);
-  }
-}
-
-/* Close menu when clicking a link */
-document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click',()=>{toggleMenu();}); });
+fetch('menu.html')
+  .then(resp => resp.text())
+  .then(data => { document.getElementById('menu-container').innerHTML = data; })
+  .then(()=>{ 
+      // بعد تحميل HTML الهامبرغر
+      const script = document.createElement('script');
+      script.src='menu.js';
+      document.body.appendChild(script);
+  });
 
 /* Prevent actual form submission */
 document.getElementById("contactForm").addEventListener("submit", function(e){
   e.preventDefault();
-  alert(currentLang==="en"?"Message sent successfully!":"تم إرسال الرسالة بنجاح!");
+  alert(document.documentElement.lang==="en"?"Message sent successfully!":"تم إرسال الرسالة بنجاح!");
 });
-
-applyLang();
 </script>
 
 </body>
