@@ -11,14 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* ===== Reset ===== */
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-/* ===== Body & Arabic font ===== */
+* {margin:0;padding:0;box-sizing:border-box;}
 body{
     background:#f4f4f4;
     color:#333;
@@ -27,12 +20,11 @@ body{
     overflow-x:hidden;
     transition: font-family 0.3s ease;
 }
-
 html[lang="ar"] body{
     font-family:'Cairo', Arial, sans-serif;
 }
 
-/* ===== Header ===== */
+/* Header */
 header{
     background:#ff7a00;
     color:white;
@@ -42,7 +34,7 @@ header{
     z-index:1;
 }
 
-/* ===== Language Button ===== */
+/* Language Button */
 .lang-btn{
     position:fixed;
     top:20px;
@@ -56,12 +48,9 @@ header{
     z-index:10001;
     transition:0.3s;
 }
-.lang-btn:hover{
-    background:#333;
-    transform:scale(1.05);
-}
+.lang-btn:hover{background:#333;transform:scale(1.05);}
 
-/* ===== Hamburger Menu ===== */
+/* Hamburger Menu */
 .menu-btn{
     position:fixed;
     top:20px;
@@ -73,18 +62,11 @@ header{
     transition:0.3s;
 }
 
-html[lang="ar"] .menu-btn{
-    left:auto;
-    right:20px;
-}
-
-/* ===== Overlay ===== */
+/* Overlay */
 .overlay{
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
+    top:0; left:0;
+    width:100%; height:100%;
     background: rgba(0,0,0,0.5);
     opacity:0;
     visibility:hidden;
@@ -92,7 +74,7 @@ html[lang="ar"] .menu-btn{
     z-index:9998;
 }
 
-/* ===== Menu ===== */
+/* Menu */
 .menu{
     position:fixed;
     top:0;
@@ -106,9 +88,7 @@ html[lang="ar"] .menu-btn{
     transition: left 0.4s ease;
     z-index:10000;
 }
-.menu.show{
-    left:0;
-}
+.menu.show{left:0;}
 .menu a{
     color:#fff;
     text-decoration:none;
@@ -122,18 +102,14 @@ html[lang="ar"] .menu-btn{
     opacity:1;
     transform: translateX(0);
 }
-.menu a:hover{
-    color:#f9c74f;
-    transform: translateX(5px);
-}
+.menu a:hover{color:#f9c74f; transform:translateX(5px);}
 
-/* ===== Container & Sections ===== */
+/* Container & Sections */
 .container{
     max-width:1000px;
     margin:auto;
     padding:40px 20px;
 }
-
 section{
     margin-bottom:40px;
     background:#fff;
@@ -144,29 +120,13 @@ section{
     transform: translateY(20px);
     transition: opacity .6s ease, transform .6s ease;
 }
+section.show{opacity:1; transform:translateY(0);}
+h2{color:#ff7a00;margin-bottom:15px;}
+ul{padding-left:20px;}
+html[lang="ar"] ul{padding-left:0; padding-right:20px;}
+li{margin-bottom:10px;}
 
-section.show{
-    opacity:1;
-    transform: translateY(0);
-}
-
-h2{
-    color:#ff7a00;
-    margin-bottom:15px;
-}
-
-ul{
-    padding-left:20px;
-}
-html[lang="ar"] ul{
-    padding-left:0;
-    padding-right:20px;
-}
-li{
-    margin-bottom:10px;
-}
-
-/* ===== Home Button ===== */
+/* Home Button */
 .home-btn{
     display:inline-block;
     margin-top:30px;
@@ -178,11 +138,9 @@ li{
     font-weight:600;
     transition:.3s;
 }
-.home-btn:hover{
-    background:#e66d00;
-}
+.home-btn:hover{background:#e66d00;}
 
-/* ===== Social Icons ===== */
+/* Social Icons */
 .social{
     display:flex;
     gap:15px;
@@ -193,12 +151,9 @@ li{
     color:#ff7a00;
     transition:0.3s;
 }
-.social a:hover{
-    transform:scale(1.1);
-    color:#ffd166;
-}
+.social a:hover{transform:scale(1.1); color:#ffd166;}
 
-/* ===== Footer ===== */
+/* Footer */
 footer{
     text-align:center;
     margin-top:40px;
@@ -207,7 +162,7 @@ footer{
     color:#fff;
 }
 
-/* ===== Responsive ===== */
+/* Responsive */
 @media(max-width:600px){
     header h1{font-size:28px;}
     header p{font-size:16px;}
@@ -217,16 +172,10 @@ footer{
 
 <body>
 
-<!-- Overlay -->
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-
-<!-- Hamburger Menu -->
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-<!-- Language Button -->
 <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 
-<!-- Menu Links -->
 <nav class="menu" id="menu">
     <a href="index.html" id="menuHome">Home</a>
     <a href="about.html" id="menuAbout">About Us</a>
@@ -241,27 +190,22 @@ footer{
 </header>
 
 <div class="container">
-
 <section>
     <h2 id="aboutTitle"></h2>
     <p id="aboutText"></p>
 </section>
-
 <section>
     <h2 id="visionTitle"></h2>
     <p id="visionText"></p>
 </section>
-
 <section>
     <h2 id="missionTitle"></h2>
     <p id="missionText"></p>
 </section>
-
 <section>
     <h2 id="servicesTitle"></h2>
     <ul id="servicesList"></ul>
 </section>
-
 <section>
     <h2 id="whyTitle"></h2>
     <ul id="whyList"></ul>
@@ -275,132 +219,101 @@ footer{
 </div>
 
 <a href="index.html" class="home-btn" id="homeBtn"></a>
-
 <footer id="footer"></footer>
 
 <script>
 let currentLang = "en";
 let menuLinks;
 
-/* ===== Language Application ===== */
+/* Apply Language */
 function applyLang(){
-    if(currentLang === "en"){
-        document.documentElement.lang = "en";
-        document.documentElement.dir = "ltr";
+    if(currentLang==="en"){
+        document.documentElement.lang="en";
+        document.documentElement.dir="ltr";
 
-        mainTitle.innerText = "Alasl Solar";
-        tagline.innerText = "Quality Guaranteed • Sustainable Energy Solutions";
+        mainTitle.innerText="Alasl Solar";
+        tagline.innerText="Quality Guaranteed • Sustainable Energy Solutions";
 
-        aboutTitle.innerText = "Who We Are";
-        aboutText.innerText = "Alasl Solar delivers reliable and innovative solar energy solutions designed to help farmers, businesses, and investors reduce energy costs and achieve long-term sustainability. With strong experience in solar system design and implementation, we help our clients transition toward clean and efficient energy solutions.";
+        aboutTitle.innerText="Who We Are";
+        aboutText.innerText="Alasl Solar delivers reliable and innovative solar energy solutions designed to help farmers, businesses, and investors reduce energy costs and achieve long-term sustainability. With strong experience in solar system design and implementation, we help our clients transition toward clean and efficient energy solutions.";
 
-        visionTitle.innerText = "Our Vision";
-        visionText.innerText = "To become the leading provider of solar and renewable energy solutions and to contribute to the transition toward a clean and sustainable energy future.";
+        visionTitle.innerText="Our Vision";
+        visionText.innerText="To become the leading provider of solar and renewable energy solutions and to contribute to the transition toward a clean and sustainable energy future.";
 
-        missionTitle.innerText = "Our Mission";
-        missionText.innerText = "To deliver efficient solar energy solutions that help our clients reduce dependence on traditional fuels and improve operational efficiency.";
+        missionTitle.innerText="Our Mission";
+        missionText.innerText="To deliver efficient solar energy solutions that help our clients reduce dependence on traditional fuels and improve operational efficiency.";
 
-        servicesTitle.innerText = "Our Services";
-        servicesList.innerHTML = `
-            <li>Solar irrigation systems</li>
-            <li>Energy storage solutions</li>
-            <li>Solar systems for homes and businesses</li>
-            <li>PV–Diesel Hybrid systems</li>
-        `;
+        servicesTitle.innerText="Our Services";
+        servicesList.innerHTML=`<li>Solar irrigation systems</li><li>Energy storage solutions</li><li>Solar systems for homes and businesses</li><li>PV–Diesel Hybrid systems</li>`;
 
-        whyTitle.innerText = "Why Choose Alasl Solar";
-        whyList.innerHTML = `
-            <li>Extensive experience in agricultural solar projects</li>
-            <li>Customized solar solutions for each client</li>
-            <li>High-quality components ensuring reliable performance</li>
-            <li>Latest solar technologies</li>
-            <li>Long-term warranties and professional maintenance services</li>
-        `;
+        whyTitle.innerText="Why Choose Alasl Solar";
+        whyList.innerHTML=`<li>Extensive experience in agricultural solar projects</li><li>Customized solar solutions for each client</li><li>High-quality components ensuring reliable performance</li><li>Latest solar technologies</li><li>Long-term warranties and professional maintenance services</li>`;
 
-        homeBtn.innerText = "Back to Home";
-        footer.innerText = "© 2026 Alasl Solar. All Rights Reserved.";
+        homeBtn.innerText="Back to Home";
+        footer.innerText="© 2026 Alasl Solar. All Rights Reserved.";
 
-        menuLinks = ["Home","About Us","Our Services","Our Projects","Contact Us"];
-    } else {
-        document.documentElement.lang = "ar";
-        document.documentElement.dir = "rtl";
+        menuLinks=["Home","About Us","Our Services","Our Projects","Contact Us"];
+    }else{
+        document.documentElement.lang="ar";
+        document.documentElement.dir="rtl";
 
-        mainTitle.innerText = "شركة الأصل للطاقة الشمسية";
-        tagline.innerText = "نضمن الجودة • حلول طاقة مستدامة";
+        mainTitle.innerText="شركة الأصل للطاقة الشمسية";
+        tagline.innerText="نضمن الجودة • حلول طاقة مستدامة";
 
-        aboutTitle.innerText = "من نحن";
-        aboutText.innerText = "شركة الأصل للطاقة الشمسية تقدم حلول طاقة شمسية مبتكرة وموثوقة تساعد المزارعين والشركات والمستثمرين على خفض تكاليف الطاقة وتحقيق الاستدامة. نعتمد على خبرة قوية في تصميم وتنفيذ أنظمة الطاقة الشمسية لتحقيق أفضل أداء وكفاءة.";
+        aboutTitle.innerText="من نحن";
+        aboutText.innerText="شركة الأصل للطاقة الشمسية تقدم حلول طاقة شمسية مبتكرة وموثوقة تساعد المزارعين والشركات والمستثمرين على خفض تكاليف الطاقة وتحقيق الاستدامة. نعتمد على خبرة قوية في تصميم وتنفيذ أنظمة الطاقة الشمسية لتحقيق أفضل أداء وكفاءة.";
 
-        visionTitle.innerText = "رؤيتنا";
-        visionText.innerText = "أن نكون الخيار الأول في تنفيذ حلول الطاقة الشمسية والطاقة المتجددة والمساهمة في التحول نحو مستقبل يعتمد على الطاقة النظيفة والمستدامة.";
+        visionTitle.innerText="رؤيتنا";
+        visionText.innerText="أن نكون الخيار الأول في تنفيذ حلول الطاقة الشمسية والطاقة المتجددة والمساهمة في التحول نحو مستقبل يعتمد على الطاقة النظيفة والمستدامة.";
 
-        missionTitle.innerText = "رسالتنا";
-        missionText.innerText = "تقديم حلول طاقة شمسية فعالة تساعد عملاءنا على تقليل الاعتماد على الوقود التقليدي وتحسين كفاءة أعمالهم.";
+        missionTitle.innerText="رسالتنا";
+        missionText.innerText="تقديم حلول طاقة شمسية فعالة تساعد عملاءنا على تقليل الاعتماد على الوقود التقليدي وتحسين كفاءة أعمالهم.";
 
-        servicesTitle.innerText = "خدماتنا";
-        servicesList.innerHTML = `
-            <li>أنظمة الطاقة الشمسية للري الزراعي</li>
-            <li>حلول تخزين الطاقة</li>
-            <li>أنظمة طاقة شمسية للمنازل والشركات</li>
-            <li>أنظمة هجينة PV–Diesel Hybrid</li>
-        `;
+        servicesTitle.innerText="خدماتنا";
+        servicesList.innerHTML=`<li>أنظمة الطاقة الشمسية للري الزراعي</li><li>حلول تخزين الطاقة</li><li>أنظمة طاقة شمسية للمنازل والشركات</li><li>أنظمة هجينة PV–Diesel Hybrid</li>`;
 
-        whyTitle.innerText = "لماذا تختارنا";
-        whyList.innerHTML = `
-            <li>خبرة واسعة في مشروعات الطاقة الشمسية الزراعية</li>
-            <li>حلول مخصصة حسب احتياجات كل عميل</li>
-            <li>مكونات عالية الجودة لضمان الأداء الموثوق</li>
-            <li>استخدام أحدث تقنيات الطاقة الشمسية</li>
-            <li>ضمانات طويلة الأمد وخدمات صيانة احترافية</li>
-        `;
+        whyTitle.innerText="لماذا تختارنا";
+        whyList.innerHTML=`<li>خبرة واسعة في مشروعات الطاقة الشمسية الزراعية</li><li>حلول مخصصة حسب احتياجات كل عميل</li><li>مكونات عالية الجودة لضمان الأداء الموثوق</li><li>استخدام أحدث تقنيات الطاقة الشمسية</li><li>ضمانات طويلة الأمد وخدمات صيانة احترافية</li>`;
 
-        homeBtn.innerText = "العودة للصفحة الرئيسية";
-        footer.innerText = "© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+        homeBtn.innerText="العودة للصفحة الرئيسية";
+        footer.innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
 
-        menuLinks = ["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
+        menuLinks=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
     }
 
-    // Animate menu links
-    const menuA = document.querySelectorAll(".menu a");
+    const menuA=document.querySelectorAll(".menu a");
     menuA.forEach((link,i)=>{
-        link.style.transitionDelay = `${i*0.08}s`;
-        link.innerText = menuLinks[i];
+        link.style.transitionDelay=`${i*0.08}s`;
+        link.innerText=menuLinks[i];
     });
 }
 
-/* ===== Toggle Language ===== */
-function toggleLang(){
-    currentLang = (currentLang==="en")?"ar":"en";
-    applyLang();
-}
+/* Toggle Language */
+function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
 
-/* ===== Hamburger Menu Toggle ===== */
+/* Toggle Menu */
 function toggleMenu(){
-    const menu = document.getElementById("menu");
-    const overlay = document.getElementById("overlay");
+    const menu=document.getElementById("menu");
+    const overlay=document.getElementById("overlay");
     menu.classList.toggle("show");
     if(menu.classList.contains("show")){
-        overlay.style.opacity = "1";
-        overlay.style.visibility = "visible";
-    } else {
-        overlay.style.opacity = "0";
-        overlay.style.visibility = "hidden";
+        overlay.style.opacity="1";
+        overlay.style.visibility="visible";
+    }else{
+        overlay.style.opacity="0";
+        overlay.style.visibility="hidden";
     }
 }
 
 /* Close menu when clicking a link */
 document.querySelectorAll('.menu a').forEach(link=>{
-    link.addEventListener('click', ()=>{
-        toggleMenu();
-    });
+    link.addEventListener('click',()=>{ toggleMenu(); });
 });
 
-/* ===== Animate Sections on load ===== */
-window.addEventListener('load', ()=>{
-    const sections = document.querySelectorAll('section');
-    sections.forEach((sec,i)=>{
-        setTimeout(()=>{ sec.classList.add('show'); }, i*150);
-    });
+/* Animate Sections on load */
+window.addEventListener('load',()=>{
+    const sections=document.querySelectorAll('section');
+    sections.forEach((sec,i)=>{ setTimeout(()=>{ sec.classList.add('show'); }, i*150); });
 });
 
 applyLang();
