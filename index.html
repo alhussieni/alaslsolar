@@ -26,35 +26,17 @@ body{
   transition: font-family 0.3s;
 }
 
-/* Hamburger */
+/* Hamburger (ثابت دائمًا على اليسار) */
 .menu-btn{
   position:fixed;
   top:20px;
+  left:20px;
   font-size:30px;
   cursor:pointer;
   color:#fff;
   z-index:10002;
   transition:.3s;
 }
-/* موقع الهامبرغر حسب اللغة */
-html[lang="en"] .menu-btn{ left:20px; }
-html[lang="ar"] .menu-btn{ right:20px; }
-
-/* Language Button */
-.lang-btn{
-  position:fixed;
-  top:20px;
-  right:20px;
-  padding:10px 18px;
-  border-radius:30px;
-  background:rgba(0,0,0,.85);
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
-  z-index:10003;
-  transition:.3s;
-}
-.lang-btn:hover{ background:rgba(0,0,0,.95); transform:scale(1.05); }
 
 /* Overlay */
 .overlay{
@@ -84,15 +66,17 @@ html[lang="ar"] .menu-btn{ right:20px; }
   z-index:10000;
 }
 .menu.show{ left:0; }
-.menu a{
+
+/* روابط القائمة + زر اللغة داخل القائمة */
+.menu a, .menu .lang-btn{
   color:#fff; text-decoration:none; padding:12px 0; font-size:18px;
   opacity:0; transform:translateX(-20px);
   transition: all 0.3s ease;
 }
-.menu.show a{
+.menu.show a, .menu.show .lang-btn{
   opacity:1; transform:translateX(0);
 }
-.menu a:hover{ color:#f9c74f; transform:translateX(5px); }
+.menu a:hover, .menu .lang-btn:hover{ color:#f9c74f; transform:translateX(5px); }
 
 /* Container */
 .container{ text-align:center; max-width:900px; padding:20px; }
@@ -162,9 +146,10 @@ p{ font-size:20px; margin-bottom:30px; }
 
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
-<div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 
 <nav class="menu" id="menu">
+  <!-- زر اللغة داخل القائمة -->
+  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
   <a href="index.html" id="menuHome">Home</a>
   <a href="about.html" id="menuAbout">About Us</a>
   <a href="services.html" id="menuServices">Our Services</a>
@@ -218,6 +203,7 @@ function applyLang(){
     document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
     menuLinksEN.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
+    document.querySelector('.menu .lang-btn').innerText="AR | EN";
   }else{
     document.documentElement.lang="ar"; document.documentElement.dir="rtl";
     document.getElementById("mainTitle").innerText="شركة الأصل للطاقة الشمسية";
@@ -228,6 +214,7 @@ function applyLang(){
     document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
     menuLinksAR.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
+    document.querySelector('.menu .lang-btn').innerText="EN | AR";
   }
 }
 
@@ -241,14 +228,14 @@ function toggleMenu(){
   menu.classList.toggle("show");
   overlay.classList.toggle("show");
   if(menu.classList.contains("show")){
-    const links=menu.querySelectorAll("a");
+    const links=[...menu.querySelectorAll("a, .lang-btn")];
     links.forEach((link,i)=>{
       link.style.transitionDelay=`${i*0.08}s`;
       link.style.transform='translateX(0)';
       link.style.opacity='1';
     });
   }else{
-    menu.querySelectorAll("a").forEach(link=>{
+    menu.querySelectorAll("a, .lang-btn").forEach(link=>{
       link.style.transitionDelay='0s';
       link.style.transform='translateX(-20px)';
       link.style.opacity='0';
@@ -261,7 +248,7 @@ function closeMenu(){
   const overlay=document.getElementById("overlay");
   menu.classList.remove("show");
   overlay.classList.remove("show");
-  menu.querySelectorAll("a").forEach(link=>{
+  menu.querySelectorAll("a, .lang-btn").forEach(link=>{
     link.style.transitionDelay='0s';
     link.style.transform='translateX(-20px)';
     link.style.opacity='0';
