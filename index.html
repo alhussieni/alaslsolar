@@ -10,192 +10,238 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
+/* ===== Reset ===== */
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
 }
 
+/* ===== Body ===== */
 body{
-height:100vh;
-color:#fff;
-display:flex;
-align-items:center;
-justify-content:center;
-background:
-linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),
-url("solar.jpg");
-background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
+  height:100vh;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)), url("solar.jpg");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  transition: font-family 0.3s;
 }
 
 /* Arabic font */
 html[lang="ar"] body{
-    font-family:'Cairo', Arial, sans-serif;
+  font-family:'Cairo', Arial, sans-serif;
 }
 
-.lang-btn{
-position:fixed;
-top:20px;
-right:20px;
-background:rgba(0,0,0,.85);
-color:#fff;
-padding:10px 18px;
-border-radius:30px;
-cursor:pointer;
-font-size:14px;
-z-index:99999;
+/* ===== Hamburger Menu ===== */
+.menu-btn{
+  position:fixed;
+  top:20px;
+  right:20px;
+  font-size:30px;
+  cursor:pointer;
+  color:#fff;
+  z-index:10000;
 }
 
+html[dir="rtl"] .menu-btn{
+  right:auto;
+  left:20px;
+}
+
+/* Menu container */
+.menu{
+  position:fixed;
+  top:0;
+  left:-250px; /* مخفي افتراضياً */
+  width:250px;
+  height:100%;
+  background:#222;
+  display:flex;
+  flex-direction:column;
+  padding:60px 20px;
+  transition:0.3s;
+  z-index:9999;
+}
+
+.menu a{
+  color:#fff;
+  text-decoration:none;
+  padding:12px 0;
+  font-size:18px;
+  transition:0.2s;
+}
+
+.menu a:hover{
+  color:#f9c74f;
+}
+
+/* تظهر عند تفعيل القائمة */
+.menu.show{
+  left:0;
+}
+
+/* ===== Container ===== */
 .container{
-text-align:center;
-max-width:900px;
-padding:20px;
+  text-align:center;
+  max-width:900px;
+  padding:20px;
 }
 
 .logo img{
-max-width:160px;
-margin-bottom:20px;
+  max-width:160px;
+  margin-bottom:20px;
 }
 
 .badge{
-display:inline-block;
-padding:8px 22px;
-border-radius:30px;
-background:rgba(255,255,255,.15);
-margin-bottom:20px;
-font-size:14px;
+  display:inline-block;
+  padding:8px 22px;
+  border-radius:30px;
+  background:rgba(255,255,255,.15);
+  margin-bottom:20px;
+  font-size:14px;
 }
 
 h1{
-font-size:48px;
-margin-bottom:15px;
+  font-size:48px;
+  margin-bottom:15px;
 }
 
 h2{
-font-weight:300;
-margin-bottom:25px;
+  font-weight:300;
+  margin-bottom:25px;
 }
 
 p{
-font-size:20px;
-margin-bottom:30px;
+  font-size:20px;
+  margin-bottom:30px;
 }
 
 .about-btn{
-display:inline-block;
-margin-top:10px;
-padding:12px 28px;
-border-radius:30px;
-background:#f9c74f;
-color:#000;
-text-decoration:none;
-font-weight:600;
-transition:.3s;
+  display:inline-block;
+  margin-top:10px;
+  padding:12px 28px;
+  border-radius:30px;
+  background:#f9c74f;
+  color:#000;
+  text-decoration:none;
+  font-weight:600;
+  transition:.3s;
 }
 
 .about-btn:hover{
-background:#ffd166;
+  background:#ffd166;
 }
 
 .contact span,
 .contact a{
-display:block;
-margin:6px 0;
-color:#fff;
-text-decoration:none;
+  display:block;
+  margin:6px 0;
+  color:#fff;
+  text-decoration:none;
 }
 
 .contact a:hover{
-text-decoration:underline;
+  text-decoration:underline;
 }
 
 .social{
-margin-top:25px;
+  margin-top:25px;
 }
 
 .social a{
-margin:0 10px;
-font-size:26px;
-color:#fff;
-text-decoration:none;
-transition:.3s;
+  margin:0 10px;
+  font-size:26px;
+  color:#fff;
+  text-decoration:none;
+  transition:.3s;
 }
 
 .social a:hover{
-color:#f9c74f;
+  color:#f9c74f;
 }
 
 .footer{
-margin-top:40px;
-font-size:14px;
-opacity:.6;
+  margin-top:40px;
+  font-size:14px;
+  opacity:.6;
 }
 
 .whatsapp{
-position:fixed;
-bottom:25px;
-right:25px;
-background:#25d366;
-width:60px;
-height:60px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-color:#fff;
-text-decoration:none;
-z-index:99999;
+  position:fixed;
+  bottom:25px;
+  right:25px;
+  background:#25d366;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  color:#fff;
+  text-decoration:none;
+  z-index:99999;
 }
 
 @media(max-width:600px){
-h1{font-size:36px;}
-p{font-size:18px;}
+  h1{font-size:36px;}
+  p{font-size:18px;}
 }
 </style>
 </head>
 
 <body>
 
-<div class="lang-btn" onclick="toggleLang()">AR | EN</div>
+<!-- Hamburger Menu Button -->
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+<!-- Menu Links -->
+<nav class="menu" id="menu">
+  <a href="index.html" id="menuHome">Home</a>
+  <a href="about.html" id="menuAbout">About Us</a>
+  <a href="services.html" id="menuServices">Our Services</a>
+  <a href="projects.html" id="menuProjects">Our Projects</a>
+  <a href="contact.html" id="menuContact">Contact Us</a>
+</nav>
 
 <div class="container">
+  <div class="logo">
+    <img src="logo.png" alt="Logo">
+  </div>
 
-<div class="logo">
-<img src="logo.png" alt="Logo">
-</div>
+  <div class="badge" id="badge"></div>
 
-<div class="badge" id="badge"></div>
+  <h1 id="mainTitle">AL ASL SOLAR</h1>
 
-<h1 id="mainTitle">AL ASL SOLAR</h1>
+  <h2 id="subtitle"></h2>
 
-<h2 id="subtitle"></h2>
+  <p id="desc"></p>
 
-<p id="desc"></p>
+  <a href="about.html" class="about-btn" id="aboutBtn"></a>
 
-<a href="about.html" class="about-btn" id="aboutBtn"></a>
+  <div class="contact">
+    <span>🇪🇬 +20 120 007 4344</span>
+    <span>🇪🇬 +20 120 878 7702</span>
+    <span>🇸🇦 +966 56 127 4344</span>
 
-<div class="contact">
-<span>🇪🇬 +20 120 007 4344</span>
-<span>🇪🇬 +20 120 878 7702</span>
-<span>🇸🇦 +966 56 127 4344</span>
+    <a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
+    <a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
+    <a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
+  </div>
 
-<a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
-<a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
-<a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
-</div>
+  <div class="social">
+    <a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
+    <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
+  </div>
 
-<div class="social">
-<a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-<a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-<a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
-<a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
-</div>
-
-<div class="footer" id="footer"></div>
+  <div class="footer" id="footer"></div>
 
 </div>
 
@@ -204,43 +250,66 @@ p{font-size:18px;}
 <script>
 let currentLang = "en";
 
+/* تطبيق اللغة */
 function applyLang(){
 
 if(currentLang === "en"){
+  document.documentElement.lang="en";
+  document.documentElement.dir="ltr";
 
-document.documentElement.lang="en";
-document.documentElement.dir="ltr";
+  document.getElementById("mainTitle").innerText = "AL ASL SOLAR";
+  document.getElementById("badge").innerText="🚧 COMING SOON";
+  document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
+  document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
+  document.getElementById("aboutBtn").innerText="About Us";
+  document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
+  document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
 
-document.getElementById("mainTitle").innerText = "AL ASL SOLAR";
-document.getElementById("badge").innerText="🚧 COMING SOON";
-document.getElementById("subtitle").innerText="Clean Energy • Smart Solutions • Long-Term Value";
-document.getElementById("desc").innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
-document.getElementById("aboutBtn").innerText="About Us";
-document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
-document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
+  /* قائمة الهامبرغر */
+  document.getElementById("menuHome").innerText="Home";
+  document.getElementById("menuAbout").innerText="About Us";
+  document.getElementById("menuServices").innerText="Our Services";
+  document.getElementById("menuProjects").innerText="Our Projects";
+  document.getElementById("menuContact").innerText="Contact Us";
 
 }else{
+  document.documentElement.lang="ar";
+  document.documentElement.dir="rtl";
 
-document.documentElement.lang="ar";
-document.documentElement.dir="rtl";
+  document.getElementById("mainTitle").innerText = "شركة الأصل للطاقة الشمسية";
+  document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
+  document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
+  document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
+  document.getElementById("aboutBtn").innerText="من نحن";
+  document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+  document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
 
-document.getElementById("mainTitle").innerText = "شركة الأصل للطاقة الشمسية";
-document.getElementById("badge").innerText="🚧 الموقع قيد الإنشاء";
-document.getElementById("subtitle").innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
-document.getElementById("desc").innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
-document.getElementById("aboutBtn").innerText="من نحن";
-document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
-document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
-
+  /* قائمة الهامبرغر */
+  document.getElementById("menuHome").innerText="الرئيسية";
+  document.getElementById("menuAbout").innerText="من نحن";
+  document.getElementById("menuServices").innerText="خدماتنا";
+  document.getElementById("menuProjects").innerText="مشاريعنا";
+  document.getElementById("menuContact").innerText="اتصل بنا";
+}
 }
 
-}
-
+/* Toggle اللغة */
 function toggleLang(){
-currentLang = (currentLang === "en") ? "ar" : "en";
-applyLang();
+  currentLang = (currentLang==="en")?"ar":"en";
+  applyLang();
 }
 
+/* Toggle Hamburger */
+function toggleMenu(){
+  document.getElementById("menu").classList.toggle("show");
+}
+
+/* إغلاق القائمة عند الضغط على أي رابط */
+document.querySelectorAll('.menu a').forEach(link=>{
+  link.addEventListener('click',()=>{document.getElementById("menu").classList.remove("show");});
+});
+
+/* تطبيق اللغة عند بداية التحميل */
 applyLang();
 </script>
 
