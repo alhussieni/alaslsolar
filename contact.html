@@ -57,7 +57,7 @@ header p{
   border-radius:30px;
   cursor:pointer;
   font-size:14px;
-  z-index:10001;
+  z-index:10002;
   transition:0.3s;
 }
 
@@ -80,6 +80,19 @@ html[lang="ar"] .lang-btn{
 html[lang="en"] .menu-btn{ left:20px; }
 html[lang="ar"] .menu-btn{ right:20px; }
 
+/* ===== Overlay ===== */
+.menu-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  z-index:10000;
+  display:none;
+}
+
+/* ===== Menu Links ===== */
 .menu{
   position:fixed;
   top:0;
@@ -91,7 +104,7 @@ html[lang="ar"] .menu-btn{ right:20px; }
   flex-direction:column;
   padding:60px 20px;
   transition:0.3s;
-  z-index:10000;
+  z-index:10001;
 }
 
 .menu a{
@@ -177,7 +190,7 @@ form button:hover{
 .social{
   margin-top:20px;
   display:flex;
-  gap:15px;  /* المسافة بين كل أيقونة */
+  gap:15px;
 }
 
 .social a{
@@ -213,6 +226,9 @@ footer{
 
 <!-- Language Button -->
 <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
+
+<!-- Overlay -->
+<div class="menu-overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <!-- Menu Links -->
 <nav class="menu" id="menu">
@@ -320,11 +336,12 @@ function toggleLang(){
 /* Toggle Hamburger */
 function toggleMenu(){
   document.getElementById("menu").classList.toggle("show");
+  document.getElementById("overlay").style.display = document.getElementById("menu").classList.contains("show") ? "block" : "none";
 }
 
 /* إغلاق القائمة عند الضغط على أي رابط */
 document.querySelectorAll('.menu a').forEach(link=>{
-  link.addEventListener('click',()=>{document.getElementById("menu").classList.remove("show");});
+  link.addEventListener('click',()=>{toggleMenu();});
 });
 
 /* منع الفورم من الإرسال الفعلي */
