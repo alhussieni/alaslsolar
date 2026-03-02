@@ -11,22 +11,22 @@
 
 <style>
 *{margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; transition: font-family 0.3s;}
+html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
 
-/* Body */
 body{
-  height:100vh;
+  min-height:100vh;
   color:#fff;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   background: linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)), url("solar.jpg");
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
+  overflow-x:hidden;
   transition: font-family 0.3s;
 }
-
-html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
 
 /* Hamburger */
 .menu-btn{
@@ -38,12 +38,14 @@ html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
   z-index:10002;
   transition:.3s;
 }
+html[lang="en"] .menu-btn{ left:20px; }
+html[lang="ar"] .menu-btn{ right:20px; }
 
 /* Language Button */
 .lang-btn{
   position:fixed;
   top:20px;
-  right:20px; /* ثابت أعلى اليمين */
+  right:20px;
   padding:10px 18px;
   border-radius:30px;
   background:rgba(0,0,0,.85);
@@ -53,22 +55,17 @@ html[lang="ar"] body{ font-family:'Cairo', Arial, sans-serif; }
   z-index:10003;
   transition:.3s;
 }
-
-/* Hamburger على الطرف المقابل */
-html[lang="en"] .menu-btn{ left:20px; }
-html[lang="ar"] .menu-btn{ right:20px; }
+.lang-btn:hover{ background:rgba(0,0,0,.95); transform:scale(1.05); }
 
 /* Overlay */
 .overlay{
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  top:0; left:0;
+  width:100%; height:100%;
   background:rgba(0,0,0,0.5);
   opacity:0;
   visibility:hidden;
-  transition:opacity .3s ease, visibility .3s ease;
+  transition:opacity .4s ease, visibility .4s ease;
   z-index:9998;
 }
 .overlay.show{ opacity:1; visibility:visible; }
@@ -77,22 +74,32 @@ html[lang="ar"] .menu-btn{ right:20px; }
 .menu{
   position:fixed;
   top:0;
-  left:-250px;
-  width:250px;
+  left:-260px;
+  width:260px;
   height:100%;
   background:#222;
   display:flex;
   flex-direction:column;
-  padding:60px 20px;
-  transition:left .3s ease;
+  padding:80px 20px;
+  transition:left .4s ease;
   z-index:10000;
 }
 .menu.show{ left:0; }
-.menu a{ color:#fff; text-decoration:none; padding:12px 0; font-size:18px; transition: color .2s; }
-.menu a:hover{ color:#f9c74f; }
+.menu a{
+  color:#fff; text-decoration:none; padding:12px 0; font-size:18px;
+  opacity:0; transform:translateX(-20px);
+  transition: all 0.3s ease;
+}
+.menu.show a{
+  opacity:1; transform:translateX(0);
+}
+.menu a:hover{ color:#f9c74f; transform:translateX(5px); }
 
 /* Container */
 .container{ text-align:center; max-width:900px; padding:20px; }
+.container section{ opacity:0; transform:translateY(20px); transition: all 0.6s ease; margin-bottom:40px; background:rgba(255,255,255,.05); padding:20px; border-radius:10px; }
+.container section.show{ opacity:1; transform:translateY(0); }
+
 .logo img{ max-width:160px; margin-bottom:20px; }
 .badge{ display:inline-block; padding:8px 22px; border-radius:30px; background:rgba(255,255,255,.15); margin-bottom:20px; font-size:14px; }
 h1{ font-size:48px; margin-bottom:15px; }
@@ -100,32 +107,34 @@ h2{ font-weight:300; margin-bottom:25px; }
 p{ font-size:20px; margin-bottom:30px; }
 .about-btn{ display:inline-block; margin-top:10px; padding:12px 28px; border-radius:30px; background:#f9c74f; color:#000; text-decoration:none; font-weight:600; transition:.3s; }
 .about-btn:hover{ background:#ffd166; }
+
+/* Contact Info */
 .contact span, .contact a{ display:block; margin:6px 0; color:#fff; text-decoration:none; }
 .contact a:hover{ text-decoration:underline; }
 
 /* Social horizontal */
 .social{ margin-top:25px; display:flex; justify-content:center; gap:15px; }
-.social a{ font-size:26px; color:#fff; text-decoration:none; transition:.3s; }
-.social a:hover{ color:#f9c74f; }
+.social a{ font-size:26px; color:#fff; transition:.3s; }
+.social a:hover{ color:#f9c74f; transform:scale(1.1); }
 
+/* Footer */
 .footer{ margin-top:40px; font-size:14px; opacity:.6; }
 
+/* WhatsApp Button */
 .whatsapp{
   position:fixed;
   bottom:25px;
   right:25px;
   background:#25d366;
-  width:60px;
-  height:60px;
+  width:60px; height:60px;
   border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; color:#fff;
   text-decoration:none;
   z-index:99999;
+  transition:.3s;
 }
+.whatsapp:hover{ transform:scale(1.1); }
 
 @media(max-width:600px){ h1{font-size:36px;} p{font-size:18px;} }
 </style>
@@ -133,16 +142,10 @@ p{ font-size:20px; margin-bottom:30px; }
 
 <body>
 
-<!-- Hamburger -->
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-<!-- Language -->
 <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 
-<!-- Overlay -->
-<div class="overlay" id="overlay" onclick="closeMenu()"></div>
-
-<!-- Menu Links -->
 <nav class="menu" id="menu">
   <a href="index.html" id="menuHome">Home</a>
   <a href="about.html" id="menuAbout">About Us</a>
@@ -158,6 +161,15 @@ p{ font-size:20px; margin-bottom:30px; }
   <h2 id="subtitle"></h2>
   <p id="desc"></p>
   <a href="about.html" class="about-btn" id="aboutBtn"></a>
+
+  <section>
+    <h2>Section 1</h2>
+    <p>Some introduction text here.</p>
+  </section>
+  <section>
+    <h2>Section 2</h2>
+    <p>Some information text here.</p>
+  </section>
 
   <div class="contact">
     <span>🇪🇬 +20 120 007 4344</span>
@@ -181,10 +193,12 @@ p{ font-size:20px; margin-bottom:30px; }
 <a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
-let currentLang = "en";
+let currentLang="en";
 
-/* تطبيق اللغة */
+/* Toggle Language */
 function applyLang(){
+  const menuLinksEN=["Home","About Us","Our Services","Our Projects","Contact Us"];
+  const menuLinksAR=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
   if(currentLang==="en"){
     document.documentElement.lang="en"; document.documentElement.dir="ltr";
     document.getElementById("mainTitle").innerText="AL ASL SOLAR";
@@ -194,11 +208,7 @@ function applyLang(){
     document.getElementById("aboutBtn").innerText="About Us";
     document.getElementById("footer").innerText="© 2026 Al Asl Solar. All Rights Reserved.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
-    document.getElementById("menuHome").innerText="Home";
-    document.getElementById("menuAbout").innerText="About Us";
-    document.getElementById("menuServices").innerText="Our Services";
-    document.getElementById("menuProjects").innerText="Our Projects";
-    document.getElementById("menuContact").innerText="Contact Us";
+    menuLinksEN.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
   }else{
     document.documentElement.lang="ar"; document.documentElement.dir="rtl";
     document.getElementById("mainTitle").innerText="شركة الأصل للطاقة الشمسية";
@@ -208,24 +218,32 @@ function applyLang(){
     document.getElementById("aboutBtn").innerText="من نحن";
     document.getElementById("footer").innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
     document.getElementById("wa").href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
-    document.getElementById("menuHome").innerText="الرئيسية";
-    document.getElementById("menuAbout").innerText="من نحن";
-    document.getElementById("menuServices").innerText="خدماتنا";
-    document.getElementById("menuProjects").innerText="مشاريعنا";
-    document.getElementById("menuContact").innerText="اتصل بنا";
+    menuLinksAR.forEach((txt,i)=>document.querySelectorAll('.menu a')[i].innerText=txt);
   }
 }
-
 function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
+
+/* Toggle Menu with link animation */
 function toggleMenu(){
-  document.getElementById("menu").classList.toggle("show");
-  document.getElementById("overlay").classList.toggle("show");
+  const menu=document.getElementById("menu");
+  const overlay=document.getElementById("overlay");
+  menu.classList.toggle("show");
+  overlay.classList.toggle("show");
+  if(menu.classList.contains("show")){
+    const links=menu.querySelectorAll("a");
+    links.forEach((link,i)=>{ link.style.transitionDelay=`${i*0.08}s`; });
+  }
 }
-function closeMenu(){
-  document.getElementById("menu").classList.remove("show");
-  document.getElementById("overlay").classList.remove("show");
-}
+function closeMenu(){ document.getElementById("menu").classList.remove("show"); document.getElementById("overlay").classList.remove("show"); }
 document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click', closeMenu); });
+
+/* Animate sections on load */
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.container section').forEach((sec,i)=>{
+    setTimeout(()=>{ sec.classList.add('show'); }, i*200);
+  });
+});
+
 applyLang();
 </script>
 
