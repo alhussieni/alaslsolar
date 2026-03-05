@@ -5,311 +5,387 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About Us | Alasl Solar</title>
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition: font-family 0.3s;}
-html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
-body{background:#f4f4f4;color:#333;line-height:1.7;overflow-x:hidden;transition: font-family 0.3s ease;}
 
-/* Hamburger Button */
-.menu-btn{
-    position:fixed;
-    top:20px;
-    left:20px;
-    font-size:30px;
-    cursor:pointer;
-    color:#ff7a00;
-    z-index:10002;
-    transition:0.3s;
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+color:white;
+background-image:url("solar.jpg");
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
 }
 
-/* Overlay */
 .overlay{
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.5);
-    opacity:0;
-    visibility:hidden;
-    transition: opacity .3s ease, visibility .3s ease;
-    z-index:9998;
+background:rgba(0,0,0,0.65);
+min-height:100vh;
+padding:40px 20px;
+text-align:center;
 }
 
-/* Menu */
-.menu{
-    position:fixed;
-    top:0;
-    left:-280px;
-    width:280px;
-    height:100%;
-    background:#222;
-    display:flex;
-    flex-direction:column;
-    padding:80px 20px;
-    transition: left 0.4s ease;
-    z-index:10000;
+/* logo */
+
+.logo{
+width:120px;
+display:block;
+margin:auto;
+cursor:pointer;
 }
-.menu.show{left:0;}
+
+/* hamburger */
+
+.hamburger{
+position:fixed;
+top:25px;
+left:25px;
+font-size:24px;
+cursor:pointer;
+z-index:1001;
+}
+
+/* menu */
+
+.menu{
+position:fixed;
+top:70px;
+left:20px;
+background:#111;
+padding:15px;
+border-radius:8px;
+display:none;
+text-align:left;
+min-width:200px;
+z-index:1000;
+}
 
 .menu a{
-    color:#fff;
-    text-decoration:none;
-    padding:12px 0;
-    font-size:18px;
-    opacity:0;
-    transform:translateX(-20px);
-    transition: all 0.3s ease;
-}
-.menu.show a{
-    opacity:1;
-    transform:translateX(0);
-}
-.menu a:hover{color:#f9c74f; transform:translateX(5px);}
-
-/* Language Button inside menu */
-.lang-btn{
-    margin-top:20px;
-    padding:10px 18px;
-    border-radius:30px;
-    background:rgba(0,0,0,.85);
-    color:#fff;
-    font-size:14px;
-    cursor:pointer;
-    align-self:flex-start;
-    transition:0.3s;
-}
-.lang-btn:hover{background:rgba(0,0,0,.95); transform:scale(1.05);}
-
-/* Header */
-header{
-    background:#ff7a00;
-    color:white;
-    padding:40px;
-    text-align:center;
-    position:relative;
-    z-index:1;
+display:block;
+color:white;
+text-decoration:none;
+padding:8px 10px;
+font-size:14px;
 }
 
-/* Container & Sections */
+.menu a:hover{
+background:#333;
+}
+
+.menu-title{
+margin-top:10px;
+font-size:12px;
+opacity:.7;
+padding:6px 10px;
+}
+
+.menu-divider{
+height:1px;
+background:#333;
+margin:8px 0;
+}
+
+/* titles */
+
+.page-title{
+font-size:42px;
+margin-top:20px;
+}
+
+.subtitle{
+font-size:20px;
+margin-bottom:30px;
+color:#f7b500;
+}
+
+/* container */
+
 .container{
-    max-width:1000px;
-    margin:auto;
-    padding:40px 20px;
+max-width:900px;
+margin:auto;
+text-align:left;
 }
-section{
-    margin-bottom:40px;
-    background:#fff;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 4px 10px rgba(0,0,0,.05);
-    opacity:0;
-    transform:translateY(20px);
-    transition: opacity .6s ease, transform .6s ease;
-}
-section.show{opacity:1; transform:translateY(0);}
-h2{color:#ff7a00;margin-bottom:15px;}
-ul{padding-left:20px;}
-html[lang="ar"] ul{padding-left:0; padding-right:20px;}
-li{margin-bottom:10px;}
 
-/* Home Button */
-.home-btn{
-    display:inline-block;
-    margin-top:30px;
-    padding:12px 28px;
-    border-radius:30px;
-    background:#ff7a00;
-    color:white;
-    text-decoration:none;
-    font-weight:600;
-    transition:.3s;
+.section{
+margin-top:40px;
+background:rgba(255,255,255,0.05);
+padding:25px;
+border-radius:10px;
 }
-.home-btn:hover{background:#e66d00;}
 
-/* Social Icons */
+.section h2{
+color:#f7b500;
+margin-bottom:15px;
+}
+
+.section p{
+line-height:1.8;
+font-size:16px;
+}
+
+ul{
+line-height:1.9;
+padding-left:20px;
+}
+
+li{
+margin-bottom:8px;
+}
+
+/* button */
+
+.btn{
+display:inline-block;
+margin-top:30px;
+background:#f7b500;
+color:black;
+padding:12px 28px;
+border-radius:25px;
+text-decoration:none;
+font-weight:bold;
+}
+
+/* social */
+
 .social{
-    display:flex;
-    gap:15px;
-    margin-top:20px;
-    justify-content:center;
+margin-top:30px;
+font-size:22px;
+text-align:center;
 }
-.social a{
-    font-size:24px;
-    color:#ff7a00;
-    transition:0.3s;
-}
-.social a:hover{transform:scale(1.1); color:#ffd166;}
 
-/* Footer */
+.social i{
+margin:0 10px;
+cursor:pointer;
+}
+
+/* footer */
+
 footer{
-    text-align:center;
-    margin-top:40px;
-    padding:20px;
-    background:#222;
-    color:#fff;
+margin-top:40px;
+font-size:13px;
+opacity:0.8;
+text-align:center;
 }
 
-/* Responsive */
-@media(max-width:600px){
-    header h1{font-size:28px;}
-    header p{font-size:16px;}
+/* whatsapp */
+
+.whatsapp{
+position:fixed;
+bottom:25px;
+right:25px;
+width:60px;
+height:60px;
+background:#25D366;
+color:white;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:32px;
+box-shadow:0 4px 10px rgba(0,0,0,0.3);
+z-index:999;
+transition:0.3s;
+text-decoration:none;
 }
+
+.whatsapp:hover{
+transform:scale(1.1);
+background:#1ebe5d;
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- Overlay -->
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="overlay">
 
-<!-- Hamburger Button -->
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
-
-<!-- Menu -->
-<nav class="menu" id="menu">
-    <a href="index.html" id="menuHome">Home</a>
-    <a href="about.html" id="menuAbout">About Us</a>
-    <a href="services.html" id="menuServices">Our Services</a>
-    <a href="projects.html" id="menuProjects">Our Projects</a>
-    <a href="contact.html" id="menuContact">Contact Us</a>
-    
-    <!-- Language Button inside menu -->
-    <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
-</nav>
-
-<header>
-    <h1 id="mainTitle"></h1>
-    <p id="tagline"></p>
-</header>
-
-<div class="container">
-<section>
-    <h2 id="aboutTitle"></h2>
-    <p id="aboutText"></p>
-</section>
-<section>
-    <h2 id="visionTitle"></h2>
-    <p id="visionText"></p>
-</section>
-<section>
-    <h2 id="missionTitle"></h2>
-    <p id="missionText"></p>
-</section>
-<section>
-    <h2 id="servicesTitle"></h2>
-    <ul id="servicesList"></ul>
-</section>
-<section>
-    <h2 id="whyTitle"></h2>
-    <ul id="whyList"></ul>
-</section>
-
-<div class="social">
-    <a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-    <a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-    <a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
-    <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
+<!-- hamburger -->
+<div class="hamburger" onclick="toggleMenu()">
+<i class="fa fa-bars"></i>
 </div>
 
-<a href="index.html" class="home-btn" id="homeBtn"></a>
-<footer id="footer"></footer>
+<div class="menu" id="menu">
+
+<a href="index.html">Home</a>
+<a href="about.html">About Us</a>
+<a href="#">Services</a>
+<a href="#">Projects</a>
+<a href="#">Contact</a>
+
+<div class="menu-divider"></div>
+
+<div class="menu-title">Language</div>
+
+<a href="#" onclick="setLang('en')">🇬🇧 English</a>
+<a href="#" onclick="setLang('ar')">🇸🇦 العربية</a>
+<a href="#" onclick="setLang('es')">🇪🇸 Español</a>
+<a href="#" onclick="setLang('zh')">🇨🇳 中文</a>
+
+</div>
+
+<a href="index.html">
+<img src="logo.png" class="logo">
+</a>
+
+<h1 class="page-title" data-i18n="title">About Us</h1>
+<div class="subtitle" data-i18n="slogan">Quality Guaranteed • Sustainable Energy</div>
+
+<div class="container">
+
+<div class="section">
+<h2 data-i18n="who">Who We Are</h2>
+<p data-i18n="whoText"></p>
+</div>
+
+<div class="section">
+<h2 data-i18n="vision">Our Vision</h2>
+<p data-i18n="visionText"></p>
+</div>
+
+<div class="section">
+<h2 data-i18n="mission">Our Mission</h2>
+<p data-i18n="missionText"></p>
+</div>
+
+<div class="section">
+<h2 data-i18n="services">Our Services</h2>
+<ul id="servicesList"></ul>
+</div>
+
+<div class="section">
+<h2 data-i18n="why">Why Choose Us</h2>
+<ul id="whyList"></ul>
+</div>
+
+<a class="btn" href="index.html" data-i18n="home">Back to Home</a>
+
+</div>
+
+<div class="social">
+<i class="fab fa-facebook-f"></i>
+<i class="fab fa-linkedin-in"></i>
+<i class="fab fa-youtube"></i>
+<i class="fab fa-tiktok"></i>
+</div>
+
+<footer>
+© 2026 Al Asl Solar Energy
+</footer>
+
+</div>
+
+<a href="https://wa.me/201200074344" class="whatsapp" target="_blank">
+<i class="fab fa-whatsapp"></i>
+</a>
 
 <script>
-let currentLang = "en";
-let menuLinks;
 
-/* Apply Language */
-function applyLang(){
-    if(currentLang==="en"){
-        document.documentElement.lang="en"; document.documentElement.dir="ltr";
-        mainTitle.innerText="Alasl Solar";
-        tagline.innerText="Quality Guaranteed • Sustainable Energy Solutions";
-
-        aboutTitle.innerText="Who We Are";
-        aboutText.innerText="Alasl Solar delivers reliable and innovative solar energy solutions designed to help farmers, businesses, and investors reduce energy costs and achieve long-term sustainability. With strong experience in solar system design and implementation, we help our clients transition toward clean and efficient energy solutions.";
-
-        visionTitle.innerText="Our Vision";
-        visionText.innerText="To become the leading provider of solar and renewable energy solutions and to contribute to the transition toward a clean and sustainable energy future.";
-
-        missionTitle.innerText="Our Mission";
-        missionText.innerText="To deliver efficient solar energy solutions that help our clients reduce dependence on traditional fuels and improve operational efficiency.";
-
-        servicesTitle.innerText="Our Services";
-        servicesList.innerHTML=`<li>Solar irrigation systems</li><li>Energy storage solutions</li><li>Solar systems for homes and businesses</li><li>PV–Diesel Hybrid systems</li>`;
-
-        whyTitle.innerText="Why Choose Alasl Solar";
-        whyList.innerHTML=`<li>Extensive experience in agricultural solar projects</li><li>Customized solar solutions for each client</li><li>High-quality components ensuring reliable performance</li><li>Latest solar technologies</li><li>Long-term warranties and professional maintenance services</li>`;
-
-        homeBtn.innerText="Back to Home";
-        footer.innerText="© 2026 Alasl Solar. All Rights Reserved.";
-
-        menuLinks=["Home","About Us","Our Services","Our Projects","Contact Us"];
-    }else{
-        document.documentElement.lang="ar"; document.documentElement.dir="rtl";
-        mainTitle.innerText="شركة الأصل للطاقة الشمسية";
-        tagline.innerText="نضمن الجودة • حلول طاقة مستدامة";
-
-        aboutTitle.innerText="من نحن";
-        aboutText.innerText="شركة الأصل للطاقة الشمسية تقدم حلول طاقة شمسية مبتكرة وموثوقة تساعد المزارعين والشركات والمستثمرين على خفض تكاليف الطاقة وتحقيق الاستدامة. نعتمد على خبرة قوية في تصميم وتنفيذ أنظمة الطاقة الشمسية لتحقيق أفضل أداء وكفاءة.";
-
-        visionTitle.innerText="رؤيتنا";
-        visionText.innerText="أن نكون الخيار الأول في تنفيذ حلول الطاقة الشمسية والطاقة المتجددة والمساهمة في التحول نحو مستقبل يعتمد على الطاقة النظيفة والمستدامة.";
-
-        missionTitle.innerText="رسالتنا";
-        missionText.innerText="تقديم حلول طاقة شمسية فعالة تساعد عملاءنا على تقليل الاعتماد على الوقود التقليدي وتحسين كفاءة أعمالهم.";
-
-        servicesTitle.innerText="خدماتنا";
-        servicesList.innerHTML=`<li>أنظمة الطاقة الشمسية للري الزراعي</li><li>حلول تخزين الطاقة</li><li>أنظمة طاقة شمسية للمنازل والشركات</li><li>أنظمة هجينة PV–Diesel Hybrid</li>`;
-
-        whyTitle.innerText="لماذا تختارنا";
-        whyList.innerHTML=`<li>خبرة واسعة في مشروعات الطاقة الشمسية الزراعية</li><li>حلول مخصصة حسب احتياجات كل عميل</li><li>مكونات عالية الجودة لضمان الأداء الموثوق</li><li>استخدام أحدث تقنيات الطاقة الشمسية</li><li>ضمانات طويلة الأمد وخدمات صيانة احترافية</li>`;
-
-        homeBtn.innerText="العودة للصفحة الرئيسية";
-        footer.innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
-
-        menuLinks=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
-    }
-
-    // Menu links with staggered animation
-    const menuA=document.querySelectorAll(".menu a");
-    menuA.forEach((link,i)=>{
-        link.style.transitionDelay=`${i*0.08}s`;
-        link.innerText=menuLinks[i];
-    });
-}
-
-/* Toggle Language */
-function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
-
-/* Toggle Menu */
 function toggleMenu(){
-    const menu=document.getElementById("menu");
-    const overlay=document.getElementById("overlay");
-    menu.classList.toggle("show");
-    if(menu.classList.contains("show")){
-        overlay.style.opacity="1";
-        overlay.style.visibility="visible";
-    }else{
-        overlay.style.opacity="0";
-        overlay.style.visibility="hidden";
-    }
+let menu=document.getElementById("menu");
+menu.style.display = menu.style.display==="block" ? "none" : "block";
 }
 
-/* Close menu when clicking a link */
-document.querySelectorAll('.menu a').forEach(link=>{
-    link.addEventListener('click',()=>{ toggleMenu(); });
+function setLang(lang){
+
+if(lang==="ar"){
+document.documentElement.dir="rtl";
+}else{
+document.documentElement.dir="ltr";
+}
+
+const data={
+en:{
+title:"About Us",
+slogan:"Quality Guaranteed • Sustainable Energy",
+who:"Who We Are",
+whoText:"We are a leading company providing innovative and reliable solar energy solutions. We work to provide expertise and efficiency so you can maximize the benefits of solar energy while helping farmers and businesses reduce energy costs using sustainable solutions. We believe solar and clean energy are the key to the future.",
+vision:"Our Vision",
+visionText:"To be the first choice in implementing solar and renewable energy solutions and lead the transition toward a future powered by clean and sustainable energy.",
+mission:"Our Mission",
+missionText:"Provide effective solar energy solutions that help our clients achieve independence from traditional fuels and improve their daily operational efficiency.",
+services:"Our Services",
+servicesList:[
+"Design and implementation of solar power stations for agricultural irrigation.",
+"Energy storage solutions to ensure operational continuity.",
+"Integrated solar energy systems for homes and businesses.",
+"Implementation of PV-Diesel Hybrid stations to reduce fuel consumption and improve energy efficiency."
+],
+why:"Why Choose Us",
+whyList:[
+"Extensive experience and successful projects in the agricultural sector.",
+"Customized solutions tailored to your needs and budget to maximize benefits.",
+"High-quality materials ensuring reliable and sustainable performance.",
+"Use of the latest solar technologies to guarantee the best solutions.",
+"Environmentally friendly solutions that reduce carbon footprint.",
+"Long-term warranties with fast and comprehensive maintenance.",
+"Comprehensive training for users to ensure optimal system use."
+],
+home:"Back to Home"
+},
+
+ar:{
+title:"من نحن",
+slogan:"نضمن الجودة • نحقق الاستدامة",
+who:"من نحن",
+whoText:"نحن شركة رائدة في تقديم وتنفيذ حلول طاقة شمسية مبتكرة وموثوقة. نعمل على تزويدك بخبرة وكفاءة لتحقق أقصى استفادة من الطاقة الشمسية، مساعدة المزارعين والشركات في خفض تكاليف الطاقة باستخدام حلول مستدامة. نؤمن بأن الطاقة الشمسية والطاقة النظيفة هي مفتاح المستقبل.",
+vision:"رؤيتنا",
+visionText:"أن نكون الخيار الأول في تنفيذ حلول الطاقة الشمسية والطاقة المتجددة، ونقود التحول نحو مستقبل يعتمد على طاقة نظيفة ومستدامة.",
+mission:"رسالتنا",
+missionText:"تقديم حلول طاقة شمسية فعّالة تساعد عملاءنا على تحقيق استقلالية عن الوقود التقليدي وتحسين كفاءة أعمالهم اليومية.",
+services:"خدماتنا",
+servicesList:[
+"تصميم وتنفيذ محطات طاقة شمسية للري الزراعي.",
+"حلول تخزين الطاقة لضمان استمرارية التشغيل.",
+"أنظمة طاقة شمسية متكاملة للمنازل والشركات.",
+"تنفيذ محطات PV-Diesel Hybrid لتقليل استخدام الوقود وتحقيق كفاءة أكبر في استهلاك الطاقة."
+],
+why:"لماذا تختارنا",
+whyList:[
+"خبرة طويلة ومشروعات ناجحة في القطاع الزراعي.",
+"حلول مخصصة لتلبية احتياجاتك وميزانيتك للوصول إلى أقصى استفادة.",
+"خامات عالية الجودة وكفاءة لضمان أفضل أداء مستدام.",
+"استخدام أحدث التقنيات في مجال الطاقة الشمسية.",
+"حلول صديقة للبيئة تقلل البصمة الكربونية.",
+"ضمانات طويلة الأمد مع صيانة شاملة وسريعة.",
+"تدريب شامل للمستخدمين لضمان الاستخدام الأمثل."
+],
+home:"العودة للرئيسية"
+}
+};
+
+const t=data[lang];
+
+document.querySelector('[data-i18n="title"]').innerText=t.title;
+document.querySelector('[data-i18n="slogan"]').innerText=t.slogan;
+document.querySelector('[data-i18n="who"]').innerText=t.who;
+document.querySelector('[data-i18n="whoText"]').innerText=t.whoText;
+document.querySelector('[data-i18n="vision"]').innerText=t.vision;
+document.querySelector('[data-i18n="visionText"]').innerText=t.visionText;
+document.querySelector('[data-i18n="mission"]').innerText=t.mission;
+document.querySelector('[data-i18n="missionText"]').innerText=t.missionText;
+document.querySelector('[data-i18n="services"]').innerText=t.services;
+document.querySelector('[data-i18n="why"]').innerText=t.why;
+document.querySelector('[data-i18n="home"]').innerText=t.home;
+
+const servicesList=document.getElementById("servicesList");
+servicesList.innerHTML="";
+t.servicesList.forEach(s=>{
+servicesList.innerHTML+=`<li>${s}</li>`;
 });
 
-/* Animate Sections on load */
-window.addEventListener('load',()=>{
-    const sections=document.querySelectorAll('section');
-    sections.forEach((sec,i)=>{ setTimeout(()=>{ sec.classList.add('show'); }, i*150); });
+const whyList=document.getElementById("whyList");
+whyList.innerHTML="";
+t.whyList.forEach(w=>{
+whyList.innerHTML+=`<li>${w}</li>`;
 });
 
-applyLang();
+document.getElementById("menu").style.display="none";
+}
+
+setLang("en");
+
 </script>
 
 </body>
