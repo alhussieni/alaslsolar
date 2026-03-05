@@ -1,228 +1,58 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Us | Alasl Solar</title>
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>Contact Al Asl Solar</title>
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition: font-family 0.3s;}
-html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
-body{background:#f4f4f4;color:#333;line-height:1.7;padding:0 20px;overflow-x:hidden;transition: font-family 0.3s;}
+<meta name="description" content="Contact Al Asl Solar for solar energy solutions and project consultations.">
 
-/* Hamburger Button */
-.menu-btn{
-    position:fixed;
-    top:20px;
-    left:20px;
-    font-size:30px;
-    cursor:pointer;
-    color:#ff7a00;
-    z-index:10002;
-    transition:0.3s;
-}
-.menu-btn:hover{ transform:scale(1.1); }
+<link rel="stylesheet" href="css/style.css">
 
-/* Overlay */
-.overlay{
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.5);
-    opacity:0;
-    visibility:hidden;
-    transition: opacity .3s ease, visibility .3s ease;
-    z-index:9998;
-}
-
-/* Menu */
-.menu{
-    position:fixed;
-    top:0;
-    left:-280px;
-    width:280px;
-    height:100%;
-    background:#222;
-    display:flex;
-    flex-direction:column;
-    padding:80px 20px;
-    transition: left 0.4s ease;
-    z-index:10000;
-}
-.menu.show{left:0;}
-.menu a, .menu .lang-btn{
-    color:#fff;
-    text-decoration:none;
-    padding:12px 0;
-    font-size:18px;
-    opacity:0;
-    transform:translateX(-20px);
-    transition: all 0.3s ease;
-}
-.menu.show a, .menu.show .lang-btn{opacity:1; transform:translateX(0);}
-.menu a:hover, .menu .lang-btn:hover{color:#f9c74f; transform:translateX(5px);}
-
-/* Language Button inside menu */
-.lang-btn{
-    margin-top:20px;
-    padding:10px 18px;
-    border-radius:30px;
-    background:rgba(0,0,0,.85);
-    color:#fff;
-    font-size:14px;
-    cursor:pointer;
-    align-self:flex-start;
-    transition:0.3s;
-}
-.lang-btn:hover{background:rgba(0,0,0,.95); transform:scale(1.05);}
-
-/* Header */
-header{background:#ff7a00;color:white;text-align:center;padding:40px 20px;}
-header h1{font-size:36px;margin-bottom:10px;}
-header p{font-size:18px;}
-
-/* Container */
-.container{max-width:900px;margin:auto;padding:40px 20px;background:#fff;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1);}
-form{display:flex; flex-direction:column;}
-form label{margin-bottom:5px; font-weight:600;}
-form input, form textarea{margin-bottom:20px;padding:12px;border-radius:6px;border:1px solid #ccc;font-size:16px;resize:none;}
-form button{padding:12px 28px;background:#ff7a00;color:white;border:none;border-radius:30px;cursor:pointer;font-size:16px;font-weight:600;transition:.3s;}
-form button:hover{background:#e66d00;}
-
-.contact-info{margin-top:30px;}
-.contact-info span, .contact-info a{display:block;margin-bottom:10px;color:#333;text-decoration:none;}
-.contact-info a:hover{text-decoration:underline;}
-
-.social{margin-top:20px; display:flex; gap:15px;}
-.social a{font-size:24px; color:#ff7a00; transition:.3s;}
-.social a:hover{color:#e66d00; transform:scale(1.1);}
-
-footer{text-align:center; margin-top:40px; padding:20px; background:#222; color:#fff;}
-.whatsapp{position:fixed; bottom:25px; right:25px; background:#25d366; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; text-decoration:none; z-index:99999; transition:.3s;}
-.whatsapp:hover{transform:scale(1.1);}
-
-@media(max-width:600px){header h1{font-size:28px;} header p{font-size:16px;} form input, form textarea{font-size:14px;}}
-</style>
 </head>
+
 <body>
 
-<!-- Overlay + Hamburger Menu -->
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
+<h1>Contact Us</h1>
 
-<nav class="menu" id="menu">
-  <a href="index.html">Home</a>
-  <a href="about.html">About Us</a>
-  <a href="services.html">Our Services</a>
-  <a href="projects.html">Our Projects</a>
-  <a href="contact.html">Contact Us</a>
-  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
-</nav>
+<section>
 
-<header>
-  <h1 id="mainTitle">Contact Us</h1>
-  <p id="subtitle">Get in touch with us for professional solar solutions</p>
-</header>
+<h2>Phone Numbers</h2>
 
-<div class="container">
-  <form id="contactForm">
-    <label for="name" id="labelName">Name</label>
-    <input type="text" id="name" placeholder="Enter your name" required>
+<p>Egypt: +201208787702</p>
+<p>Egypt: +201200074344</p>
+<p>KSA: +966561274344</p>
 
-    <label for="email" id="labelEmail">Email</label>
-    <input type="email" id="email" placeholder="Enter your email" required>
+</section>
 
-    <label for="message" id="labelMessage">Message</label>
-    <textarea id="message" rows="5" placeholder="Write your message" required></textarea>
 
-    <button type="submit" id="submitBtn">Send Message</button>
-  </form>
+<section>
 
-  <div class="contact-info">
-    <span>🇪🇬 +20 120 007 4344</span>
-    <span>🇪🇬 +20 120 878 7702</span>
-    <span>🇸🇦 +966 56 127 4344</span>
+<h2>Email</h2>
 
-    <a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
-    <a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
-    <a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
+<p>info@alaslsolar.com</p>
+<p>sales@alaslsolar.com</p>
+<p>alasl.renewable.energy@outlook.com</p>
 
-    <div class="social">
-      <a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-      <a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-      <a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
-      <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
-    </div>
-  </div>
-</div>
+</section>
 
-<footer>© 2026 Alasl Solar. All Rights Reserved.</footer>
-<a class="whatsapp" href="https://wa.me/201200074344" target="_blank">💬</a>
 
-<script>
-let currentLang="en";
-let menuLinks;
+<section>
 
-/* Apply Language */
-function applyLang(){
-    if(currentLang==="en"){
-        document.documentElement.lang="en"; document.documentElement.dir="ltr";
-        mainTitle.innerText="Contact Us";
-        subtitle.innerText="Get in touch with us for professional solar solutions";
-        labelName.innerText="Name";
-        labelEmail.innerText="Email";
-        labelMessage.innerText="Message";
-        submitBtn.innerText="Send Message";
-        menuLinks=["Home","About Us","Our Services","Our Projects","Contact Us"];
-        document.querySelector('.menu .lang-btn').innerText="AR | EN";
-    }else{
-        document.documentElement.lang="ar"; document.documentElement.dir="rtl";
-        mainTitle.innerText="اتصل بنا";
-        subtitle.innerText="تواصل معنا للحصول على حلول طاقة شمسية احترافية";
-        labelName.innerText="الاسم";
-        labelEmail.innerText="البريد الإلكتروني";
-        labelMessage.innerText="رسالتك";
-        submitBtn.innerText="إرسال الرسالة";
-        menuLinks=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
-        document.querySelector('.menu .lang-btn').innerText="EN | AR";
-    }
-    const menuA=document.querySelectorAll(".menu a");
-    menuA.forEach((link,i)=>{ link.innerText=menuLinks[i]; link.style.transitionDelay=`${i*0.08}s`; });
-}
+<h2>WhatsApp</h2>
 
-/* Toggle Language */
-function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
+<a href="https://wa.me/201200074344">
+Chat with us on WhatsApp
+</a>
 
-/* Toggle Menu */
-function toggleMenu(){
-    const menu=document.getElementById("menu");
-    const overlay=document.getElementById("overlay");
-    menu.classList.toggle("show");
-    if(menu.classList.contains("show")){
-        overlay.style.opacity="1"; overlay.style.visibility="visible";
-        const items=[...menu.querySelectorAll("a, .lang-btn")];
-        items.forEach((el,i)=>{ el.style.transitionDelay=`${i*0.08}s`; el.style.transform='translateX(0)'; el.style.opacity='1'; });
-    }else{
-        overlay.style.opacity="0"; overlay.style.visibility="hidden";
-        menu.querySelectorAll("a, .lang-btn").forEach(el=>{ el.style.transitionDelay='0s'; el.style.transform='translateX(-20px)'; el.style.opacity='0'; });
-    }
-}
+</section>
 
-/* Close menu when clicking a link */
-document.querySelectorAll('.menu a').forEach(link=>link.addEventListener('click', toggleMenu));
 
-/* Form submission */
-document.getElementById("contactForm").addEventListener("submit", function(e){
-  e.preventDefault();
-  alert(document.documentElement.lang==="en"?"Message sent successfully!":"تم إرسال الرسالة بنجاح!");
-});
-
-applyLang();
-</script>
+<a class="whatsapp" href="https://wa.me/201200074344">
+WhatsApp
+</a>
 
 </body>
 </html>
