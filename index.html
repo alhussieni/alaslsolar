@@ -1,333 +1,218 @@
 <!DOCTYPE html>
-<html lang="ar">
-
+<html lang="en" dir="ltr">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Al Asl Solar | Coming Soon</title>
 
-<title>Alasl Solar Energy</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- Google Fonts: Poppins + Cairo -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition: font-family 0.3s;}
+html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
+body{background:#f4f4f4;color:#333;line-height:1.7;overflow-x:hidden;transition: font-family 0.3s ease;}
 
-body{
-font-family:'Cairo',sans-serif;
-margin:0;
-direction:rtl;
+/* Hamburger Button */
+.menu-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    font-size:30px;
+    cursor:pointer;
+    color:#ff7a00;
+    z-index:10002;
+    transition:0.3s;
 }
 
-header{
-background:white;
-box-shadow:0 2px 10px rgba(0,0,0,.1);
-position:fixed;
-width:100%;
-top:0;
+/* Overlay */
+.overlay{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    opacity:0;
+    visibility:hidden;
+    transition: opacity .3s ease, visibility .3s ease;
+    z-index:9998;
 }
 
-.container{
-width:90%;
-max-width:1200px;
-margin:auto;
+/* Menu */
+.menu{
+    position:fixed;
+    top:0;
+    left:-280px;
+    width:280px;
+    height:100%;
+    background:#222;
+    display:flex;
+    flex-direction:column;
+    padding:80px 20px;
+    transition: left 0.4s ease;
+    z-index:10000;
 }
+.menu.show{left:0;}
 
-.navbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px;
+.menu a{
+    color:#fff;
+    text-decoration:none;
+    padding:12px 0;
+    font-size:18px;
+    opacity:0;
+    transform:translateX(-20px);
+    transition: all 0.3s ease;
 }
-
-nav a{
-margin:10px;
-text-decoration:none;
-color:#333;
-font-weight:600;
+.menu.show a{
+    opacity:1;
+    transform:translateX(0);
 }
+.menu a:hover{color:#f9c74f; transform:translateX(5px);}
 
-.hero{
-
-height:100vh;
-
-background:
-linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),
-url("images/hero.jpg");
-
-background-size:cover;
-background-position:center;
-
-display:flex;
-align-items:center;
-text-align:center;
-
-color:white;
-}
-
-.hero h1{
-font-size:48px;
-}
-
-.section{
-padding:90px 0;
-}
-
-.services{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:30px;
-}
-
-.card{
-padding:30px;
-box-shadow:0 4px 15px rgba(0,0,0,.08);
-border-radius:8px;
-}
-
-.projects{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-gap:30px;
-}
-
-.projects img{
-width:100%;
-border-radius:10px;
-}
-
-.btn{
-background:#ff7a00;
-color:white;
-padding:12px 25px;
-border-radius:6px;
-text-decoration:none;
-}
-
-.contact{
-text-align:center;
-}
-
-footer{
-background:#111;
-color:#aaa;
-text-align:center;
-padding:30px;
-}
-
+/* Language Button inside menu */
 .lang-btn{
-cursor:pointer;
-padding:8px 15px;
-background:#ff7a00;
-color:white;
-border:none;
-border-radius:5px;
+    margin-top:20px;
+    padding:10px 18px;
+    border-radius:30px;
+    background:rgba(0,0,0,.85);
+    color:#fff;
+    font-size:14px;
+    cursor:pointer;
+    align-self:flex-start;
+    transition:0.3s;
 }
+.lang-btn:hover{background:rgba(0,0,0,.95); transform:scale(1.05);}
 
+/* Container */
+.container{ text-align:center; max-width:900px; padding:20px; color:#fff; }
+body{ background: linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)), url("solar.jpg"); background-size:cover; background-position:center; }
+
+/* Logo & Badge */
+.logo img{ max-width:160px; margin-bottom:20px; }
+.badge{ display:inline-block; padding:8px 22px; border-radius:30px; background:rgba(255,255,255,.15); margin-bottom:20px; font-size:14px; }
+h1{ font-size:48px; margin-bottom:15px; }
+h2{ font-weight:300; margin-bottom:25px; }
+p{ font-size:20px; margin-bottom:30px; }
+.about-btn{ display:inline-block; margin-top:10px; padding:12px 28px; border-radius:30px; background:#f9c74f; color:#000; text-decoration:none; font-weight:600; transition:.3s; }
+.about-btn:hover{ background:#ffd166; }
+
+/* Contact & Social */
+.contact span, .contact a{ display:block; margin:6px 0; color:#fff; text-decoration:none; }
+.contact a:hover{ text-decoration:underline; }
+.social{ margin-top:25px; display:flex; justify-content:center; gap:15px; }
+.social a{ font-size:26px; color:#fff; transition:.3s; }
+.social a:hover{ color:#f9c74f; transform:scale(1.1); }
+
+.footer{ margin-top:40px; font-size:14px; opacity:.6; }
+
+/* WhatsApp Button */
+.whatsapp{ position:fixed; bottom:25px; right:25px; background:#25d366; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; text-decoration:none; z-index:99999; transition:.3s; }
+.whatsapp:hover{ transform:scale(1.1); }
+
+/* Responsive */
+@media(max-width:600px){ h1{font-size:36px;} p{font-size:18px;} }
 </style>
-
 </head>
 
 <body>
 
-<header>
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-<div class="container navbar">
+<!-- Hamburger Button -->
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
 
-<div>
-
-<b>ALASL SOLAR</b>
-
-</div>
-
-<nav>
-
-<a href="#">الرئيسية</a>
-<a href="#services">الخدمات</a>
-<a href="#projects">المشروعات</a>
-<a href="#contact">تواصل</a>
-
+<!-- Menu -->
+<nav class="menu" id="menu">
+  <a href="index.html" id="menuHome">Home</a>
+  <a href="about.html" id="menuAbout">About Us</a>
+  <a href="services.html" id="menuServices">Our Services</a>
+  <a href="projects.html" id="menuProjects">Our Projects</a>
+  <a href="contact.html" id="menuContact">Contact Us</a>
+  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
 </nav>
 
-<button class="lang-btn" onclick="toggleLanguage()">
-
-EN
-
-</button>
-
-</div>
-
-</header>
-
-<section class="hero">
-
 <div class="container">
+  <div class="logo"><img src="logo.png" alt="Logo"></div>
+  <div class="badge" id="badge"></div>
+  <h1 id="mainTitle"></h1>
+  <h2 id="subtitle"></h2>
+  <p id="desc"></p>
+  <a href="about.html" class="about-btn" id="aboutBtn"></a>
 
-<h1 id="hero-title">
+  <div class="contact">
+    <span>🇪🇬 +20 120 007 4344</span>
+    <span>🇪🇬 +20 120 878 7702</span>
+    <span>🇸🇦 +966 56 127 4344</span>
+    <a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
+    <a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
+    <a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
+  </div>
 
-حلول الطاقة الشمسية للمزارع والمنازل
+  <div class="social">
+    <a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
+    <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
+  </div>
 
-</h1>
-
-<p id="hero-text">
-
-نوفر أنظمة طاقة شمسية متكاملة لتقليل تكلفة الكهرباء والديزل
-
-</p>
-
+  <div class="footer" id="footer"></div>
 </div>
 
-</section>
-
-<section id="services" class="section">
-
-<div class="container">
-
-<h2 id="services-title">خدماتنا</h2>
-
-<div class="services">
-
-<div class="card">
-
-<h3 id="s1">محطات الري الزراعي</h3>
-
-<p id="s1t">
-تشغيل آبار المياه باستخدام الطاقة الشمسية.
-</p>
-
-</div>
-
-<div class="card">
-
-<h3 id="s2">أنظمة On Grid</h3>
-
-<p id="s2t">
-أنظمة متصلة بالشبكة لتقليل فاتورة الكهرباء.
-</p>
-
-</div>
-
-<div class="card">
-
-<h3 id="s3">أنظمة Off Grid</h3>
-
-<p id="s3t">
-أنظمة مستقلة للمناطق البعيدة.
-</p>
-
-</div>
-
-<div class="card">
-
-<h3 id="s4">أنظمة Hybrid</h3>
-
-<p id="s4t">
-أنظمة تجمع بين الطاقة الشمسية والديزل.
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="projects" class="section">
-
-<div class="container">
-
-<h2 id="projects-title">أحدث المشروعات</h2>
-
-<div class="projects">
-
-<img src="images/project1.jpg">
-
-<img src="images/project2.jpg">
-
-<img src="images/project3.jpg">
-
-</div>
-
-</div>
-
-</section>
-
-<section id="contact" class="section contact">
-
-<div class="container">
-
-<h2 id="contact-title">تواصل معنا</h2>
-
-<p>
-
-📞 +201208787702  
-<br>
-📞 +201227488794  
-<br>
-📞 +201200074344  
-
-<br><br>
-
-📧 alasl.renewable.energy@gmail.com  
-<br>
-📧 alasl.renewable.energy@outlook.com  
-
-</p>
-
-</div>
-
-</section>
-
-<footer>
-
-© 2026 Alasl Solar Energy
-
-</footer>
+<a class="whatsapp" id="wa" target="_blank">💬</a>
 
 <script>
+let currentLang="en";
+let menuLinks;
 
-let currentLang="ar"
+/* Apply Language */
+function applyLang(){
+    if(currentLang==="en"){
+        document.documentElement.lang="en"; document.documentElement.dir="ltr";
+        mainTitle.innerText="AL ASL SOLAR";
+        badge.innerText="🚧 COMING SOON";
+        subtitle.innerText="Clean Energy • Smart Solutions • Long-Term Value";
+        desc.innerText="We provide professional solar energy solutions for farms, homes, and industrial projects.";
+        aboutBtn.innerText="About Us";
+        footer.innerText="© 2026 Al Asl Solar. All Rights Reserved.";
+        wa.href="https://wa.me/201200074344?text=Hello%20Al%20Asl%20Solar";
+        menuLinks=["Home","About Us","Our Services","Our Projects","Contact Us"];
+    }else{
+        document.documentElement.lang="ar"; document.documentElement.dir="rtl";
+        mainTitle.innerText="شركة الأصل للطاقة الشمسية";
+        badge.innerText="🚧 الموقع قيد الإنشاء";
+        subtitle.innerText="طاقة نظيفة • حلول ذكية • قيمة طويلة الأمد";
+        desc.innerText="نقدم حلول طاقة شمسية احترافية للمزارع والمنازل والمشروعات الصناعية.";
+        aboutBtn.innerText="من نحن";
+        footer.innerText="© 2026 الأصل للطاقة الشمسية. جميع الحقوق محفوظة.";
+        wa.href="https://wa.me/201200074344?text=مرحباً%20الأصل%20للطاقة%20الشمسية";
+        menuLinks=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
+    }
 
-function toggleLanguage(){
-
-if(currentLang=="ar"){
-
-document.body.dir="ltr"
-
-document.getElementById("hero-title").innerText="Solar Energy Solutions For Farms And Homes"
-document.getElementById("hero-text").innerText="Integrated solar systems to reduce electricity and diesel costs"
-
-document.getElementById("services-title").innerText="Our Services"
-
-document.getElementById("s1").innerText="Solar Irrigation Systems"
-document.getElementById("s1t").innerText="Solar systems for operating water pumps."
-
-document.getElementById("s2").innerText="On Grid Systems"
-document.getElementById("s2t").innerText="Grid connected solar systems."
-
-document.getElementById("s3").innerText="Off Grid Systems"
-document.getElementById("s3t").innerText="Standalone solar systems."
-
-document.getElementById("s4").innerText="Hybrid Systems"
-document.getElementById("s4t").innerText="Solar + diesel hybrid systems."
-
-document.getElementById("projects-title").innerText="Recent Projects"
-document.getElementById("contact-title").innerText="Contact Us"
-
-currentLang="en"
-
+    const menuA=document.querySelectorAll(".menu a");
+    menuA.forEach((link,i)=>{
+        link.style.transitionDelay=`${i*0.08}s`;
+        link.innerText=menuLinks[i];
+    });
 }
 
-else{
+/* Toggle Language */
+function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
 
-location.reload()
-
+/* Toggle Menu */
+function toggleMenu(){
+    const menu=document.getElementById("menu");
+    const overlay=document.getElementById("overlay");
+    menu.classList.toggle("show");
+    overlay.style.opacity=menu.classList.contains("show")?"1":"0";
+    overlay.style.visibility=menu.classList.contains("show")?"visible":"hidden";
 }
 
-}
+/* Close menu when clicking a link */
+document.querySelectorAll('.menu a').forEach(link=>{ link.addEventListener('click',()=>{ toggleMenu(); }); });
 
+applyLang();
 </script>
 
 </body>
-
 </html>
