@@ -12,7 +12,20 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition: font-family 0.3s;}
 html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
-body{background:#f4f4f4;color:#333;line-height:1.7;overflow-x:hidden;transition: font-family 0.3s ease;}
+body{
+    background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url("solar.jpg");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center; /* محاذاة أفقية للوسط */
+    align-items: center;     /* محاذاة عمودية للوسط */
+    height: 100vh;           /* ارتفاع كامل الشاشة */
+    margin: 0;
+    color:#fff;
+    line-height:1.7;
+    overflow-x:hidden;
+    transition: font-family 0.3s ease;
+}
 
 /* Hamburger Button */
 .menu-btn{
@@ -84,8 +97,12 @@ body{background:#f4f4f4;color:#333;line-height:1.7;overflow-x:hidden;transition:
 .lang-btn:hover{background:rgba(0,0,0,.95); transform:scale(1.05);}
 
 /* Container */
-.container{ text-align:center; max-width:900px; padding:20px; color:#fff; }
-body{ background: linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)), url("solar.jpg"); background-size:cover; background-position:center; }
+.container{
+    text-align:center;
+    max-width:900px;
+    padding:20px;
+    color:#fff;
+}
 
 /* Logo & Badge */
 .logo img{ max-width:160px; margin-bottom:20px; }
@@ -111,6 +128,7 @@ p{ font-size:20px; margin-bottom:30px; }
 
 /* Responsive */
 @media(max-width:600px){ h1{font-size:36px;} p{font-size:18px;} }
+
 </style>
 </head>
 
