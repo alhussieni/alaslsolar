@@ -1,17 +1,129 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Al Asl Solar | Solar Energy Solutions for Farms & Businesses</title>
+<title>Alasl Solar Energy</title>
 
-<meta name="description" content="Al Asl Solar provides professional solar energy solutions for agriculture, homes, and industrial projects in Egypt and the Middle East. Reduce energy costs with sustainable solar power.">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-<meta name="keywords" content="solar energy egypt, solar irrigation systems, solar pumps, solar power for farms, solar energy company egypt">
+<style>
 
-<link rel="stylesheet" href="css/style.css">
+body{
+font-family:'Cairo',sans-serif;
+margin:0;
+direction:rtl;
+}
+
+header{
+background:white;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+position:fixed;
+width:100%;
+top:0;
+}
+
+.container{
+width:90%;
+max-width:1200px;
+margin:auto;
+}
+
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px;
+}
+
+nav a{
+margin:10px;
+text-decoration:none;
+color:#333;
+font-weight:600;
+}
+
+.hero{
+
+height:100vh;
+
+background:
+linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),
+url("images/hero.jpg");
+
+background-size:cover;
+background-position:center;
+
+display:flex;
+align-items:center;
+text-align:center;
+
+color:white;
+}
+
+.hero h1{
+font-size:48px;
+}
+
+.section{
+padding:90px 0;
+}
+
+.services{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:30px;
+}
+
+.card{
+padding:30px;
+box-shadow:0 4px 15px rgba(0,0,0,.08);
+border-radius:8px;
+}
+
+.projects{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:30px;
+}
+
+.projects img{
+width:100%;
+border-radius:10px;
+}
+
+.btn{
+background:#ff7a00;
+color:white;
+padding:12px 25px;
+border-radius:6px;
+text-decoration:none;
+}
+
+.contact{
+text-align:center;
+}
+
+footer{
+background:#111;
+color:#aaa;
+text-align:center;
+padding:30px;
+}
+
+.lang-btn{
+cursor:pointer;
+padding:8px 15px;
+background:#ff7a00;
+color:white;
+border:none;
+border-radius:5px;
+}
+
+</style>
 
 </head>
 
@@ -19,93 +131,203 @@
 
 <header>
 
-<img src="images/logo.png" class="logo">
+<div class="container navbar">
+
+<div>
+
+<b>ALASL SOLAR</b>
+
+</div>
 
 <nav>
-<a href="index.html">Home</a>
-<a href="about.html">About</a>
-<a href="contact.html">Contact</a>
+
+<a href="#">الرئيسية</a>
+<a href="#services">الخدمات</a>
+<a href="#projects">المشروعات</a>
+<a href="#contact">تواصل</a>
+
 </nav>
 
-<div class="lang">
-<button onclick="setLang('en')">EN</button>
-<button onclick="setLang('ar')">AR</button>
-<button onclick="setLang('es')">ES</button>
+<button class="lang-btn" onclick="toggleLanguage()">
+
+EN
+
+</button>
+
 </div>
 
 </header>
 
-
 <section class="hero">
 
-<h1 data-en="Solar Energy Solutions for Farms & Businesses"
-data-ar="حلول الطاقة الشمسية للمزارع والشركات"
-data-es="Soluciones de energía solar para granjas y empresas">
-Solar Energy Solutions for Farms & Businesses
+<div class="container">
+
+<h1 id="hero-title">
+
+حلول الطاقة الشمسية للمزارع والمنازل
+
 </h1>
 
-<p data-en="Reduce energy costs and power your projects with reliable solar energy systems."
-data-ar="قلل تكاليف الطاقة وشغل مشاريعك بأنظمة طاقة شمسية موثوقة."
-data-es="Reduce los costos de energía y alimenta tus proyectos con sistemas solares confiables.">
-Reduce energy costs and power your projects with reliable solar energy systems.
+<p id="hero-text">
+
+نوفر أنظمة طاقة شمسية متكاملة لتقليل تكلفة الكهرباء والديزل
+
 </p>
 
-<a href="about.html" class="btn">Learn More</a>
-
-</section>
-
-
-<section class="services">
-
-<h2>Our Services</h2>
-
-<div class="grid">
-
-<div class="card">
-<img src="images/solar-farm.jpg">
-<h3>Solar Irrigation Systems</h3>
-<p>Professional solar pump systems designed for agricultural irrigation.</p>
-</div>
-
-<div class="card">
-<img src="images/solar-installation.jpg">
-<h3>Solar Power Systems</h3>
-<p>Complete solar energy systems for homes, farms, and businesses.</p>
-</div>
-
-<div class="card">
-<h3>Hybrid Solar Systems</h3>
-<p>PV-Diesel hybrid solutions to reduce fuel consumption and operating costs.</p>
-</div>
-
 </div>
 
 </section>
 
+<section id="services" class="section">
+
+<div class="container">
+
+<h2 id="services-title">خدماتنا</h2>
+
+<div class="services">
+
+<div class="card">
+
+<h3 id="s1">محطات الري الزراعي</h3>
+
+<p id="s1t">
+تشغيل آبار المياه باستخدام الطاقة الشمسية.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3 id="s2">أنظمة On Grid</h3>
+
+<p id="s2t">
+أنظمة متصلة بالشبكة لتقليل فاتورة الكهرباء.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3 id="s3">أنظمة Off Grid</h3>
+
+<p id="s3t">
+أنظمة مستقلة للمناطق البعيدة.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3 id="s4">أنظمة Hybrid</h3>
+
+<p id="s4t">
+أنظمة تجمع بين الطاقة الشمسية والديزل.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="projects" class="section">
+
+<div class="container">
+
+<h2 id="projects-title">أحدث المشروعات</h2>
+
+<div class="projects">
+
+<img src="images/project1.jpg">
+
+<img src="images/project2.jpg">
+
+<img src="images/project3.jpg">
+
+</div>
+
+</div>
+
+</section>
+
+<section id="contact" class="section contact">
+
+<div class="container">
+
+<h2 id="contact-title">تواصل معنا</h2>
+
+<p>
+
+📞 +201208787702  
+<br>
+📞 +201227488794  
+<br>
+📞 +201200074344  
+
+<br><br>
+
+📧 alasl.renewable.energy@gmail.com  
+<br>
+📧 alasl.renewable.energy@outlook.com  
+
+</p>
+
+</div>
+
+</section>
 
 <footer>
 
-<div class="contact">
-
-<p>Egypt: +201208787702</p>
-<p>Egypt: +201200074344</p>
-<p>KSA: +966561274344</p>
-
-<p>info@alaslsolar.com</p>
-<p>sales@alaslsolar.com</p>
-
-</div>
-
-<p>© 2026 Al Asl Solar</p>
+© 2026 Alasl Solar Energy
 
 </footer>
 
+<script>
 
-<a class="whatsapp" href="https://wa.me/201200074344" target="_blank">
-WhatsApp
-</a>
+let currentLang="ar"
 
-<script src="js/lang.js"></script>
+function toggleLanguage(){
+
+if(currentLang=="ar"){
+
+document.body.dir="ltr"
+
+document.getElementById("hero-title").innerText="Solar Energy Solutions For Farms And Homes"
+document.getElementById("hero-text").innerText="Integrated solar systems to reduce electricity and diesel costs"
+
+document.getElementById("services-title").innerText="Our Services"
+
+document.getElementById("s1").innerText="Solar Irrigation Systems"
+document.getElementById("s1t").innerText="Solar systems for operating water pumps."
+
+document.getElementById("s2").innerText="On Grid Systems"
+document.getElementById("s2t").innerText="Grid connected solar systems."
+
+document.getElementById("s3").innerText="Off Grid Systems"
+document.getElementById("s3t").innerText="Standalone solar systems."
+
+document.getElementById("s4").innerText="Hybrid Systems"
+document.getElementById("s4t").innerText="Solar + diesel hybrid systems."
+
+document.getElementById("projects-title").innerText="Recent Projects"
+document.getElementById("contact-title").innerText="Contact Us"
+
+currentLang="en"
+
+}
+
+else{
+
+location.reload()
+
+}
+
+}
+
+</script>
 
 </body>
+
 </html>
