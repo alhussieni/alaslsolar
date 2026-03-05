@@ -6,78 +6,44 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>الأصل للطاقة الشمسية | Alasl Solar Energy</title>
-
-<meta name="description" content="شركة الأصل للطاقة الشمسية - تصميم وتنفيذ محطات الطاقة الشمسية للري الزراعي والمنازل والشركات">
+<title>Alasl Solar Energy</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
 body{
-
 font-family:'Cairo',sans-serif;
-background:#fff;
-color:#333;
-line-height:1.7;
-
-}
-
-.container{
-
-width:90%;
-max-width:1200px;
-margin:auto;
-
+margin:0;
+direction:rtl;
 }
 
 header{
-
+background:white;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
 position:fixed;
 width:100%;
-background:white;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
-z-index:999;
+top:0;
+}
 
+.container{
+width:90%;
+max-width:1200px;
+margin:auto;
 }
 
 .navbar{
-
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:15px 0;
-
-}
-
-.logo{
-
-font-size:22px;
-font-weight:700;
-color:#ff7a00;
-
-}
-
-nav ul{
-
-list-style:none;
-display:flex;
-gap:25px;
-
+padding:15px;
 }
 
 nav a{
-
+margin:10px;
 text-decoration:none;
-font-weight:600;
 color:#333;
-
+font-weight:600;
 }
 
 .hero{
@@ -85,174 +51,76 @@ color:#333;
 height:100vh;
 
 background:
-
-linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),
-
-url('https://images.unsplash.com/photo-1509395176047-4a66953fd231');
+linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),
+url("images/hero.jpg");
 
 background-size:cover;
 background-position:center;
 
 display:flex;
 align-items:center;
-
-color:white;
 text-align:center;
 
+color:white;
 }
 
 .hero h1{
-
-font-size:50px;
-margin-bottom:20px;
-
-}
-
-.hero p{
-
-font-size:20px;
-margin-bottom:30px;
-
-}
-
-.btn{
-
-background:#ff7a00;
-color:white;
-padding:14px 30px;
-border-radius:6px;
-text-decoration:none;
-font-weight:600;
-
-}
-
-.btn:hover{
-
-opacity:.9;
-
+font-size:48px;
 }
 
 .section{
-
 padding:90px 0;
-
-}
-
-.section-title{
-
-text-align:center;
-margin-bottom:60px;
-
-}
-
-.section-title h2{
-
-font-size:34px;
-
 }
 
 .services{
-
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
 gap:30px;
-
 }
 
 .card{
-
-background:white;
 padding:30px;
-border-radius:10px;
-box-shadow:0 5px 15px rgba(0,0,0,0.08);
-transition:.3s;
-
-}
-
-.card:hover{
-
-transform:translateY(-6px);
-
-}
-
-.card h3{
-
-margin-bottom:15px;
-color:#ff7a00;
-
-}
-
-.stats{
-
-background:#ff7a00;
-color:white;
-
-}
-
-.stats-grid{
-
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-text-align:center;
-gap:30px;
-
-}
-
-.stat{
-
-font-size:32px;
-font-weight:700;
-
+box-shadow:0 4px 15px rgba(0,0,0,.08);
+border-radius:8px;
 }
 
 .projects{
-
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
 gap:30px;
-
 }
 
-.project{
-
-overflow:hidden;
-border-radius:10px;
-
-}
-
-.project img{
-
+.projects img{
 width:100%;
-display:block;
-
+border-radius:10px;
 }
 
-.about{
-
-background:#f7f7f7;
-
+.btn{
+background:#ff7a00;
+color:white;
+padding:12px 25px;
+border-radius:6px;
+text-decoration:none;
 }
 
 .contact{
-
 text-align:center;
-
 }
 
 footer{
-
 background:#111;
 color:#aaa;
 text-align:center;
-padding:30px 0;
-
+padding:30px;
 }
 
-footer a{
-
-color:#ff7a00;
-text-decoration:none;
-
+.lang-btn{
+cursor:pointer;
+padding:8px 15px;
+background:#ff7a00;
+color:white;
+border:none;
+border-radius:5px;
 }
 
 </style>
@@ -265,25 +133,26 @@ text-decoration:none;
 
 <div class="container navbar">
 
-<div class="logo">
+<div>
 
-ALASL SOLAR
+<b>ALASL SOLAR</b>
 
 </div>
 
 <nav>
 
-<ul>
-
-<li><a href="#">الرئيسية</a></li>
-<li><a href="#services">الخدمات</a></li>
-<li><a href="#projects">المشروعات</a></li>
-<li><a href="#about">عن الشركة</a></li>
-<li><a href="#contact">تواصل معنا</a></li>
-
-</ul>
+<a href="#">الرئيسية</a>
+<a href="#services">الخدمات</a>
+<a href="#projects">المشروعات</a>
+<a href="#contact">تواصل</a>
 
 </nav>
+
+<button class="lang-btn" onclick="toggleLanguage()">
+
+EN
+
+</button>
 
 </div>
 
@@ -293,23 +162,17 @@ ALASL SOLAR
 
 <div class="container">
 
-<h1>
+<h1 id="hero-title">
 
 حلول الطاقة الشمسية للمزارع والمنازل
 
 </h1>
 
-<p>
+<p id="hero-text">
 
-نوفر أنظمة طاقة شمسية متكاملة لتقليل تكلفة الكهرباء والديزل وتحقيق الاستدامة
+نوفر أنظمة طاقة شمسية متكاملة لتقليل تكلفة الكهرباء والديزل
 
 </p>
-
-<a class="btn" href="#contact">
-
-احصل على استشارة مجانية
-
-</a>
 
 </div>
 
@@ -319,138 +182,46 @@ ALASL SOLAR
 
 <div class="container">
 
-<div class="section-title">
-
-<h2>
-
-خدماتنا
-
-</h2>
-
-</div>
+<h2 id="services-title">خدماتنا</h2>
 
 <div class="services">
 
 <div class="card">
 
-<h3>
+<h3 id="s1">محطات الري الزراعي</h3>
 
-محطات الري الزراعي
-
-</h3>
-
-<p>
-
-تنفيذ أنظمة طاقة شمسية لتشغيل آبار المياه وتقليل الاعتماد على الديزل.
-
+<p id="s1t">
+تشغيل آبار المياه باستخدام الطاقة الشمسية.
 </p>
 
 </div>
 
 <div class="card">
 
-<h3>
+<h3 id="s2">أنظمة On Grid</h3>
 
-أنظمة On Grid
-
-</h3>
-
-<p>
-
-أنظمة متصلة بالشبكة لتقليل فاتورة الكهرباء للمنازل والشركات.
-
+<p id="s2t">
+أنظمة متصلة بالشبكة لتقليل فاتورة الكهرباء.
 </p>
 
 </div>
 
 <div class="card">
 
-<h3>
+<h3 id="s3">أنظمة Off Grid</h3>
 
-أنظمة Off Grid
-
-</h3>
-
-<p>
-
-حلول طاقة شمسية مستقلة للمناطق البعيدة بدون كهرباء حكومية.
-
+<p id="s3t">
+أنظمة مستقلة للمناطق البعيدة.
 </p>
 
 </div>
 
 <div class="card">
 
-<h3>
+<h3 id="s4">أنظمة Hybrid</h3>
 
-أنظمة Hybrid
-
-</h3>
-
-<p>
-
-أنظمة تجمع بين الطاقة الشمسية والديزل لتحقيق أعلى كفاءة تشغيل.
-
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<section class="section stats">
-
-<div class="container">
-
-<div class="stats-grid">
-
-<div>
-
-<div class="stat">
-
-100+
-
-</div>
-
-<p>
-
-مشروع منفذ
-
-</p>
-
-</div>
-
-<div>
-
-<div class="stat">
-
-5MW+
-
-</div>
-
-<p>
-
-قدرة مركبة
-
-</p>
-
-</div>
-
-<div>
-
-<div class="stat">
-
-10+
-
-</div>
-
-<p>
-
-سنوات خبرة
-
+<p id="s4t">
+أنظمة تجمع بين الطاقة الشمسية والديزل.
 </p>
 
 </div>
@@ -465,63 +236,17 @@ ALASL SOLAR
 
 <div class="container">
 
-<div class="section-title">
-
-<h2>
-
-أحدث المشروعات
-
-</h2>
-
-</div>
+<h2 id="projects-title">أحدث المشروعات</h2>
 
 <div class="projects">
 
-<div class="project">
+<img src="images/project1.jpg">
 
-<img src="https://images.unsplash.com/photo-1592838064575-70ed626d3a0e">
+<img src="images/project2.jpg">
 
-</div>
-
-<div class="project">
-
-<img src="https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c">
+<img src="images/project3.jpg">
 
 </div>
-
-<div class="project">
-
-<img src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d">
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="about" class="section about">
-
-<div class="container">
-
-<div class="section-title">
-
-<h2>
-
-عن الشركة
-
-</h2>
-
-</div>
-
-<p style="max-width:800px;margin:auto;text-align:center;font-size:18px">
-
-شركة الأصل للطاقة الشمسية تقدم حلولاً متكاملة للطاقة الشمسية
-للمزارع والمنازل والشركات بهدف تقليل تكاليف الطاقة وتحقيق الاستدامة
-باستخدام أحدث التقنيات العالمية.
-
-</p>
 
 </div>
 
@@ -531,15 +256,7 @@ ALASL SOLAR
 
 <div class="container">
 
-<div class="section-title">
-
-<h2>
-
-تواصل معنا
-
-</h2>
-
-</div>
+<h2 id="contact-title">تواصل معنا</h2>
 
 <p>
 
@@ -547,17 +264,15 @@ ALASL SOLAR
 <br>
 📞 +201227488794  
 <br>
-📧 alasl.renewable.energy@gmail.com
+📞 +201200074344  
+
+<br><br>
+
+📧 alasl.renewable.energy@gmail.com  
+<br>
+📧 alasl.renewable.energy@outlook.com  
 
 </p>
-
-<br>
-
-<a class="btn" href="mailto:alasl.renewable.energy@gmail.com">
-
-إرسال رسالة
-
-</a>
 
 </div>
 
@@ -565,13 +280,53 @@ ALASL SOLAR
 
 <footer>
 
-<p>
-
 © 2026 Alasl Solar Energy
 
-</p>
-
 </footer>
+
+<script>
+
+let currentLang="ar"
+
+function toggleLanguage(){
+
+if(currentLang=="ar"){
+
+document.body.dir="ltr"
+
+document.getElementById("hero-title").innerText="Solar Energy Solutions For Farms And Homes"
+document.getElementById("hero-text").innerText="Integrated solar systems to reduce electricity and diesel costs"
+
+document.getElementById("services-title").innerText="Our Services"
+
+document.getElementById("s1").innerText="Solar Irrigation Systems"
+document.getElementById("s1t").innerText="Solar systems for operating water pumps."
+
+document.getElementById("s2").innerText="On Grid Systems"
+document.getElementById("s2t").innerText="Grid connected solar systems."
+
+document.getElementById("s3").innerText="Off Grid Systems"
+document.getElementById("s3t").innerText="Standalone solar systems."
+
+document.getElementById("s4").innerText="Hybrid Systems"
+document.getElementById("s4t").innerText="Solar + diesel hybrid systems."
+
+document.getElementById("projects-title").innerText="Recent Projects"
+document.getElementById("contact-title").innerText="Contact Us"
+
+currentLang="en"
+
+}
+
+else{
+
+location.reload()
+
+}
+
+}
+
+</script>
 
 </body>
 
