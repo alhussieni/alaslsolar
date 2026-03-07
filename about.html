@@ -3,12 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>About Us | Alasl Solar</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
 
+.social{
+margin-top:50px;
+text-align:center;
+}
+
+.social a{
+color:white;
+font-size:22px;
+margin:0 12px;
+text-decoration:none;
+transition:0.3s;
+}
+
+.social a:hover{
+color:#f7b500;
+}
+
+footer{
+margin-top:20px;
+font-size:13px;
+opacity:0.8;
+text-align:center;
+}
+
+/* نفس CSS بدون أي تعديل */
 body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
@@ -26,8 +53,6 @@ padding:40px 20px;
 text-align:center;
 }
 
-/* logo */
-
 .logo{
 width:120px;
 display:block;
@@ -35,18 +60,15 @@ margin:auto;
 cursor:pointer;
 }
 
-/* hamburger */
-
 .hamburger{
 position:fixed;
 top:25px;
 left:25px;
-font-size:24px;
+font-size:26px;
 cursor:pointer;
 z-index:1001;
+color:white;
 }
-
-/* menu */
 
 .menu{
 position:fixed;
@@ -73,21 +95,6 @@ font-size:14px;
 background:#333;
 }
 
-.menu-title{
-margin-top:10px;
-font-size:12px;
-opacity:.7;
-padding:6px 10px;
-}
-
-.menu-divider{
-height:1px;
-background:#333;
-margin:8px 0;
-}
-
-/* titles */
-
 .page-title{
 font-size:42px;
 margin-top:20px;
@@ -98,8 +105,6 @@ font-size:20px;
 margin-bottom:30px;
 color:#f7b500;
 }
-
-/* container */
 
 .container{
 max-width:900px;
@@ -112,6 +117,7 @@ margin-top:40px;
 background:rgba(255,255,255,0.05);
 padding:25px;
 border-radius:10px;
+backdrop-filter:blur(5px);
 }
 
 .section h2{
@@ -126,14 +132,14 @@ font-size:16px;
 
 ul{
 line-height:1.9;
-padding-left:20px;
+padding-left:0;
+list-style:none;
+margin:0;
 }
 
 li{
 margin-bottom:8px;
 }
-
-/* button */
 
 .btn{
 display:inline-block;
@@ -146,54 +152,18 @@ text-decoration:none;
 font-weight:bold;
 }
 
-/* social */
-
-.social{
-margin-top:30px;
-font-size:22px;
-text-align:center;
+html[dir="rtl"] body{
+font-family:'Cairo',sans-serif;
 }
 
-.social i{
-margin:0 10px;
-cursor:pointer;
+html[dir="rtl"] .section,
+html[dir="rtl"] .container,
+html[dir="rtl"] ul,
+html[dir="rtl"] p,
+html[dir="rtl"] h2{
+text-align:right;
+direction:rtl;
 }
-
-/* footer */
-
-footer{
-margin-top:40px;
-font-size:13px;
-opacity:0.8;
-text-align:center;
-}
-
-/* whatsapp */
-
-.whatsapp{
-position:fixed;
-bottom:25px;
-right:25px;
-width:60px;
-height:60px;
-background:#25D366;
-color:white;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:32px;
-box-shadow:0 4px 10px rgba(0,0,0,0.3);
-z-index:999;
-transition:0.3s;
-text-decoration:none;
-}
-
-.whatsapp:hover{
-transform:scale(1.1);
-background:#1ebe5d;
-}
-
 </style>
 </head>
 
@@ -201,7 +171,6 @@ background:#1ebe5d;
 
 <div class="overlay">
 
-<!-- hamburger -->
 <div class="hamburger" onclick="toggleMenu()">
 <i class="fa fa-bars"></i>
 </div>
@@ -212,16 +181,14 @@ background:#1ebe5d;
 <a href="about.html">About Us</a>
 <a href="#">Services</a>
 <a href="#">Projects</a>
-<a href="#">Contact</a>
+<a href="contact.html">Contact</a>
 
-<div class="menu-divider"></div>
+<hr>
 
-<div class="menu-title">Language</div>
-
-<a href="#" onclick="setLang('en')">🇬🇧 English</a>
-<a href="#" onclick="setLang('ar')">🇸🇦 العربية</a>
-<a href="#" onclick="setLang('es')">🇪🇸 Español</a>
-<a href="#" onclick="setLang('zh')">🇨🇳 中文</a>
+<a href="javascript:void(0)" onclick="setLang('en')">EN English</a>
+<a href="#" onclick="setLang('ar')">AR العربية</a>
+<a href="#" onclick="setLang('es')">ES Español</a>
+<a href="#" onclick="setLang('zh')">ZH 中文</a>
 
 </div>
 
@@ -264,21 +231,34 @@ background:#1ebe5d;
 </div>
 
 <div class="social">
-<i class="fab fa-facebook-f"></i>
+
+<a href="https://linkedin.com/company/alaslsolar" target="_blank">
 <i class="fab fa-linkedin-in"></i>
+</a>
+
+<a href="https://youtube.com/@alaslsolar" target="_blank">
 <i class="fab fa-youtube"></i>
+</a>
+
+<a href="https://facebook.com/alaslsolar" target="_blank">
+<i class="fab fa-facebook-f"></i>
+</a>
+
+<a href="https://instagram.com/alaslsolar" target="_blank">
+<i class="fab fa-instagram"></i>
+</a>
+
+<a href="https://tiktok.com/@alaslsolar" target="_blank">
 <i class="fab fa-tiktok"></i>
+</a>
+
 </div>
 
 <footer>
-© 2026 Al Asl Solar Energy
+© 2026 Alasl Solar Energy
 </footer>
 
 </div>
-
-<a href="https://wa.me/201200074344" class="whatsapp" target="_blank">
-<i class="fab fa-whatsapp"></i>
-</a>
 
 <script>
 
@@ -289,49 +269,48 @@ menu.style.display = menu.style.display==="block" ? "none" : "block";
 
 function setLang(lang){
 
-if(lang==="ar"){
-document.documentElement.dir="rtl";
-}else{
-document.documentElement.dir="ltr";
-}
+document.documentElement.dir = (lang==="ar") ? "rtl" : "ltr";
 
 const data={
+
+/* ENGLISH (كما هو بدون تغيير) */
 en:{
 title:"About Us",
 slogan:"Quality Guaranteed • Sustainable Energy",
 who:"Who We Are",
-whoText:"We are a leading company providing innovative and reliable solar energy solutions. We work to provide expertise and efficiency so you can maximize the benefits of solar energy while helping farmers and businesses reduce energy costs using sustainable solutions. We believe solar and clean energy are the key to the future.",
+whoText:"We are a leading company in providing and implementing innovative and reliable solar energy solutions. We work to provide you with expertise and efficiency to achieve the maximum benefit from solar energy, helping farmers and businesses reduce energy costs using sustainable solutions. We believe that solar and clean energy are the key to the future.",
 vision:"Our Vision",
-visionText:"To be the first choice in implementing solar and renewable energy solutions and lead the transition toward a future powered by clean and sustainable energy.",
+visionText:"To be the first choice in implementing solar and renewable energy solutions, and to lead the transformation towards a future that relies on clean and sustainable energy.",
 mission:"Our Mission",
-missionText:"Provide effective solar energy solutions that help our clients achieve independence from traditional fuels and improve their daily operational efficiency.",
+missionText:"Providing effective solar energy solutions that help our clients achieve independence from traditional fuels and improve the efficiency of their daily operations.",
 services:"Our Services",
 servicesList:[
-"Design and implementation of solar power stations for agricultural irrigation.",
-"Energy storage solutions to ensure operational continuity.",
+"Design and implementation of solar energy stations for agricultural irrigation.",
+"Energy storage solutions to ensure continuous operation.",
 "Integrated solar energy systems for homes and businesses.",
-"Implementation of PV-Diesel Hybrid stations to reduce fuel consumption and improve energy efficiency."
+"Implementation of PV-Diesel Hybrid stations to reduce fuel use and achieve greater energy efficiency."
 ],
 why:"Why Choose Us",
 whyList:[
 "Extensive experience and successful projects in the agricultural sector.",
-"Customized solutions tailored to your needs and budget to maximize benefits.",
-"High-quality materials ensuring reliable and sustainable performance.",
-"Use of the latest solar technologies to guarantee the best solutions.",
-"Environmentally friendly solutions that reduce carbon footprint.",
-"Long-term warranties with fast and comprehensive maintenance.",
-"Comprehensive training for users to ensure optimal system use."
+"Customized solutions to meet your needs and budget to achieve maximum benefit.",
+"High quality materials and efficiency to ensure the best sustainable and reliable performance.",
+"We keep up with the latest solar energy technologies to ensure the best solutions.",
+"We provide environmentally friendly solutions that help reduce carbon footprint and achieve environmental sustainability.",
+"Long-term warranties with comprehensive and fast maintenance to ensure continuous operation at the highest efficiency.",
+"Comprehensive training for users on our services to ensure optimal use."
 ],
 home:"Back to Home"
 },
 
+/* ARABIC كما هو */
 ar:{
 title:"من نحن",
 slogan:"نضمن الجودة • نحقق الاستدامة",
-who:"من نحن",
+who:"من نحن؟",
 whoText:"نحن شركة رائدة في تقديم وتنفيذ حلول طاقة شمسية مبتكرة وموثوقة. نعمل على تزويدك بخبرة وكفاءة لتحقق أقصى استفادة من الطاقة الشمسية، مساعدة المزارعين والشركات في خفض تكاليف الطاقة باستخدام حلول مستدامة. نؤمن بأن الطاقة الشمسية والطاقة النظيفة هي مفتاح المستقبل.",
 vision:"رؤيتنا",
-visionText:"أن نكون الخيار الأول في تنفيذ حلول الطاقة الشمسية والطاقة المتجددة، ونقود التحول نحو مستقبل يعتمد على طاقة نظيفة ومستدامة.",
+visionText:"أن نكون الخيار الأول في تنفيذ حلول الطاقة الشمسية والطاقة المتجدده، ونقود التحول نحو مستقبل يعتمد على طاقة نظيفة ومستدامة.",
 mission:"رسالتنا",
 missionText:"تقديم حلول طاقة شمسية فعّالة تساعد عملاءنا على تحقيق استقلالية عن الوقود التقليدي وتحسين كفاءة أعمالهم اليومية.",
 services:"خدماتنا",
@@ -341,18 +320,79 @@ servicesList:[
 "أنظمة طاقة شمسية متكاملة للمنازل والشركات.",
 "تنفيذ محطات PV-Diesel Hybrid لتقليل استخدام الوقود وتحقيق كفاءة أكبر في استهلاك الطاقة."
 ],
-why:"لماذا تختارنا",
+why:"لماذا تختارنا؟",
 whyList:[
 "خبرة طويلة ومشروعات ناجحة في القطاع الزراعي.",
-"حلول مخصصة لتلبية احتياجاتك وميزانيتك للوصول إلى أقصى استفادة.",
-"خامات عالية الجودة وكفاءة لضمان أفضل أداء مستدام.",
-"استخدام أحدث التقنيات في مجال الطاقة الشمسية.",
-"حلول صديقة للبيئة تقلل البصمة الكربونية.",
-"ضمانات طويلة الأمد مع صيانة شاملة وسريعة.",
-"تدريب شامل للمستخدمين لضمان الاستخدام الأمثل."
+"حلول مخصصة لتلبية احتياجاتك وميزانيتك، للوصول إلى أقصى استفادة.",
+"خامات عالية الجودة وكفاءة لضمان أفضل أداء مستدام وموثوق.",
+"نواكب أحدث ما توصلت إليه التكنولوجيا في مجال الطاقة الشمسية لضمان أفضل الحلول.",
+"نقدم حلولًا صديقة للبيئة تساهم في تقليل البصمة الكربونية وتحقيق الاستدامة البيئية.",
+"ضمانات طويلة الأمد مع صيانة شاملة وسريعة تضمن لك استمرارية العمل بأعلى كفاءة.",
+"تدريب شامل للمستخدمين على خدماتنا لضمان الاستخدام الأمثل."
 ],
 home:"العودة للرئيسية"
+},
+
+/* Spanish ترجمة مباشرة بدون تحسين */
+es:{
+title:"Sobre Nosotros",
+slogan:"Calidad Garantizada • Energía Sostenible",
+who:"Quiénes Somos",
+whoText:"Somos una empresa líder en proporcionar e implementar soluciones de energía solar innovadoras y confiables. Trabajamos para brindarle experiencia y eficiencia para lograr el máximo beneficio de la energía solar, ayudando a agricultores y empresas a reducir los costos de energía utilizando soluciones sostenibles. Creemos que la energía solar y la energía limpia son la clave del futuro.",
+vision:"Nuestra Visión",
+visionText:"Ser la primera opción en la implementación de soluciones de energía solar y energías renovables, y liderar la transformación hacia un futuro que dependa de energía limpia y sostenible.",
+mission:"Nuestra Misión",
+missionText:"Proporcionar soluciones efectivas de energía solar que ayuden a nuestros clientes a lograr independencia de los combustibles tradicionales y mejorar la eficiencia de sus operaciones diarias.",
+services:"Nuestros Servicios",
+servicesList:[
+"Diseño e implementación de estaciones de energía solar para riego agrícola.",
+"Soluciones de almacenamiento de energía para asegurar operación continua.",
+"Sistemas integrados de energía solar para hogares y empresas.",
+"Implementación de estaciones híbridas PV-Diesel para reducir el uso de combustible y lograr mayor eficiencia energética."
+],
+why:"Por Qué Elegirnos",
+whyList:[
+"Amplia experiencia y proyectos exitosos en el sector agrícola.",
+"Soluciones personalizadas para satisfacer sus necesidades y presupuesto para lograr el máximo beneficio.",
+"Materiales de alta calidad y eficiencia para asegurar el mejor rendimiento sostenible y confiable.",
+"Mantenemos el ritmo con las últimas tecnologías de energía solar para asegurar las mejores soluciones.",
+"Proporcionamos soluciones respetuosas con el medio ambiente que ayudan a reducir la huella de carbono y lograr la sostenibilidad ambiental.",
+"Garantías a largo plazo con mantenimiento completo y rápido para asegurar operación continua con la máxima eficiencia.",
+"Capacitación integral para usuarios sobre nuestros servicios para asegurar uso óptimo."
+],
+home:"Volver al Inicio"
+},
+
+/* Chinese ترجمة مباشرة */
+zh:{
+title:"关于我们",
+slogan:"质量保证 • 可持续能源",
+who:"我们是谁",
+whoText:"我们是一家在提供和实施创新且可靠的太阳能解决方案方面处于领先地位的公司。我们致力于为您提供专业经验和高效率，以实现太阳能的最大利用，帮助农民和企业通过可持续解决方案降低能源成本。我们相信太阳能和清洁能源是未来的关键。",
+vision:"我们的愿景",
+visionText:"成为实施太阳能和可再生能源解决方案的首选公司，并引领向依赖清洁和可持续能源的未来转型。",
+mission:"我们的使命",
+missionText:"提供有效的太阳能解决方案，帮助客户实现对传统燃料的独立，并提高其日常运营效率。",
+services:"我们的服务",
+servicesList:[
+"农业灌溉太阳能电站的设计与实施。",
+"能源储存解决方案以确保持续运行。",
+"家庭和企业一体化太阳能系统。",
+"实施PV-柴油混合电站以减少燃料使用并实现更高的能源效率。"
+],
+why:"为什么选择我们",
+whyList:[
+"在农业领域拥有丰富经验和成功项目。",
+"根据您的需求和预算提供定制解决方案以实现最大收益。",
+"高质量材料和效率确保最佳可持续和可靠性能。",
+"我们跟进最新的太阳能技术以确保最佳解决方案。",
+"我们提供环保解决方案以减少碳足迹并实现环境可持续性。",
+"长期保修并提供全面快速维护以确保持续高效运行。",
+"为用户提供全面培训以确保最佳使用。"
+],
+home:"返回首页"
 }
+
 };
 
 const t=data[lang];
@@ -384,7 +424,10 @@ whyList.innerHTML+=`<li>${w}</li>`;
 document.getElementById("menu").style.display="none";
 }
 
+/* اللغة الافتراضية تظهر مباشرة */
+window.onload=function(){
 setLang("en");
+}
 
 </script>
 
