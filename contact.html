@@ -3,225 +3,394 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Contact Us | Alasl Solar</title>
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cairo:wght@300;400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition: font-family 0.3s;}
-html[lang="ar"] body{font-family:'Cairo', Arial, sans-serif;}
-body{background:#f4f4f4;color:#333;line-height:1.7;padding:0 20px;overflow-x:hidden;transition: font-family 0.3s;}
 
-/* Hamburger Button */
-.menu-btn{
-    position:fixed;
-    top:20px;
-    left:20px;
-    font-size:30px;
-    cursor:pointer;
-    color:#ff7a00;
-    z-index:10002;
-    transition:0.3s;
-}
-.menu-btn:hover{ transform:scale(1.1); }
-
-/* Overlay */
-.overlay{
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.5);
-    opacity:0;
-    visibility:hidden;
-    transition: opacity .3s ease, visibility .3s ease;
-    z-index:9998;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
-/* Menu */
+body{
+font-family:'Poppins',sans-serif;
+background:#f4f4f4;
+color:#333;
+line-height:1.7;
+}
+
+html[dir="rtl"] body{
+font-family:'Cairo',sans-serif;
+}
+
+/* hamburger */
+
+.hamburger{
+position:fixed;
+top:25px;
+left:25px;
+font-size:26px;
+cursor:pointer;
+color:white;
+z-index:1000;
+}
+
+/* menu */
+
 .menu{
-    position:fixed;
-    top:0;
-    left:-280px;
-    width:280px;
-    height:100%;
-    background:#222;
-    display:flex;
-    flex-direction:column;
-    padding:80px 20px;
-    transition: left 0.4s ease;
-    z-index:10000;
+position:fixed;
+top:70px;
+left:20px;
+background:#111;
+padding:18px;
+border-radius:10px;
+display:none;
+min-width:200px;
+z-index:999;
 }
-.menu.show{left:0;}
-.menu a, .menu .lang-btn{
-    color:#fff;
-    text-decoration:none;
-    padding:12px 0;
-    font-size:18px;
-    opacity:0;
-    transform:translateX(-20px);
-    transition: all 0.3s ease;
+
+.menu a{
+display:block;
+color:white;
+text-decoration:none;
+padding:8px 10px;
+font-size:15px;
 }
-.menu.show a, .menu.show .lang-btn{opacity:1; transform:translateX(0);}
-.menu a:hover, .menu .lang-btn:hover{color:#f9c74f; transform:translateX(5px);}
 
-/* Language Button inside menu */
-.lang-btn{
-    margin-top:20px;
-    padding:10px 18px;
-    border-radius:30px;
-    background:rgba(0,0,0,.85);
-    color:#fff;
-    font-size:14px;
-    cursor:pointer;
-    align-self:flex-start;
-    transition:0.3s;
+.menu a:hover{
+background:#333;
 }
-.lang-btn:hover{background:rgba(0,0,0,.95); transform:scale(1.05);}
 
-/* Header */
-header{background:#ff7a00;color:white;text-align:center;padding:40px 20px;}
-header h1{font-size:36px;margin-bottom:10px;}
-header p{font-size:18px;}
+.menu-title{
+margin-top:10px;
+font-size:12px;
+opacity:.7;
+padding:6px 10px;
+}
 
-/* Container */
-.container{max-width:900px;margin:auto;padding:40px 20px;background:#fff;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.1);}
-form{display:flex; flex-direction:column;}
-form label{margin-bottom:5px; font-weight:600;}
-form input, form textarea{margin-bottom:20px;padding:12px;border-radius:6px;border:1px solid #ccc;font-size:16px;resize:none;}
-form button{padding:12px 28px;background:#ff7a00;color:white;border:none;border-radius:30px;cursor:pointer;font-size:16px;font-weight:600;transition:.3s;}
-form button:hover{background:#e66d00;}
+.menu-divider{
+height:1px;
+background:#333;
+margin:8px 0;
+}
 
-.contact-info{margin-top:30px;}
-.contact-info span, .contact-info a{display:block;margin-bottom:10px;color:#333;text-decoration:none;}
-.contact-info a:hover{text-decoration:underline;}
+/* header */
 
-.social{margin-top:20px; display:flex; gap:15px;}
-.social a{font-size:24px; color:#ff7a00; transition:.3s;}
-.social a:hover{color:#e66d00; transform:scale(1.1);}
+header{
+background:#111;
+color:white;
+text-align:center;
+padding:60px 20px;
+}
 
-footer{text-align:center; margin-top:40px; padding:20px; background:#222; color:#fff;}
-.whatsapp{position:fixed; bottom:25px; right:25px; background:#25d366; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; text-decoration:none; z-index:99999; transition:.3s;}
-.whatsapp:hover{transform:scale(1.1);}
+header h1{
+font-size:38px;
+margin-bottom:10px;
+}
 
-@media(max-width:600px){header h1{font-size:28px;} header p{font-size:16px;} form input, form textarea{font-size:14px;}}
+header p{
+font-size:18px;
+color:#f7b500;
+}
+
+/* container */
+
+.container{
+max-width:900px;
+margin:40px auto;
+background:white;
+padding:40px;
+border-radius:12px;
+box-shadow:0 4px 15px rgba(0,0,0,.1);
+}
+
+/* form */
+
+form{
+display:flex;
+flex-direction:column;
+}
+
+form label{
+font-weight:600;
+margin-bottom:5px;
+}
+
+form input,form textarea{
+margin-bottom:20px;
+padding:12px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+form textarea{
+resize:none;
+}
+
+form button{
+padding:12px;
+background:#f7b500;
+color:black;
+border:none;
+border-radius:30px;
+font-size:16px;
+cursor:pointer;
+font-weight:bold;
+}
+
+form button:hover{
+background:#e0a700;
+}
+
+/* contact info */
+
+.contact-info{
+margin-top:30px;
+}
+
+.contact-info span,
+.contact-info a{
+display:block;
+margin-bottom:10px;
+text-decoration:none;
+color:#333;
+}
+
+/* social */
+
+.social{
+margin-top:20px;
+display:flex;
+gap:15px;
+align-items:center;
+}
+
+.social a{
+font-size:24px;
+color:#f7b500;
+transition:0.3s;
+}
+
+.social a:hover{
+transform:scale(1.15);
+}
+/* footer */
+
+footer{
+text-align:center;
+margin-top:40px;
+padding:20px;
+background:#111;
+color:white;
+}
+
+/* whatsapp */
+
+.whatsapp{
+position:fixed;
+bottom:25px;
+right:25px;
+background:#25D366;
+width:60px;
+height:60px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:30px;
+color:white;
+text-decoration:none;
+z-index:999;
+}
+
+.whatsapp:hover{
+transform:scale(1.1);
+}
+
 </style>
 </head>
+
 <body>
 
-<!-- Overlay + Hamburger Menu -->
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
+<div class="hamburger" onclick="toggleMenu()">
+<i class="fa fa-bars"></i>
+</div>
 
-<nav class="menu" id="menu">
-  <a href="index.html">Home</a>
-  <a href="about.html">About Us</a>
-  <a href="services.html">Our Services</a>
-  <a href="projects.html">Our Projects</a>
-  <a href="contact.html">Contact Us</a>
-  <div class="lang-btn" onclick="toggleLang()">AR | EN</div>
-</nav>
+<div class="menu" id="menu">
+
+<a href="index.html">Home</a>
+<a href="about.html">About Us</a>
+<a href="services.html">Services</a>
+<a href="projects.html">Projects</a>
+<a href="contact.html">Contact</a>
+
+<div class="menu-divider"></div>
+
+<div class="menu-title">Language</div>
+
+<a href="#" onclick="setLang('en')">🇬🇧 English</a>
+<a href="#" onclick="setLang('ar')">🇸🇦 العربية</a>
+<a href="#" onclick="setLang('es')">🇪🇸 Español</a>
+<a href="#" onclick="setLang('zh')">🇨🇳 中文</a>
+
+</div>
 
 <header>
-  <h1 id="mainTitle">Contact Us</h1>
-  <p id="subtitle">Get in touch with us for professional solar solutions</p>
+
+<h1 data-i18n="title">Contact Us</h1>
+<p data-i18n="subtitle">Get in touch with us for professional solar solutions</p>
+
 </header>
 
 <div class="container">
-  <form id="contactForm">
-    <label for="name" id="labelName">Name</label>
-    <input type="text" id="name" placeholder="Enter your name" required>
 
-    <label for="email" id="labelEmail">Email</label>
-    <input type="email" id="email" placeholder="Enter your email" required>
+<form id="contactForm">
 
-    <label for="message" id="labelMessage">Message</label>
-    <textarea id="message" rows="5" placeholder="Write your message" required></textarea>
+<label data-i18n="name">Name</label>
+<input type="text" required placeholder="Your Name">
 
-    <button type="submit" id="submitBtn">Send Message</button>
-  </form>
+<label data-i18n="email">Email</label>
+<input type="email" required placeholder="Your Email">
 
-  <div class="contact-info">
-    <span>🇪🇬 +20 120 007 4344</span>
-    <span>🇪🇬 +20 120 878 7702</span>
-    <span>🇸🇦 +966 56 127 4344</span>
+<label data-i18n="message">Message</label>
+<textarea rows="5" required placeholder="Write your message..."></textarea>
 
-    <a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
-    <a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
-    <a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
+<button type="submit" data-i18n="send">Send Message</button>
 
-    <div class="social">
-      <a href="https://www.facebook.com/AlaslSolar/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-      <a href="https://www.linkedin.com/company/alaslsolar" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-      <a href="https://www.youtube.com/@alaslsolar" target="_blank"><i class="fab fa-youtube"></i></a>
-      <a href="https://www.tiktok.com/@alaslsolar" target="_blank"><i class="fab fa-tiktok"></i></a>
-    </div>
-  </div>
+</form>
+
+<div class="contact-info">
+
+<a href="tel:+201200074344">📞 🇪🇬 +20 120 007 4344</a>
+
+<a href="tel:+201208787702">📞 🇪🇬 +20 120 878 7702</a>
+
+<a href="tel:+966561274344">📞 🇸🇦 +966 56 127 4344</a>
+
+<a href="mailto:sales@alaslsolar.com">📧 sales@alaslsolar.com</a>
+<a href="mailto:info@alaslsolar.com">📧 info@alaslsolar.com</a>
+<a href="mailto:alasl.renewable.energy@outlook.com">📧 alasl.renewable.energy@outlook.com</a>
+
+<div class="social">
+
+<a href="https://www.facebook.com/AlaslSolar/" target="_blank">
+<i class="fab fa-facebook-f"></i>
+</a>
+
+<a href="https://www.instagram.com/alaslsolar/" target="_blank">
+<i class="fab fa-instagram"></i>
+</a>
+
+<a href="https://www.linkedin.com/company/alaslsolar" target="_blank">
+<i class="fab fa-linkedin-in"></i>
+</a>
+
+<a href="https://www.youtube.com/@alaslsolar" target="_blank">
+<i class="fab fa-youtube"></i>
+</a>
+
+<a href="https://www.tiktok.com/@alaslsolar" target="_blank">
+<i class="fab fa-tiktok"></i>
+</a>
+
+</div>
 </div>
 
-<footer>© 2026 Alasl Solar. All Rights Reserved.</footer>
-<a class="whatsapp" href="https://wa.me/201200074344" target="_blank">💬</a>
+</div>
+
+<footer>
+© 2026 Alasl Solar Energy
+</footer>
+
+<a class="whatsapp" href="https://wa.me/201200074344" target="_blank">
+<i class="fab fa-whatsapp"></i>
+</a>
 
 <script>
-let currentLang="en";
-let menuLinks;
 
-/* Apply Language */
-function applyLang(){
-    if(currentLang==="en"){
-        document.documentElement.lang="en"; document.documentElement.dir="ltr";
-        mainTitle.innerText="Contact Us";
-        subtitle.innerText="Get in touch with us for professional solar solutions";
-        labelName.innerText="Name";
-        labelEmail.innerText="Email";
-        labelMessage.innerText="Message";
-        submitBtn.innerText="Send Message";
-        menuLinks=["Home","About Us","Our Services","Our Projects","Contact Us"];
-        document.querySelector('.menu .lang-btn').innerText="AR | EN";
-    }else{
-        document.documentElement.lang="ar"; document.documentElement.dir="rtl";
-        mainTitle.innerText="اتصل بنا";
-        subtitle.innerText="تواصل معنا للحصول على حلول طاقة شمسية احترافية";
-        labelName.innerText="الاسم";
-        labelEmail.innerText="البريد الإلكتروني";
-        labelMessage.innerText="رسالتك";
-        submitBtn.innerText="إرسال الرسالة";
-        menuLinks=["الرئيسية","من نحن","خدماتنا","مشاريعنا","اتصل بنا"];
-        document.querySelector('.menu .lang-btn').innerText="EN | AR";
-    }
-    const menuA=document.querySelectorAll(".menu a");
-    menuA.forEach((link,i)=>{ link.innerText=menuLinks[i]; link.style.transitionDelay=`${i*0.08}s`; });
-}
-
-/* Toggle Language */
-function toggleLang(){ currentLang=(currentLang==="en")?"ar":"en"; applyLang(); }
-
-/* Toggle Menu */
 function toggleMenu(){
-    const menu=document.getElementById("menu");
-    const overlay=document.getElementById("overlay");
-    menu.classList.toggle("show");
-    if(menu.classList.contains("show")){
-        overlay.style.opacity="1"; overlay.style.visibility="visible";
-        const items=[...menu.querySelectorAll("a, .lang-btn")];
-        items.forEach((el,i)=>{ el.style.transitionDelay=`${i*0.08}s`; el.style.transform='translateX(0)'; el.style.opacity='1'; });
-    }else{
-        overlay.style.opacity="0"; overlay.style.visibility="hidden";
-        menu.querySelectorAll("a, .lang-btn").forEach(el=>{ el.style.transitionDelay='0s'; el.style.transform='translateX(-20px)'; el.style.opacity='0'; });
-    }
+let menu=document.getElementById("menu");
+menu.style.display= menu.style.display==="block" ? "none":"block";
 }
 
-/* Close menu when clicking a link */
-document.querySelectorAll('.menu a').forEach(link=>link.addEventListener('click', toggleMenu));
+function setLang(lang){
 
-/* Form submission */
-document.getElementById("contactForm").addEventListener("submit", function(e){
-  e.preventDefault();
-  alert(document.documentElement.lang==="en"?"Message sent successfully!":"تم إرسال الرسالة بنجاح!");
+if(lang==="ar"){
+document.documentElement.dir="rtl";
+}else{
+document.documentElement.dir="ltr";
+}
+
+const data={
+
+en:{
+title:"Contact Us",
+subtitle:"Get in touch with us for professional solar solutions",
+name:"Name",
+email:"Email",
+message:"Message",
+send:"Send Message"
+},
+
+ar:{
+title:"اتصل بنا",
+subtitle:"تواصل معنا للحصول على حلول طاقة شمسية احترافية",
+name:"الاسم",
+email:"البريد الإلكتروني",
+message:"رسالتك",
+send:"إرسال الرسالة"
+},
+
+es:{
+title:"Contáctanos",
+subtitle:"Comunícate con nosotros para soluciones solares profesionales",
+name:"Nombre",
+email:"Correo electrónico",
+message:"Mensaje",
+send:"Enviar mensaje"
+},
+
+zh:{
+title:"联系我们",
+subtitle:"与我们联系以获得专业的太阳能解决方案",
+name:"姓名",
+email:"电子邮件",
+message:"信息",
+send:"发送消息"
+}
+
+};
+
+const t=data[lang];
+
+document.querySelector('[data-i18n="title"]').innerText=t.title;
+document.querySelector('[data-i18n="subtitle"]').innerText=t.subtitle;
+document.querySelector('[data-i18n="name"]').innerText=t.name;
+document.querySelector('[data-i18n="email"]').innerText=t.email;
+document.querySelector('[data-i18n="message"]').innerText=t.message;
+document.querySelector('[data-i18n="send"]').innerText=t.send;
+
+document.getElementById("menu").style.display="none";
+
+}
+
+setLang("en");
+
+document.getElementById("contactForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+alert(document.documentElement.dir==="rtl"?"تم إرسال الرسالة بنجاح":"Message sent successfully");
+
 });
 
-applyLang();
 </script>
 
 </body>
