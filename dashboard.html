@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>Admin Dashboard | Al Asl Solar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="supabase-config.js"></script>
+  <script defer src="dashboard.js"></script>
+</head>
+<body>
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <a class="dashboard-logo" href="index.html">
+        <img src="logo-white.png" alt="Al Asl Solar logo">
+      </a>
+      <div>
+        <p class="eyebrow">Admin</p>
+        <h1>Content Dashboard</h1>
+        <p>Add projects, upload images, and publish articles without editing code.</p>
+      </div>
+    </section>
+
+    <section class="dashboard-card" data-auth-panel>
+      <h2>Login</h2>
+      <form class="admin-form" id="loginForm">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="email" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">Login</button>
+        <p class="form-note" data-auth-message></p>
+      </form>
+    </section>
+
+    <section class="dashboard-content" data-dashboard hidden>
+      <div class="dashboard-toolbar">
+        <div>
+          <h2>Manage Content</h2>
+          <p data-user-email></p>
+        </div>
+        <button class="btn btn-secondary dark" type="button" data-logout>Logout</button>
+      </div>
+
+
+      <!-- Stats Management -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card" id="statsCard">
+          <h3>🔢 Homepage Stats</h3>
+          <p style="color:var(--muted);font-size:14px;margin-bottom:var(--space-3)">
+            Edit the three numbers shown on the homepage. Changes go live immediately after saving.
+          </p>
+          <div id="statsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">Loading stats...</p>
+          </div>
+          <p class="form-note" id="statsMessage" style="margin-top:var(--space-2)"></p>
+        </article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="dashboard-card">
+          <h3>Add Project</h3>
+          <form class="admin-form" id="projectForm">
+            <label for="projectTitle">Title</label>
+            <input id="projectTitle" name="title" required>
+
+            <label for="projectCategory">Category</label>
+            <select id="projectCategory" name="category">
+              <option>Agriculture</option>
+              <option>Commercial</option>
+              <option>Hybrid</option>
+              <option>Residential</option>
+              <option>Maintenance</option>
+            </select>
+
+            <label for="projectLocation">Location</label>
+            <input id="projectLocation" name="location">
+
+            <label for="projectCapacity">Capacity</label>
+            <input id="projectCapacity" name="capacity" placeholder="120 kW">
+
+            <label for="projectYear">Year</label>
+            <input id="projectYear" name="year" type="number" min="2020" max="2035">
+
+            <label for="projectSummary">Summary</label>
+            <textarea id="projectSummary" name="summary" rows="5" required></textarea>
+
+            <label for="projectImage">Main image</label>
+            <input id="projectImage" name="image" type="file" accept="image/*">
+
+            <label class="check-row">
+              <input name="published" type="checkbox" checked>
+              Published
+            </label>
+
+            <button class="btn btn-primary" type="submit">Save Project</button>
+            <p class="form-note" data-project-message></p>
+          </form>
+        </article>
+
+        <article class="dashboard-card">
+          <h3>Add Article</h3>
+          <form class="admin-form" id="articleForm">
+            <label for="articleTitle">Title</label>
+            <input id="articleTitle" name="title" required>
+
+            <label for="articleSummary">Summary</label>
+            <textarea id="articleSummary" name="summary" rows="4" required></textarea>
+
+            <label for="articleContent">Content</label>
+            <textarea id="articleContent" name="content" rows="8" required></textarea>
+
+            <label for="articleImage">Image</label>
+            <input id="articleImage" name="image" type="file" accept="image/*">
+
+            <label class="check-row">
+              <input name="published" type="checkbox" checked>
+              Published
+            </label>
+
+            <button class="btn btn-primary" type="submit">Save Article</button>
+            <p class="form-note" data-article-message></p>
+          </form>
+        </article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="dashboard-card">
+          <h3>Latest Projects</h3>
+          <div class="admin-list" data-project-list></div>
+        </article>
+        <article class="dashboard-card">
+          <h3>Latest Articles</h3>
+          <div class="admin-list" data-article-list></div>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
