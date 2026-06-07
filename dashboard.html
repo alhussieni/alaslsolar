@@ -13,6 +13,50 @@
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="supabase-config.js"></script>
   <script defer src="dashboard.js"></script>
+  <style>
+    .faq-page-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: var(--space-3) var(--space-2);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, transform .18s;
+      text-align: center;
+    }
+    .faq-page-btn:hover { border-color: var(--brand); background: var(--brand-soft); transform: translateY(-2px); }
+    .faq-page-btn.active { border-color: var(--brand); background: var(--brand-soft); }
+    .fpb-icon { font-size: 22px; }
+    .fpb-label { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .fpb-count { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--brand-soft); color: var(--brand-dark); }
+  </style>
+
+  <style>
+    .dashboard-home-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      width: fit-content;
+      transition: background .18s;
+    }
+    .dashboard-home-btn:hover { background: rgba(255,255,255,0.2); }
+    @media (max-width: 860px) {
+      .dashboard-home-btn { display: flex; }
+      .dashboard-logo { display: block !important; }
+    }
+  </style>
 </head>
 <body>
   <main class="dashboard-shell">
@@ -21,6 +65,10 @@
         <img src="logo-white.png" alt="Al Asl Solar logo">
       </a>
       <div>
+        <a href="index.html" class="dashboard-home-btn" aria-label="الرئيسية">
+          <i class="fa fa-house" aria-hidden="true"></i>
+          <span>الرئيسية</span>
+        </a>
         <p class="eyebrow">Admin</p>
         <h1>Content Dashboard</h1>
         <p>Add projects, upload images, and publish articles without editing code.</p>
@@ -63,81 +111,261 @@
         </article>
       </div>
 
-      <div class="dashboard-grid">
-        <article class="dashboard-card">
-          <h3>Add Project</h3>
-          <form class="admin-form" id="projectForm">
-            <label for="projectTitle">Title</label>
-            <input id="projectTitle" name="title" required>
 
-            <label for="projectCategory">Category</label>
-            <select id="projectCategory" name="category">
-              <option>Agriculture</option>
-              <option>Commercial</option>
-              <option>Hybrid</option>
-              <option>Residential</option>
-              <option>Maintenance</option>
-            </select>
+                  <!-- FAQ Management -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card" id="faqCard">
+          <h3>❓ إدارة الأسئلة الشائعة</h3>
+          <p style="color:var(--muted);font-size:14px;margin:0 0 var(--space-3)">
+            اختر صفحة لعرض أسئلتها وإدارتها، أو أضف سؤالاً جديداً.
+          </p>
 
-            <label for="projectLocation">Location</label>
-            <input id="projectLocation" name="location">
+          <!-- Page selector grid -->
+          <div id="faqPageSelector" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--space-3)">
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('home')" data-page="home">
+              <span class="fpb-icon">🏠</span>
+              <span class="fpb-label">الصفحة الرئيسية</span>
+              <span class="fpb-count" id="faqCount_home">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('services')" data-page="services">
+              <span class="fpb-icon">⚙️</span>
+              <span class="fpb-label">الخدمات</span>
+              <span class="fpb-count" id="faqCount_services">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('agriculture')" data-page="agriculture">
+              <span class="fpb-icon">🌱</span>
+              <span class="fpb-label">زراعة وري</span>
+              <span class="fpb-count" id="faqCount_agriculture">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('industrial')" data-page="industrial">
+              <span class="fpb-icon">🏭</span>
+              <span class="fpb-label">صناعة وتجارة</span>
+              <span class="fpb-count" id="faqCount_industrial">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('residential')" data-page="residential">
+              <span class="fpb-icon">🏡</span>
+              <span class="fpb-label">سكني</span>
+              <span class="fpb-count" id="faqCount_residential">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('about')" data-page="about">
+              <span class="fpb-icon">ℹ️</span>
+              <span class="fpb-label">من نحن</span>
+              <span class="fpb-count" id="faqCount_about">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('contact')" data-page="contact">
+              <span class="fpb-icon">📞</span>
+              <span class="fpb-label">تواصل معنا</span>
+              <span class="fpb-count" id="faqCount_contact">…</span>
+            </button>
+          </div>
 
-            <label for="projectCapacity">Capacity</label>
-            <input id="projectCapacity" name="capacity" placeholder="120 kW">
+          <!-- Page questions panel (hidden until page selected) -->
+          <div id="faqPagePanel" style="display:none">
 
-            <label for="projectYear">Year</label>
-            <input id="projectYear" name="year" type="number" min="2020" max="2035">
+            <!-- Panel header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--brand-soft);border-radius:var(--radius);margin-bottom:var(--space-3)">
+              <div style="display:flex;align-items:center;gap:8px">
+                <button type="button" onclick="closeFaqPanel()"
+                  style="padding:4px 10px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">
+                  ← رجوع
+                </button>
+                <strong id="faqPanelTitle" style="font-size:16px"></strong>
+              </div>
+              <button type="button" onclick="toggleFaqAddForm()"
+                style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+                + إضافة سؤال
+              </button>
+            </div>
 
-            <label for="projectSummary">Summary</label>
-            <textarea id="projectSummary" name="summary" rows="5" required></textarea>
+            <!-- Add form (hidden by default) -->
+            <div id="faqAddFormWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+              <p style="font-weight:700;font-size:14px;margin:0 0 var(--space-2);color:var(--brand-dark)">إضافة سؤال جديد</p>
+              <form class="admin-form" id="faqAddForm">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                  <div>
+                    <label>السؤال بالعربية *</label>
+                    <input id="faq_new_q_ar" placeholder="اكتب السؤال..." dir="rtl" required>
+                  </div>
+                  <div>
+                    <label>الإجابة بالعربية *</label>
+                    <textarea id="faq_new_a_ar" rows="3" placeholder="اكتب الإجابة..." dir="rtl" required></textarea>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap">
+                  <div>
+                    <label style="font-size:12px;display:block;margin-bottom:4px">الترتيب</label>
+                    <input id="faq_new_sort" type="number" value="100" style="width:75px;min-height:38px">
+                  </div>
+                </div>
+                <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;align-items:center">
+                  <button class="btn btn-secondary" type="button" id="faqTranslateBtn" onclick="translateNewFaq()"
+                    style="min-height:38px;font-size:13px">✨ ترجمة تلقائية</button>
+                  <button class="btn btn-primary" type="submit" style="min-height:38px;font-size:13px">💾 حفظ السؤال</button>
+                  <button type="button" onclick="toggleFaqAddForm()"
+                    style="padding:6px 14px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+                </div>
+                <p class="form-note" id="faqAddMessage" style="margin-top:6px"></p>
 
-            <label for="projectImage">Main image</label>
-            <input id="projectImage" name="image" type="file" accept="image/*">
+                <!-- Translation review (shown after translate) -->
+                <div id="faqTranslationPreview" style="display:none;margin-top:var(--space-3);padding:var(--space-2);background:#fff;border-radius:var(--radius);border:1px solid var(--line)">
+                  <p style="font-weight:700;font-size:12px;color:var(--brand);margin:0 0 var(--space-2)">راجع الترجمة وعدّل إن احتجت:</p>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-1)">
+                    <div><label style="font-size:11px">Q — English</label><input id="faq_new_q_en" placeholder="English question..."></div>
+                    <div><label style="font-size:11px">A — English</label><textarea id="faq_new_a_en" rows="2"></textarea></div>
+                    <div><label style="font-size:11px">Q — Español</label><input id="faq_new_q_es"></div>
+                    <div><label style="font-size:11px">A — Español</label><textarea id="faq_new_a_es" rows="2"></textarea></div>
+                    <div><label style="font-size:11px">Q — 中文</label><input id="faq_new_q_zh"></div>
+                    <div><label style="font-size:11px">A — 中文</label><textarea id="faq_new_a_zh" rows="2"></textarea></div>
+                  </div>
+                </div>
+              </form>
+            </div>
 
-            <label class="check-row">
-              <input name="published" type="checkbox" checked>
-              Published
-            </label>
+            <!-- Questions list -->
+            <div id="faqList" style="display:grid;gap:var(--space-2)">
+              <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+            </div>
+            <p class="form-note" id="faqMessage"></p>
+          </div>
 
-            <button class="btn btn-primary" type="submit">Save Project</button>
-            <p class="form-note" data-project-message></p>
-          </form>
-        </article>
-
-        <article class="dashboard-card">
-          <h3>Add Article</h3>
-          <form class="admin-form" id="articleForm">
-            <label for="articleTitle">Title</label>
-            <input id="articleTitle" name="title" required>
-
-            <label for="articleSummary">Summary</label>
-            <textarea id="articleSummary" name="summary" rows="4" required></textarea>
-
-            <label for="articleContent">Content</label>
-            <textarea id="articleContent" name="content" rows="8" required></textarea>
-
-            <label for="articleImage">Image</label>
-            <input id="articleImage" name="image" type="file" accept="image/*">
-
-            <label class="check-row">
-              <input name="published" type="checkbox" checked>
-              Published
-            </label>
-
-            <button class="btn btn-primary" type="submit">Save Article</button>
-            <p class="form-note" data-article-message></p>
-          </form>
         </article>
       </div>
 
-      <div class="dashboard-grid">
+      <!-- ── Projects Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
         <article class="dashboard-card">
-          <h3>Latest Projects</h3>
-          <div class="admin-list" data-project-list></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">📁 إدارة المشاريع</h3>
+            <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')" id="addProjectBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة مشروع
+            </button>
+          </div>
+
+          <!-- Add form -->
+          <div id="projectAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="projectForm">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                <div>
+                  <label>عنوان المشروع *</label>
+                  <input id="projectTitle" name="title" required placeholder="اسم المشروع...">
+                </div>
+                <div>
+                  <label>التصنيف</label>
+                  <select id="projectCategory" name="category">
+                    <option value="Agriculture">زراعة</option>
+                    <option value="Commercial">تجاري</option>
+                    <option value="Hybrid">هجين</option>
+                    <option value="Residential">سكني</option>
+                    <option value="Maintenance">صيانة</option>
+                  </select>
+                </div>
+                <div>
+                  <label>الموقع</label>
+                  <input id="projectLocation" name="location" placeholder="المحافظة / المنطقة">
+                </div>
+                <div>
+                  <label>القدرة</label>
+                  <input id="projectCapacity" name="capacity" placeholder="مثال: 120 kW">
+                </div>
+                <div>
+                  <label>السنة</label>
+                  <input id="projectYear" name="year" type="number" min="2020" max="2035" placeholder="2025">
+                </div>
+                <div>
+                  <label>الترتيب</label>
+                  <input id="projectSort" name="sort_order" type="number" value="100" placeholder="100">
+                </div>
+              </div>
+              <div>
+                <label>ملخص المشروع *</label>
+                <textarea id="projectSummary" name="summary" rows="3" required placeholder="وصف مختصر للمشروع..."></textarea>
+              </div>
+
+              <!-- Multi-image uploader -->
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">الصور</label>
+                <div id="projectImagesWrap" style="display:grid;gap:var(--space-2)"></div>
+                <button type="button" onclick="addImageRow('projectImagesWrap','project')"
+                  style="margin-top:8px;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer;width:100%">
+                  + إضافة صورة
+                </button>
+              </div>
+
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" type="checkbox" checked>
+                <span style="font-weight:700">نشر المشروع</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المشروع</button>
+                <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" data-project-message></p>
+            </form>
+          </div>
+
+          <!-- Projects list -->
+          <div id="projectsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
         </article>
+      </div>
+
+      <!-- ── Articles Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
         <article class="dashboard-card">
-          <h3>Latest Articles</h3>
-          <div class="admin-list" data-article-list></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">📝 إدارة المقالات</h3>
+            <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')" id="addArticleBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة مقال
+            </button>
+          </div>
+
+          <!-- Add form -->
+          <div id="articleAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="articleForm">
+              <div>
+                <label>عنوان المقال *</label>
+                <input id="articleTitle" name="title" required placeholder="عنوان المقال...">
+              </div>
+              <div>
+                <label>ملخص *</label>
+                <textarea id="articleSummary" name="summary" rows="3" required placeholder="ملخص يظهر في القائمة..."></textarea>
+              </div>
+              <div>
+                <label>المحتوى الكامل *</label>
+                <textarea id="articleContent" name="content" rows="8" required placeholder="اكتب محتوى المقال هنا..."></textarea>
+              </div>
+
+              <!-- Multi-image uploader -->
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">الصور</label>
+                <div id="articleImagesWrap" style="display:grid;gap:var(--space-2)"></div>
+                <button type="button" onclick="addImageRow('articleImagesWrap','article')"
+                  style="margin-top:8px;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer;width:100%">
+                  + إضافة صورة
+                </button>
+              </div>
+
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" type="checkbox" checked>
+                <span style="font-weight:700">نشر المقال</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المقال</button>
+                <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" data-article-message></p>
+            </form>
+          </div>
+
+          <!-- Articles list -->
+          <div id="articlesList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
         </article>
       </div>
     </section>
