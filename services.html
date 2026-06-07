@@ -196,6 +196,17 @@
     </section>
 
     <!-- CTA band -->
+    <!-- FAQ -->
+    <section class="section reveal">
+      <div class="section-heading">
+        <p class="eyebrow" data-i18n="faq_kicker">FAQ</p>
+        <h2 data-i18n="faq_title">Common questions about our services</h2>
+      </div>
+      <div class="faq-list" id="faqContainerSvc">
+        <!-- loaded from Supabase -->
+      </div>
+    </section>
+
     <section class="section cta-band reveal">
       <h2 data-i18n="cta_band_title">Ready to reduce your energy costs?</h2>
       <p data-i18n="cta_band_text">Send us your project details and we'll prepare a tailored solar proposal for you.</p>
@@ -231,40 +242,26 @@
   </a>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  
   <script>
     (async function loadPageFaqs() {
       try {
         const client = getAlaslSupabase();
         if (!client) return;
-        const { data } = await client
-          .from('faqs')
-          .select('question_en,answer_en,question_ar,answer_ar,question_es,answer_es,question_zh,answer_zh')
-          .eq('published', true)
-          .eq('page', 'services')
-          .order('sort_order');
+        const { data } = await client.from('faqs').select('*')
+          .eq('published', true).eq('page', 'services').order('sort_order');
         if (!data || data.length === 0) return;
-
         const lang = localStorage.getItem('alasl-lang') || 'en';
-        const qKey = {en:'question_en',ar:'question_ar',es:'question_es',zh:'question_zh'};
-        const aKey = {en:'answer_en',  ar:'answer_ar',  es:'answer_es',  zh:'answer_zh'};
-
-        function renderFaqs(l) {
-          const qk = qKey[l] || 'question_en';
-          const ak = aKey[l] || 'answer_en';
-          const container = document.getElementById('faqContainerSvc');
-          if (!container) return;
-          container.innerHTML = data.map(faq => `
-            <details>
-              <summary>${faq[qk] || faq.question_en}</summary>
-              <p>${faq[ak] || faq.answer_en}</p>
-            </details>
-          `).join('');
+        const qk = {en:'question_en',ar:'question_ar',es:'question_es',zh:'question_zh'};
+        const ak = {en:'answer_en',  ar:'answer_ar',  es:'answer_es',  zh:'answer_zh'};
+        function render(l) {
+          const c = document.getElementById('faqContainerSvc');
+          if (!c) return;
+          c.innerHTML = data.map(f=>`<details><summary>${f[qk[l]]||f.question_en}</summary><p>${f[ak[l]]||f.answer_en}</p></details>`).join('');
         }
-        renderFaqs(lang);
-        document.querySelectorAll('[data-lang]').forEach(btn => {
-          btn.addEventListener('click', () => renderFaqs(btn.dataset.lang));
-        });
-      } catch(e) { /* keep static fallback */ }
+        render(lang);
+        document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>render(b.dataset.lang)));
+      } catch(e) {}
     })();
   </script>
 </body>
