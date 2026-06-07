@@ -1547,3 +1547,4 @@ html[dir="rtl"] .lang-dropdown {
     min-height: -webkit-fill-available;
   }
 }
+.admin-link { display: none; }

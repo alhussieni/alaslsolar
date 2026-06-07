@@ -153,7 +153,7 @@
         <p class="eyebrow" data-i18n="faq_kicker">FAQ</p>
         <h2 data-i18n="ind_faq_title">Common questions from industrial clients</h2>
       </div>
-      <div class="faq-list">
+      <div class="faq-list" id="faqContainerInd">
         <details>
           <summary data-i18n="ind_faq_1_q">What system size does a factory typically need?</summary>
           <p data-i18n="ind_faq_1_a">It depends on your monthly consumption and available roof or ground area. We size the system after reviewing your electricity bills and site — not from a catalogue.</p>
@@ -201,5 +201,43 @@
   <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
     <i class="fab fa-whatsapp" aria-hidden="true"></i>
   </a>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    (async function loadPageFaqs() {
+      try {
+        const client = getAlaslSupabase();
+        if (!client) return;
+        const { data } = await client
+          .from('faqs')
+          .select('question_en,answer_en,question_ar,answer_ar,question_es,answer_es,question_zh,answer_zh')
+          .eq('published', true)
+          .eq('page', 'industrial')
+          .order('sort_order');
+        if (!data || data.length === 0) return;
+
+        const lang = localStorage.getItem('alasl-lang') || 'en';
+        const qKey = {en:'question_en',ar:'question_ar',es:'question_es',zh:'question_zh'};
+        const aKey = {en:'answer_en',  ar:'answer_ar',  es:'answer_es',  zh:'answer_zh'};
+
+        function renderFaqs(l) {
+          const qk = qKey[l] || 'question_en';
+          const ak = aKey[l] || 'answer_en';
+          const container = document.getElementById('faqContainerInd');
+          if (!container) return;
+          container.innerHTML = data.map(faq => `
+            <details>
+              <summary>${faq[qk] || faq.question_en}</summary>
+              <p>${faq[ak] || faq.answer_en}</p>
+            </details>
+          `).join('');
+        }
+        renderFaqs(lang);
+        document.querySelectorAll('[data-lang]').forEach(btn => {
+          btn.addEventListener('click', () => renderFaqs(btn.dataset.lang));
+        });
+      } catch(e) { /* keep static fallback */ }
+    })();
+  </script>
 </body>
 </html>
