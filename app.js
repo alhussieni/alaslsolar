@@ -1315,16 +1315,16 @@ function renderArticles(articles) {
     const image = normalizeAssetPath(article.image_url || "solar.jpg");
     const date = article.created_at ? new Date(article.created_at).toLocaleDateString() : "";
 
-    return `
-      <article class="article-card">
-        <img src="${escapeHtml(image)}" alt="${escapeHtml(article.title)}" loading="lazy">
-        <div>
-          ${date ? `<span>${escapeHtml(date)}</span>` : ""}
-          <h2>${escapeHtml(article.title)}</h2>
-          <p>${escapeHtml(article.summary)}</p>
-        </div>
-      </article>
-    `;
+  return `
+  <a class="article-card" href="article.html?slug=${encodeURIComponent(article.slug)}">
+    <img src="${escapeHtml(image)}" alt="${escapeHtml(article.title)}" loading="lazy">
+    <div>
+      ${date ? `<span>${escapeHtml(date)}</span>` : ""}
+      <h2>${escapeHtml(article.title)}</h2>
+      <p>${escapeHtml(article.summary)}</p>
+    </div>
+  </a>
+`;
   }).join("");
 }
 
