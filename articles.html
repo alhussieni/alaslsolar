@@ -1,0 +1,29 @@
+# Supabase CLI / GitHub Integration config for Al Asl Solar
+# project_id is just a local label for the CLI — it does not need to
+# match the Supabase project ref. The actual project is linked when
+# you connect this repo from Project Settings → Integrations → GitHub
+# in the Supabase Dashboard.
+project_id = "alaslsolar"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+max_rows = 1000
+
+[db]
+port = 54322
+
+[db.migrations]
+schema_paths = []
+
+[storage]
+enabled = true
+
+[storage.buckets.site-media]
+public = true
+objects_path = "./site-media"
+
+[storage.buckets.datasheets]
+public = true
+objects_path = "./datasheets"
