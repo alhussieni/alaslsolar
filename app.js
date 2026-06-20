@@ -1522,11 +1522,15 @@ function renderArticleDetail(article, lang) {
   if (dateEl) dateEl.textContent = date;
 
   const bodyEl = content.querySelector("[data-article-body]");
-  // Article body is written by the site admin in the dashboard as Markdown,
-  // so we convert it to HTML before rendering. Safe in this context since
-  // only the admin (not site visitors) can write this content.
   if (bodyEl) {
-    bodyEl.innerHTML = typeof marked !== "undefined" ? marked.parse(body || "") : body;
+    const trimmed = (body || "").trim();
+    // New articles are written with the rich text editor and stored as
+    // ready-to-render HTML (start with a tag). Older articles were written
+    // as plain Markdown text and need conversion before rendering.
+    const isHtml = trimmed.startsWith("<");
+    bodyEl.innerHTML = isHtml
+      ? trimmed
+      : (typeof marked !== "undefined" ? marked.parse(trimmed) : trimmed);
   }
 }
 
