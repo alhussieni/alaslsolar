@@ -1595,7 +1595,26 @@ function initLangDropdown() {
   });
 }
 
+function detectVisitorLanguage() {
+  const supported = ["ar", "en", "es", "zh"];
+  const browserLangs = navigator.languages && navigator.languages.length
+    ? navigator.languages
+    : [navigator.language || "en"];
+
+  for (const raw of browserLangs) {
+    const code = raw.toLowerCase().split("-")[0];
+    if (supported.includes(code)) return code;
+  }
+  return "en";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const storedLang = localStorage.getItem("alasl-lang");
+  const savedLang = storedLang || detectVisitorLanguage();
+  localStorage.setItem("alasl-lang", savedLang);
+  document.documentElement.lang = savedLang;
+  document.documentElement.dir = savedLang === "ar" ? "rtl" : "ltr";
+
   initMenu();
   initNavigationState();
   initContactForm();
@@ -1605,7 +1624,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initArticleDetail();
   initLangDropdown();
 
-  const savedLang = localStorage.getItem("alasl-lang") || "en";
   applyLanguage(savedLang);
 
   document.querySelectorAll("[data-lang]").forEach((button) => {
