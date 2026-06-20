@@ -1130,6 +1130,111 @@ details[open] summary::after {
   resize: vertical;
 }
 
+/* ── Rich text editor (article content) ── */
+.rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom: none;
+}
+
+.rte-group {
+  display: flex;
+  gap: 4px;
+  padding-inline-end: 8px;
+  border-inline-end: 1px solid var(--line);
+}
+
+.rte-group:last-child {
+  border-inline-end: none;
+}
+
+.rte-select {
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  min-height: auto;
+  width: auto;
+}
+
+.rte-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.rte-btn:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.rte-img-btn {
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.rte-editor {
+  min-height: 260px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding: var(--space-2);
+  border: 1.5px solid var(--line);
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: #fff;
+}
+
+.rte-editor:focus-within {
+  border-color: var(--brand);
+}
+
+.rte-editor .ProseMirror {
+  outline: none;
+  min-height: 240px;
+}
+
+.rte-editor .ProseMirror p {
+  margin: 0 0 12px;
+}
+
+.rte-editor .ProseMirror h1,
+.rte-editor .ProseMirror h2,
+.rte-editor .ProseMirror h3 {
+  margin: 18px 0 10px;
+  font-weight: 800;
+}
+
+.rte-editor .ProseMirror blockquote {
+  border-inline-start: 3px solid var(--brand);
+  margin: 12px 0;
+  padding: 6px 14px;
+  background: #f9f6f2;
+  border-radius: 0 8px 8px 0;
+}
+
+.rte-editor .ProseMirror ul {
+  padding-inline-start: 20px;
+  margin: 0 0 12px;
+}
+
+.rte-editor .ProseMirror img {
+  max-width: 100%;
+  border-radius: var(--radius);
+  margin: 12px 0;
+  display: block;
+}
+
 .check-row {
   display: flex;
   align-items: center;

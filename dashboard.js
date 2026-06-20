@@ -23,20 +23,27 @@ function fileExtension(file) {
 
 const LIBRETRANSLATE_URL = "https://libretranslate.com/translate";
 
-// Markdown tokens we must not let the translator mangle.
-// We swap them for plain placeholders, translate, then restore them.
+// Protects formatting syntax from being mangled by the translator:
+// - Legacy Markdown tokens (old articles written as plain Markdown text)
+// - HTML tags (new articles written with the rich text editor)
+// Both are swapped for plain placeholders, translated, then restored.
 function protectMarkdown(text) {
   const tokens = [];
   let i = 0;
 
-  const protected_ = String(text || "").replace(
+  const capture = (match) => {
+    tokens.push(match);
+    const placeholder = `[[T${i}]]`;
+    i += 1;
+    return placeholder;
+  };
+
+  // First protect HTML tags (e.g. <h2>, </strong>, <img src="...">),
+  // then protect legacy Markdown tokens in whatever plain text remains.
+  let protected_ = String(text || "").replace(/<\/?[a-zA-Z][^>]*>/g, capture);
+  protected_ = protected_.replace(
     /(^#{1,6}\s|\*\*[^*]+\*\*|^>\s|`[^`]+`|^-{3,}$)/gm,
-    (match) => {
-      tokens.push(match);
-      const placeholder = `[[T${i}]]`;
-      i += 1;
-      return placeholder;
-    }
+    capture
   );
 
   return { protected_, tokens };
@@ -101,6 +108,131 @@ async function uploadImage(file, folder) {
 async function requireSession() {
   const { data } = await client.auth.getSession();
   updateAuthState(data.session);
+}
+
+/* ═══════════════════════════════════════════
+   RICH TEXT EDITOR (Al Asl Editor / TipTap)
+   ═══════════════════════════════════════════ */
+
+const RTE_FONTS = [
+  { label: "الخط الافتراضي", value: "" },
+  { label: "Cairo", value: "Cairo, sans-serif" },
+  { label: "Tahoma", value: "Tahoma, Arial, sans-serif" },
+  { label: "Georgia", value: "Georgia, serif" },
+  { label: "Courier New", value: "'Courier New', monospace" },
+];
+
+const RTE_SIZES = [
+  { label: "صغير", value: "13px" },
+  { label: "عادي", value: "16px" },
+  { label: "متوسط", value: "20px" },
+  { label: "كبير", value: "26px" },
+  { label: "كبير جدًا", value: "34px" },
+];
+
+const alaslEditors = {}; // keyed by suffix, e.g. "new" or article id
+
+function rteToolbarHtml(suffix) {
+  const fontOptions = RTE_FONTS.map(f => `<option value="${f.value}">${f.label}</option>`).join("");
+  const sizeOptions = RTE_SIZES.map(s => `<option value="${s.value}">${s.label}</option>`).join("");
+  return `
+    <div class="rte-group">
+      <select class="rte-select" onchange="rteSetFont('${suffix}', this.value)">${fontOptions}</select>
+      <select class="rte-select" onchange="rteSetSize('${suffix}', this.value)">${sizeOptions}</select>
+    </div>
+    <div class="rte-group">
+      <button type="button" class="rte-btn" title="عريض" onclick="rteCmd('${suffix}','toggleBold')"><b>B</b></button>
+      <button type="button" class="rte-btn" title="مائل" onclick="rteCmd('${suffix}','toggleItalic')"><i>I</i></button>
+      <button type="button" class="rte-btn" title="عنوان كبير" onclick="rteHeading('${suffix}',1)">H1</button>
+      <button type="button" class="rte-btn" title="عنوان متوسط" onclick="rteHeading('${suffix}',2)">H2</button>
+      <button type="button" class="rte-btn" title="عنوان صغير" onclick="rteHeading('${suffix}',3)">H3</button>
+    </div>
+    <div class="rte-group">
+      <button type="button" class="rte-btn" title="قائمة نقطية" onclick="rteCmd('${suffix}','toggleBulletList')">•≡</button>
+      <button type="button" class="rte-btn" title="اقتباس" onclick="rteCmd('${suffix}','toggleBlockquote')">"</button>
+      <button type="button" class="rte-btn" title="محاذاة لليمين" onclick="rteAlign('${suffix}','right')">⇥</button>
+      <button type="button" class="rte-btn" title="محاذاة للوسط" onclick="rteAlign('${suffix}','center')">≡</button>
+    </div>
+    <div class="rte-group">
+      <button type="button" class="rte-btn rte-img-btn" title="إدراج صورة هنا" onclick="rteInsertImagePrompt('${suffix}')">🖼 إدراج صورة</button>
+    </div>
+  `;
+}
+
+function initRichEditor(suffix, { initialHtml, hiddenFieldId } = {}) {
+  const toolbarEl = document.querySelector(`[data-rte-toolbar="${suffix}"]`);
+  const editorEl = document.getElementById(`articleContentEditor_${suffix}`);
+  if (!toolbarEl || !editorEl || !window.AlaslEditor) return;
+
+  toolbarEl.innerHTML = rteToolbarHtml(suffix);
+  editorEl.innerHTML = "";
+
+  const editor = window.AlaslEditor.create({
+    element: editorEl,
+    content: initialHtml || "<p></p>",
+    onUpdate: (html) => {
+      const hidden = document.getElementById(hiddenFieldId);
+      if (hidden) hidden.value = html;
+    },
+  });
+
+  alaslEditors[suffix] = editor;
+  const hidden = document.getElementById(hiddenFieldId);
+  if (hidden) hidden.value = editor.getHTML();
+}
+
+function rteCmd(suffix, command) {
+  const editor = alaslEditors[suffix];
+  if (editor && editor.commands[command]) editor.commands[command]();
+}
+
+function rteHeading(suffix, level) {
+  const editor = alaslEditors[suffix];
+  if (editor) editor.commands.toggleHeading({ level });
+}
+
+function rteAlign(suffix, align) {
+  const editor = alaslEditors[suffix];
+  if (editor) editor.commands.setTextAlign(align);
+}
+
+function rteSetFont(suffix, fontFamily) {
+  const editor = alaslEditors[suffix];
+  if (!editor) return;
+  if (fontFamily) editor.commands.setFontFamily(fontFamily);
+  else editor.commands.unsetFontFamily();
+}
+
+function rteSetSize(suffix, size) {
+  const editor = alaslEditors[suffix];
+  if (!editor) return;
+  if (size) editor.commands.setFontSize(size);
+  else editor.commands.unsetFontSize();
+}
+
+async function rteInsertImagePrompt(suffix) {
+  const editor = alaslEditors[suffix];
+  if (!editor) return;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    try {
+      const url = await uploadImage(file, "articles-inline");
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (e) {
+      alert("فشل رفع الصورة: " + e.message);
+    }
+  };
+  input.click();
+}
+
+function openNewArticleEditor() {
+  if (alaslEditors["new"]) return; // already initialized
+  initRichEditor("new", { initialHtml: "<p></p>", hiddenFieldId: "articleContent_ar" });
 }
 
 function updateAuthState(session) {
@@ -421,6 +553,7 @@ async function handleArticle(event) {
     if (error) throw error;
     form.reset();
     document.getElementById('articleImagesWrap').innerHTML = '';
+    if (alaslEditors["new"]) alaslEditors["new"].commands.setContent("<p></p>");
     if (msgEl) msgEl.textContent = '✅ تم حفظ المقال! جاري الترجمة للغات الأخرى...';
     setTimeout(() => { toggleSection('articleAddWrap','addArticleBtn'); }, 1500);
     loadArticles();
@@ -479,6 +612,8 @@ async function loadArticles() {
   container.innerHTML = data.map(a => {
     const imgs = Array.isArray(a.images) ? a.images : [];
     const heroImg = imgs.find(i => i.position === 'hero') || imgs[0];
+    const rawContent = a.content_ar || a.content || '';
+    const isHtmlContent = rawContent.trim().startsWith('<');
     return `
     <div style="border:1px solid var(--line);border-radius:var(--radius-lg);background:#fff;overflow:hidden">
       <div style="display:flex;align-items:center;gap:10px;padding:10px var(--space-3);background:#f9f6f2;border-bottom:1px solid var(--line);cursor:pointer"
@@ -507,13 +642,36 @@ async function loadArticles() {
       <!-- Edit form -->
       <div id="artEdit_${a.id}" style="display:none;padding:var(--space-3)">
         <div style="display:grid;gap:var(--space-2)">
-          <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">العنوان *</label>
-            <input id="af_title_${a.id}" value="${escP(a.title)}"></div>
-          <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">الملخص *</label>
-            <textarea id="af_sum_${a.id}" rows="3">${escP(a.summary)}</textarea></div>
-          <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">المحتوى *</label>
-            <textarea id="af_con_${a.id}" rows="6">${escP(a.content)}</textarea></div>
+          <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">التصنيف *</label>
+            <select id="af_cat_${a.id}">
+              <option value="intro" ${a.category==='intro'?'selected':''}>تعليمي (إيه هي الطاقة الشمسية)</option>
+              <option value="compare" ${a.category==='compare'?'selected':''}>مقارنات بين الأنظمة</option>
+              <option value="maintenance" ${a.category==='maintenance'?'selected':''}>الصيانة وطول العمر</option>
+              <option value="applications" ${a.category==='applications'?'selected':''}>تطبيقات معينة</option>
+              <option value="general" ${(!a.category||a.category==='general')?'selected':''}>عام / غير مصنف</option>
+            </select></div>
+          <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">العنوان (عربي) *</label>
+            <input id="af_title_${a.id}" value="${escP(a.title_ar || a.title)}"></div>
+          <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">الملخص (عربي) *</label>
+            <textarea id="af_sum_${a.id}" rows="3">${escP(a.summary_ar || a.summary)}</textarea></div>
+          <div>
+            <label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">المحتوى (عربي) *</label>
+            ${isHtmlContent ? `
+              <div class="rte-toolbar" data-rte-toolbar="${a.id}"></div>
+              <div class="rte-editor" id="articleContentEditor_${a.id}"></div>
+              <textarea id="af_con_${a.id}" style="display:none">${escP(rawContent)}</textarea>
+            ` : `
+              <textarea id="af_con_${a.id}" rows="6">${escP(rawContent)}</textarea>
+              <p class="form-note" style="margin-top:4px">هذا مقال قديم مكتوب بصيغة Markdown النصية، فلا يستخدم المحرر الغني الجديد.</p>
+            `}
+          </div>
         </div>
+
+        ${a.title_en ? `
+        <label class="check-row" style="margin-top:var(--space-2);font-size:12px">
+          <input type="checkbox" id="af_retranslate_${a.id}" checked>
+          <span>🌐 إعادة ترجمة المقال للغات الأخرى بعد الحفظ (لو عدّلت في النص العربي أو لاحظت غلطة بالترجمة)</span>
+        </label>` : ''}
 
         <!-- Existing images -->
         ${imgs.length > 0 ? `
@@ -558,7 +716,17 @@ async function loadArticles() {
 
 function toggleArticleEdit(id) {
   const el = document.getElementById('artEdit_' + id);
-  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (!el) return;
+  const opening = el.style.display === 'none';
+  el.style.display = opening ? 'block' : 'none';
+
+  if (opening && !alaslEditors[id]) {
+    const hidden = document.getElementById('af_con_' + id);
+    const editorEl = document.getElementById('articleContentEditor_' + id);
+    if (hidden && editorEl) {
+      initRichEditor(id, { initialHtml: hidden.value, hiddenFieldId: 'af_con_' + id });
+    }
+  }
 }
 
 async function saveArticle(id) {
@@ -570,18 +738,35 @@ async function saveArticle(id) {
     const existImgs = Array.isArray(existing?.images) ? existing.images : [];
     const allImgs = [...existImgs, ...newImgs];
 
+    const titleAr = document.getElementById('af_title_' + id)?.value.trim();
+    const summaryAr = document.getElementById('af_sum_' + id)?.value.trim();
+    const contentAr = document.getElementById('af_con_' + id)?.value.trim();
+    const category = document.getElementById('af_cat_' + id)?.value || 'general';
+    const retranslateBox = document.getElementById('af_retranslate_' + id);
+    const shouldRetranslate = retranslateBox ? retranslateBox.checked : false;
+
     const payload = {
-      title:      document.getElementById('af_title_' + id)?.value.trim(),
-      summary:    document.getElementById('af_sum_' + id)?.value.trim(),
-      content:    document.getElementById('af_con_' + id)?.value.trim(),
+      category,
+      title:      titleAr,
+      summary:    summaryAr,
+      content:    contentAr,
+      title_ar:   titleAr,
+      summary_ar: summaryAr,
+      content_ar: contentAr,
       image_url:  allImgs[0]?.url || null,
       images:     allImgs,
       updated_at: new Date().toISOString(),
     };
     const { error } = await client.from('articles').update(payload).eq('id', id);
     if (error) throw error;
-    if (msg) { msg.textContent = '✅ تم الحفظ!'; setTimeout(() => { if(msg) msg.textContent=''; }, 2500); }
+
+    if (msg) { msg.textContent = '✅ تم الحفظ!'; }
     loadArticles();
+
+    if (shouldRetranslate) {
+      if (msg) msg.textContent = '✅ تم الحفظ! جاري إعادة الترجمة...';
+      await runArticleTranslation(id);
+    }
   } catch(e) {
     if (msg) msg.textContent = 'خطأ: ' + e.message;
   }

@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="supabase-config.js"></script>
+  <script defer src="alasl-editor.bundle.js"></script>
   <script defer src="dashboard.js"></script>
   <style>
     .faq-page-btn {
@@ -342,7 +343,7 @@
         <article class="dashboard-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
             <h3 style="margin:0">📝 إدارة المقالات</h3>
-            <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')" id="addArticleBtn"
+            <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn');openNewArticleEditor()" id="addArticleBtn"
               style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
               + إضافة مقال
             </button>
@@ -370,17 +371,19 @@
               </div>
               <div style="margin-top:var(--space-2)">
                 <label>المحتوى الكامل *</label>
-                <textarea id="articleContent_ar" name="content_ar" rows="8" required placeholder="اكتب محتوى المقال هنا..."></textarea>
+                <div class="rte-toolbar" data-rte-toolbar="new"></div>
+                <div class="rte-editor" id="articleContentEditor_new"></div>
+                <textarea id="articleContent_ar" name="content_ar" style="display:none"></textarea>
               </div>
               <p class="form-note" style="margin-top:6px">🌐 اكتب المقال بالعربي فقط — هيتم ترجمته تلقائيًا للإنجليزي والإسباني والصيني بعد الحفظ.</p>
 
-              <!-- Multi-image uploader -->
+              <!-- Hero / cover image -->
               <div style="margin-top:var(--space-2)">
-                <label style="font-weight:700;display:block;margin-bottom:6px">الصور</label>
+                <label style="font-weight:700;display:block;margin-bottom:6px">صورة الغلاف (تظهر في كارت المقال)</label>
                 <div id="articleImagesWrap" style="display:grid;gap:var(--space-2)"></div>
                 <button type="button" onclick="addImageRow('articleImagesWrap','article')"
                   style="margin-top:8px;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer;width:100%">
-                  + إضافة صورة
+                  + إضافة صورة غلاف
                 </button>
               </div>
 
