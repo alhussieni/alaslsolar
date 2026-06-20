@@ -1428,9 +1428,12 @@ function renderArticleDetail(article, lang) {
   if (dateEl) dateEl.textContent = date;
 
   const bodyEl = content.querySelector("[data-article-body]");
-  // Article body is written by the site admin in the dashboard, not by site
-  // visitors, so rendering it as HTML here is safe in this context.
-  if (bodyEl) bodyEl.innerHTML = body;
+  // Article body is written by the site admin in the dashboard as Markdown,
+  // so we convert it to HTML before rendering. Safe in this context since
+  // only the admin (not site visitors) can write this content.
+  if (bodyEl) {
+    bodyEl.innerHTML = typeof marked !== "undefined" ? marked.parse(body || "") : body;
+  }
 }
 
 async function initArticleDetail() {
