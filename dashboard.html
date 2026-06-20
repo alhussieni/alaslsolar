@@ -3,115 +3,372 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Read Al Asl Solar articles, updates, and renewable energy insights.">
+  <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0d0b0a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="format-detection" content="telephone=no">
-  <meta property="og:title" content="Article | Al Asl Solar">
-  <meta property="og:description" content="Solar energy articles, project updates, and renewable energy insights.">
-  <meta property="og:type" content="article">
-  <meta property="og:url" content="https://alaslsolar.com/article.html">
-  <meta property="og:image" content="https://alaslsolar.com/solar.jpg">
-  <title>Article | Al Asl Solar</title>
-  <link rel="canonical" href="https://alaslsolar.com/article.html">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <title>Admin Dashboard | Al Asl Solar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap"></noscript>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
   <link rel="stylesheet" href="styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="supabase-config.js"></script>
-  <link rel="alternate" hreflang="en" href="https://alaslsolar.com/article.html">
-  <link rel="alternate" hreflang="ar" href="https://alaslsolar.com/article.html">
-  <link rel="alternate" hreflang="es" href="https://alaslsolar.com/article.html">
-  <link rel="alternate" hreflang="zh" href="https://alaslsolar.com/article.html">
-  <link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/article.html">
-  <script defer src="app.js"></script>
+  <script defer src="dashboard.js"></script>
+  <style>
+    .faq-page-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: var(--space-3) var(--space-2);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, transform .18s;
+      text-align: center;
+    }
+    .faq-page-btn:hover { border-color: var(--brand); background: var(--brand-soft); transform: translateY(-2px); }
+    .faq-page-btn.active { border-color: var(--brand); background: var(--brand-soft); }
+    .fpb-icon { font-size: 22px; }
+    .fpb-label { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .fpb-count { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--brand-soft); color: var(--brand-dark); }
+  </style>
+
+  <style>
+    .dashboard-home-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      width: fit-content;
+      transition: background .18s;
+    }
+    .dashboard-home-btn:hover { background: rgba(255,255,255,0.2); }
+    @media (max-width: 860px) {
+      .dashboard-home-btn { display: flex; }
+      .dashboard-logo { display: block !important; }
+    }
+  </style>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Al Asl Solar home">
-      <img src="logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
-    </a>
-    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
-      <i class="fa fa-bars" aria-hidden="true"></i>
-      <span class="sr-only">Open menu</span>
-    </button>
-    <nav class="site-menu" id="siteMenu" aria-label="Main navigation">
-      <a href="index.html" data-i18n="nav_home">Home</a>
-      <a href="about.html" data-i18n="nav_about">About Us</a>
-      <a href="services.html" data-i18n="nav_services">Services</a>
-      <a href="projects.html" data-i18n="nav_projects">Projects</a>
-      <a href="articles.html" data-i18n="nav_articles">Articles</a>
-      <a href="contact.html" data-i18n="nav_contact">Contact</a>
-      <a class="admin-link" href="dashboard.html" data-i18n="nav_admin">Admin Login</a>
-      <div class="lang-switcher" role="group" aria-label="Language">
-        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
-          <i class="ti ti-world" aria-hidden="true"></i>
-          <span id="langLabel" data-i18n="language">Language</span>
-          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
-        </button>
-        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
-          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
-          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
-          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
-          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
-        </ul>
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <a class="dashboard-logo" href="index.html">
+        <img src="logo-white.png" alt="Al Asl Solar logo">
+      </a>
+      <div>
+        <a href="index.html" class="dashboard-home-btn" aria-label="الرئيسية">
+          <i class="fa fa-house" aria-hidden="true"></i>
+          <span>الرئيسية</span>
+        </a>
+        <p class="eyebrow">Admin</p>
+        <h1>Content Dashboard</h1>
+        <p>Add projects, upload images, and publish articles without editing code.</p>
       </div>
-    </nav>
-  </header>
-
-  <main id="main">
-    <section class="page-hero">
-      <p class="eyebrow" data-i18n="articles_kicker">Knowledge center</p>
-      <h1 id="articleTitle">…</h1>
     </section>
 
-    <section class="section">
-      <div class="article-detail" data-article-detail>
+    <section class="dashboard-card" data-auth-panel>
+      <h2>Login</h2>
+      <form class="admin-form" id="loginForm">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="email" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">Login</button>
+        <p class="form-note" data-auth-message></p>
+      </form>
+    </section>
 
-        <div class="article-detail-loading" data-article-loading>
-          <p data-i18n="article_loading">Loading article…</p>
+    <section class="dashboard-content" data-dashboard hidden>
+      <div class="dashboard-toolbar">
+        <div>
+          <h2>Manage Content</h2>
+          <p data-user-email></p>
         </div>
+        <button class="btn btn-secondary dark" type="button" data-logout>Logout</button>
+      </div>
 
-        <div class="article-detail-not-found" data-article-not-found hidden>
-          <p data-i18n="article_not_found">This article could not be found.</p>
-          <a href="articles.html" data-i18n="article_back_link">Back to articles</a>
-        </div>
 
-        <article class="article-detail-content" data-article-content hidden>
-          <img data-article-image src="" alt="" loading="eager">
-          <span data-article-date></span>
-          <div data-article-body></div>
+      <!-- Stats Management -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card" id="statsCard">
+          <h3>🔢 Homepage Stats</h3>
+          <p style="color:var(--muted);font-size:14px;margin-bottom:var(--space-3)">
+            Edit the three numbers shown on the homepage. Changes go live immediately after saving.
+          </p>
+          <div id="statsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">Loading stats...</p>
+          </div>
+          <p class="form-note" id="statsMessage" style="margin-top:var(--space-2)"></p>
         </article>
+      </div>
 
+
+                  <!-- FAQ Management -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card" id="faqCard">
+          <h3>❓ إدارة الأسئلة الشائعة</h3>
+          <p style="color:var(--muted);font-size:14px;margin:0 0 var(--space-3)">
+            اختر صفحة لعرض أسئلتها وإدارتها، أو أضف سؤالاً جديداً.
+          </p>
+
+          <!-- Page selector grid -->
+          <div id="faqPageSelector" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--space-3)">
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('home')" data-page="home">
+              <span class="fpb-icon">🏠</span>
+              <span class="fpb-label">الصفحة الرئيسية</span>
+              <span class="fpb-count" id="faqCount_home">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('services')" data-page="services">
+              <span class="fpb-icon">⚙️</span>
+              <span class="fpb-label">الخدمات</span>
+              <span class="fpb-count" id="faqCount_services">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('agriculture')" data-page="agriculture">
+              <span class="fpb-icon">🌱</span>
+              <span class="fpb-label">زراعة وري</span>
+              <span class="fpb-count" id="faqCount_agriculture">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('industrial')" data-page="industrial">
+              <span class="fpb-icon">🏭</span>
+              <span class="fpb-label">صناعة وتجارة</span>
+              <span class="fpb-count" id="faqCount_industrial">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('residential')" data-page="residential">
+              <span class="fpb-icon">🏡</span>
+              <span class="fpb-label">سكني</span>
+              <span class="fpb-count" id="faqCount_residential">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('about')" data-page="about">
+              <span class="fpb-icon">ℹ️</span>
+              <span class="fpb-label">من نحن</span>
+              <span class="fpb-count" id="faqCount_about">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('contact')" data-page="contact">
+              <span class="fpb-icon">📞</span>
+              <span class="fpb-label">تواصل معنا</span>
+              <span class="fpb-count" id="faqCount_contact">…</span>
+            </button>
+          </div>
+
+          <!-- Page questions panel (hidden until page selected) -->
+          <div id="faqPagePanel" style="display:none">
+
+            <!-- Panel header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--brand-soft);border-radius:var(--radius);margin-bottom:var(--space-3)">
+              <div style="display:flex;align-items:center;gap:8px">
+                <button type="button" onclick="closeFaqPanel()"
+                  style="padding:4px 10px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">
+                  ← رجوع
+                </button>
+                <strong id="faqPanelTitle" style="font-size:16px"></strong>
+              </div>
+              <button type="button" onclick="toggleFaqAddForm()"
+                style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+                + إضافة سؤال
+              </button>
+            </div>
+
+            <!-- Add form (hidden by default) -->
+            <div id="faqAddFormWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+              <p style="font-weight:700;font-size:14px;margin:0 0 var(--space-2);color:var(--brand-dark)">إضافة سؤال جديد</p>
+              <form class="admin-form" id="faqAddForm">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                  <div>
+                    <label>السؤال بالعربية *</label>
+                    <input id="faq_new_q_ar" placeholder="اكتب السؤال..." dir="rtl" required>
+                  </div>
+                  <div>
+                    <label>الإجابة بالعربية *</label>
+                    <textarea id="faq_new_a_ar" rows="3" placeholder="اكتب الإجابة..." dir="rtl" required></textarea>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap">
+                  <div>
+                    <label style="font-size:12px;display:block;margin-bottom:4px">الترتيب</label>
+                    <input id="faq_new_sort" type="number" value="100" style="width:75px;min-height:38px">
+                  </div>
+                </div>
+                <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;align-items:center">
+                  <button class="btn btn-secondary" type="button" id="faqTranslateBtn" onclick="translateNewFaq()"
+                    style="min-height:38px;font-size:13px">✨ ترجمة تلقائية</button>
+                  <button class="btn btn-primary" type="submit" style="min-height:38px;font-size:13px">💾 حفظ السؤال</button>
+                  <button type="button" onclick="toggleFaqAddForm()"
+                    style="padding:6px 14px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+                </div>
+                <p class="form-note" id="faqAddMessage" style="margin-top:6px"></p>
+
+                <!-- Translation review (shown after translate) -->
+                <div id="faqTranslationPreview" style="display:none;margin-top:var(--space-3);padding:var(--space-2);background:#fff;border-radius:var(--radius);border:1px solid var(--line)">
+                  <p style="font-weight:700;font-size:12px;color:var(--brand);margin:0 0 var(--space-2)">راجع الترجمة وعدّل إن احتجت:</p>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-1)">
+                    <div><label style="font-size:11px">Q — English</label><input id="faq_new_q_en" placeholder="English question..."></div>
+                    <div><label style="font-size:11px">A — English</label><textarea id="faq_new_a_en" rows="2"></textarea></div>
+                    <div><label style="font-size:11px">Q — Español</label><input id="faq_new_q_es"></div>
+                    <div><label style="font-size:11px">A — Español</label><textarea id="faq_new_a_es" rows="2"></textarea></div>
+                    <div><label style="font-size:11px">Q — 中文</label><input id="faq_new_q_zh"></div>
+                    <div><label style="font-size:11px">A — 中文</label><textarea id="faq_new_a_zh" rows="2"></textarea></div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Questions list -->
+            <div id="faqList" style="display:grid;gap:var(--space-2)">
+              <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+            </div>
+            <p class="form-note" id="faqMessage"></p>
+          </div>
+
+        </article>
+      </div>
+
+      <!-- ── Projects Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">📁 إدارة المشاريع</h3>
+            <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')" id="addProjectBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة مشروع
+            </button>
+          </div>
+
+          <!-- Add form -->
+          <div id="projectAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="projectForm">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                <div>
+                  <label>عنوان المشروع *</label>
+                  <input id="projectTitle" name="title" required placeholder="اسم المشروع...">
+                </div>
+                <div>
+                  <label>التصنيف</label>
+                  <select id="projectCategory" name="category">
+                    <option value="Agriculture">زراعة</option>
+                    <option value="Commercial">تجاري</option>
+                    <option value="Hybrid">هجين</option>
+                    <option value="Residential">سكني</option>
+                    <option value="Maintenance">صيانة</option>
+                  </select>
+                </div>
+                <div>
+                  <label>الموقع</label>
+                  <input id="projectLocation" name="location" placeholder="المحافظة / المنطقة">
+                </div>
+                <div>
+                  <label>القدرة</label>
+                  <input id="projectCapacity" name="capacity" placeholder="مثال: 120 kW">
+                </div>
+                <div>
+                  <label>السنة</label>
+                  <input id="projectYear" name="year" type="number" min="2020" max="2035" placeholder="2025">
+                </div>
+                <div>
+                  <label>الترتيب</label>
+                  <input id="projectSort" name="sort_order" type="number" value="100" placeholder="100">
+                </div>
+              </div>
+              <div>
+                <label>ملخص المشروع *</label>
+                <textarea id="projectSummary" name="summary" rows="3" required placeholder="وصف مختصر للمشروع..."></textarea>
+              </div>
+
+              <!-- Multi-image uploader -->
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">الصور</label>
+                <div id="projectImagesWrap" style="display:grid;gap:var(--space-2)"></div>
+                <button type="button" onclick="addImageRow('projectImagesWrap','project')"
+                  style="margin-top:8px;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer;width:100%">
+                  + إضافة صورة
+                </button>
+              </div>
+
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" type="checkbox" checked>
+                <span style="font-weight:700">نشر المشروع</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المشروع</button>
+                <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" data-project-message></p>
+            </form>
+          </div>
+
+          <!-- Projects list -->
+          <div id="projectsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- ── Articles Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">📝 إدارة المقالات</h3>
+            <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')" id="addArticleBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة مقال
+            </button>
+          </div>
+
+          <!-- Add form -->
+          <div id="articleAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="articleForm">
+              <div>
+                <label>عنوان المقال *</label>
+                <input id="articleTitle" name="title" required placeholder="عنوان المقال...">
+              </div>
+              <div>
+                <label>ملخص *</label>
+                <textarea id="articleSummary" name="summary" rows="3" required placeholder="ملخص يظهر في القائمة..."></textarea>
+              </div>
+              <div>
+                <label>المحتوى الكامل *</label>
+                <textarea id="articleContent" name="content" rows="8" required placeholder="اكتب محتوى المقال هنا..."></textarea>
+              </div>
+
+              <!-- Multi-image uploader -->
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">الصور</label>
+                <div id="articleImagesWrap" style="display:grid;gap:var(--space-2)"></div>
+                <button type="button" onclick="addImageRow('articleImagesWrap','article')"
+                  style="margin-top:8px;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer;width:100%">
+                  + إضافة صورة
+                </button>
+              </div>
+
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" type="checkbox" checked>
+                <span style="font-weight:700">نشر المقال</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المقال</button>
+                <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" data-article-message></p>
+            </form>
+          </div>
+
+          <!-- Articles list -->
+          <div id="articlesList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
+        </article>
       </div>
     </section>
   </main>
-
-  <footer class="site-footer">
-    <div>
-      <strong>Al Asl Solar Energy</strong>
-      <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
-    </div>
-    <div class="social-links" aria-label="Social links">
-      <a href="https://linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
-      <a href="https://youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
-      <a href="https://facebook.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
-      <a href="https://instagram.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-      <a href="https://tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-    </div>
-  </footer>
-
-  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
-    <i class="fab fa-whatsapp" aria-hidden="true"></i>
-  </a>
 </body>
 </html>
