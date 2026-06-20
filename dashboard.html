@@ -56,7 +56,42 @@
       .dashboard-home-btn { display: flex; }
       .dashboard-logo { display: block !important; }
     }
+    .lang-tab-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .lang-tab-btn.active {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .lang-panel label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .lang-panel input,
+    .lang-panel textarea {
+      width: 100%;
+    }
   </style>
+  <script>
+    function switchArticleLangTab(lang) {
+      document.querySelectorAll("[data-lang-tab]").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.langTab === lang);
+      });
+      document.querySelectorAll("[data-lang-panel]").forEach((panel) => {
+        panel.style.display = panel.dataset.langPanel === lang ? "block" : "none";
+      });
+    }
+  </script>
 </head>
 <body>
   <main class="dashboard-shell">
@@ -327,16 +362,62 @@
           <div id="articleAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
             <form class="admin-form" id="articleForm">
               <div>
-                <label>عنوان المقال *</label>
-                <input id="articleTitle" name="title" required placeholder="عنوان المقال...">
+                <label>التصنيف *</label>
+                <select id="articleCategory" name="category" required>
+                  <option value="intro">تعليمي (إيه هي الطاقة الشمسية)</option>
+                  <option value="compare">مقارنات بين الأنظمة</option>
+                  <option value="maintenance">الصيانة وطول العمر</option>
+                  <option value="applications">تطبيقات معينة</option>
+                </select>
               </div>
-              <div>
-                <label>ملخص *</label>
-                <textarea id="articleSummary" name="summary" rows="3" required placeholder="ملخص يظهر في القائمة..."></textarea>
-              </div>
-              <div>
-                <label>المحتوى الكامل *</label>
-                <textarea id="articleContent" name="content" rows="8" required placeholder="اكتب محتوى المقال هنا..."></textarea>
+
+              <!-- Language tabs for title/summary/content -->
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">محتوى المقال بكل لغة</label>
+                <div id="articleLangTabs" style="display:flex;gap:6px;margin-bottom:var(--space-2)">
+                  <button type="button" class="lang-tab-btn active" data-lang-tab="ar" onclick="switchArticleLangTab('ar')">🇸🇦 العربية</button>
+                  <button type="button" class="lang-tab-btn" data-lang-tab="en" onclick="switchArticleLangTab('en')">🇺🇸 English</button>
+                  <button type="button" class="lang-tab-btn" data-lang-tab="es" onclick="switchArticleLangTab('es')">🇪🇸 Español</button>
+                  <button type="button" class="lang-tab-btn" data-lang-tab="zh" onclick="switchArticleLangTab('zh')">🇨🇳 中文</button>
+                </div>
+
+                <div data-lang-panel="ar" class="lang-panel">
+                  <label>عنوان المقال (عربي) *</label>
+                  <input id="articleTitle_ar" name="title_ar" required placeholder="عنوان المقال...">
+                  <label style="margin-top:8px">ملخص (عربي) *</label>
+                  <textarea id="articleSummary_ar" name="summary_ar" rows="3" required placeholder="ملخص يظهر في القائمة..."></textarea>
+                  <label style="margin-top:8px">المحتوى الكامل (عربي) *</label>
+                  <textarea id="articleContent_ar" name="content_ar" rows="8" required placeholder="اكتب محتوى المقال هنا..."></textarea>
+                </div>
+
+                <div data-lang-panel="en" class="lang-panel" style="display:none">
+                  <label>Article title (English)</label>
+                  <input id="articleTitle_en" name="title_en" placeholder="Article title...">
+                  <label style="margin-top:8px">Summary (English)</label>
+                  <textarea id="articleSummary_en" name="summary_en" rows="3" placeholder="Summary shown in the list..."></textarea>
+                  <label style="margin-top:8px">Full content (English)</label>
+                  <textarea id="articleContent_en" name="content_en" rows="8" placeholder="Write the article content here..."></textarea>
+                </div>
+
+                <div data-lang-panel="es" class="lang-panel" style="display:none">
+                  <label>Título del artículo (Español)</label>
+                  <input id="articleTitle_es" name="title_es" placeholder="Título del artículo...">
+                  <label style="margin-top:8px">Resumen (Español)</label>
+                  <textarea id="articleSummary_es" name="summary_es" rows="3" placeholder="Resumen mostrado en la lista..."></textarea>
+                  <label style="margin-top:8px">Contenido completo (Español)</label>
+                  <textarea id="articleContent_es" name="content_es" rows="8" placeholder="Escribe el contenido del artículo aquí..."></textarea>
+                </div>
+
+                <div data-lang-panel="zh" class="lang-panel" style="display:none">
+                  <label>文章标题（中文）</label>
+                  <input id="articleTitle_zh" name="title_zh" placeholder="文章标题...">
+                  <label style="margin-top:8px">摘要（中文）</label>
+                  <textarea id="articleSummary_zh" name="summary_zh" rows="3" placeholder="显示在列表中的摘要..."></textarea>
+                  <label style="margin-top:8px">完整内容（中文）</label>
+                  <textarea id="articleContent_zh" name="content_zh" rows="8" placeholder="在此处撰写文章内容..."></textarea>
+                </div>
+
+                <p class="form-note" style="margin-top:6px">العربي مطلوب دايمًا. باقي اللغات اختيارية — لو سبتها فاضية، الزائر هيشوف النسخة العربية بدالها.</p>
               </div>
 
               <!-- Multi-image uploader -->
