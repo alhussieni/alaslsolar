@@ -17,6 +17,75 @@ function fileExtension(file) {
   return file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "jpg";
 }
 
+/* ═══════════════════════════════════════════
+   AUTO TRANSLATION (LibreTranslate, free public API)
+   ═══════════════════════════════════════════ */
+
+const LIBRETRANSLATE_URL = "https://libretranslate.com/translate";
+
+// Markdown tokens we must not let the translator mangle.
+// We swap them for plain placeholders, translate, then restore them.
+function protectMarkdown(text) {
+  const tokens = [];
+  let i = 0;
+
+  const protected_ = String(text || "").replace(
+    /(^#{1,6}\s|\*\*[^*]+\*\*|^>\s|`[^`]+`|^-{3,}$)/gm,
+    (match) => {
+      tokens.push(match);
+      const placeholder = `[[T${i}]]`;
+      i += 1;
+      return placeholder;
+    }
+  );
+
+  return { protected_, tokens };
+}
+
+function restoreMarkdown(translatedText, tokens) {
+  return tokens.reduce(
+    (text, token, index) => text.replace(`[[T${index}]]`, token),
+    translatedText
+  );
+}
+
+async function translateText(text, targetLang) {
+  if (!text || !text.trim()) return "";
+
+  const { protected_, tokens } = protectMarkdown(text);
+
+  const response = await fetch(LIBRETRANSLATE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      q: protected_,
+      source: "ar",
+      target: targetLang,
+      format: "text",
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Translation failed (${targetLang}): ${response.status}`);
+  }
+
+  const data = await response.json();
+  return restoreMarkdown(data.translatedText || "", tokens);
+}
+
+async function translateArticleFields(article) {
+  const targets = ["en", "es", "zh"];
+  const result = {};
+
+  for (const lang of targets) {
+    result[`title_${lang}`] = await translateText(article.title_ar, lang);
+    result[`summary_${lang}`] = await translateText(article.summary_ar, lang);
+    result[`content_${lang}`] = await translateText(article.content_ar, lang);
+  }
+
+  return result;
+}
+
 async function uploadImage(file, folder) {
   if (!file || file.size === 0) return "";
   const safeName = `${folder}/${Date.now()}-${Math.random().toString(16).slice(2)}.${fileExtension(file)}`;
@@ -348,16 +417,53 @@ async function handleArticle(event) {
       images,
       published:    formData.get('published') === 'on',
     };
-    const { error } = await client.from('articles').insert(payload);
+    const { data: inserted, error } = await client.from('articles').insert(payload).select().single();
     if (error) throw error;
     form.reset();
     document.getElementById('articleImagesWrap').innerHTML = '';
-    switchArticleLangTab('ar');
-    if (msgEl) msgEl.textContent = '✅ تم حفظ المقال!';
-    setTimeout(() => { if(msgEl) msgEl.textContent=''; toggleSection('articleAddWrap','addArticleBtn'); }, 2000);
+    if (msgEl) msgEl.textContent = '✅ تم حفظ المقال! جاري الترجمة للغات الأخرى...';
+    setTimeout(() => { toggleSection('articleAddWrap','addArticleBtn'); }, 1500);
     loadArticles();
+
+    try {
+      const translated = await translateArticleFields(payload);
+      await client.from('articles').update(translated).eq('id', inserted.id);
+      loadArticles();
+    } catch (translateError) {
+      console.warn('Auto-translation failed, can retry from the list:', translateError);
+    }
   } catch(e) {
     if (msgEl) msgEl.textContent = 'خطأ: ' + e.message;
+  }
+}
+
+async function runArticleTranslation(id) {
+  const btn = document.getElementById(`translateBtn_${id}`);
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري الترجمة...';
+  }
+
+  try {
+    const { data: article, error: fetchError } = await client
+      .from('articles').select('title_ar, summary_ar, content_ar').eq('id', id).single();
+    if (fetchError) throw fetchError;
+    if (!article.title_ar || !article.summary_ar || !article.content_ar) {
+      throw new Error('المقال ناقص محتوى عربي (عنوان/ملخص/محتوى)');
+    }
+
+    const translated = await translateArticleFields(article);
+    const { error: updateError } = await client.from('articles').update(translated).eq('id', id);
+    if (updateError) throw updateError;
+
+    if (btn) { btn.textContent = '✅ تمت الترجمة'; }
+    loadArticles();
+  } catch (e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '⚠️ فشلت، حاول تاني';
+    }
+    alert('خطأ في الترجمة: ' + e.message + '\n\nخدمة الترجمة المجانية أحيانًا بتكون مشغولة، حاول تاني بعد دقيقة.');
   }
 }
 
@@ -383,6 +489,11 @@ async function loadArticles() {
           <div style="font-size:11px;color:var(--muted);margin-top:2px">${new Date(a.created_at).toLocaleDateString('ar-EG')} · ${imgs.length} صورة</div>
         </div>
         <div style="display:flex;gap:5px;flex-shrink:0">
+          <button type="button" onclick="event.stopPropagation();runArticleTranslation('${a.id}')"
+            id="translateBtn_${a.id}"
+            style="padding:3px 8px;border-radius:var(--radius);border:1px solid ${a.title_en ? '#c7d2fe' : '#fde68a'};background:${a.title_en ? '#eef2ff' : '#fffbeb'};color:${a.title_en ? '#4338ca' : '#92400e'};font-size:11px;font-weight:700;cursor:pointer">
+            ${a.title_en ? '🌐 مترجَم' : '🌐 ترجم الآن'}
+          </button>
           <button type="button" onclick="event.stopPropagation();togglePublish('articles','${a.id}',${a.published},'articlesList',loadArticles)"
             style="padding:3px 8px;border-radius:var(--radius);border:1px solid var(--line);background:${a.published ? '#e8f5e9' : '#fff3e0'};color:${a.published ? '#2e7d32' : '#e65100'};font-size:11px;font-weight:700;cursor:pointer">
             ${a.published ? '✅ منشور' : '⏸ موقوف'}
