@@ -1346,7 +1346,7 @@ async function initProjects() {
 // Lets articles display correctly even if only some language columns are filled in.
 function getLocalizedField(record, baseName, lang) {
   if (!record) return "";
-  const candidates = [`${baseName}_${lang}`, `${baseName}_en`, baseName];
+  const candidates = [`${baseName}_${lang}`, `${baseName}_ar`, `${baseName}_en`, baseName];
   for (const key of candidates) {
     if (record[key]) return record[key];
   }

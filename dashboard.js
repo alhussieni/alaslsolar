@@ -325,20 +325,34 @@ async function handleArticle(event) {
 
   try {
     const images = await collectImages('articleImagesWrap', 'articles');
-    const title = formData.get('title');
+    const titleAr = formData.get('title_ar');
     const payload = {
-      title,
-      slug:      `${slugify(title)}-${Date.now()}`,
-      summary:   formData.get('summary'),
-      content:   formData.get('content'),
-      image_url: images[0]?.url || null,
+      category:     formData.get('category') || 'general',
+      title:        titleAr,
+      slug:         `${slugify(titleAr)}-${Date.now()}`,
+      summary:      formData.get('summary_ar'),
+      content:      formData.get('content_ar'),
+      title_ar:     titleAr,
+      title_en:     formData.get('title_en') || null,
+      title_es:     formData.get('title_es') || null,
+      title_zh:     formData.get('title_zh') || null,
+      summary_ar:   formData.get('summary_ar'),
+      summary_en:   formData.get('summary_en') || null,
+      summary_es:   formData.get('summary_es') || null,
+      summary_zh:   formData.get('summary_zh') || null,
+      content_ar:   formData.get('content_ar'),
+      content_en:   formData.get('content_en') || null,
+      content_es:   formData.get('content_es') || null,
+      content_zh:   formData.get('content_zh') || null,
+      image_url:    images[0]?.url || null,
       images,
-      published: formData.get('published') === 'on',
+      published:    formData.get('published') === 'on',
     };
     const { error } = await client.from('articles').insert(payload);
     if (error) throw error;
     form.reset();
     document.getElementById('articleImagesWrap').innerHTML = '';
+    switchArticleLangTab('ar');
     if (msgEl) msgEl.textContent = '✅ تم حفظ المقال!';
     setTimeout(() => { if(msgEl) msgEl.textContent=''; toggleSection('articleAddWrap','addArticleBtn'); }, 2000);
     loadArticles();
