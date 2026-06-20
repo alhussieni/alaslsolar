@@ -704,6 +704,128 @@ details[open] summary::after {
   color: var(--muted);
 }
 
+/* ── Article controls: filters + view toggle ── */
+.article-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.article-filters {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.article-filter-btn {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.article-filter-btn:hover {
+  border-color: var(--brand);
+  color: var(--brand-dark);
+}
+
+.article-filter-btn.active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.article-view-toggle {
+  display: flex;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.article-view-btn {
+  width: 32px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.article-view-btn.active {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+/* ── List view for article cards ── */
+.cards-list {
+  grid-template-columns: 1fr !important;
+  gap: var(--space-2);
+}
+
+.cards-list .article-card {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: stretch;
+}
+
+.cards-list .article-card img {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 100px;
+}
+
+.cards-list .article-card div {
+  padding: var(--space-2) var(--space-3);
+}
+
+.cards-list .article-card h2 {
+  font-size: 16px;
+}
+
+.cards-list .article-card p {
+  font-size: 14px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.article-card-empty {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .cards-list .article-card {
+    grid-template-columns: 96px 1fr;
+  }
+
+  .cards-list .article-card h2 {
+    font-size: 14px;
+  }
+
+  .cards-list .article-card p {
+    font-size: 13px;
+    -webkit-line-clamp: 1;
+  }
+}
+
 /* ── Split section ── */
 .split {
   width: min(var(--container), 100%);

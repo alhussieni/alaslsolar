@@ -96,6 +96,14 @@ const translations = {
     articles_intro: "Insights, announcements, and practical notes from Al Asl Solar.",
     articles_empty_title: "Articles will appear here soon",
     articles_empty_text: "Use the admin dashboard to publish your first article.",
+    articles_filter_all: "All",
+    articles_filter_intro: "Getting started",
+    articles_filter_compare: "Comparisons",
+    articles_filter_maintenance: "Maintenance",
+    articles_filter_applications: "Applications",
+    articles_view_grid: "Grid view",
+    articles_view_list: "List view",
+    articles_empty_filtered: "No articles in this category yet.",
     article_loading: "Loading article…",
     article_not_found: "This article could not be found.",
     article_back_link: "Back to articles",
@@ -382,6 +390,14 @@ const translations = {
     articles_intro: "رؤى وأخبار وملاحظات عملية من الأصل سولار.",
     articles_empty_title: "ستظهر المقالات هنا قريبًا",
     articles_empty_text: "استخدم لوحة الإدارة لنشر أول مقال.",
+    articles_filter_all: "الكل",
+    articles_filter_intro: "تعليمي",
+    articles_filter_compare: "مقارنات",
+    articles_filter_maintenance: "صيانة",
+    articles_filter_applications: "تطبيقات",
+    articles_view_grid: "عرض شبكة",
+    articles_view_list: "عرض قائمة",
+    articles_empty_filtered: "لا توجد مقالات في هذا التصنيف حتى الآن.",
     project_tag_agri: "زراعي",
     project_agri_title: "محطات ري بالطاقة الشمسية",
     project_agri_text: "أنظمة لتشغيل الطلمبات وتقليل استهلاك الديزل في المزارع.",
@@ -663,6 +679,14 @@ const translations = {
     articles_intro: "Ideas, anuncios y notas prácticas de Al Asl Solar.",
     articles_empty_title: "Los artículos aparecerán aquí pronto",
     articles_empty_text: "Use el panel de administración para publicar su primer artículo.",
+    articles_filter_all: "Todos",
+    articles_filter_intro: "Primeros pasos",
+    articles_filter_compare: "Comparaciones",
+    articles_filter_maintenance: "Mantenimiento",
+    articles_filter_applications: "Aplicaciones",
+    articles_view_grid: "Vista de cuadrícula",
+    articles_view_list: "Vista de lista",
+    articles_empty_filtered: "Aún no hay artículos en esta categoría.",
     project_tag_agri: "Agricultura",
     project_agri_title: "Estaciones solares de riego",
     project_agri_text: "Sistemas FV diseñados para alimentar bombas y reducir el consumo de diésel en granjas.",
@@ -944,6 +968,14 @@ const translations = {
     articles_intro: "Al Asl Solar 的见解、公告和实用说明。",
     articles_empty_title: "文章即将显示在这里",
     articles_empty_text: "请使用管理后台发布第一篇文章。",
+    articles_filter_all: "全部",
+    articles_filter_intro: "入门指南",
+    articles_filter_compare: "系统比较",
+    articles_filter_maintenance: "维护保养",
+    articles_filter_applications: "应用案例",
+    articles_view_grid: "网格视图",
+    articles_view_list: "列表视图",
+    articles_empty_filtered: "该分类暂无文章。",
     project_tag_agri: "农业",
     project_agri_title: "太阳能灌溉电站",
     project_agri_text: "为水泵供电并减少农场柴油消耗的光伏系统。",
@@ -1322,6 +1354,54 @@ function getLocalizedField(record, baseName, lang) {
 }
 
 let currentArticlesData = null;
+let currentArticlesFilter = "all";
+let currentArticlesView = localStorage.getItem("alasl-articles-view") || "grid";
+
+const ARTICLE_CATEGORIES = ["intro", "compare", "maintenance", "applications"];
+
+function translateUi(key) {
+  const lang = localStorage.getItem("alasl-lang") || "en";
+  return (translations[lang] && translations[lang][key]) || (translations.en && translations.en[key]) || key;
+}
+
+function renderArticleControls() {
+  const wrap = document.querySelector("[data-articles-controls]");
+  if (!wrap) return;
+
+  const filterBtns = ["all", ...ARTICLE_CATEGORIES].map((cat) => {
+    const active = cat === currentArticlesFilter;
+    return `<button type="button" class="article-filter-btn${active ? " active" : ""}" data-filter="${cat}">${escapeHtml(translateUi(`articles_filter_${cat}`))}</button>`;
+  }).join("");
+
+  wrap.innerHTML = `
+    <div class="article-filters" role="group" aria-label="Article categories">${filterBtns}</div>
+    <div class="article-view-toggle" role="group" aria-label="View mode">
+      <button type="button" class="article-view-btn${currentArticlesView === "grid" ? " active" : ""}" data-view="grid" aria-label="${escapeHtml(translateUi("articles_view_grid"))}">
+        <i class="ti ti-grid-dots" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="article-view-btn${currentArticlesView === "list" ? " active" : ""}" data-view="list" aria-label="${escapeHtml(translateUi("articles_view_list"))}">
+        <i class="ti ti-list" aria-hidden="true"></i>
+      </button>
+    </div>
+  `;
+
+  wrap.querySelectorAll("[data-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentArticlesFilter = btn.dataset.filter;
+      renderArticleControls();
+      renderArticles(currentArticlesData);
+    });
+  });
+
+  wrap.querySelectorAll("[data-view]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentArticlesView = btn.dataset.view;
+      localStorage.setItem("alasl-articles-view", currentArticlesView);
+      renderArticleControls();
+      renderArticles(currentArticlesData);
+    });
+  });
+}
 
 function renderArticles(articles, lang) {
   const grid = document.querySelector("[data-articles-grid]");
@@ -1330,7 +1410,19 @@ function renderArticles(articles, lang) {
   currentArticlesData = articles;
   const activeLang = lang || localStorage.getItem("alasl-lang") || "en";
 
-  grid.innerHTML = articles.map((article) => {
+  const filtered = currentArticlesFilter === "all"
+    ? articles
+    : articles.filter((article) => (article.category || "general") === currentArticlesFilter);
+
+  grid.classList.toggle("cards-list", currentArticlesView === "list");
+  grid.classList.toggle("three", currentArticlesView === "grid");
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<article class="article-card article-card-empty"><p>${escapeHtml(translateUi("articles_empty_filtered"))}</p></article>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((article) => {
     const image = normalizeAssetPath(article.image_url || "solar.jpg");
     const date = article.created_at ? new Date(article.created_at).toLocaleDateString() : "";
     const title = getLocalizedField(article, "title", activeLang) || article.title || "";
@@ -1365,12 +1457,14 @@ async function initArticles() {
       .order("created_at", { ascending: false });
 
     if (!error && data && data.length) {
+      renderArticleControls();
       renderArticles(data);
     }
   } catch (error) {
     // Keep the static empty state.
   }
 }
+
 
 // ---- Single article page (article.html) ----
 
