@@ -96,6 +96,9 @@ const translations = {
     articles_intro: "Insights, announcements, and practical notes from Al Asl Solar.",
     articles_empty_title: "Articles will appear here soon",
     articles_empty_text: "Use the admin dashboard to publish your first article.",
+    article_loading: "Loading article…",
+    article_not_found: "This article could not be found.",
+    article_back_link: "Back to articles",
     project_tag_agri: "Agriculture",
     project_agri_title: "Solar irrigation stations",
     project_agri_text: "PV systems designed to power pumps and reduce diesel consumption in farm operations.",
@@ -1307,24 +1310,43 @@ async function initProjects() {
   }
 }
 
-function renderArticles(articles) {
+// Tries "<base>_<lang>" first, falls back to "<base>_en", then plain "<base>".
+// Lets articles display correctly even if only some language columns are filled in.
+function getLocalizedField(record, baseName, lang) {
+  if (!record) return "";
+  const candidates = [`${baseName}_${lang}`, `${baseName}_en`, baseName];
+  for (const key of candidates) {
+    if (record[key]) return record[key];
+  }
+  return "";
+}
+
+let currentArticlesData = null;
+
+function renderArticles(articles, lang) {
   const grid = document.querySelector("[data-articles-grid]");
   if (!grid || !Array.isArray(articles) || articles.length === 0) return;
+
+  currentArticlesData = articles;
+  const activeLang = lang || localStorage.getItem("alasl-lang") || "en";
 
   grid.innerHTML = articles.map((article) => {
     const image = normalizeAssetPath(article.image_url || "solar.jpg");
     const date = article.created_at ? new Date(article.created_at).toLocaleDateString() : "";
+    const title = getLocalizedField(article, "title", activeLang) || article.title || "";
+    const summary = getLocalizedField(article, "summary", activeLang) || article.summary || "";
+    const slug = article.slug || article.id;
 
-  return `
-  <a class="article-card" href="article.html?slug=${encodeURIComponent(article.slug)}">
-    <img src="${escapeHtml(image)}" alt="${escapeHtml(article.title)}" loading="lazy">
-    <div>
-      ${date ? `<span>${escapeHtml(date)}</span>` : ""}
-      <h2>${escapeHtml(article.title)}</h2>
-      <p>${escapeHtml(article.summary)}</p>
-    </div>
-  </a>
-`;
+    return `
+      <a class="article-card" href="article.html?slug=${encodeURIComponent(slug)}">
+        <img src="${escapeHtml(image)}" alt="${escapeHtml(title)}" loading="lazy">
+        <div>
+          ${date ? `<span>${escapeHtml(date)}</span>` : ""}
+          <h2>${escapeHtml(title)}</h2>
+          <p>${escapeHtml(summary)}</p>
+        </div>
+      </a>
+    `;
   }).join("");
 }
 
@@ -1338,7 +1360,7 @@ async function initArticles() {
   try {
     const { data, error } = await client
       .from("articles")
-      .select("title,summary,image_url,created_at,published")
+      .select("*")
       .eq("published", true)
       .order("created_at", { ascending: false });
 
@@ -1347,6 +1369,105 @@ async function initArticles() {
     }
   } catch (error) {
     // Keep the static empty state.
+  }
+}
+
+// ---- Single article page (article.html) ----
+
+let currentArticleData = null;
+
+function renderArticleNotFound() {
+  const loading = document.querySelector("[data-article-loading]");
+  const notFound = document.querySelector("[data-article-not-found]");
+  const content = document.querySelector("[data-article-content]");
+  if (loading) loading.hidden = true;
+  if (content) content.hidden = true;
+  if (notFound) notFound.hidden = false;
+}
+
+function renderArticleDetail(article, lang) {
+  if (!article) return;
+  currentArticleData = article;
+  const activeLang = lang || localStorage.getItem("alasl-lang") || "en";
+
+  const loading = document.querySelector("[data-article-loading]");
+  const notFound = document.querySelector("[data-article-not-found]");
+  const content = document.querySelector("[data-article-content]");
+  if (loading) loading.hidden = true;
+  if (notFound) notFound.hidden = true;
+  if (!content) return;
+  content.hidden = false;
+
+  const title = getLocalizedField(article, "title", activeLang) || article.title || "";
+  const body =
+    getLocalizedField(article, "content", activeLang) ||
+    getLocalizedField(article, "body", activeLang) ||
+    getLocalizedField(article, "summary", activeLang) ||
+    article.summary ||
+    "";
+  const image = normalizeAssetPath(article.image_url || "solar.jpg");
+  const date = article.created_at ? new Date(article.created_at).toLocaleDateString() : "";
+
+  document.title = `${title} | Al Asl Solar`;
+
+  const titleEl = document.getElementById("articleTitle");
+  if (titleEl) titleEl.textContent = title;
+
+  const imageEl = content.querySelector("[data-article-image]");
+  if (imageEl) {
+    if (image) {
+      imageEl.src = image;
+      imageEl.alt = title;
+      imageEl.hidden = false;
+    } else {
+      imageEl.hidden = true;
+    }
+  }
+
+  const dateEl = content.querySelector("[data-article-date]");
+  if (dateEl) dateEl.textContent = date;
+
+  const bodyEl = content.querySelector("[data-article-body]");
+  // Article body is written by the site admin in the dashboard, not by site
+  // visitors, so rendering it as HTML here is safe in this context.
+  if (bodyEl) bodyEl.innerHTML = body;
+}
+
+async function initArticleDetail() {
+  const root = document.querySelector("[data-article-detail]");
+  if (!root) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug");
+  const lang = localStorage.getItem("alasl-lang") || "en";
+
+  if (!slug) {
+    renderArticleNotFound();
+    return;
+  }
+
+  const client = typeof getAlaslSupabase === "function" ? getAlaslSupabase() : null;
+  if (!client) {
+    renderArticleNotFound();
+    return;
+  }
+
+  try {
+    const { data, error } = await client
+      .from("articles")
+      .select("*")
+      .eq("slug", slug)
+      .eq("published", true)
+      .maybeSingle();
+
+    if (error || !data) {
+      renderArticleNotFound();
+      return;
+    }
+
+    renderArticleDetail(data, lang);
+  } catch (error) {
+    renderArticleNotFound();
   }
 }
 
@@ -1384,13 +1505,22 @@ document.addEventListener("DOMContentLoaded", () => {
   initProjectFilters();
   initProjects();
   initArticles();
+  initArticleDetail();
   initLangDropdown();
 
   const savedLang = localStorage.getItem("alasl-lang") || "en";
   applyLanguage(savedLang);
 
   document.querySelectorAll("[data-lang]").forEach((button) => {
-    button.addEventListener("click", () => applyLanguage(button.dataset.lang));
+    button.addEventListener("click", () => {
+      applyLanguage(button.dataset.lang);
+      if (currentArticlesData) {
+        renderArticles(currentArticlesData, button.dataset.lang);
+      }
+      if (currentArticleData) {
+        renderArticleDetail(currentArticleData, button.dataset.lang);
+      }
+    });
   });
 
   // Scroll reveal
