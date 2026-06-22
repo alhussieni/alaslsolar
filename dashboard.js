@@ -18,10 +18,10 @@ function fileExtension(file) {
 }
 
 /* ═══════════════════════════════════════════
-   AUTO TRANSLATION (Google Translate, free unofficial endpoint)
+   AUTO TRANSLATION (MyMemory, free CORS-enabled API)
    ═══════════════════════════════════════════ */
 
-const GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single";
+const MYMEMORY_URL = "https://api.mymemory.translated.net/get";
 
 // Protects formatting syntax from being mangled by the translator:
 // - Legacy Markdown tokens (old articles written as plain Markdown text)
@@ -57,25 +57,47 @@ function restoreMarkdown(translatedText, tokens) {
   );
 }
 
-// The unofficial endpoint becomes unreliable on very long single requests,
-// so long content is split into safe-sized chunks (breaking on paragraph
-// boundaries where possible) and translated sequentially, then rejoined.
-function splitIntoChunks(text, maxLen = 3500) {
-  if (text.length <= maxLen) return [text];
+// MyMemory enforces a tight ~500 byte limit per request, and Arabic
+// characters take 2-3 bytes each in UTF-8, so we keep chunks conservatively
+// short (measured in bytes, not characters) and cut on sentence/paragraph
+// boundaries where possible.
+function byteLength(str) {
+  return new TextEncoder().encode(str).length;
+}
+
+function splitIntoChunks(text, maxBytes = 420) {
+  if (byteLength(text) <= maxBytes) return [text];
 
   const chunks = [];
   let remaining = text;
 
-  while (remaining.length > maxLen) {
-    let cut = remaining.lastIndexOf("\n\n", maxLen);
-    if (cut < maxLen * 0.5) cut = remaining.lastIndexOf("\n", maxLen);
-    if (cut < maxLen * 0.5) cut = maxLen;
-    chunks.push(remaining.slice(0, cut));
-    remaining = remaining.slice(cut);
+  while (byteLength(remaining) > maxBytes) {
+    // Binary-search-ish: start from a character estimate, then shrink
+    // until the slice fits within maxBytes, preferring to cut on a
+    // paragraph/sentence/space boundary near that point.
+    let approxChars = Math.floor(maxBytes / 2); // worst case ~2 bytes/char for Arabic
+    let cut = Math.min(approxChars, remaining.length);
+
+    while (cut > 10 && byteLength(remaining.slice(0, cut)) > maxBytes) {
+      cut -= 10;
+    }
+
+    let niceCut = remaining.lastIndexOf("\n", cut);
+    if (niceCut < cut * 0.4) niceCut = remaining.lastIndexOf(". ", cut);
+    if (niceCut < cut * 0.4) niceCut = remaining.lastIndexOf(" ", cut);
+    if (niceCut < cut * 0.4) niceCut = cut;
+
+    const finalCut = Math.max(niceCut, 1);
+    chunks.push(remaining.slice(0, finalCut));
+    remaining = remaining.slice(finalCut);
   }
   if (remaining) chunks.push(remaining);
 
   return chunks;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function translateText(text, targetLang) {
@@ -85,20 +107,33 @@ async function translateText(text, targetLang) {
   const chunks = splitIntoChunks(protected_);
   const translatedChunks = [];
 
-  for (const chunk of chunks) {
-    const url = `${GOOGLE_TRANSLATE_URL}?client=gtx&sl=ar&tl=${targetLang}&dt=t&q=${encodeURIComponent(chunk)}`;
-    const response = await fetch(url);
+  for (let i = 0; i < chunks.length; i += 1) {
+    const chunk = chunks[i];
+    if (!chunk.trim()) {
+      translatedChunks.push(chunk);
+      continue;
+    }
+
+    const params = new URLSearchParams({
+      q: chunk,
+      langpair: `ar|${targetLang}`,
+    });
+    const response = await fetch(`${MYMEMORY_URL}?${params}`);
 
     if (!response.ok) {
       throw new Error(`Translation failed (${targetLang}): ${response.status}`);
     }
 
     const data = await response.json();
-    // data[0] is an array of translated sentence/chunk pairs: [translated, original, ...]
-    const piece = Array.isArray(data?.[0])
-      ? data[0].map((part) => part?.[0] || "").join("")
-      : "";
-    translatedChunks.push(piece);
+    if (data.responseStatus && Number(data.responseStatus) !== 200) {
+      throw new Error(`Translation failed (${targetLang}): ${data.responseDetails || data.responseStatus}`);
+    }
+
+    translatedChunks.push(data?.responseData?.translatedText || chunk);
+
+    // Small pacing delay between requests to stay well under MyMemory's
+    // rate limits when a long article is split into many chunks.
+    if (i < chunks.length - 1) await sleep(300);
   }
 
   return restoreMarkdown(translatedChunks.join(""), tokens);
@@ -578,7 +613,7 @@ async function handleArticle(event) {
     form.reset();
     document.getElementById('articleImagesWrap').innerHTML = '';
     if (alaslEditors["new"]) alaslEditors["new"].commands.setContent("<p></p>");
-    if (msgEl) msgEl.textContent = '✅ تم حفظ المقال! جاري الترجمة للغات الأخرى...';
+    if (msgEl) msgEl.textContent = '✅ تم حفظ المقال! جاري الترجمة للغات الأخرى (ممكن تاخد دقيقة)...';
     setTimeout(() => { toggleSection('articleAddWrap','addArticleBtn'); }, 1500);
     loadArticles();
 
@@ -598,7 +633,7 @@ async function runArticleTranslation(id) {
   const btn = document.getElementById(`translateBtn_${id}`);
   if (btn) {
     btn.disabled = true;
-    btn.textContent = '⏳ جاري الترجمة...';
+    btn.textContent = '⏳ جاري الترجمة (ممكن تاخد دقيقة)...';
   }
 
   try {
@@ -1143,7 +1178,7 @@ async function translateNewFaq() {
   const btn  = document.getElementById('faqTranslateBtn');
   const prev = document.getElementById('faqTranslationPreview');
   if (!q_ar || !a_ar) { if (msg) msg.textContent = 'اكتب السؤال والإجابة بالعربية أولاً.'; return; }
-  if (btn) { btn.textContent = '⏳ جاري الترجمة...'; btn.disabled = true; }
+  if (btn) { btn.textContent = '⏳ جاري الترجمة (ممكن تاخد دقيقة)...'; btn.disabled = true; }
   if (msg) msg.textContent = '';
   try {
     const t = await callClaudeTranslate(q_ar, a_ar);
@@ -1168,7 +1203,7 @@ async function translateExistingFaq(id) {
   const a_ar = document.getElementById('fea_ar_' + id)?.value.trim();
   const msg  = document.getElementById('faqEditMsg_' + id);
   if (!q_ar || !a_ar) { if (msg) msg.textContent = 'اكتب النص العربي أولاً.'; return; }
-  if (msg) msg.textContent = '⏳ جاري الترجمة...';
+  if (msg) msg.textContent = '⏳ جاري الترجمة (ممكن تاخد دقيقة)...';
   try {
     const t = await callClaudeTranslate(q_ar, a_ar);
     ['en','es','zh'].forEach(l => {
