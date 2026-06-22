@@ -18,22 +18,23 @@ function fileExtension(file) {
 }
 
 /* ═══════════════════════════════════════════
-   AUTO TRANSLATION (LibreTranslate, free public API)
+   AUTO TRANSLATION (Google Translate, free unofficial endpoint)
    ═══════════════════════════════════════════ */
 
-const LIBRETRANSLATE_URL = "https://libretranslate.com/translate";
+const GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single";
 
 // Protects formatting syntax from being mangled by the translator:
 // - Legacy Markdown tokens (old articles written as plain Markdown text)
 // - HTML tags (new articles written with the rich text editor)
-// Both are swapped for plain placeholders, translated, then restored.
+// Placeholders use a rare symbol (§) so the translator treats them as a
+// single opaque token instead of trying to "helpfully" translate brackets.
 function protectMarkdown(text) {
   const tokens = [];
   let i = 0;
 
   const capture = (match) => {
     tokens.push(match);
-    const placeholder = `[[T${i}]]`;
+    const placeholder = `§${i}§`;
     i += 1;
     return placeholder;
   };
@@ -51,33 +52,56 @@ function protectMarkdown(text) {
 
 function restoreMarkdown(translatedText, tokens) {
   return tokens.reduce(
-    (text, token, index) => text.replace(`[[T${index}]]`, token),
+    (text, token, index) => text.replace(`§${index}§`, token).replace(`§ ${index}§`, token),
     translatedText
   );
+}
+
+// The unofficial endpoint becomes unreliable on very long single requests,
+// so long content is split into safe-sized chunks (breaking on paragraph
+// boundaries where possible) and translated sequentially, then rejoined.
+function splitIntoChunks(text, maxLen = 3500) {
+  if (text.length <= maxLen) return [text];
+
+  const chunks = [];
+  let remaining = text;
+
+  while (remaining.length > maxLen) {
+    let cut = remaining.lastIndexOf("\n\n", maxLen);
+    if (cut < maxLen * 0.5) cut = remaining.lastIndexOf("\n", maxLen);
+    if (cut < maxLen * 0.5) cut = maxLen;
+    chunks.push(remaining.slice(0, cut));
+    remaining = remaining.slice(cut);
+  }
+  if (remaining) chunks.push(remaining);
+
+  return chunks;
 }
 
 async function translateText(text, targetLang) {
   if (!text || !text.trim()) return "";
 
   const { protected_, tokens } = protectMarkdown(text);
+  const chunks = splitIntoChunks(protected_);
+  const translatedChunks = [];
 
-  const response = await fetch(LIBRETRANSLATE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      q: protected_,
-      source: "ar",
-      target: targetLang,
-      format: "text",
-    }),
-  });
+  for (const chunk of chunks) {
+    const url = `${GOOGLE_TRANSLATE_URL}?client=gtx&sl=ar&tl=${targetLang}&dt=t&q=${encodeURIComponent(chunk)}`;
+    const response = await fetch(url);
 
-  if (!response.ok) {
-    throw new Error(`Translation failed (${targetLang}): ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Translation failed (${targetLang}): ${response.status}`);
+    }
+
+    const data = await response.json();
+    // data[0] is an array of translated sentence/chunk pairs: [translated, original, ...]
+    const piece = Array.isArray(data?.[0])
+      ? data[0].map((part) => part?.[0] || "").join("")
+      : "";
+    translatedChunks.push(piece);
   }
 
-  const data = await response.json();
-  return restoreMarkdown(data.translatedText || "", tokens);
+  return restoreMarkdown(translatedChunks.join(""), tokens);
 }
 
 async function translateArticleFields(article) {
