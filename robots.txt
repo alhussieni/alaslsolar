@@ -1,4 +1,8 @@
 User-agent: *
+Disallow: /dashboard.html
+Disallow: /admin/
+Disallow: /article.html
+
 Allow: /
 
 Sitemap: https://alaslsolar.com/sitemap.xml
