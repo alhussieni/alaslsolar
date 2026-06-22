@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://alaslsolar.com/</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/"/>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/"/>
   </url>
   <url>
     <loc>https://alaslsolar.com/about.html</loc>
@@ -50,12 +46,36 @@
     <loc>https://alaslsolar.com/articles.html</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/contact.html</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://alaslsolar.com/articles/تطبيقات-الطاقة-الشمسية-من-المزرعة-للفيلا-والمصنع-والفندق-1781971759844.html</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alaslsolar.com/articles/الصيانة-وطول-العمر-إزاي-تحافظ-على-منظومتك-الشمسية-لأطول-فترة؟-1781971245146.html</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alaslsolar.com/articles/المقارنات-بين-الأنظمة-إزاي-تختار-النظام-الشمسي-المناسب-ليك؟-1781970721422.html</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://alaslsolar.com/articles/الطاقة-الشمسية-إيه-هي-وإزاي-بتشتغل؟-1781918119702.html</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>
