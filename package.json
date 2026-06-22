@@ -1,0 +1,18 @@
+{
+  "name": "alaslsolar-clean",
+  "version": "1.0.0",
+  "description": "Static GitHub Pages website for Al Asl Solar — run npm run generate after publishing articles.",
+  "main": "alasl-editor.bundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "node generate-articles.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "marked": "^18.0.5"
+  },
+  "type": "module"
+}
