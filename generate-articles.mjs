@@ -1,18 +1,19 @@
 /**
  * generate-articles.mjs
- * Al Asl Solar — Static Article Generator
+ * Al Asl Solar — Static Article Generator (Multilingual)
  *
- * Run this script every time you publish or update an article:
- *   node generate-articles.mjs
+ * Run after publishing or updating an article:
+ *   npm run generate
  *
- * What it does:
- *   1. Fetches all published articles from Supabase
- *   2. Generates a static HTML file for each article  → /articles/{slug}.html
- *   3. Regenerates articles.html with static article cards (SEO-ready)
- *   4. Updates sitemap.xml to include every article URL
+ * Generates per article:
+ *   /articles/{slug}.html       English (default, indexed by Google)
+ *   /articles/{slug}-ar.html    Arabic
+ *   /articles/{slug}-es.html    Spanish
+ *   /articles/{slug}-zh.html    Chinese
  *
- * Requirements:
- *   npm install @supabase/supabase-js marked
+ * Also regenerates:
+ *   articles.html   — static cards (English)
+ *   sitemap.xml     — all article URLs
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -28,6 +29,14 @@ const SUPABASE_ANON_KEY =
 const SITE_URL = "https://alaslsolar.com";
 const __dir = path.dirname(fileURLToPath(import.meta.url));
 
+// Supported languages: code → { label, dir, hreflang, suffix }
+const LANGS = {
+  en: { label: "English",  dir: "ltr", hreflang: "en", suffix: ""     },
+  ar: { label: "العربية",  dir: "rtl", hreflang: "ar", suffix: "-ar"  },
+  es: { label: "Español",  dir: "ltr", hreflang: "es", suffix: "-es"  },
+  zh: { label: "中文",      dir: "ltr", hreflang: "zh", suffix: "-zh"  },
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(str = "") {
   return String(str)
@@ -37,14 +46,15 @@ function esc(str = "") {
     .replace(/"/g, "&quot;");
 }
 
+// Get the best available field for a language, falling back to Arabic then English
 function getField(article, field, lang) {
-  // Multilingual fields are stored as  field_en / field_ar / field_es / field_zh
-  // or as a JSON object under the field key.
-  const localized = article[`${field}_${lang}`];
-  if (localized) return localized;
-  const base = article[field];
-  if (base && typeof base === "object") return base[lang] || base["en"] || "";
-  return base || "";
+  return (
+    article[`${field}_${lang}`] ||
+    article[`${field}_ar`]      ||
+    article[`${field}_en`]      ||
+    article[field]              ||
+    ""
+  );
 }
 
 function renderBody(raw = "") {
@@ -52,34 +62,43 @@ function renderBody(raw = "") {
   return trimmed.startsWith("<") ? trimmed : marked.parse(trimmed);
 }
 
-function formatDate(iso) {
+function formatDate(iso, lang = "en") {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("en-GB", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const locales = { en: "en-GB", ar: "ar-SA", es: "es-ES", zh: "zh-CN" };
+  return new Date(iso).toLocaleDateString(locales[lang] || "en-GB", {
+    year: "numeric", month: "long", day: "numeric",
   });
 }
 
-// ── Shared nav HTML (keeps it DRY) ───────────────────────────────────────────
-const NAV = `
+// ── Shared layout blocks ──────────────────────────────────────────────────────
+const CSS_LINKS = `
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">`;
+
+function nav(depth = 1) {
+  const prefix = depth === 1 ? "../" : "";
+  return `
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
-    <a class="brand" href="../index.html" aria-label="Al Asl Solar home">
-      <img src="../logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
+    <a class="brand" href="${prefix}index.html" aria-label="Al Asl Solar home">
+      <img src="${prefix}logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
     </a>
     <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
       <i class="fa fa-bars" aria-hidden="true"></i>
       <span class="sr-only">Open menu</span>
     </button>
     <nav class="site-menu" id="siteMenu" aria-label="Main navigation">
-      <a href="../index.html" data-i18n="nav_home">Home</a>
-      <a href="../about.html" data-i18n="nav_about">About Us</a>
-      <a href="../services.html" data-i18n="nav_services">Services</a>
-      <a href="../projects.html" data-i18n="nav_projects">Projects</a>
-      <a href="../articles.html" data-i18n="nav_articles">Articles</a>
-      <a href="../contact.html" data-i18n="nav_contact">Contact</a>
-      <a class="admin-link" href="../dashboard.html" data-i18n="nav_admin">Admin Login</a>
+      <a href="${prefix}index.html" data-i18n="nav_home">Home</a>
+      <a href="${prefix}about.html" data-i18n="nav_about">About Us</a>
+      <a href="${prefix}services.html" data-i18n="nav_services">Services</a>
+      <a href="${prefix}projects.html" data-i18n="nav_projects">Projects</a>
+      <a href="${prefix}articles.html" data-i18n="nav_articles">Articles</a>
+      <a href="${prefix}contact.html" data-i18n="nav_contact">Contact</a>
+      <a class="admin-link" href="${prefix}dashboard.html">Admin</a>
       <div class="lang-switcher" role="group" aria-label="Language">
         <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
           <i class="ti ti-world" aria-hidden="true"></i>
@@ -95,8 +114,10 @@ const NAV = `
       </div>
     </nav>
   </header>`;
+}
 
-const FOOTER = `
+function footer() {
+  return `
   <footer class="site-footer">
     <div>
       <strong>Al Asl Solar Energy</strong>
@@ -113,74 +134,68 @@ const FOOTER = `
   <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
     <i class="fab fa-whatsapp" aria-hidden="true"></i>
   </a>`;
+}
 
-const HEAD_COMMON = (extraLinks = "") => `
+// ── Build one article page for one language ───────────────────────────────────
+function buildArticlePage(article, lang) {
+  const { dir, hreflang, suffix } = LANGS[lang];
+  const slug    = article.slug || String(article.id);
+  const title   = getField(article, "title",   lang);
+  const summary = getField(article, "summary", lang);
+  const rawBody = getField(article, "content", lang) || getField(article, "body", lang) || summary;
+  const body    = renderBody(rawBody);
+  const image   = article.image_url || `${SITE_URL}/solar.jpg`;
+  const dateISO = article.created_at
+    ? new Date(article.created_at).toISOString().split("T")[0]
+    : new Date().toISOString().split("T")[0];
+  const dateDisplay = formatDate(article.created_at, lang);
+
+  const pageUrl     = `${SITE_URL}/articles/${slug}${suffix}.html`;
+  const canonicalEn = `${SITE_URL}/articles/${slug}.html`; // canonical always points to EN
+
+  // hreflang links for all variants
+  const hreflangLinks = Object.entries(LANGS)
+    .map(([l, { suffix: s, hreflang: h }]) =>
+      `  <link rel="alternate" hreflang="${h}" href="${SITE_URL}/articles/${slug}${s}.html">`)
+    .join("\n");
+
+  // Language switcher links (shown as static links so Google can follow them)
+  const langLinks = Object.entries(LANGS)
+    .map(([l, { label, suffix: s }]) => {
+      const active = l === lang ? ' aria-current="true"' : "";
+      return `<a href="${slug}${s}.html"${active}>${label}</a>`;
+    })
+    .join(" | ");
+
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    description: summary,
+    image,
+    inLanguage: hreflang,
+    datePublished: dateISO,
+    dateModified: dateISO,
+    author: { "@type": "Organization", name: "Al Asl Solar", url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: "Al Asl Solar",
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+  });
+
+  return `<!DOCTYPE html>
+<html lang="${hreflang}" dir="${dir}">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0d0b0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-  ${extraLinks}`;
-
-// ── Generate one static article page ─────────────────────────────────────────
-function buildArticlePage(article) {
-  const slug = article.slug || String(article.id);
-  const title = getField(article, "title", "en");
-  const summary = getField(article, "summary", "en");
-  const body = renderBody(
-    getField(article, "content", "en") ||
-      getField(article, "body", "en") ||
-      summary
-  );
-  const image = article.image_url || `${SITE_URL}/solar.jpg`;
-  const dateISO = article.created_at
-    ? new Date(article.created_at).toISOString().split("T")[0]
-    : new Date().toISOString().split("T")[0];
-  const dateDisplay = formatDate(article.created_at);
-  const pageUrl = `${SITE_URL}/articles/${slug}.html`;
-
-  // Build hreflang links for all supported languages
-  const langs = ["en", "ar", "es", "zh"];
-  const hreflangLinks = langs
-    .map((l) => `  <link rel="alternate" hreflang="${l}" href="${pageUrl}">`)
-    .join("\n");
-
-  // JSON-LD structured data for Google
-  const jsonLd = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: title,
-    description: summary,
-    image: image,
-    datePublished: dateISO,
-    dateModified: dateISO,
-    author: {
-      "@type": "Organization",
-      name: "Al Asl Solar",
-      url: SITE_URL,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Al Asl Solar",
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/logo.png`,
-      },
-    },
-    mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
-  });
-
-  return `<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-  ${HEAD_COMMON(`<link rel="stylesheet" href="../styles.css">`)}
+  ${CSS_LINKS}
+  <link rel="stylesheet" href="../styles.css">
   <title>${esc(title)} | Al Asl Solar</title>
   <meta name="description" content="${esc(summary)}">
   <meta property="og:title" content="${esc(title)} | Al Asl Solar">
@@ -188,7 +203,7 @@ function buildArticlePage(article) {
   <meta property="og:type" content="article">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:image" content="${esc(image)}">
-  <link rel="canonical" href="${pageUrl}">
+  <link rel="canonical" href="${canonicalEn}">
 ${hreflangLinks}
   <script type="application/ld+json">${jsonLd}</script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -196,46 +211,43 @@ ${hreflangLinks}
   <script defer src="../app.js"></script>
 </head>
 <body>
-${NAV}
+${nav(1)}
 
   <main id="main">
     <section class="page-hero">
-      <p class="eyebrow" data-i18n="articles_kicker">Knowledge center</p>
-      <h1 id="articleTitle">${esc(title)}</h1>
+      <p class="eyebrow">Knowledge center</p>
+      <h1>${esc(title)}</h1>
+      <p class="article-lang-switcher" style="margin-top:0.5rem;font-size:0.9rem;opacity:0.75;">
+        ${langLinks}
+      </p>
     </section>
 
     <section class="section">
-      <div class="article-detail" data-article-detail>
-        <div class="article-detail-loading" data-article-loading hidden></div>
-        <div class="article-detail-not-found" data-article-not-found hidden>
-          <p data-i18n="article_not_found">This article could not be found.</p>
-          <a href="../articles.html" data-i18n="article_back_link">Back to articles</a>
-        </div>
-        <article class="article-detail-content" data-article-content>
-          ${image ? `<img data-article-image src="${esc(image)}" alt="${esc(title)}" loading="eager">` : ""}
-          <span data-article-date>${esc(dateDisplay)}</span>
-          <div data-article-body>${body}</div>
-        </article>
-      </div>
+      <article class="article-detail-content">
+        ${image ? `<img src="${esc(image)}" alt="${esc(title)}" loading="eager">` : ""}
+        <span>${esc(dateDisplay)}</span>
+        <div>${body}</div>
+      </article>
+      <p style="margin-top:2rem;">
+        <a href="../articles.html">← Back to articles</a>
+      </p>
     </section>
   </main>
 
-${FOOTER}
+${footer()}
 </body>
 </html>`;
 }
 
 // ── Regenerate articles.html with static cards ────────────────────────────────
 function buildArticlesPage(articles) {
-  const cards = articles
-    .map((article) => {
-      const slug = article.slug || String(article.id);
-      const title = getField(article, "title", "en");
-      const summary = getField(article, "summary", "en");
-      const image = article.image_url || "solar.jpg";
-      const date = formatDate(article.created_at);
-
-      return `        <a class="article-card" href="articles/${slug}.html">
+  const cards = articles.map((article) => {
+    const slug    = article.slug || String(article.id);
+    const title   = getField(article, "title",   "en");
+    const summary = getField(article, "summary", "en");
+    const image   = article.image_url || "solar.jpg";
+    const date    = formatDate(article.created_at, "en");
+    return `        <a class="article-card" href="articles/${slug}.html">
           <img src="${esc(image)}" alt="${esc(title)}" loading="lazy">
           <div>
             ${date ? `<span>${esc(date)}</span>` : ""}
@@ -243,24 +255,19 @@ function buildArticlesPage(articles) {
             <p>${esc(summary)}</p>
           </div>
         </a>`;
-    })
-    .join("\n");
+  }).join("\n");
 
-  // JSON-LD for the listing page
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Blog",
     name: "Solar Energy Articles — Al Asl Solar",
     url: `${SITE_URL}/articles.html`,
-    description:
-      "Solar energy guides, tips, and industry insights from Al Asl Solar.",
+    description: "Solar energy guides, tips, and industry insights from Al Asl Solar.",
     blogPost: articles.map((a) => ({
       "@type": "BlogPosting",
       headline: getField(a, "title", "en"),
       url: `${SITE_URL}/articles/${a.slug || a.id}.html`,
-      datePublished: a.created_at
-        ? new Date(a.created_at).toISOString().split("T")[0]
-        : "",
+      datePublished: a.created_at ? new Date(a.created_at).toISOString().split("T")[0] : "",
       description: getField(a, "summary", "en"),
     })),
   });
@@ -268,7 +275,11 @@ function buildArticlesPage(articles) {
   return `<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-  ${HEAD_COMMON(`<link rel="stylesheet" href="styles.css">`)}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0b0a">
+  ${CSS_LINKS}
+  <link rel="stylesheet" href="styles.css">
   <title>Articles | Al Asl Solar</title>
   <meta name="description" content="Read Al Asl Solar articles, updates, and renewable energy insights.">
   <meta property="og:title" content="Articles | Al Asl Solar">
@@ -304,7 +315,7 @@ function buildArticlesPage(articles) {
       <a href="projects.html" data-i18n="nav_projects">Projects</a>
       <a href="articles.html" data-i18n="nav_articles">Articles</a>
       <a href="contact.html" data-i18n="nav_contact">Contact</a>
-      <a class="admin-link" href="dashboard.html" data-i18n="nav_admin">Admin Login</a>
+      <a class="admin-link" href="dashboard.html">Admin</a>
       <div class="lang-switcher" role="group" aria-label="Language">
         <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
           <i class="ti ti-world" aria-hidden="true"></i>
@@ -327,7 +338,6 @@ function buildArticlesPage(articles) {
       <h1 data-i18n="articles_title">Solar articles and updates</h1>
       <p data-i18n="articles_intro">Insights, announcements, and practical notes from Al Asl Solar.</p>
     </section>
-
     <section class="section">
       <div class="article-controls" data-articles-controls></div>
       <div class="cards three" data-articles-grid>
@@ -349,7 +359,6 @@ ${cards}
       <a href="https://tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
     </div>
   </footer>
-
   <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
     <i class="fab fa-whatsapp" aria-hidden="true"></i>
   </a>
@@ -362,47 +371,52 @@ function buildSitemap(articles) {
   const today = new Date().toISOString().split("T")[0];
 
   const staticPages = [
-    { url: "/", priority: "1.0", freq: "monthly" },
-    { url: "/about.html", priority: "0.8", freq: "monthly" },
-    { url: "/services.html", priority: "0.9", freq: "monthly" },
+    { url: "/",                        priority: "1.0", freq: "monthly" },
+    { url: "/about.html",              priority: "0.8", freq: "monthly" },
+    { url: "/services.html",           priority: "0.9", freq: "monthly" },
     { url: "/services-agriculture.html", priority: "0.9", freq: "monthly" },
-    { url: "/services-industrial.html", priority: "0.9", freq: "monthly" },
+    { url: "/services-industrial.html",  priority: "0.9", freq: "monthly" },
     { url: "/services-residential.html", priority: "0.9", freq: "monthly" },
-    { url: "/projects.html", priority: "0.8", freq: "weekly" },
-    { url: "/articles.html", priority: "0.8", freq: "weekly" },
-    { url: "/contact.html", priority: "0.8", freq: "yearly" },
+    { url: "/projects.html",           priority: "0.8", freq: "weekly"  },
+    { url: "/articles.html",           priority: "0.8", freq: "weekly"  },
+    { url: "/contact.html",            priority: "0.8", freq: "yearly"  },
   ];
 
-  const staticEntries = staticPages
-    .map(
-      ({ url, priority, freq }) => `  <url>
+  const staticEntries = staticPages.map(({ url, priority, freq }) => `  <url>
     <loc>${SITE_URL}${url}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${freq}</changefreq>
     <priority>${priority}</priority>
-  </url>`
-    )
-    .join("\n");
+  </url>`).join("\n");
 
-  const articleEntries = articles
-    .map((a) => {
-      const slug = a.slug || String(a.id);
-      const lastmod = a.updated_at
-        ? new Date(a.updated_at).toISOString().split("T")[0]
-        : a.created_at
-        ? new Date(a.created_at).toISOString().split("T")[0]
-        : today;
-      return `  <url>
+  // Each article generates 4 URLs — EN is canonical, others are alternates
+  const articleEntries = articles.flatMap((a) => {
+    const slug    = a.slug || String(a.id);
+    const lastmod = a.updated_at
+      ? new Date(a.updated_at).toISOString().split("T")[0]
+      : a.created_at
+      ? new Date(a.created_at).toISOString().split("T")[0]
+      : today;
+
+    // hreflang links for sitemap
+    const hreflangs = Object.entries(LANGS)
+      .map(([l, { hreflang, suffix }]) =>
+        `      <xhtml:link rel="alternate" hreflang="${hreflang}" href="${SITE_URL}/articles/${slug}${suffix}.html"/>`)
+      .join("\n");
+
+    // Only include the canonical (EN) URL in sitemap with hreflang annotations
+    return `  <url>
     <loc>${SITE_URL}/articles/${slug}.html</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+${hreflangs}
   </url>`;
-    })
-    .join("\n");
+  }).join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${staticEntries}
 ${articleEntries}
 </urlset>`;
@@ -426,20 +440,22 @@ async function main() {
 
   console.log(`✅  Fetched ${articles.length} published article(s).`);
 
-  // Create /articles/ directory
   const articlesDir = path.join(__dir, "articles");
   if (!fs.existsSync(articlesDir)) fs.mkdirSync(articlesDir);
 
-  // 1. Generate individual article pages
+  // 1. Generate all language variants for each article
   for (const article of articles) {
     const slug = article.slug || String(article.id);
-    const html = buildArticlePage(article);
-    const filePath = path.join(articlesDir, `${slug}.html`);
-    fs.writeFileSync(filePath, html, "utf8");
-    console.log(`   📄  articles/${slug}.html`);
+    for (const lang of Object.keys(LANGS)) {
+      const { suffix } = LANGS[lang];
+      const html     = buildArticlePage(article, lang);
+      const filename = `${slug}${suffix}.html`;
+      fs.writeFileSync(path.join(articlesDir, filename), html, "utf8");
+      console.log(`   📄  articles/${filename}`);
+    }
   }
 
-  // 2. Regenerate articles.html with static cards
+  // 2. Regenerate articles.html
   const articlesListHtml = buildArticlesPage(articles);
   fs.writeFileSync(path.join(__dir, "articles.html"), articlesListHtml, "utf8");
   console.log("   📄  articles.html  (updated)");
@@ -449,10 +465,8 @@ async function main() {
   fs.writeFileSync(path.join(__dir, "sitemap.xml"), sitemapXml, "utf8");
   console.log("   🗺️   sitemap.xml  (updated)");
 
-  console.log("\n✨  Done! Upload the following to your GitHub repo:");
-  console.log("     • articles/          (whole folder)");
-  console.log("     • articles.html");
-  console.log("     • sitemap.xml");
+  console.log(`\n✨  Done! Generated ${articles.length * 4} article pages (EN + AR + ES + ZH).`);
+  console.log("    Upload to GitHub: articles/  articles.html  sitemap.xml");
 }
 
 main().catch((err) => {
