@@ -209,6 +209,7 @@ ${hreflangLinks}
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="../supabase-config.js"></script>
   <script defer src="../app.js"></script>
+  <script defer src="../article-lang-switcher.js"></script>
 </head>
 <body>
 ${nav(1)}
