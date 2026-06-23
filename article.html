@@ -15,6 +15,19 @@
   <meta property="og:image" content="https://alaslsolar.com/solar.jpg">
   <title>Article | Al Asl Solar</title>
   <link rel="canonical" href="https://alaslsolar.com/article.html">
+
+  <!-- Redirect old dynamic URLs (article.html?slug=...) to new static pages -->
+  <script>
+    (function () {
+      var slug = new URLSearchParams(window.location.search).get("slug");
+      if (slug) {
+        var lang = localStorage.getItem("alasl-lang") || "en";
+        var suffix = { en: "", ar: "-ar", es: "-es", zh: "-zh" }[lang] || "";
+        window.location.replace("articles/" + slug + suffix + ".html");
+      }
+    })();
+  </script>
+
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
