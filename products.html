@@ -729,7 +729,6 @@
       const { data, error } = await sb
         .from('products')
         .select('*')
-        .eq('published', true)
         .order('sort_order', { ascending: true });
 
       loading.hidden = true;
