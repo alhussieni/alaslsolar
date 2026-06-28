@@ -1331,16 +1331,21 @@ function renderDashProducts() {
 
   list.innerHTML = rows.map(p => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-3);border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:var(--space-2);flex-wrap:wrap">
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark)">${catLabels[p.category] || p.category}</span>
-          ${p.brand ? `<span style="font-size:11px;color:var(--muted)">${p.brand}</span>` : ''}
-          ${p.published ? '' : '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي</span>'}
+      <div style="display:flex;gap:var(--space-2);flex:1;min-width:0">
+        <div style="width:48px;height:48px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
+          ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:18px;opacity:.5">${({inverters:'⚡',panels:'☀️',accessories:'🔌',combiners:'📦',structures:'🏗️',cables:'🔶'})[p.category] || '📦'}</span>`}
         </div>
-        <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name_ar}</p>
-        <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs || ''} ${p.notes ? '— ' + p.notes : ''}</p>
-        ${p.model_available ? `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark)">📋 موديل: ${p.model_available}</p>` : ''}
-        ${p.datasheet_url ? `<a href="${p.datasheet_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:none">📄 داتا شيت</a>` : ''}
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark)">${catLabels[p.category] || p.category}</span>
+            ${p.brand ? `<span style="font-size:11px;color:var(--muted)">${p.brand}</span>` : ''}
+            ${p.published ? '' : '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي</span>'}
+          </div>
+          <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name_ar}</p>
+          <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs || ''} ${p.notes ? '— ' + p.notes : ''}</p>
+          ${p.model_available ? `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark)">📋 موديل: ${p.model_available}</p>` : ''}
+          ${p.datasheet_url ? `<a href="${p.datasheet_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:none">📄 داتا شيت</a>` : ''}
+        </div>
       </div>
       <div style="text-align:left;flex-shrink:0">
         <p style="font-weight:800;font-size:16px;color:var(--brand-dark);margin:0">${Number(p.price).toLocaleString('ar-EG')} <span style="font-size:11px;font-weight:400">ج.م/${p.unit||'قطعة'}</span></p>
@@ -1355,6 +1360,39 @@ function renderDashProducts() {
       </div>
     </div>`).join('');
 }
+
+function setProductImagePreview(url) {
+  const prev = document.getElementById('productImagePreview');
+  const removeBtn = document.getElementById('removeProductImageBtn');
+  if (!prev) return;
+  if (url) {
+    prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+    if (removeBtn) removeBtn.style.display = 'inline-block';
+  } else {
+    prev.innerHTML = `<span style="color:var(--muted);font-size:10px">بدون صورة</span>`;
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
+function removeProductImage() {
+  document.getElementById('productImageUrl').value = '';
+  const fileInput = document.getElementById('productImageFile');
+  if (fileInput) fileInput.value = '';
+  setProductImagePreview('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const imgFile = document.getElementById('productImageFile');
+  if (imgFile) {
+    imgFile.addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => setProductImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+});
 
 function editProduct(id) {
   const p = allDashProducts.find(x => x.id === id);
@@ -1371,6 +1409,9 @@ function editProduct(id) {
   document.getElementById('productNotes').value = p.notes || '';
   document.getElementById('productSort').value = p.sort_order;
   document.getElementById('productPublished').checked = p.published;
+  document.getElementById('productImageUrl').value = p.image_url || '';
+  document.getElementById('productImageFile').value = '';
+  setProductImagePreview(p.image_url || '');
   document.getElementById('productAddWrap').style.display = 'block';
   document.getElementById('productAddWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -1378,6 +1419,8 @@ function editProduct(id) {
 function cancelProductForm() {
   document.getElementById('productForm').reset();
   document.getElementById('productEditId').value = '';
+  document.getElementById('productImageUrl').value = '';
+  setProductImagePreview('');
   document.getElementById('productAddWrap').style.display = 'none';
 }
 
@@ -1402,6 +1445,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const msg = document.getElementById('productMessage');
     if (msg) msg.textContent = 'جاري الحفظ...';
     const editId = document.getElementById('productEditId').value;
+
+    // Keep existing image_url unless a new file was chosen
+    let imageUrl = document.getElementById('productImageUrl').value || null;
+    const imageFile = document.getElementById('productImageFile')?.files[0];
+    if (imageFile) {
+      try {
+        if (msg) msg.textContent = 'جاري رفع الصورة...';
+        imageUrl = await uploadImage(imageFile, 'products');
+      } catch (err) {
+        if (msg) msg.textContent = 'خطأ في رفع الصورة: ' + err.message;
+        return;
+      }
+    }
+
     const payload = {
       category:   document.getElementById('productCategory').value,
       brand:      document.getElementById('productBrand').value.trim() || null,
@@ -1412,11 +1469,13 @@ document.addEventListener('DOMContentLoaded', () => {
       unit:       document.getElementById('productUnit').value,
       price:      parseFloat(document.getElementById('productPrice').value) || 0,
       notes:      document.getElementById('productNotes').value.trim() || null,
+      image_url:  imageUrl,
       sort_order: parseInt(document.getElementById('productSort').value) || 100,
       published:  document.getElementById('productPublished').checked,
       updated_at: new Date().toISOString(),
     };
     if (!payload.name_ar) { if (msg) msg.textContent = 'اسم المنتج مطلوب.'; return; }
+    if (msg) msg.textContent = 'جاري الحفظ...';
     let error;
     if (editId) {
       ({ error } = await client.from('products').update(payload).eq('id', editId));
