@@ -338,6 +338,112 @@
         </article>
       </div>
 
+      <!-- ── Products Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">🛒 إدارة المنتجات</h3>
+            <button type="button" onclick="toggleSection('productAddWrap','addProductBtn')" id="addProductBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة منتج
+            </button>
+          </div>
+
+          <!-- Add / Edit form -->
+          <div id="productAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="productForm">
+              <input type="hidden" id="productEditId">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                <div>
+                  <label>التصنيف *</label>
+                  <select id="productCategory" name="category" required>
+                    <option value="inverters">⚡ إنفرترات</option>
+                    <option value="panels">☀️ ألواح شمسية</option>
+                    <option value="accessories">🔌 إكسسوارات</option>
+                    <option value="combiners">📦 صناديق جمع</option>
+                    <option value="structures">🏗️ شاسيهات</option>
+                    <option value="cables">🔶 كابلات</option>
+                  </select>
+                </div>
+                <div>
+                  <label>الماركة / البراند</label>
+                  <input id="productBrand" name="brand" placeholder="مثال: VEICHI">
+                </div>
+                <div>
+                  <label>اسم المنتج *</label>
+                  <input id="productName" name="name" required placeholder="اسم المنتج...">
+                </div>
+                <div>
+                  <label>المواصفات</label>
+                  <input id="productSpecs" name="specs" placeholder="مثال: 5.5 HP - 4 KW">
+                </div>
+                <div>
+                  <label>الوحدة</label>
+                  <select id="productUnit" name="unit">
+                    <option value="قطعة">قطعة</option>
+                    <option value="وات">وات</option>
+                    <option value="متر">متر</option>
+                    <option value="طقم">طقم</option>
+                  </select>
+                </div>
+                <div>
+                  <label>السعر (ج.م) *</label>
+                  <input id="productPrice" name="price" type="number" min="0" step="0.01" required placeholder="0.00">
+                </div>
+                <div>
+                  <label>ملاحظات</label>
+                  <input id="productNotes" name="notes" placeholder="ملاحظة إضافية...">
+                </div>
+                <div>
+                  <label>الترتيب</label>
+                  <input id="productSort" name="sort_order" type="number" value="100" placeholder="100">
+                </div>
+              </div>
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" id="productPublished" type="checkbox" checked>
+                <span style="font-weight:700">نشر المنتج</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المنتج</button>
+                <button type="button" onclick="cancelProductForm()"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" id="productMessage" style="margin-top:6px"></p>
+            </form>
+          </div>
+
+          <!-- Filter by category -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--space-2)">
+            <button type="button" class="prod-dash-filter active" data-pcat="all"
+              onclick="filterDashProducts('all',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">الكل</button>
+            <button type="button" class="prod-dash-filter" data-pcat="inverters"
+              onclick="filterDashProducts('inverters',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">⚡ إنفرترات</button>
+            <button type="button" class="prod-dash-filter" data-pcat="panels"
+              onclick="filterDashProducts('panels',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">☀️ ألواح</button>
+            <button type="button" class="prod-dash-filter" data-pcat="accessories"
+              onclick="filterDashProducts('accessories',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔌 إكسسوارات</button>
+            <button type="button" class="prod-dash-filter" data-pcat="combiners"
+              onclick="filterDashProducts('combiners',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">📦 صناديق</button>
+            <button type="button" class="prod-dash-filter" data-pcat="structures"
+              onclick="filterDashProducts('structures',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🏗️ شاسيهات</button>
+            <button type="button" class="prod-dash-filter" data-pcat="cables"
+              onclick="filterDashProducts('cables',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔶 كابلات</button>
+          </div>
+
+          <!-- Products list -->
+          <div id="productsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
+        </article>
+      </div>
+
       <!-- ── Articles Management ── -->
       <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
         <article class="dashboard-card">
