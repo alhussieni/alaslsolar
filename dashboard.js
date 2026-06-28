@@ -1339,6 +1339,8 @@ function renderDashProducts() {
         </div>
         <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name_ar}</p>
         <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs || ''} ${p.notes ? '— ' + p.notes : ''}</p>
+        ${p.model_available ? `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark)">📋 موديل: ${p.model_available}</p>` : ''}
+        ${p.datasheet_url ? `<a href="${p.datasheet_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:none">📄 داتا شيت</a>` : ''}
       </div>
       <div style="text-align:left;flex-shrink:0">
         <p style="font-weight:800;font-size:16px;color:var(--brand-dark);margin:0">${Number(p.price).toLocaleString('ar-EG')} <span style="font-size:11px;font-weight:400">ج.م/${p.unit||'قطعة'}</span></p>
@@ -1362,6 +1364,8 @@ function editProduct(id) {
   document.getElementById('productBrand').value = p.brand || '';
   document.getElementById('productName').value = p.name_ar;
   document.getElementById('productSpecs').value = p.specs || '';
+  document.getElementById('productModel').value = p.model_available || '';
+  document.getElementById('productDatasheet').value = p.datasheet_url || '';
   document.getElementById('productUnit').value = p.unit || 'قطعة';
   document.getElementById('productPrice').value = p.price;
   document.getElementById('productNotes').value = p.notes || '';
@@ -1403,6 +1407,8 @@ document.addEventListener('DOMContentLoaded', () => {
       brand:      document.getElementById('productBrand').value.trim() || null,
       name_ar:    document.getElementById('productName').value.trim(),
       specs:      document.getElementById('productSpecs').value.trim() || null,
+      model_available: document.getElementById('productModel').value.trim() || null,
+      datasheet_url:   document.getElementById('productDatasheet').value.trim() || null,
       unit:       document.getElementById('productUnit').value,
       price:      parseFloat(document.getElementById('productPrice').value) || 0,
       notes:      document.getElementById('productNotes').value.trim() || null,
