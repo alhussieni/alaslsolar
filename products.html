@@ -713,44 +713,72 @@
     async function loadProducts() {
       const loading = document.getElementById('productsLoading');
 
-      // Wait for Supabase to be ready
+      // Wait for supabase library + config to load (max 5 seconds)
       let attempts = 0;
-      while ((!window.supabase || !window.getAlaslSupabase) && attempts < 40) {
+      while (attempts < 50) {
+        if (
+          window.supabase &&
+          typeof window.supabase.createClient === 'function' &&
+          window.ALASL_SUPABASE_URL &&
+          window.ALASL_SUPABASE_ANON_KEY
+        ) break;
         await new Promise(r => setTimeout(r, 100));
         attempts++;
       }
 
-      const sb = window.getAlaslSupabase ? window.getAlaslSupabase() : null;
+      // Build client directly — don't rely on getAlaslSupabase being on window
+      let sb = null;
+      try {
+        if (window.alaslSupabase) {
+          sb = window.alaslSupabase;
+        } else if (window.supabase && window.supabase.createClient) {
+          sb = window.supabase.createClient(
+            window.ALASL_SUPABASE_URL,
+            window.ALASL_SUPABASE_ANON_KEY
+          );
+          window.alaslSupabase = sb;
+        }
+      } catch(e) {
+        console.error('Supabase init error:', e);
+      }
+
       if (!sb) {
         loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>تعذّر تحميل المنتجات — يرجى تحديث الصفحة.';
         return;
       }
 
-      const { data, error } = await sb
-        .from('products')
-        .select('*')
-        .order('sort_order', { ascending: true });
+      try {
+        const { data, error } = await sb
+          .from('products')
+          .select('*')
+          .order('sort_order', { ascending: true });
 
-      loading.hidden = true;
+        loading.hidden = true;
 
-      if (error || !data) {
+        if (error || !data) {
+          console.error('Supabase query error:', error);
+          loading.hidden = false;
+          loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>حدث خطأ في تحميل المنتجات.';
+          return;
+        }
+
+        // Group by category
+        const groups = {};
+        CATEGORIES.forEach(c => groups[c] = []);
+        data.forEach(row => { if (groups[row.category]) groups[row.category].push(row); });
+
+        CATEGORIES.forEach(cat => {
+          const sec = document.getElementById('sec-' + cat);
+          if (!sec) return;
+          if (groups[cat].length === 0) return;
+          RENDERERS[cat](groups[cat]);
+          sec.hidden = false;
+        });
+      } catch(e) {
+        console.error('loadProducts error:', e);
         loading.hidden = false;
         loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>حدث خطأ في تحميل المنتجات.';
-        return;
       }
-
-      // Group by category
-      const groups = {};
-      CATEGORIES.forEach(c => groups[c] = []);
-      data.forEach(row => { if (groups[row.category]) groups[row.category].push(row); });
-
-      CATEGORIES.forEach(cat => {
-        const sec = document.getElementById('sec-' + cat);
-        if (!sec) return;
-        if (groups[cat].length === 0) return;
-        RENDERERS[cat](groups[cat]);
-        sec.hidden = false;
-      });
     }
 
     // Boot after DOM ready
