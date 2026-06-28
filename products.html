@@ -440,7 +440,7 @@
       tb.innerHTML = rows.map(r => `
         <tr>
           <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
-          <td>${r.specs || r.name}</td>
+          <td>${r.specs || r.name_ar}</td>
           <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
         </tr>`).join('');
     }
@@ -450,7 +450,7 @@
       tb.innerHTML = rows.map(r => `
         <tr>
           <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
-          <td>${r.name}${r.notes ? ' <em style="font-size:11px;color:var(--brand-dark)">(' + r.notes + ')</em>' : ''}</td>
+          <td>${r.name_ar}${r.notes ? ' <em style="font-size:11px;color:var(--brand-dark)">(' + r.notes + ')</em>' : ''}</td>
           <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م/وات</span></td>
         </tr>`).join('');
     }
@@ -459,7 +459,7 @@
       const tb = document.getElementById('tbody-accessories');
       tb.innerHTML = rows.map(r => `
         <tr>
-          <td>${r.name}</td>
+          <td>${r.name_ar}</td>
           <td>${r.specs || '—'}</td>
           <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
         </tr>`).join('');
@@ -469,7 +469,7 @@
       const tb = document.getElementById('tbody-combiners');
       tb.innerHTML = rows.map(r => `
         <tr>
-          <td>${r.name}</td>
+          <td>${r.name_ar}</td>
           <td>${r.specs || '—'}</td>
           <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
         </tr>`).join('');
@@ -479,7 +479,7 @@
       const tb = document.getElementById('tbody-structures');
       tb.innerHTML = rows.map(r => `
         <tr>
-          <td>${r.name}</td>
+          <td>${r.name_ar}</td>
           <td>${r.specs || '—'}</td>
           <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
         </tr>`).join('');
@@ -490,7 +490,7 @@
       tb.innerHTML = rows.map(r => `
         <tr>
           <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
-          <td>${r.specs || r.name}</td>
+          <td>${r.specs || r.name_ar}</td>
           <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م/م</span></td>
         </tr>`).join('');
     }

@@ -1337,7 +1337,7 @@ function renderDashProducts() {
           ${p.brand ? `<span style="font-size:11px;color:var(--muted)">${p.brand}</span>` : ''}
           ${p.published ? '' : '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي</span>'}
         </div>
-        <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name}</p>
+        <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name_ar}</p>
         <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs || ''} ${p.notes ? '— ' + p.notes : ''}</p>
       </div>
       <div style="text-align:left;flex-shrink:0">
@@ -1360,7 +1360,7 @@ function editProduct(id) {
   document.getElementById('productEditId').value = p.id;
   document.getElementById('productCategory').value = p.category;
   document.getElementById('productBrand').value = p.brand || '';
-  document.getElementById('productName').value = p.name;
+  document.getElementById('productName').value = p.name_ar;
   document.getElementById('productSpecs').value = p.specs || '';
   document.getElementById('productUnit').value = p.unit || 'قطعة';
   document.getElementById('productPrice').value = p.price;
@@ -1401,7 +1401,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const payload = {
       category:   document.getElementById('productCategory').value,
       brand:      document.getElementById('productBrand').value.trim() || null,
-      name:       document.getElementById('productName').value.trim(),
+      name_ar:    document.getElementById('productName').value.trim(),
       specs:      document.getElementById('productSpecs').value.trim() || null,
       unit:       document.getElementById('productUnit').value,
       price:      parseFloat(document.getElementById('productPrice').value) || 0,
@@ -1410,7 +1410,7 @@ document.addEventListener('DOMContentLoaded', () => {
       published:  document.getElementById('productPublished').checked,
       updated_at: new Date().toISOString(),
     };
-    if (!payload.name) { if (msg) msg.textContent = 'اسم المنتج مطلوب.'; return; }
+    if (!payload.name_ar) { if (msg) msg.textContent = 'اسم المنتج مطلوب.'; return; }
     let error;
     if (editId) {
       ({ error } = await client.from('products').update(payload).eq('id', editId));
