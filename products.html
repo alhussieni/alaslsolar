@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,120 +26,256 @@
   <link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products.html">
   <link rel="alternate" hreflang="en" href="https://alaslsolar.com/products.html">
   <link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products.html">
+  <!-- Products-page translation keys — injected before app.js -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof translations === 'undefined') return;
+
+    const prodKeys = {
+      en: {
+        products_kicker: "Product List",
+        products_title: "Products & Prices",
+        products_intro: "All prices in EGP and subject to change. Contact us for the best offer.",
+        prod_note_label: "Note:",
+        prod_note_text: "Prices are approximate and may change — contact us to confirm before ordering.",
+        prod_cat_all: "All",
+        prod_cat_inverters: "⚡ Inverters",
+        prod_cat_panels: "☀️ Solar Panels",
+        prod_cat_accessories: "🔌 Accessories",
+        prod_cat_combiners: "📦 Combiner Boxes",
+        prod_cat_structures: "🏗️ Mounting Structures",
+        prod_cat_cables: "🔶 Cables",
+        prod_loading: "Loading products…",
+        prod_inv_title: "Inverters — VEICHI & Delixi",
+        prod_brand: "Brand",
+        prod_power: "Power",
+        prod_all_brands: "All Brands",
+        prod_all_powers: "All Powers",
+        prod_reset: "Reset",
+        prod_panels_title: "Solar Panels — Price per Watt",
+        prod_acc_title: "Accessories — Suntree",
+        prod_comb_title: "Combiner Boxes — Kayal",
+        prod_struct_title: "Mounting Structures",
+        prod_cables_title: "Cables — LEADER",
+        prod_th_brand: "Brand",
+        prod_th_kw: "Power (KW)",
+        prod_th_hp: "Power (HP)",
+        prod_th_model: "Model",
+        prod_th_datasheet: "Datasheet",
+        prod_th_price_egp: "Price (EGP)",
+        prod_th_type: "Type",
+        prod_th_panels_count: "Panel Count",
+        prod_th_price_watt: "Price/Watt (EGP)",
+        prod_th_item: "Item",
+        prod_th_ampere: "Type / Current",
+        prod_th_name: "Name",
+        prod_th_specs: "Specs",
+        prod_th_price_meter: "Price/m (EGP)",
+        prod_no_results: "No results for this selection",
+        prod_cta_title: "🤝 Need a Quote?",
+        prod_cta_text: "Contact us and we'll prepare the best offer based on your needs and project size.",
+        prod_sort_newest: "Newest",
+        prod_count_label: "products",
+        prod_sidebar_category: "Category",
+        prod_sidebar_price: "Price (EGP)",
+        prod_price_from: "From",
+        prod_price_to: "To",
+        prod_apply_filter: "Apply Filter",
+        prod_reset_filter: "Reset",
+        prod_empty_title: "No products found",
+        prod_empty_text: "Try changing the filter or search",
+        prod_card_power: "Power",
+        prod_card_model: "Model",
+        prod_card_datasheet: "Datasheet",
+        prod_card_specs: "Specs",
+      },
+      ar: {
+        products_kicker: "قائمة المنتجات",
+        products_title: "المنتجات والأسعار",
+        products_intro: "جميع الأسعار بالجنيه المصري وقابلة للتحديث. تواصل معنا للحصول على أفضل عرض.",
+        prod_note_label: "ملاحظة:",
+        prod_note_text: "الأسعار تقريبية وقد تتغير — تواصل معنا للتأكيد قبل الطلب.",
+        prod_cat_all: "الكل",
+        prod_cat_inverters: "⚡ إنفرترات",
+        prod_cat_panels: "☀️ ألواح شمسية",
+        prod_cat_accessories: "🔌 إكسسوارات",
+        prod_cat_combiners: "📦 صناديق جمع",
+        prod_cat_structures: "🏗️ شاسيهات",
+        prod_cat_cables: "🔶 كابلات",
+        prod_loading: "جاري تحميل المنتجات…",
+        prod_inv_title: "الإنفرترات — VEICHI & Delixi",
+        prod_brand: "الماركة",
+        prod_power: "القدرة",
+        prod_all_brands: "كل الماركات",
+        prod_all_powers: "كل القدرات",
+        prod_reset: "إعادة ضبط",
+        prod_panels_title: "الألواح الشمسية — سعر الوات",
+        prod_acc_title: "الإكسسوارات — Suntree",
+        prod_comb_title: "صناديق الجمع — Kayal",
+        prod_struct_title: "الشاسيهات وهياكل التركيب",
+        prod_cables_title: "الكابلات الشمسية — LEADER",
+        prod_th_brand: "الماركة",
+        prod_th_kw: "القدرة (KW)",
+        prod_th_hp: "القدرة (HP)",
+        prod_th_model: "الموديل",
+        prod_th_datasheet: "داتا شيت",
+        prod_th_price_egp: "السعر (ج.م)",
+        prod_th_type: "النوع",
+        prod_th_panels_count: "عدد الألواح",
+        prod_th_price_watt: "السعر/وات (ج.م)",
+        prod_th_item: "الصنف",
+        prod_th_ampere: "النوع / التيار",
+        prod_th_name: "الاسم",
+        prod_th_specs: "المواصفات",
+        prod_th_price_meter: "السعر/متر (ج.م)",
+        prod_no_results: "لا توجد نتائج لهذا الاختيار",
+        prod_cta_title: "🤝 هل تحتاج عرض سعر؟",
+        prod_cta_text: "تواصل معنا وسنعدّ لك أفضل عرض بناءً على احتياجاتك وحجم مشروعك.",
+        prod_sort_newest: "الأحدث",
+        prod_count_label: "منتج",
+        prod_sidebar_category: "الفئة",
+        prod_sidebar_price: "السعر (ج.م)",
+        prod_price_from: "من",
+        prod_price_to: "إلى",
+        prod_apply_filter: "تطبيق الفلتر",
+        prod_reset_filter: "إعادة ضبط",
+        prod_empty_title: "لا توجد منتجات",
+        prod_empty_text: "جرّب تغيير الفلتر أو البحث",
+        prod_card_power: "القدرة",
+        prod_card_model: "الموديل",
+        prod_card_datasheet: "داتا شيت",
+        prod_card_specs: "المواصفات",
+      },
+      es: {
+        products_kicker: "Lista de productos",
+        products_title: "Productos y precios",
+        products_intro: "Todos los precios en EGP y sujetos a cambios. Contáctenos para la mejor oferta.",
+        prod_note_label: "Nota:",
+        prod_note_text: "Los precios son aproximados y pueden cambiar — contáctenos para confirmar antes de pedir.",
+        prod_cat_all: "Todos",
+        prod_cat_inverters: "⚡ Inversores",
+        prod_cat_panels: "☀️ Paneles solares",
+        prod_cat_accessories: "🔌 Accesorios",
+        prod_cat_combiners: "📦 Cajas combinadoras",
+        prod_cat_structures: "🏗️ Estructuras",
+        prod_cat_cables: "🔶 Cables",
+        prod_loading: "Cargando productos…",
+        prod_inv_title: "Inversores — VEICHI & Delixi",
+        prod_brand: "Marca",
+        prod_power: "Potencia",
+        prod_all_brands: "Todas las marcas",
+        prod_all_powers: "Todas las potencias",
+        prod_reset: "Restablecer",
+        prod_panels_title: "Paneles solares — Precio por vatio",
+        prod_acc_title: "Accesorios — Suntree",
+        prod_comb_title: "Cajas combinadoras — Kayal",
+        prod_struct_title: "Estructuras de montaje",
+        prod_cables_title: "Cables — LEADER",
+        prod_th_brand: "Marca",
+        prod_th_kw: "Potencia (KW)",
+        prod_th_hp: "Potencia (HP)",
+        prod_th_model: "Modelo",
+        prod_th_datasheet: "Ficha técnica",
+        prod_th_price_egp: "Precio (EGP)",
+        prod_th_type: "Tipo",
+        prod_th_panels_count: "N.º paneles",
+        prod_th_price_watt: "Precio/W (EGP)",
+        prod_th_item: "Artículo",
+        prod_th_ampere: "Tipo / Corriente",
+        prod_th_name: "Nombre",
+        prod_th_specs: "Especificaciones",
+        prod_th_price_meter: "Precio/m (EGP)",
+        prod_no_results: "Sin resultados para esta selección",
+        prod_cta_title: "🤝 ¿Necesita un presupuesto?",
+        prod_cta_text: "Contáctenos y prepararemos la mejor oferta según sus necesidades.",
+        prod_sort_newest: "Más reciente",
+        prod_count_label: "productos",
+        prod_sidebar_category: "Categoría",
+        prod_sidebar_price: "Precio (EGP)",
+        prod_price_from: "Desde",
+        prod_price_to: "Hasta",
+        prod_apply_filter: "Aplicar filtro",
+        prod_reset_filter: "Restablecer",
+        prod_empty_title: "No se encontraron productos",
+        prod_empty_text: "Intente cambiar el filtro o la búsqueda",
+        prod_card_power: "Potencia",
+        prod_card_model: "Modelo",
+        prod_card_datasheet: "Ficha técnica",
+        prod_card_specs: "Especificaciones",
+      },
+      zh: {
+        products_kicker: "产品列表",
+        products_title: "产品与价格",
+        products_intro: "所有价格以埃及镑计，可能变动。联系我们获取最优报价。",
+        prod_note_label: "注意：",
+        prod_note_text: "价格为参考价，可能变动——订购前请联系我们确认。",
+        prod_cat_all: "全部",
+        prod_cat_inverters: "⚡ 逆变器",
+        prod_cat_panels: "☀️ 太阳能板",
+        prod_cat_accessories: "🔌 配件",
+        prod_cat_combiners: "📦 汇流箱",
+        prod_cat_structures: "🏗️ 安装结构",
+        prod_cat_cables: "🔶 电缆",
+        prod_loading: "正在加载产品…",
+        prod_inv_title: "逆变器 — VEICHI & Delixi",
+        prod_brand: "品牌",
+        prod_power: "功率",
+        prod_all_brands: "全部品牌",
+        prod_all_powers: "全部功率",
+        prod_reset: "重置",
+        prod_panels_title: "太阳能板 — 每瓦价格",
+        prod_acc_title: "配件 — Suntree",
+        prod_comb_title: "汇流箱 — Kayal",
+        prod_struct_title: "安装结构",
+        prod_cables_title: "电缆 — LEADER",
+        prod_th_brand: "品牌",
+        prod_th_kw: "功率 (KW)",
+        prod_th_hp: "功率 (HP)",
+        prod_th_model: "型号",
+        prod_th_datasheet: "规格书",
+        prod_th_price_egp: "价格 (EGP)",
+        prod_th_type: "类型",
+        prod_th_panels_count: "板数",
+        prod_th_price_watt: "价格/W (EGP)",
+        prod_th_item: "品项",
+        prod_th_ampere: "类型 / 电流",
+        prod_th_name: "名称",
+        prod_th_specs: "规格",
+        prod_th_price_meter: "价格/m (EGP)",
+        prod_no_results: "没有符合条件的结果",
+        prod_cta_title: "🤝 需要报价？",
+        prod_cta_text: "联系我们，我们将根据您的需求准备最佳报价。",
+        prod_sort_newest: "最新",
+        prod_count_label: "产品",
+        prod_sidebar_category: "类别",
+        prod_sidebar_price: "价格 (EGP)",
+        prod_price_from: "从",
+        prod_price_to: "到",
+        prod_apply_filter: "应用筛选",
+        prod_reset_filter: "重置",
+        prod_empty_title: "未找到产品",
+        prod_empty_text: "请尝试更改筛选条件或搜索",
+        prod_card_power: "功率",
+        prod_card_model: "型号",
+        prod_card_datasheet: "规格书",
+        prod_card_specs: "规格",
+      },
+    };
+
+    // Merge keys into existing translations object
+    Object.keys(prodKeys).forEach(lang => {
+      if (translations[lang]) {
+        Object.assign(translations[lang], prodKeys[lang]);
+      }
+    });
+  });
+  </script>
   <script defer src="app.js"></script>
 
   <style>
     /* ── Products page styles ── */
     .products-hero { text-align: center; padding: var(--space-6) var(--space-4) var(--space-4); }
     .products-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); }
-
-    /* Filter tabs */
-    .prod-filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      padding: 0 var(--space-4) var(--space-4);
-    }
-    .prod-filter-bar button {
-      padding: 8px 20px;
-      border-radius: 999px;
-      border: 1.5px solid var(--line);
-      background: #fff;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .18s, border-color .18s, color .18s;
-      color: var(--ink);
-    }
-    .prod-filter-bar button:hover { border-color: var(--brand); color: var(--brand); }
-    .prod-filter-bar button.active { background: var(--brand); border-color: var(--brand); color: #fff; }
-
-    /* Category sections */
-    .products-section { padding: 0 var(--space-4) var(--space-5); max-width: 1100px; margin: 0 auto; }
-    .products-section[hidden] { display: none; }
-
-    .prod-section-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: var(--space-3);
-      padding-bottom: var(--space-2);
-      border-bottom: 2px solid var(--brand-soft);
-    }
-    .prod-section-header h2 {
-      font-size: 1.25rem;
-      margin: 0;
-      color: var(--brand-dark);
-    }
-    .prod-section-header .prod-icon {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: var(--brand-soft);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    /* Product table */
-    .prod-table-wrap { overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--line); }
-    .prod-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      background: #fff;
-    }
-    .prod-table thead { background: var(--brand); color: #fff; }
-    .prod-table thead th {
-      padding: 12px 14px;
-      text-align: right;
-      font-weight: 700;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-    .prod-table thead th:last-child { text-align: left; }
-    .prod-table tbody tr { border-bottom: 1px solid var(--line); }
-    .prod-table tbody tr:last-child { border-bottom: none; }
-    .prod-table tbody tr:hover { background: var(--brand-soft); }
-    .prod-table tbody tr:nth-child(even) { background: #fafaf9; }
-    .prod-table tbody tr:nth-child(even):hover { background: var(--brand-soft); }
-    .prod-table td {
-      padding: 11px 14px;
-      text-align: right;
-      color: var(--ink);
-      vertical-align: middle;
-    }
-    .prod-table td:last-child { text-align: left; white-space: nowrap; }
-
-    .prod-brand-badge {
-      display: inline-block;
-      padding: 2px 9px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      background: var(--brand-soft);
-      color: var(--brand-dark);
-    }
-    .prod-price {
-      font-weight: 800;
-      font-size: 15px;
-      color: var(--brand-dark);
-    }
-    .prod-unit {
-      font-size: 11px;
-      color: var(--muted);
-      margin-right: 3px;
-    }
-
-    /* Loading / empty states */
-    .prod-loading {
-      text-align: center;
-      padding: var(--space-5);
-      color: var(--muted);
-      font-size: 15px;
-    }
-    .prod-loading i { display: block; font-size: 32px; margin-bottom: 10px; opacity: .5; }
 
     /* Price note */
     .prod-price-note {
@@ -149,6 +285,304 @@
       font-size: 13px;
     }
     .prod-price-note strong { color: var(--brand-dark); }
+
+    /* ── Shop layout: sidebar + content ── */
+    .prod-shop {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: var(--space-4);
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-4) var(--space-5);
+      align-items: start;
+    }
+    [dir="rtl"] .prod-shop { direction: rtl; }
+
+    /* Toolbar: count + sort */
+    .prod-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 10px 16px;
+      margin-bottom: var(--space-3);
+      grid-column: 1;
+    }
+    .prod-count {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .prod-count strong { color: var(--brand-dark); }
+    .prod-sort-select {
+      padding: 8px 32px 8px 14px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+      transition: border-color .15s;
+    }
+    .prod-sort-select:hover, .prod-sort-select:focus { outline: none; border-color: var(--brand); }
+
+    /* Sidebar */
+    .prod-sidebar {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      position: sticky;
+      top: 90px;
+    }
+    .prod-sidebar-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: 0 0 14px;
+    }
+    .prod-sidebar-section + .prod-sidebar-section {
+      margin-top: var(--space-4);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--line);
+    }
+    .prod-sidebar-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 0 0 10px;
+    }
+
+    /* Category radio list */
+    .prod-radio-list { display: flex; flex-direction: column; gap: 2px; }
+    .prod-radio-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      transition: background .15s;
+    }
+    .prod-radio-item:hover { background: var(--brand-soft); }
+    .prod-radio-item.active { background: var(--brand-soft); font-weight: 800; color: var(--brand-dark); }
+    .prod-radio-item .prod-radio-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prod-radio-item input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--brand);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Price range inputs */
+    .prod-price-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prod-price-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .prod-price-field label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .prod-price-field input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      transition: border-color .15s;
+    }
+    .prod-price-field input:focus { outline: none; border-color: var(--brand); }
+    .prod-price-sep { color: var(--muted); margin-top: 16px; font-size: 14px; }
+
+    /* Sidebar buttons */
+    .prod-btn-apply {
+      width: 100%;
+      margin-top: var(--space-4);
+      padding: 12px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--brand-dark);
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .prod-btn-apply:hover { opacity: .9; }
+    .prod-btn-reset {
+      width: 100%;
+      margin-top: 10px;
+      padding: 11px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .prod-btn-reset:hover { border-color: var(--brand); color: var(--brand-dark); }
+
+    /* Product grid */
+    .prod-grid-wrap { grid-column: 1; }
+    .prod-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: var(--space-3);
+    }
+
+    /* Product card */
+    .prod-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .prod-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .prod-card-media {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: var(--brand-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .prod-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .prod-card-media .prod-fallback-icon { font-size: 42px; opacity: .55; }
+    .prod-card-body { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .prod-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .prod-card-name {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.4;
+      margin: 0;
+    }
+    .prod-card-cat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      background: var(--brand-soft);
+      border-radius: 999px;
+      padding: 2px 9px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .prod-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .prod-card-meta span {
+      background: #f4f4f3;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-weight: 600;
+    }
+    .prod-card-meta span strong { color: var(--brand-dark); font-weight: 700; }
+    .prod-card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+    .prod-card-price {
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--brand-dark);
+    }
+    .prod-card-price .prod-unit { font-size: 11px; color: var(--muted); font-weight: 600; margin-right: 3px; }
+    .prod-card-ds {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--brand);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .cheaper-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-bottom: 4px;
+    }
+
+    /* Loading / empty states */
+    .prod-loading {
+      grid-column: 1;
+      text-align: center;
+      padding: var(--space-5);
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .prod-loading i { display: block; font-size: 32px; margin-bottom: 10px; opacity: .5; }
+
+    .prod-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px var(--space-4);
+      color: var(--muted);
+    }
+    .prod-empty .prod-empty-icon { font-size: 48px; margin-bottom: 14px; opacity: .8; }
+    .prod-empty h3 { font-size: 17px; color: var(--brand-dark); margin: 0 0 6px; }
+    .prod-empty p { font-size: 14px; margin: 0; }
+    .prod-grid[hidden] { display: none; }
 
     /* CTA */
     .prod-cta {
@@ -162,100 +596,17 @@
     .prod-cta h3 { font-size: 1.4rem; margin-bottom: var(--space-2); }
     .prod-cta p { color: var(--muted); margin-bottom: var(--space-3); }
 
-    /* RTL helpers */
-    [dir="rtl"] .prod-table thead th { text-align: right; }
-    [dir="rtl"] .prod-table thead th:last-child { text-align: left; }
-    [dir="rtl"] .prod-table td { text-align: right; }
-    [dir="rtl"] .prod-table td:last-child { text-align: left; }
-
-    @media (max-width: 600px) {
-      .prod-table thead th, .prod-table td { padding: 9px 10px; font-size: 13px; }
-      .prod-price { font-size: 14px; }
+    @media (max-width: 900px) {
+      .prod-shop { grid-template-columns: 1fr; }
+      .prod-sidebar { grid-column: 1; grid-row: auto; position: static; order: -1; }
+      .prod-toolbar { grid-column: 1; }
+      .prod-grid-wrap { grid-column: 1; }
+      .prod-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
-
-    /* ── Inverter dropdown filter ── */
-    .inv-filter-box {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      padding: var(--space-3);
-      margin-bottom: var(--space-3);
-    }
-    .inv-dd-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      gap: 14px;
-    }
-    .inv-dd-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
-    .inv-dd-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-    .inv-dd-select {
-      padding: 9px 14px;
-      border-radius: var(--radius);
-      border: 1.5px solid var(--line);
-      background: #fff;
-      font-family: inherit;
-      font-size: 14px;
-      color: var(--ink);
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: left 12px center;
-      padding-left: 32px;
-      transition: border-color .15s;
-    }
-    .inv-dd-select:focus { outline: none; border-color: var(--brand); }
-    .inv-dd-select:hover { border-color: var(--brand); }
-    .inv-dd-reset {
-      padding: 9px 18px;
-      border-radius: var(--radius);
-      border: 1.5px solid var(--line);
-      background: #fff;
-      font-family: inherit;
-      font-size: 13px;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .15s;
-      align-self: flex-end;
-      white-space: nowrap;
-    }
-    .inv-dd-reset:hover { border-color: var(--brand); color: var(--brand-dark); }
-    .inv-compare-info {
-      margin-top: 12px;
-      padding: 10px 14px;
-      background: var(--brand-soft);
-      border-radius: var(--radius);
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--brand-dark);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .prod-table td.kw-cell { font-weight: 700; color: var(--brand-dark); }
-    .prod-table tr.inv-cheaper td.prod-price { color: var(--brand-dark); }
-    .prod-table tr.inv-cheaper { background: var(--brand-soft) !important; }
-    .cheaper-badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      background: var(--brand);
-      color: #fff;
-      border-radius: 4px;
-      padding: 2px 6px;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-    @media (max-width: 600px) {
-      .inv-dd-row { flex-direction: column; }
-      .inv-dd-group { min-width: 100%; }
+    @media (max-width: 480px) {
+      .prod-toolbar { flex-direction: column; align-items: stretch; }
+      .prod-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .prod-card-body { padding: 10px; }
     }
   </style>
 </head>
@@ -305,187 +656,106 @@
 
     <!-- Price date note -->
     <p class="prod-price-note">
-      <strong>ملاحظة:</strong> الأسعار تقريبية وقد تتغير — تواصل معنا للتأكيد قبل الطلب.
+      <strong data-i18n="prod_note_label">ملاحظة:</strong> <span data-i18n="prod_note_text">الأسعار تقريبية وقد تتغير — تواصل معنا للتأكيد قبل الطلب.</span>
     </p>
 
-    <!-- Filter tabs -->
-    <div class="prod-filter-bar" role="group" aria-label="تصفية المنتجات">
-      <button class="active" data-cat="all" type="button">الكل</button>
-      <button data-cat="inverters" type="button">⚡ إنفرترات</button>
-      <button data-cat="panels" type="button">☀️ ألواح شمسية</button>
-      <button data-cat="accessories" type="button">🔌 إكسسوارات</button>
-      <button data-cat="combiners" type="button">📦 صناديق جمع</button>
-      <button data-cat="structures" type="button">🏗️ شاسيهات</button>
-      <button data-cat="cables" type="button">🔶 كابلات</button>
-    </div>
+    <!-- Shop layout: toolbar + grid + sidebar -->
+    <div class="prod-shop">
 
-    <!-- Loading state -->
-    <div id="productsLoading" class="prod-loading">
-      <i class="fa fa-spinner fa-spin"></i>
-      جاري تحميل المنتجات…
-    </div>
-
-    <!-- ── Inverters ── -->
-    <section id="sec-inverters" class="products-section" hidden>
-      <div class="prod-section-header">
-        <div class="prod-icon">⚡</div>
-        <h2>الإنفرترات — VEICHI &amp; Delixi</h2>
+      <!-- Toolbar -->
+      <div class="prod-toolbar">
+        <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
+          <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
+        </select>
+        <span class="prod-count" id="prodCount"><strong>0</strong> <span data-i18n="prod_count_label">منتج</span></span>
       </div>
 
-      <!-- Dropdown filter -->
-      <div class="inv-filter-box">
-        <div class="inv-dd-row">
-          <div class="inv-dd-group">
-            <label class="inv-dd-label" for="ddBrand">الماركة</label>
-            <select class="inv-dd-select" id="ddBrand">
-              <option value="all">كل الماركات</option>
-              <option value="VEICHI">VEICHI</option>
-              <option value="Delixi">Delixi</option>
-            </select>
-          </div>
-          <div class="inv-dd-group">
-            <label class="inv-dd-label" for="ddPower">القدرة</label>
-            <select class="inv-dd-select" id="ddPower">
-              <option value="all">كل القدرات</option>
-            </select>
-          </div>
-          <button type="button" class="inv-dd-reset" id="ddReset" onclick="resetInvFilter()">إعادة ضبط</button>
-        </div>
-        <div class="inv-compare-info" id="invCompareInfo" style="display:none">
-          <i class="fa fa-info-circle" aria-hidden="true"></i>
-          <span id="invCompareMsg"></span>
+      <!-- Loading state -->
+      <div id="productsLoading" class="prod-loading">
+        <i class="fa fa-spinner fa-spin"></i>
+        <span data-i18n="prod_loading">جاري تحميل المنتجات…</span>
+      </div>
+
+      <!-- Product grid -->
+      <div class="prod-grid-wrap">
+        <div class="prod-grid" id="prodGrid" hidden></div>
+
+        <!-- Empty state -->
+        <div class="prod-empty" id="prodEmpty" hidden>
+          <div class="prod-empty-icon">📦</div>
+          <h3 data-i18n="prod_empty_title">لا توجد منتجات</h3>
+          <p data-i18n="prod_empty_text">جرّب تغيير الفلتر أو البحث</p>
         </div>
       </div>
 
-      <!-- Results table -->
-      <div class="prod-table-wrap">
-        <table class="prod-table" id="invTable" aria-label="جدول الإنفرترات">
-          <thead>
-            <tr>
-              <th>الماركة</th>
-              <th>القدرة (KW)</th>
-              <th>القدرة (HP)</th>
-              <th>الموديل</th>
-              <th>داتا شيت</th>
-              <th>السعر (ج.م)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-inverters"></tbody>
-        </table>
-        <p id="inv-no-results" style="display:none;text-align:center;padding:24px;color:var(--muted);font-size:14px">لا توجد نتائج لهذا الاختيار</p>
-      </div>
-    </section>
+      <!-- Sidebar -->
+      <aside class="prod-sidebar">
 
-    <!-- ── Panels ── -->
-    <section id="sec-panels" class="products-section" hidden>
-      <div class="prod-section-header">
-        <div class="prod-icon">☀️</div>
-        <h2>الألواح الشمسية — سعر الوات</h2>
-      </div>
-      <div class="prod-table-wrap">
-        <table class="prod-table" aria-label="جدول الألواح الشمسية">
-          <thead>
-            <tr>
-              <th>الماركة</th>
-              <th>النوع والمواصفات</th>
-              <th>الموديل</th>
-              <th>داتا شيت</th>
-              <th>السعر/وات (ج.م)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-panels"></tbody>
-        </table>
-      </div>
-    </section>
+        <!-- Category filter -->
+        <div class="prod-sidebar-section">
+          <p class="prod-sidebar-label" data-i18n="prod_sidebar_category">الفئة</p>
+          <div class="prod-radio-list" id="catRadioList" role="radiogroup" aria-label="تصفية الفئة">
+            <label class="prod-radio-item active" data-cat="all">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_all">جميع المنتجات</span></span>
+              <input type="radio" name="prodCat" value="all" checked>
+            </label>
+            <label class="prod-radio-item" data-cat="panels">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_panels">☀️ ألواح شمسية</span></span>
+              <input type="radio" name="prodCat" value="panels">
+            </label>
+            <label class="prod-radio-item" data-cat="inverters">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_inverters">⚡ إنفرترات</span></span>
+              <input type="radio" name="prodCat" value="inverters">
+            </label>
+            <label class="prod-radio-item" data-cat="accessories">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_accessories">🔌 إكسسوارات</span></span>
+              <input type="radio" name="prodCat" value="accessories">
+            </label>
+            <label class="prod-radio-item" data-cat="cables">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_cables">🔶 كابلات</span></span>
+              <input type="radio" name="prodCat" value="cables">
+            </label>
+            <label class="prod-radio-item" data-cat="structures">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_structures">🏗️ هياكل</span></span>
+              <input type="radio" name="prodCat" value="structures">
+            </label>
+            <label class="prod-radio-item" data-cat="combiners">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_combiners">📦 صناديق جمع</span></span>
+              <input type="radio" name="prodCat" value="combiners">
+            </label>
+          </div>
+        </div>
 
-    <!-- ── Accessories ── -->
-    <section id="sec-accessories" class="products-section" hidden>
-      <div class="prod-section-header">
-        <div class="prod-icon">🔌</div>
-        <h2>الإكسسوارات — Suntree</h2>
-      </div>
-      <div class="prod-table-wrap">
-        <table class="prod-table" aria-label="جدول الإكسسوارات">
-          <thead>
-            <tr>
-              <th>الصنف</th>
-              <th>النوع / التيار</th>
-              <th>السعر (ج.م)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-accessories"></tbody>
-        </table>
-      </div>
-    </section>
+        <!-- Price filter -->
+        <div class="prod-sidebar-section">
+          <p class="prod-sidebar-label" data-i18n="prod_sidebar_price">السعر (ج.م)</p>
+          <div class="prod-price-row">
+            <div class="prod-price-field">
+              <label for="priceFrom" data-i18n="prod_price_from">من</label>
+              <input type="number" id="priceFrom" min="0" placeholder="0">
+            </div>
+            <span class="prod-price-sep">–</span>
+            <div class="prod-price-field">
+              <label for="priceTo" data-i18n="prod_price_to">إلى</label>
+              <input type="number" id="priceTo" min="0" placeholder="∞">
+            </div>
+          </div>
+        </div>
 
-    <!-- ── Combiners ── -->
-    <section id="sec-combiners" class="products-section" hidden>
-      <div class="prod-section-header">
-        <div class="prod-icon">📦</div>
-        <h2>صناديق الجمع — Kayal</h2>
-      </div>
-      <div class="prod-table-wrap">
-        <table class="prod-table" aria-label="جدول صناديق الجمع">
-          <thead>
-            <tr>
-              <th>الاسم</th>
-              <th>المواصفات</th>
-              <th>السعر (ج.م)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-combiners"></tbody>
-        </table>
-      </div>
-    </section>
+        <button type="button" class="prod-btn-apply" id="btnApplyFilter" data-i18n="prod_apply_filter">تطبيق الفلتر</button>
+        <button type="button" class="prod-btn-reset" id="btnResetFilter" data-i18n="prod_reset_filter">إعادة ضبط</button>
 
-    <!-- ── Structures ── -->
-    <section id="sec-structures" class="products-section" hidden>
-      <div class="prod-section-header">
-        <div class="prod-icon">🏗️</div>
-        <h2>الشاسيهات وهياكل التركيب</h2>
-      </div>
-      <div class="prod-table-wrap">
-        <table class="prod-table" aria-label="جدول الشاسيهات">
-          <thead>
-            <tr>
-              <th>النوع</th>
-              <th>عدد الألواح</th>
-              <th>السعر (ج.م)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-structures"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ── Cables ── -->
-    <section id="sec-cables" class="products-section" hidden>
-      <div class="prod-section-header">
-        <div class="prod-icon">🔶</div>
-        <h2>الكابلات الشمسية — LEADER</h2>
-      </div>
-      <div class="prod-table-wrap">
-        <table class="prod-table" aria-label="جدول الكابلات">
-          <thead>
-            <tr>
-              <th>الماركة</th>
-              <th>المواصفات</th>
-              <th>السعر/متر (ج.م)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-cables"></tbody>
-        </table>
-      </div>
-    </section>
+      </aside>
+    </div>
 
     <!-- CTA -->
     <div style="padding: 0 var(--space-4);">
       <div class="prod-cta reveal">
-        <h3>🤝 هل تحتاج عرض سعر؟</h3>
-        <p>تواصل معنا وسنعدّ لك أفضل عرض بناءً على احتياجاتك وحجم مشروعك.</p>
+        <h3 data-i18n="prod_cta_title">🤝 هل تحتاج عرض سعر؟</h3>
+        <p data-i18n="prod_cta_text">تواصل معنا وسنعدّ لك أفضل عرض بناءً على احتياجاتك وحجم مشروعك.</p>
         <a class="btn btn-primary" href="contact.html">
           <i class="fa fa-paper-plane" aria-hidden="true"></i>
-          طلب عرض سعر
+          <span data-i18n="cta_quote">اطلب عرض سعر</span>
         </a>
       </div>
     </div>
@@ -514,29 +784,49 @@
   (function () {
 
     const CATEGORIES = ['inverters', 'panels', 'accessories', 'combiners', 'structures', 'cables'];
+    const CAT_ICONS = {
+      inverters: '⚡', panels: '☀️', accessories: '🔌',
+      combiners: '📦', structures: '🏗️', cables: '🔶',
+    };
 
-    // ── Filter buttons ──
-    const filterBtns = document.querySelectorAll('.prod-filter-bar button');
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const cat = btn.dataset.cat;
-        CATEGORIES.forEach(c => {
-          const sec = document.getElementById('sec-' + c);
-          if (sec) sec.hidden = (cat !== 'all' && c !== cat);
-        });
-      });
-    });
+    // ── Language helper ──
+    function getLang() {
+      return localStorage.getItem('alasl-lang') || 'ar';
+    }
 
-    // ── Render helpers ──
+    // Returns localised name: tries name_<lang>, then name_ar, then name_en, then name
+    function localName(r) {
+      const lang = getLang();
+      return r['name_' + lang] || r['name_ar'] || r['name_en'] || r['name'] || '';
+    }
+
+    function localSpecs(r) {
+      const lang = getLang();
+      return r['specs_' + lang] || r['specs_ar'] || r['specs_en'] || r['specs'] || '';
+    }
+
+    // Currency unit labels per language
+    const UNITS = {
+      ar: { egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', cheaper: 'الأوفر' },
+      en: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Best Price' },
+      es: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Más Barato' },
+      zh: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: '最优惠' },
+    };
+    function u(key) {
+      return (UNITS[getLang()] || UNITS.ar)[key];
+    }
+
     function fmt(price) {
       return Number(price).toLocaleString('ar-EG');
     }
 
-    // ── Inverter filter state ──
-    let invData = [];
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
 
+    // ── Inverter power parsing (kept from original logic) ──
     function parseInvPower(row) {
       let kw = row.power_kw ? parseFloat(row.power_kw) : null;
       let hp = row.power_hp ? parseFloat(row.power_hp) : null;
@@ -550,170 +840,197 @@
       return { kw, hp };
     }
 
-    function populatePowerDropdown(brand) {
-      const dd = document.getElementById('ddPower');
-      if (!dd) return;
-      const current = dd.value;
-      const powers = [...new Map(
-        invData
-          .filter(r => brand === 'all' || r.brand === brand)
-          .map(r => { const p = parseInvPower(r); return [p.kw, p]; })
-          .filter(([kw]) => kw)
-      ).values()].sort((a, b) => a.kw - b.kw);
-      dd.innerHTML = '<option value="all">كل القدرات</option>' +
-        powers.map(p => `<option value="${p.kw}">${p.kw} KW — ${p.hp} HP</option>`).join('');
-      if ([...dd.options].some(o => o.value === current)) dd.value = current;
+    // ── State ──
+    let allProducts = [];     // flat list of every product across categories, each tagged with .category
+    let currentCat = 'all';
+    let priceMin = null;
+    let priceMax = null;
+
+    // ── Per-unit label for a product based on its category ──
+    function unitFor(p) {
+      if (p.category === 'panels') return u('watt');
+      if (p.category === 'cables') return u('meter');
+      return u('egp');
     }
 
-    function applyInvFilter() {
-      const brand = document.getElementById('ddBrand')?.value || 'all';
-      const power = document.getElementById('ddPower')?.value || 'all';
-      const tb = document.getElementById('tbody-inverters');
-      const noRes = document.getElementById('inv-no-results');
-      const info = document.getElementById('invCompareInfo');
-      const msg = document.getElementById('invCompareMsg');
-      if (!tb) return;
+    // ── Build the meta chips shown under the product name on each card ──
+    function metaChips(p) {
+      const chips = [];
+      if (p.brand) chips.push(`<span>${escapeHtml(p.brand)}</span>`);
 
-      const filtered = invData.filter(r => {
-        if (brand !== 'all' && r.brand !== brand) return false;
-        if (power !== 'all') {
-          const { kw } = parseInvPower(r);
-          if (String(kw) !== String(power)) return false;
+      if (p.category === 'inverters') {
+        const { kw, hp } = parseInvPower(p);
+        if (kw) chips.push(`<span><strong>${kw}</strong> KW</span>`);
+        if (hp) chips.push(`<span>${hp} HP</span>`);
+        if (p.model_available) chips.push(`<span>${escapeHtml(p.model_available)}</span>`);
+      } else {
+        const specs = localSpecs(p);
+        if (specs) {
+          const short = specs.length > 40 ? specs.slice(0, 40) + '…' : specs;
+          chips.push(`<span>${escapeHtml(short)}</span>`);
         }
+        if (p.model_available) chips.push(`<span>${escapeHtml(p.model_available)}</span>`);
+      }
+      return chips.join('');
+    }
+
+    // ── Is this product the cheapest among same-category, same-power matches? (inverters only) ──
+    function computeCheaperSet(rows) {
+      // Group inverters by kw, mark cheapest in each group when there's more than one brand at that power
+      const cheapIds = new Set();
+      const byKw = {};
+      rows.forEach(r => {
+        if (r.category !== 'inverters') return;
+        const { kw } = parseInvPower(r);
+        if (!kw) return;
+        (byKw[kw] = byKw[kw] || []).push(r);
+      });
+      Object.values(byKw).forEach(group => {
+        if (group.length < 2) return;
+        const min = Math.min(...group.map(r => r.price));
+        group.forEach(r => { if (r.price === min) cheapIds.add(r.id || r); });
+      });
+      return cheapIds;
+    }
+
+    // ── Render a single product card ──
+    function renderCard(p, cheapSet) {
+      const name = escapeHtml(localName(p));
+      const icon = CAT_ICONS[p.category] || '📦';
+      const img = p.image_url
+        ? `<img src="${escapeHtml(p.image_url)}" alt="${name}" loading="lazy">`
+        : `<span class="prod-fallback-icon">${icon}</span>`;
+
+      const isCheap = cheapSet && cheapSet.has(p.id || p);
+      const badge = isCheap ? `<span class="cheaper-badge">${u('cheaper')}</span>` : '';
+
+      const ds = p.datasheet_url
+        ? `<a href="${escapeHtml(p.datasheet_url)}" target="_blank" rel="noopener" class="prod-card-ds"><i class="fa fa-file-pdf-o"></i> PDF</a>`
+        : '';
+
+      const catLabel = {
+        inverters: { ar: 'إنفرتر', en: 'Inverter', es: 'Inversor', zh: '逆变器' },
+        panels: { ar: 'لوح شمسي', en: 'Panel', es: 'Panel', zh: '太阳能板' },
+        accessories: { ar: 'إكسسوار', en: 'Accessory', es: 'Accesorio', zh: '配件' },
+        combiners: { ar: 'صندوق جمع', en: 'Combiner', es: 'Combinador', zh: '汇流箱' },
+        structures: { ar: 'هيكل', en: 'Structure', es: 'Estructura', zh: '结构' },
+        cables: { ar: 'كابل', en: 'Cable', es: 'Cable', zh: '电缆' },
+      }[p.category];
+      const catText = (catLabel && catLabel[getLang()]) || '';
+
+      return `
+        <div class="prod-card" data-cat="${p.category}">
+          <div class="prod-card-media">${img}</div>
+          <div class="prod-card-body">
+            <div class="prod-card-top">
+              <h3 class="prod-card-name">${name}</h3>
+              <span class="prod-card-cat-badge">${icon} ${catText}</span>
+            </div>
+            <div class="prod-card-meta">${metaChips(p)}</div>
+            <div class="prod-card-bottom">
+              <div>
+                ${badge ? `<div>${badge}</div>` : ''}
+                <span class="prod-card-price">${fmt(p.price)} <span class="prod-unit">${unitFor(p)}</span></span>
+              </div>
+              ${ds}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ── Apply category + price filters and render grid ──
+    function renderGrid() {
+      const grid = document.getElementById('prodGrid');
+      const empty = document.getElementById('prodEmpty');
+      const countEl = document.getElementById('prodCount');
+      if (!grid) return;
+
+      let filtered = allProducts.filter(p => {
+        if (currentCat !== 'all' && p.category !== currentCat) return false;
+        if (priceMin !== null && p.price < priceMin) return false;
+        if (priceMax !== null && p.price > priceMax) return false;
         return true;
       });
 
+      const cheapSet = computeCheaperSet(filtered);
+
+      if (countEl) {
+        const strong = countEl.querySelector('strong');
+        if (strong) strong.textContent = filtered.length;
+      }
+
       if (filtered.length === 0) {
-        tb.innerHTML = '';
-        if (noRes) noRes.style.display = 'block';
-        if (info) info.style.display = 'none';
+        grid.hidden = true;
+        grid.innerHTML = '';
+        if (empty) empty.hidden = false;
         return;
       }
-      if (noRes) noRes.style.display = 'none';
 
-      // Find cheapest when comparing same power across brands
-      const isComparing = brand === 'all' && power !== 'all' && filtered.length > 1;
-      const minPrice = isComparing ? Math.min(...filtered.map(r => r.price)) : null;
-
-      tb.innerHTML = filtered.map(r => {
-        const { kw, hp } = parseInvPower(r);
-        const isCheap = isComparing && r.price === minPrice;
-        const badge = isCheap ? '<span class="cheaper-badge">الأوفر</span>' : '';
-        const modelCell = r.model_available ? `<span style="font-size:12px;font-weight:600;color:var(--brand-dark)">${r.model_available}</span>` : '<span style="color:var(--muted)">—</span>';
-        const dsCell = r.datasheet_url ? `<a href="${r.datasheet_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--brand);font-weight:700;text-decoration:none" title="تحميل الداتا شيت"><i class="fa fa-file-pdf-o"></i> PDF</a>` : '<span style="color:var(--muted)">—</span>';
-        return `<tr${isCheap ? ' class="inv-cheaper"' : ''}>
-          <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
-          <td class="kw-cell">${kw || '—'} KW</td>
-          <td style="color:var(--muted)">${hp || '—'} HP</td>
-          <td>${modelCell}</td>
-          <td>${dsCell}</td>
-          <td class="prod-price">${badge}${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
-        </tr>`;
-      }).join('');
-
-      // Info bar
-      if (info && msg) {
-        if (isComparing) {
-          const diff = filtered.map(r=>r.price).sort((a,b)=>a-b);
-          const saving = diff[diff.length-1] - diff[0];
-          msg.textContent = `مقارنة ${filtered.length} إنفرترات بقدرة ${power} KW — الفرق ${fmt(saving)} ج.م`;
-          info.style.display = 'flex';
-        } else {
-          info.style.display = 'none';
-        }
-      }
+      if (empty) empty.hidden = true;
+      grid.hidden = false;
+      grid.innerHTML = filtered.map(p => renderCard(p, cheapSet)).join('');
     }
 
-    function resetInvFilter() {
-      const ddB = document.getElementById('ddBrand');
-      const ddP = document.getElementById('ddPower');
-      if (ddB) ddB.value = 'all';
-      populatePowerDropdown('all');
-      if (ddP) ddP.value = 'all';
-      applyInvFilter();
-    }
-
-    function renderInverters(rows) {
-      invData = rows;
-      populatePowerDropdown('all');
-      applyInvFilter();
-
-      document.getElementById('ddBrand')?.addEventListener('change', function() {
-        populatePowerDropdown(this.value);
-        applyInvFilter();
+    // ── Category radio handling ──
+    function setActiveCategory(cat) {
+      currentCat = cat;
+      document.querySelectorAll('.prod-radio-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.cat === cat);
       });
-      document.getElementById('ddPower')?.addEventListener('change', applyInvFilter);
+      renderGrid();
     }
 
-        function renderPanels(rows) {
-      const tb = document.getElementById('tbody-panels');
-      tb.innerHTML = rows.map(r => {
-        const model = r.model_available ? `<span style="font-size:12px;font-weight:600;color:var(--brand-dark)">${r.model_available}</span>` : '<span style="color:var(--muted)">—</span>';
-        const ds = r.datasheet_url ? `<a href="${r.datasheet_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--brand);font-weight:700;text-decoration:none"><i class="fa fa-file-pdf-o"></i> PDF</a>` : '<span style="color:var(--muted)">—</span>';
-        return `<tr>
-          <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
-          <td>${r.name_ar}${r.notes ? ' <em style="font-size:11px;color:var(--brand-dark)">(' + r.notes + ')</em>' : ''}</td>
-          <td>${model}</td>
-          <td>${ds}</td>
-          <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م/وات</span></td>
-        </tr>`;
-      }).join('');
-    }
+    document.querySelectorAll('#catRadioList input[type="radio"]').forEach(input => {
+      input.addEventListener('change', () => {
+        const item = input.closest('.prod-radio-item');
+        setActiveCategory(item ? item.dataset.cat : 'all');
+      });
+    });
 
-    function renderAccessories(rows) {
-      const tb = document.getElementById('tbody-accessories');
-      tb.innerHTML = rows.map(r => `
-        <tr>
-          <td>${r.name_ar}</td>
-          <td>${r.specs || '—'}</td>
-          <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
-        </tr>`).join('');
-    }
+    // ── Price filter apply / reset ──
+    document.getElementById('btnApplyFilter')?.addEventListener('click', () => {
+      const fromVal = document.getElementById('priceFrom')?.value;
+      const toVal = document.getElementById('priceTo')?.value;
+      priceMin = fromVal !== '' && fromVal != null ? parseFloat(fromVal) : null;
+      priceMax = toVal !== '' && toVal != null ? parseFloat(toVal) : null;
+      renderGrid();
+    });
 
-    function renderCombiners(rows) {
-      const tb = document.getElementById('tbody-combiners');
-      tb.innerHTML = rows.map(r => `
-        <tr>
-          <td>${r.name_ar}</td>
-          <td>${r.specs || '—'}</td>
-          <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
-        </tr>`).join('');
-    }
+    document.getElementById('btnResetFilter')?.addEventListener('click', () => {
+      priceMin = null;
+      priceMax = null;
+      const fFrom = document.getElementById('priceFrom');
+      const fTo = document.getElementById('priceTo');
+      if (fFrom) fFrom.value = '';
+      if (fTo) fTo.value = '';
+      const allRadio = document.querySelector('.prod-radio-item[data-cat="all"]');
+      if (allRadio) {
+        const input = allRadio.querySelector('input[type="radio"]');
+        if (input) input.checked = true;
+      }
+      setActiveCategory('all');
+    });
 
-    function renderStructures(rows) {
-      const tb = document.getElementById('tbody-structures');
-      tb.innerHTML = rows.map(r => `
-        <tr>
-          <td>${r.name_ar}</td>
-          <td>${r.specs || '—'}</td>
-          <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
-        </tr>`).join('');
-    }
+    // Allow Enter key inside price fields to trigger apply
+    ['priceFrom', 'priceTo'].forEach(id => {
+      document.getElementById(id)?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('btnApplyFilter')?.click();
+      });
+    });
 
-    function renderCables(rows) {
-      const tb = document.getElementById('tbody-cables');
-      tb.innerHTML = rows.map(r => `
-        <tr>
-          <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
-          <td>${r.specs || r.name_ar}</td>
-          <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م/م</span></td>
-        </tr>`).join('');
-    }
-
-    const RENDERERS = {
-      inverters: renderInverters,
-      panels: renderPanels,
-      accessories: renderAccessories,
-      combiners: renderCombiners,
-      structures: renderStructures,
-      cables: renderCables,
-    };
+    // ── Re-render grid when language changes (names/specs/units are language-dependent) ──
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-lang]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setTimeout(renderGrid, 50);
+        });
+      });
+    });
 
     // ── Load products from Supabase ──
     async function loadProducts() {
       const loading = document.getElementById('productsLoading');
 
-      // Wait for supabase library + config to load (max 5 seconds)
       let attempts = 0;
       while (attempts < 50) {
         if (
@@ -726,7 +1043,6 @@
         attempts++;
       }
 
-      // Build client directly — don't rely on getAlaslSupabase being on window
       let sb = null;
       try {
         if (window.alaslSupabase) {
@@ -738,12 +1054,13 @@
           );
           window.alaslSupabase = sb;
         }
-      } catch(e) {
+      } catch (e) {
         console.error('Supabase init error:', e);
       }
 
       if (!sb) {
-        loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>تعذّر تحميل المنتجات — يرجى تحديث الصفحة.';
+        loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>' +
+          ({ ar: 'تعذّر تحميل المنتجات — يرجى تحديث الصفحة.', en: 'Could not load products — please refresh.', es: 'No se pudieron cargar los productos — actualice la página.', zh: '无法加载产品 — 请刷新页面。' }[getLang()] || '');
         return;
       }
 
@@ -758,30 +1075,21 @@
         if (error || !data) {
           console.error('Supabase query error:', error);
           loading.hidden = false;
-          loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>حدث خطأ في تحميل المنتجات.';
+          loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>' +
+            ({ ar: 'حدث خطأ في تحميل المنتجات.', en: 'Error loading products.', es: 'Error al cargar productos.', zh: '加载产品时出错。' }[getLang()] || '');
           return;
         }
 
-        // Group by category
-        const groups = {};
-        CATEGORIES.forEach(c => groups[c] = []);
-        data.forEach(row => { if (groups[row.category]) groups[row.category].push(row); });
-
-        CATEGORIES.forEach(cat => {
-          const sec = document.getElementById('sec-' + cat);
-          if (!sec) return;
-          if (groups[cat].length === 0) return;
-          RENDERERS[cat](groups[cat]);
-          sec.hidden = false;
-        });
-      } catch(e) {
+        allProducts = data.filter(row => CATEGORIES.includes(row.category));
+        renderGrid();
+      } catch (e) {
         console.error('loadProducts error:', e);
         loading.hidden = false;
-        loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>حدث خطأ في تحميل المنتجات.';
+        loading.innerHTML = '<i class="fa fa-exclamation-triangle"></i>' +
+          ({ ar: 'حدث خطأ في تحميل المنتجات.', en: 'Error loading products.', es: 'Error al cargar productos.', zh: '加载产品时出错。' }[getLang()] || '');
       }
     }
 
-    // Boot after DOM ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', loadProducts);
     } else {
