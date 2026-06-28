@@ -402,6 +402,18 @@
                   <label>رابط الداتا شيت (PDF)</label>
                   <input id="productDatasheet" name="datasheet_url" type="url" placeholder="https://..." style="width:100%">
                 </div>
+                <div style="grid-column:1/-1">
+                  <label style="font-weight:700;display:block;margin-bottom:6px">صورة المنتج</label>
+                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                    <div id="productImagePreview" style="width:64px;height:64px;border-radius:var(--radius);background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
+                      <span style="color:var(--muted);font-size:10px">بدون صورة</span>
+                    </div>
+                    <input type="file" id="productImageFile" accept="image/*" style="font-size:13px;flex:1;min-width:180px">
+                    <button type="button" onclick="removeProductImage()" id="removeProductImageBtn" style="display:none;padding:6px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;color:#c33;font-size:12px;cursor:pointer">إزالة الصورة</button>
+                  </div>
+                  <input type="hidden" id="productImageUrl">
+                  <p style="margin:6px 0 0;font-size:11px;color:var(--muted)">اختر صورة جديدة لرفعها، أو سيبها فاضية للاحتفاظ بالصورة الحالية لو كنت بتعدّل منتج موجود.</p>
+                </div>
                 <div>
                   <label>الترتيب</label>
                   <input id="productSort" name="sort_order" type="number" value="100" placeholder="100">
