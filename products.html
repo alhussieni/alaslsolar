@@ -173,7 +173,7 @@
       .prod-price { font-size: 14px; }
     }
 
-    /* ── Inverter smart filter ── */
+    /* ── Inverter dropdown filter ── */
     .inv-filter-box {
       background: #fff;
       border: 1px solid var(--line);
@@ -181,49 +181,81 @@
       padding: var(--space-3);
       margin-bottom: var(--space-3);
     }
-    .inv-filter-hint { font-size: 13px; color: var(--muted); margin: 0 0 var(--space-2); }
-    .inv-filter-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-    .inv-filter-group { display: flex; flex-direction: column; gap: 8px; }
-    .inv-filter-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-    .inv-brand-btns, .inv-power-btns { display: flex; flex-wrap: wrap; gap: 6px; }
-    .inv-brand-btn, .inv-power-btn {
-      padding: 6px 16px;
-      border-radius: 999px;
+    .inv-dd-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 14px;
+    }
+    .inv-dd-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
+    .inv-dd-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .inv-dd-select {
+      padding: 9px 14px;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 12px center;
+      padding-left: 32px;
+      transition: border-color .15s;
+    }
+    .inv-dd-select:focus { outline: none; border-color: var(--brand); }
+    .inv-dd-select:hover { border-color: var(--brand); }
+    .inv-dd-reset {
+      padding: 9px 18px;
+      border-radius: var(--radius);
       border: 1.5px solid var(--line);
       background: #fff;
       font-family: inherit;
       font-size: 13px;
-      font-weight: 700;
+      color: var(--muted);
       cursor: pointer;
       transition: all .15s;
-      color: var(--ink);
+      align-self: flex-end;
+      white-space: nowrap;
     }
-    .inv-brand-btn:hover, .inv-power-btn:hover { border-color: var(--brand); color: var(--brand); }
-    .inv-brand-btn.active { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
-    .inv-power-btn.active { background: var(--brand); border-color: var(--brand); color: #fff; }
-    .inv-compare-bar {
-      margin-top: var(--space-2);
+    .inv-dd-reset:hover { border-color: var(--brand); color: var(--brand-dark); }
+    .inv-compare-info {
+      margin-top: 12px;
       padding: 10px 14px;
       background: var(--brand-soft);
       border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
       font-size: 13px;
       font-weight: 700;
       color: var(--brand-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .inv-compare-clear {
-      background: none; border: none; cursor: pointer;
-      font-size: 12px; color: var(--muted); font-family: inherit;
-    }
-    .inv-compare-clear:hover { color: red; }
     .prod-table td.kw-cell { font-weight: 700; color: var(--brand-dark); }
-    .prod-table tr.inv-match { background: #fffbf0 !important; }
-    .prod-table tr.inv-match td.prod-price { color: var(--brand); }
+    .prod-table tr.inv-cheaper td.prod-price { color: var(--brand-dark); }
+    .prod-table tr.inv-cheaper { background: var(--brand-soft) !important; }
+    .cheaper-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
     @media (max-width: 600px) {
-      .inv-filter-row { flex-direction: column; }
+      .inv-dd-row { flex-direction: column; }
+      .inv-dd-group { min-width: 100%; }
     }
   </style>
 </head>
@@ -300,42 +332,47 @@
         <h2>الإنفرترات — VEICHI &amp; Delixi</h2>
       </div>
 
-      <!-- Inverter smart filter -->
+      <!-- Dropdown filter -->
       <div class="inv-filter-box">
-        <p class="inv-filter-hint">🔍 ابحث بالماركة أو القدرة لمقارنة الأسعار</p>
-        <div class="inv-filter-row">
-          <div class="inv-filter-group">
-            <label class="inv-filter-label">الماركة</label>
-            <div class="inv-brand-btns">
-              <button type="button" class="inv-brand-btn active" data-brand="all">الكل</button>
-              <button type="button" class="inv-brand-btn" data-brand="VEICHI">VEICHI</button>
-              <button type="button" class="inv-brand-btn" data-brand="Delixi">Delixi</button>
-            </div>
+        <div class="inv-dd-row">
+          <div class="inv-dd-group">
+            <label class="inv-dd-label" for="ddBrand">الماركة</label>
+            <select class="inv-dd-select" id="ddBrand">
+              <option value="all">كل الماركات</option>
+              <option value="VEICHI">VEICHI</option>
+              <option value="Delixi">Delixi</option>
+            </select>
           </div>
-          <div class="inv-filter-group">
-            <label class="inv-filter-label">القدرة</label>
-            <div class="inv-power-btns" id="invPowerBtns"></div>
+          <div class="inv-dd-group">
+            <label class="inv-dd-label" for="ddPower">القدرة</label>
+            <select class="inv-dd-select" id="ddPower">
+              <option value="all">كل القدرات</option>
+            </select>
           </div>
+          <button type="button" class="inv-dd-reset" id="ddReset" onclick="resetInvFilter()">إعادة ضبط</button>
         </div>
-        <div class="inv-compare-bar" id="invCompareBar" style="display:none">
+        <div class="inv-compare-info" id="invCompareInfo" style="display:none">
+          <i class="fa fa-info-circle" aria-hidden="true"></i>
           <span id="invCompareMsg"></span>
-          <button type="button" class="inv-compare-clear" onclick="clearInvPower()">✕ إلغاء تحديد القدرة</button>
         </div>
       </div>
 
+      <!-- Results table -->
       <div class="prod-table-wrap">
-        <table class="prod-table" aria-label="جدول الإنفرترات">
+        <table class="prod-table" id="invTable" aria-label="جدول الإنفرترات">
           <thead>
             <tr>
               <th>الماركة</th>
               <th>القدرة (KW)</th>
               <th>القدرة (HP)</th>
+              <th>الموديل</th>
+              <th>داتا شيت</th>
               <th>السعر (ج.م)</th>
             </tr>
           </thead>
           <tbody id="tbody-inverters"></tbody>
         </table>
-        <p id="inv-no-results" style="display:none;text-align:center;padding:20px;color:var(--muted);font-size:14px">لا توجد نتائج لهذا الاختيار</p>
+        <p id="inv-no-results" style="display:none;text-align:center;padding:24px;color:var(--muted);font-size:14px">لا توجد نتائج لهذا الاختيار</p>
       </div>
     </section>
 
@@ -351,6 +388,8 @@
             <tr>
               <th>الماركة</th>
               <th>النوع والمواصفات</th>
+              <th>الموديل</th>
+              <th>داتا شيت</th>
               <th>السعر/وات (ج.م)</th>
             </tr>
           </thead>
@@ -495,13 +534,10 @@
       return Number(price).toLocaleString('ar-EG');
     }
 
-    // ── Inverter data store ──
+    // ── Inverter filter state ──
     let invData = [];
-    let invBrand = 'all';
-    let invPower = null;
 
     function parseInvPower(row) {
-      // Try power_kw / power_hp from DB, else parse specs
       let kw = row.power_kw ? parseFloat(row.power_kw) : null;
       let hp = row.power_hp ? parseFloat(row.power_hp) : null;
       if (!kw || !hp) {
@@ -514,108 +550,114 @@
       return { kw, hp };
     }
 
-    function buildPowerBtns() {
-      // Collect unique KW values sorted
-      const powers = [...new Set(
+    function populatePowerDropdown(brand) {
+      const dd = document.getElementById('ddPower');
+      if (!dd) return;
+      const current = dd.value;
+      const powers = [...new Map(
         invData
-          .filter(r => invBrand === 'all' || r.brand === invBrand)
-          .map(r => parseInvPower(r).kw)
-          .filter(Boolean)
-      )].sort((a, b) => a - b);
-
-      const wrap = document.getElementById('invPowerBtns');
-      if (!wrap) return;
-      wrap.innerHTML = powers.map(kw => {
-        const active = invPower === kw ? ' active' : '';
-        return `<button type="button" class="inv-power-btn${active}" onclick="selectInvPower(${kw})">${kw} KW</button>`;
-      }).join('');
-    }
-
-    function selectInvPower(kw) {
-      invPower = (invPower === kw) ? null : kw;
-      buildPowerBtns();
-      applyInvFilter();
-    }
-
-    function clearInvPower() {
-      invPower = null;
-      buildPowerBtns();
-      applyInvFilter();
+          .filter(r => brand === 'all' || r.brand === brand)
+          .map(r => { const p = parseInvPower(r); return [p.kw, p]; })
+          .filter(([kw]) => kw)
+      ).values()].sort((a, b) => a.kw - b.kw);
+      dd.innerHTML = '<option value="all">كل القدرات</option>' +
+        powers.map(p => `<option value="${p.kw}">${p.kw} KW — ${p.hp} HP</option>`).join('');
+      if ([...dd.options].some(o => o.value === current)) dd.value = current;
     }
 
     function applyInvFilter() {
-      const rows = invData.filter(r => {
-        if (invBrand !== 'all' && r.brand !== invBrand) return false;
-        if (invPower) {
+      const brand = document.getElementById('ddBrand')?.value || 'all';
+      const power = document.getElementById('ddPower')?.value || 'all';
+      const tb = document.getElementById('tbody-inverters');
+      const noRes = document.getElementById('inv-no-results');
+      const info = document.getElementById('invCompareInfo');
+      const msg = document.getElementById('invCompareMsg');
+      if (!tb) return;
+
+      const filtered = invData.filter(r => {
+        if (brand !== 'all' && r.brand !== brand) return false;
+        if (power !== 'all') {
           const { kw } = parseInvPower(r);
-          if (kw !== invPower) return false;
+          if (String(kw) !== String(power)) return false;
         }
         return true;
       });
 
-      const tb = document.getElementById('tbody-inverters');
-      const noRes = document.getElementById('inv-no-results');
-      const compareBar = document.getElementById('invCompareBar');
-      const compareMsg = document.getElementById('invCompareMsg');
-
-      if (rows.length === 0) {
+      if (filtered.length === 0) {
         tb.innerHTML = '';
         if (noRes) noRes.style.display = 'block';
-      } else {
-        if (noRes) noRes.style.display = 'none';
-        const isPowerSelected = invPower !== null;
-        tb.innerHTML = rows.map(r => {
-          const { kw, hp } = parseInvPower(r);
-          const highlight = isPowerSelected ? ' class="inv-match"' : '';
-          return `<tr${highlight}>
-            <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
-            <td class="kw-cell">${kw || '—'} KW</td>
-            <td style="color:var(--muted)">${hp || '—'} HP</td>
-            <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
-          </tr>`;
-        }).join('');
+        if (info) info.style.display = 'none';
+        return;
       }
+      if (noRes) noRes.style.display = 'none';
 
-      // Compare bar
-      if (compareBar) {
-        if (invPower) {
-          compareBar.style.display = 'flex';
-          const matched = rows.length;
-          if (compareMsg) compareMsg.textContent = matched > 1
-            ? `مقارنة ${matched} إنفرترات بقدرة ${invPower} KW`
-            : matched === 1 ? `إنفرتر ${invPower} KW` : '';
+      // Find cheapest when comparing same power across brands
+      const isComparing = brand === 'all' && power !== 'all' && filtered.length > 1;
+      const minPrice = isComparing ? Math.min(...filtered.map(r => r.price)) : null;
+
+      tb.innerHTML = filtered.map(r => {
+        const { kw, hp } = parseInvPower(r);
+        const isCheap = isComparing && r.price === minPrice;
+        const badge = isCheap ? '<span class="cheaper-badge">الأوفر</span>' : '';
+        const modelCell = r.model_available ? `<span style="font-size:12px;font-weight:600;color:var(--brand-dark)">${r.model_available}</span>` : '<span style="color:var(--muted)">—</span>';
+        const dsCell = r.datasheet_url ? `<a href="${r.datasheet_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--brand);font-weight:700;text-decoration:none" title="تحميل الداتا شيت"><i class="fa fa-file-pdf-o"></i> PDF</a>` : '<span style="color:var(--muted)">—</span>';
+        return \`<tr\${isCheap ? ' class="inv-cheaper"' : ''}>
+          <td><span class="prod-brand-badge">\${r.brand || ''}</span></td>
+          <td class="kw-cell">\${kw || '—'} KW</td>
+          <td style="color:var(--muted)">\${hp || '—'} HP</td>
+          <td>\${modelCell}</td>
+          <td>\${dsCell}</td>
+          <td class="prod-price">\${badge}\${fmt(r.price)} <span class="prod-unit">ج.م</span></td>
+        </tr>\`;
+      }).join('');
+
+      // Info bar
+      if (info && msg) {
+        if (isComparing) {
+          const diff = filtered.map(r=>r.price).sort((a,b)=>a-b);
+          const saving = diff[diff.length-1] - diff[0];
+          msg.textContent = `مقارنة ${filtered.length} إنفرترات بقدرة ${power} KW — الفرق ${fmt(saving)} ج.م`;
+          info.style.display = 'flex';
         } else {
-          compareBar.style.display = 'none';
+          info.style.display = 'none';
         }
       }
     }
 
-    function renderInverters(rows) {
-      invData = rows;
-      buildPowerBtns();
+    function resetInvFilter() {
+      const ddB = document.getElementById('ddBrand');
+      const ddP = document.getElementById('ddPower');
+      if (ddB) ddB.value = 'all';
+      populatePowerDropdown('all');
+      if (ddP) ddP.value = 'all';
       applyInvFilter();
-
-      // Brand buttons
-      document.querySelectorAll('.inv-brand-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.inv-brand-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          invBrand = btn.dataset.brand;
-          invPower = null; // reset power on brand change
-          buildPowerBtns();
-          applyInvFilter();
-        });
-      });
     }
 
-    function renderPanels(rows) {
+    function renderInverters(rows) {
+      invData = rows;
+      populatePowerDropdown('all');
+      applyInvFilter();
+
+      document.getElementById('ddBrand')?.addEventListener('change', function() {
+        populatePowerDropdown(this.value);
+        applyInvFilter();
+      });
+      document.getElementById('ddPower')?.addEventListener('change', applyInvFilter);
+    }
+
+        function renderPanels(rows) {
       const tb = document.getElementById('tbody-panels');
-      tb.innerHTML = rows.map(r => `
-        <tr>
+      tb.innerHTML = rows.map(r => {
+        const model = r.model_available ? `<span style="font-size:12px;font-weight:600;color:var(--brand-dark)">${r.model_available}</span>` : '<span style="color:var(--muted)">—</span>';
+        const ds = r.datasheet_url ? `<a href="${r.datasheet_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--brand);font-weight:700;text-decoration:none"><i class="fa fa-file-pdf-o"></i> PDF</a>` : '<span style="color:var(--muted)">—</span>';
+        return `<tr>
           <td><span class="prod-brand-badge">${r.brand || ''}</span></td>
           <td>${r.name_ar}${r.notes ? ' <em style="font-size:11px;color:var(--brand-dark)">(' + r.notes + ')</em>' : ''}</td>
+          <td>${model}</td>
+          <td>${ds}</td>
           <td class="prod-price">${fmt(r.price)} <span class="prod-unit">ج.م/وات</span></td>
-        </tr>`).join('');
+        </tr>`;
+      }).join('');
     }
 
     function renderAccessories(rows) {
