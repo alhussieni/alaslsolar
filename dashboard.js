@@ -857,6 +857,7 @@ async function loadLists() {
   loadFaqCounts();
   loadProjects();
   loadArticles();
+  loadProducts();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1285,3 +1286,140 @@ async function handleFaqAdd(event) {
   loadFaqs();
   loadFaqCounts();
 }
+
+/* ═══════════════════════════════════════════
+   PRODUCTS MANAGEMENT
+   ═══════════════════════════════════════════ */
+
+let allDashProducts = [];
+let currentProdCat = 'all';
+
+async function loadProducts() {
+  const list = document.getElementById('productsList');
+  if (!list) return;
+  if (!client) { list.innerHTML = '<p style="color:var(--muted);font-size:14px">تعذّر الاتصال بقاعدة البيانات.</p>'; return; }
+
+  list.innerHTML = '<p style="color:var(--muted);font-size:14px">جاري التحميل…</p>';
+  const { data, error } = await client.from('products').select('*').order('sort_order', { ascending: true });
+  if (error) { list.innerHTML = '<p style="color:red;font-size:14px">خطأ: ' + error.message + '</p>'; return; }
+  allDashProducts = data || [];
+  renderDashProducts();
+}
+
+function filterDashProducts(cat, btn) {
+  currentProdCat = cat;
+  document.querySelectorAll('.prod-dash-filter').forEach(b => {
+    b.style.background = '#fff';
+    b.style.borderColor = 'var(--line)';
+    b.style.color = 'var(--ink)';
+  });
+  if (btn) {
+    btn.style.background = 'var(--brand)';
+    btn.style.borderColor = 'var(--brand)';
+    btn.style.color = '#fff';
+  }
+  renderDashProducts();
+}
+
+function renderDashProducts() {
+  const list = document.getElementById('productsList');
+  if (!list) return;
+  const rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
+  if (rows.length === 0) { list.innerHTML = '<p style="color:var(--muted);font-size:14px">لا توجد منتجات في هذا التصنيف.</p>'; return; }
+
+  const catLabels = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق جمع', structures:'🏗️ شاسيه', cables:'🔶 كابل' };
+
+  list.innerHTML = rows.map(p => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-3);border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:var(--space-2);flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark)">${catLabels[p.category] || p.category}</span>
+          ${p.brand ? `<span style="font-size:11px;color:var(--muted)">${p.brand}</span>` : ''}
+          ${p.published ? '' : '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي</span>'}
+        </div>
+        <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name}</p>
+        <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs || ''} ${p.notes ? '— ' + p.notes : ''}</p>
+      </div>
+      <div style="text-align:left;flex-shrink:0">
+        <p style="font-weight:800;font-size:16px;color:var(--brand-dark);margin:0">${Number(p.price).toLocaleString('ar-EG')} <span style="font-size:11px;font-weight:400">ج.م/${p.unit||'قطعة'}</span></p>
+        <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
+          <button type="button" onclick="editProduct('${p.id}')"
+            style="padding:4px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">✏️ تعديل</button>
+          <button type="button" onclick="toggleProductPublish('${p.id}',${p.published})"
+            style="padding:4px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">${p.published ? '🙈 إخفاء' : '👁️ نشر'}</button>
+          <button type="button" onclick="deleteProduct('${p.id}')"
+            style="padding:4px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;font-size:12px;cursor:pointer;color:#c33">🗑️ حذف</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function editProduct(id) {
+  const p = allDashProducts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('productEditId').value = p.id;
+  document.getElementById('productCategory').value = p.category;
+  document.getElementById('productBrand').value = p.brand || '';
+  document.getElementById('productName').value = p.name;
+  document.getElementById('productSpecs').value = p.specs || '';
+  document.getElementById('productUnit').value = p.unit || 'قطعة';
+  document.getElementById('productPrice').value = p.price;
+  document.getElementById('productNotes').value = p.notes || '';
+  document.getElementById('productSort').value = p.sort_order;
+  document.getElementById('productPublished').checked = p.published;
+  document.getElementById('productAddWrap').style.display = 'block';
+  document.getElementById('productAddWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelProductForm() {
+  document.getElementById('productForm').reset();
+  document.getElementById('productEditId').value = '';
+  document.getElementById('productAddWrap').style.display = 'none';
+}
+
+async function toggleProductPublish(id, current) {
+  if (!client) return;
+  await client.from('products').update({ published: !current }).eq('id', id);
+  loadProducts();
+}
+
+async function deleteProduct(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+  if (!client) return;
+  await client.from('products').delete().eq('id', id);
+  loadProducts();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('productForm');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('productMessage');
+    if (msg) msg.textContent = 'جاري الحفظ...';
+    const editId = document.getElementById('productEditId').value;
+    const payload = {
+      category:   document.getElementById('productCategory').value,
+      brand:      document.getElementById('productBrand').value.trim() || null,
+      name:       document.getElementById('productName').value.trim(),
+      specs:      document.getElementById('productSpecs').value.trim() || null,
+      unit:       document.getElementById('productUnit').value,
+      price:      parseFloat(document.getElementById('productPrice').value) || 0,
+      notes:      document.getElementById('productNotes').value.trim() || null,
+      sort_order: parseInt(document.getElementById('productSort').value) || 100,
+      published:  document.getElementById('productPublished').checked,
+      updated_at: new Date().toISOString(),
+    };
+    if (!payload.name) { if (msg) msg.textContent = 'اسم المنتج مطلوب.'; return; }
+    let error;
+    if (editId) {
+      ({ error } = await client.from('products').update(payload).eq('id', editId));
+    } else {
+      ({ error } = await client.from('products').insert(payload));
+    }
+    if (error) { if (msg) msg.textContent = 'خطأ: ' + error.message; return; }
+    if (msg) { msg.textContent = '✅ تم الحفظ!'; setTimeout(() => { if (msg) msg.textContent = ''; }, 3000); }
+    cancelProductForm();
+    loadProducts();
+  });
+});
