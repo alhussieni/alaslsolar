@@ -394,6 +394,55 @@
       flex-shrink: 0;
     }
 
+    /* Dynamic sub-filter (brand / power) */
+    .prod-subfilter-group + .prod-subfilter-group { margin-top: var(--space-3); }
+    .prod-sub-radio-list { display: flex; flex-direction: column; gap: 2px; }
+    .prod-sub-radio-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 10px 7px 22px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      transition: background .15s;
+    }
+    [dir="rtl"] .prod-sub-radio-item { padding: 7px 22px 7px 10px; }
+    .prod-sub-radio-item:hover { background: var(--brand-soft); }
+    .prod-sub-radio-item.active { background: var(--brand-soft); font-weight: 800; color: var(--brand-dark); }
+    .prod-sub-radio-item input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .prod-sub-radio-item .prod-sub-count {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Power chips (shown after brand is selected, for inverters) */
+    .prod-chip-list { display: flex; flex-wrap: wrap; gap: 6px; padding-right: 12px; }
+    [dir="rtl"] .prod-chip-list { padding-right: 0; padding-left: 12px; }
+    .prod-chip {
+      padding: 6px 13px;
+      border-radius: 999px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .prod-chip:hover { border-color: var(--brand); color: var(--brand-dark); }
+    .prod-chip.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
     /* Price range inputs */
     .prod-price-row {
       display: flex;
@@ -726,6 +775,9 @@
           </div>
         </div>
 
+        <!-- Dynamic sub-filter (brand / power) — shown depending on selected category -->
+        <div class="prod-sidebar-section" id="dynamicSubFilter" hidden></div>
+
         <!-- Price filter -->
         <div class="prod-sidebar-section">
           <p class="prod-sidebar-label" data-i18n="prod_sidebar_price">السعر (ج.م)</p>
@@ -843,6 +895,8 @@
     // ── State ──
     let allProducts = [];     // flat list of every product across categories, each tagged with .category
     let currentCat = 'all';
+    let currentBrand = 'all'; // sub-filter: brand (inverters, panels)
+    let currentPower = 'all'; // sub-filter: power in KW (inverters only)
     let priceMin = null;
     let priceMax = null;
 
@@ -947,6 +1001,11 @@
 
       let filtered = allProducts.filter(p => {
         if (currentCat !== 'all' && p.category !== currentCat) return false;
+        if (currentBrand !== 'all' && p.brand !== currentBrand) return false;
+        if (currentPower !== 'all' && p.category === 'inverters') {
+          const { kw } = parseInvPower(p);
+          if (String(kw) !== String(currentPower)) return false;
+        }
         if (priceMin !== null && p.price < priceMin) return false;
         if (priceMax !== null && p.price > priceMax) return false;
         return true;
@@ -974,10 +1033,97 @@
     // ── Category radio handling ──
     function setActiveCategory(cat) {
       currentCat = cat;
+      currentBrand = 'all';
+      currentPower = 'all';
       document.querySelectorAll('.prod-radio-item').forEach(item => {
         item.classList.toggle('active', item.dataset.cat === cat);
       });
+      renderSubFilter();
       renderGrid();
+    }
+
+    // ── Sub-filter labels per language ──
+    const SUBFILTER_LABELS = {
+      brand: { ar: 'الماركة', en: 'Brand', es: 'Marca', zh: '品牌' },
+      power: { ar: 'القدرة (KW)', en: 'Power (KW)', es: 'Potencia (KW)', zh: '功率 (KW)' },
+      allBrands: { ar: 'كل الماركات', en: 'All Brands', es: 'Todas las marcas', zh: '全部品牌' },
+      allPowers: { ar: 'كل القدرات', en: 'All Powers', es: 'Todas las potencias', zh: '全部功率' },
+    };
+    function sl(key) { return (SUBFILTER_LABELS[key] && SUBFILTER_LABELS[key][getLang()]) || SUBFILTER_LABELS[key].ar; }
+
+    // ── Build & inject the dynamic sub-filter (brand / power) based on currentCat ──
+    function renderSubFilter() {
+      const wrap = document.getElementById('dynamicSubFilter');
+      if (!wrap) return;
+
+      // Only inverters and panels currently have a sub-filter
+      if (currentCat !== 'inverters' && currentCat !== 'panels') {
+        wrap.hidden = true;
+        wrap.innerHTML = '';
+        return;
+      }
+
+      const inCat = allProducts.filter(p => p.category === currentCat);
+      const brands = [...new Set(inCat.map(p => p.brand).filter(Boolean))].sort();
+
+      let html = `
+        <div class="prod-subfilter-group">
+          <p class="prod-sidebar-label">${sl('brand')}</p>
+          <div class="prod-sub-radio-list" id="brandRadioList">
+            <label class="prod-sub-radio-item${currentBrand === 'all' ? ' active' : ''}" data-brand="all">
+              <span>${sl('allBrands')}</span>
+              <input type="radio" name="prodBrand" value="all" ${currentBrand === 'all' ? 'checked' : ''}>
+            </label>
+            ${brands.map(b => {
+              const count = inCat.filter(p => p.brand === b).length;
+              return `<label class="prod-sub-radio-item${currentBrand === b ? ' active' : ''}" data-brand="${escapeHtml(b)}">
+                <span>${escapeHtml(b)}</span>
+                <input type="radio" name="prodBrand" value="${escapeHtml(b)}" ${currentBrand === b ? 'checked' : ''}>
+              </label>`;
+            }).join('')}
+          </div>
+        </div>`;
+
+      // Power chips only for inverters, scoped to the selected brand (or all brands)
+      if (currentCat === 'inverters') {
+        const scoped = currentBrand === 'all' ? inCat : inCat.filter(p => p.brand === currentBrand);
+        const powers = [...new Map(
+          scoped.map(p => { const { kw } = parseInvPower(p); return [kw, kw]; }).filter(([kw]) => kw)
+        ).keys()].sort((a, b) => a - b);
+
+        html += `
+        <div class="prod-subfilter-group">
+          <p class="prod-sidebar-label">${sl('power')}</p>
+          <div class="prod-chip-list" id="powerChipList">
+            <button type="button" class="prod-chip${currentPower === 'all' ? ' active' : ''}" data-power="all">${sl('allPowers')}</button>
+            ${powers.map(kw => `<button type="button" class="prod-chip${String(currentPower) === String(kw) ? ' active' : ''}" data-power="${kw}">${kw} KW</button>`).join('')}
+          </div>
+        </div>`;
+      }
+
+      wrap.innerHTML = html;
+      wrap.hidden = false;
+
+      // Wire up brand radios
+      wrap.querySelectorAll('#brandRadioList input[type="radio"]').forEach(input => {
+        input.addEventListener('change', () => {
+          const item = input.closest('.prod-sub-radio-item');
+          currentBrand = item ? item.dataset.brand : 'all';
+          currentPower = 'all'; // reset power when brand changes
+          renderSubFilter();
+          renderGrid();
+        });
+      });
+
+      // Wire up power chips
+      wrap.querySelectorAll('#powerChipList .prod-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          currentPower = chip.dataset.power;
+          wrap.querySelectorAll('#powerChipList .prod-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          renderGrid();
+        });
+      });
     }
 
     document.querySelectorAll('#catRadioList input[type="radio"]').forEach(input => {
@@ -999,6 +1145,8 @@
     document.getElementById('btnResetFilter')?.addEventListener('click', () => {
       priceMin = null;
       priceMax = null;
+      currentBrand = 'all';
+      currentPower = 'all';
       const fFrom = document.getElementById('priceFrom');
       const fTo = document.getElementById('priceTo');
       if (fFrom) fFrom.value = '';
@@ -1022,7 +1170,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('[data-lang]').forEach(btn => {
         btn.addEventListener('click', () => {
-          setTimeout(renderGrid, 50);
+          setTimeout(() => { renderSubFilter(); renderGrid(); }, 50);
         });
       });
     });
@@ -1081,6 +1229,7 @@
         }
 
         allProducts = data.filter(row => CATEGORIES.includes(row.category));
+        renderSubFilter();
         renderGrid();
       } catch (e) {
         console.error('loadProducts error:', e);
