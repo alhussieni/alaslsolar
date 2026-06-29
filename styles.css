@@ -1774,4 +1774,6 @@ html[dir="rtl"] .lang-dropdown {
     min-height: -webkit-fill-available;
   }
 }
-.admin-link { display: none; }
+/* Admin link — hidden by default; shown only when a Supabase session is active */
+.admin-link { display: none !important; }
+.admin-link.admin-visible { display: inline-flex !important; }
