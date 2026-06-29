@@ -23,9 +23,19 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const SUPABASE_URL = "https://nymkmrdbicfuniobunth.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55bWttcmRiaWNmdW5pb2J1bnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzY0MjIsImV4cCI6MjA5NTM1MjQyMn0.31gmIJjgJM6MO0vcZqON-463MjZSe_2kcXUPlxtI5dY";
+// Supabase credentials are read from environment variables (set as GitHub
+// Secrets in the workflow). Never hardcode keys directly in this file.
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error(
+    "❌  Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.\n" +
+    "    Set them as GitHub Secrets, or export them locally before running this script."
+  );
+  process.exit(1);
+}
+
 const SITE_URL = "https://alaslsolar.com";
 const __dir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -426,7 +436,7 @@ ${articleEntries}
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
   console.log("🔄  Connecting to Supabase…");
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const client = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   const { data: articles, error } = await client
     .from("articles")
