@@ -1616,6 +1616,40 @@ function detectVisitorLanguage() {
   return "en";
 }
 
+// ── Admin link visibility ────────────────────────────────────────────────────
+// Show the "Admin" nav link ONLY when a Supabase session is active.
+// The link is hidden via CSS (.admin-link { display: none !important }) by default.
+async function initAdminLink() {
+  try {
+    // Supabase SDK and config may not be loaded on every page — guard carefully
+    if (typeof getAlaslSupabase !== "function") return;
+    const client = getAlaslSupabase();
+    if (!client) return;
+
+    const showIfLoggedIn = (session) => {
+      const links = document.querySelectorAll(".admin-link");
+      links.forEach((el) => {
+        if (session) {
+          el.classList.add("admin-visible");
+        } else {
+          el.classList.remove("admin-visible");
+        }
+      });
+    };
+
+    // Check current session on page load
+    const { data } = await client.auth.getSession();
+    showIfLoggedIn(data?.session ?? null);
+
+    // Keep in sync with auth state changes (login / logout)
+    client.auth.onAuthStateChange((_event, session) => {
+      showIfLoggedIn(session);
+    });
+  } catch (e) {
+    // If anything fails, admin link stays hidden — safe by default
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const storedLang = localStorage.getItem("alasl-lang");
   const savedLang = storedLang || detectVisitorLanguage();
@@ -1625,6 +1659,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initMenu();
   initNavigationState();
+  // initAdminLink needs Supabase SDK which loads at end of body — run after all scripts are ready
+  if (typeof getAlaslSupabase === "function") {
+    initAdminLink();
+  } else {
+    window.addEventListener("load", initAdminLink);
+  }
   initContactForm();
   initProjectFilters();
   initProjects();
