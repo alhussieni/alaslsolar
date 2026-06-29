@@ -586,10 +586,13 @@ async function handleArticle(event) {
   try {
     const images = await collectImages('articleImagesWrap', 'articles');
     const titleAr = formData.get('title_ar');
+    const slugCustom = (formData.get('slug_custom') || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/--+/g, '-').replace(/^-+|-+$/g, '');
+    if (!slugCustom) { if (msgEl) msgEl.textContent = 'خطأ: يجب كتابة رابط المقال (URL Slug) بالإنجليزي.'; return; }
+    const slug = `${slugCustom}-${Date.now()}`;
     const payload = {
       category:     formData.get('category') || 'general',
       title:        titleAr,
-      slug:         `${slugify(titleAr)}-${Date.now()}`,
+      slug,
       summary:      formData.get('summary_ar'),
       content:      formData.get('content_ar'),
       title_ar:     titleAr,
