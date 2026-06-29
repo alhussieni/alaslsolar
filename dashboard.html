@@ -492,6 +492,22 @@
                 <input id="articleTitle_ar" name="title_ar" required placeholder="عنوان المقال...">
               </div>
               <div style="margin-top:var(--space-2)">
+                <label style="display:flex;align-items:center;gap:6px">
+                  رابط المقال (URL Slug) — بالإنجليزي *
+                  <span style="font-size:11px;color:var(--muted);font-weight:400">(حروف صغيرة وشرطة فقط، بدون مسافات)</span>
+                </label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:12px;color:var(--muted);white-space:nowrap">alaslsolar.com/articles/</span>
+                  <input id="articleSlug" name="slug_custom" required
+                    placeholder="solar-energy-guide"
+                    pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                    title="حروف إنجليزية صغيرة وأرقام وشرطة فقط"
+                    style="flex:1"
+                    oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/--+/g,'-')">
+                </div>
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">مثال: <code>solar-energy-basics</code> أو <code>pv-diesel-hybrid-guide</code></p>
+              </div>
+              <div style="margin-top:var(--space-2)">
                 <label>ملخص *</label>
                 <textarea id="articleSummary_ar" name="summary_ar" rows="3" required placeholder="ملخص يظهر في القائمة..."></textarea>
               </div>
