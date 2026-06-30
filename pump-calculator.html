@@ -399,7 +399,33 @@
           </div>
         </div>
 
-        <!-- Results panel (full width) -->
+        <!-- Panel 3: Solar system sizing -->
+        <div class="calc-panel" style="grid-column:1/-1;">
+          <h2 class="calc-panel-title">
+            <i class="ti ti-sun"></i>
+            منظومة الطاقة الشمسية
+          </h2>
+          <div class="field-group g3">
+            <div class="field">
+              <label for="panel_choice">قدرة اللوح الشمسي</label>
+              <select id="panel_choice" onchange="calc()">
+                <option value="">جاري تحميل الألواح المتاحة...</option>
+              </select>
+              <span class="field-hint" id="panelHint">يتم التحميل من قائمة المنتجات المحدّثة</span>
+            </div>
+            <div class="field">
+              <label for="psh">ساعات الشمس الفعالة</label>
+              <input type="number" id="psh" value="6" min="3" max="9" step="0.5" oninput="calc()">
+              <span class="field-hint">Peak Sun Hours — متوسط يومي</span>
+            </div>
+            <div class="field">
+              <label for="oversize">نسبة تكبير خاصة</label>
+              <input type="number" id="oversize" value="0" min="0" max="100" step="5" oninput="calc()">
+              <span class="field-hint">% — افتراضي 0 (لا تكبير)، تُستخدم لحالات خاصة فقط</span>
+            </div>
+          </div>
+        </div>
+
         <div class="results-panel" id="results">
           <div class="calc-empty">
             <i class="ti ti-calculator" aria-hidden="true"></i>
@@ -466,8 +492,71 @@
     function getHP(kw)       { return motorHP[kw] ?? r2(kw * KW_TO_HP); }
     function r2(n)           { return Math.round(n*100)/100; }
 
+    /* ── Solar products (panels & inverters) loaded from Supabase ── */
+    let panelProducts    = [];
+    let inverterProducts = [];
+
+    function parseWatt(p) {
+      const src = `${p.specs||''} ${p.name||''}`;
+      const m = src.match(/(\d{3,4})\s*W/i);
+      return m ? parseInt(m[1], 10) : null;
+    }
+    function parseInverter(p) {
+      const src = `${p.specs||''}`;
+      const m = src.match(/([\d.]+)\s*HP\s*-\s*([\d.]+)\s*KW/i);
+      return m ? { hp: parseFloat(m[1]), kw: parseFloat(m[2]) } : null;
+    }
+
+    async function loadSolarProducts() {
+      const sel = document.getElementById('panel_choice');
+      let attempts = 0;
+      while (attempts < 50) {
+        if (window.supabase && typeof window.supabase.createClient === 'function' &&
+            window.ALASL_SUPABASE_URL && window.ALASL_SUPABASE_ANON_KEY) break;
+        await new Promise(r => setTimeout(r, 100));
+        attempts++;
+      }
+      let sb = null;
+      try {
+        sb = window.alaslSupabase || (window.supabase && window.supabase.createClient(window.ALASL_SUPABASE_URL, window.ALASL_SUPABASE_ANON_KEY));
+        window.alaslSupabase = sb;
+      } catch (e) {}
+
+      if (!sb) { useFallbackPanels(); return; }
+
+      try {
+        const { data, error } = await sb.from('products').select('*')
+          .in('category', ['panels','inverters'])
+          .eq('published', true)
+          .order('price', { ascending: true });
+        if (error || !data || !data.length) { useFallbackPanels(); return; }
+
+        panelProducts    = data.filter(p => p.category === 'panels' && parseWatt(p)).sort((a,b)=>parseWatt(a)-parseWatt(b));
+        inverterProducts = data.filter(p => p.category === 'inverters' && parseInverter(p)).sort((a,b)=>parseInverter(a).hp-parseInverter(b).hp);
+
+        if (!panelProducts.length) { useFallbackPanels(); return; }
+
+        sel.innerHTML = panelProducts.map((p,i) => {
+          const w = parseWatt(p);
+          return `<option value="${i}">${p.brand?p.brand+' — ':''}${w} واط (${p.price} ج/وات)</option>`;
+        }).join('');
+        document.getElementById('panelHint').textContent = `${panelProducts.length} نوع لوح متاح من قائمة المنتجات`;
+        calc();
+      } catch (e) {
+        useFallbackPanels();
+      }
+    }
+
+    function useFallbackPanels() {
+      // Fallback static wattages if Supabase is unreachable (no live pricing)
+      panelProducts = [550, 580, 600, 665].map(w => ({ brand: null, name: `لوح ${w} واط`, specs: `${w}W`, price: null }));
+      const sel = document.getElementById('panel_choice');
+      sel.innerHTML = panelProducts.map((p,i) => `<option value="${i}" ${p.specs==='600W'?'selected':''}>${parseWatt(p)} واط (السعر غير متاح حالياً)</option>`).join('');
+      document.getElementById('panelHint').textContent = 'تعذّر تحميل قائمة المنتجات — يُرجى التواصل لتأكيد السعر';
+      calc();
+    }
+
     function updateCrops() {
-      const method = document.getElementById('irr_method').value;
       const sel    = document.getElementById('crop_type');
       sel.innerHTML = '';
       (cropData[method]||[]).forEach(c => {
@@ -489,6 +578,33 @@
         if (opt.dataset.pressure) document.getElementById('pressure').value = opt.dataset.pressure;
       }
       calc();
+    }
+
+    function computeSolarSystem(kw_std, hp_std) {
+      const sel = document.getElementById('panel_choice');
+      const idx = sel ? parseInt(sel.value, 10) : NaN;
+      const panel = (!isNaN(idx) && panelProducts[idx]) ? panelProducts[idx] : null;
+      const psh      = parseFloat(document.getElementById('psh')?.value) || 6;
+      const oversize = parseFloat(document.getElementById('oversize')?.value) || 0;
+
+      if (!panel) return null;
+
+      const watt = parseWatt(panel) || 0;
+      if (!watt) return null;
+
+      const kwpRequired = r2(kw_std * (1 + oversize/100));
+      const panelCount  = Math.ceil((kwpRequired * 1000) / watt);
+      const kwpActual   = r2((panelCount * watt) / 1000);
+      const dailyKwh    = r2(kwpActual * psh);
+
+      const inv = inverterProducts.find(p => parseInverter(p).hp >= hp_std) || inverterProducts[inverterProducts.length-1] || null;
+
+      const panelPrice    = (panel.price != null) ? panel.price : null;
+      const panelsCost    = panelPrice != null ? Math.round(panelCount * watt * panelPrice) : null;
+      const inverterCost  = (inv && inv.price != null) ? Math.round(inv.price) : null;
+      const totalCost     = (panelsCost != null && inverterCost != null) ? (panelsCost + inverterCost) : null;
+
+      return { watt, panel, panelCount, kwpRequired, kwpActual, dailyKwh, psh, oversize, inv, panelsCost, inverterCost, totalCost };
     }
 
     function calc() {
@@ -519,6 +635,8 @@
       const kwList = Object.keys(motorHP).map(Number);
       const hp_std = hpList.find(h => h >= hp_c) || hpList[hpList.length-1];
       const kw_std = kwList[hpList.indexOf(hp_std)];
+
+      const solar = computeSolarSystem(kw_std, hp_std);
 
       /* ── Pipe diameter ── */
       const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
@@ -621,6 +739,45 @@
 
         <div class="calc-divider"></div>
 
+        <!-- Solar system sizing -->
+        ${solar ? `
+        <div class="pipe-section">
+          <p class="pipe-section-title">منظومة الطاقة الشمسية المقترحة</p>
+          <div class="metrics-row">
+            <div class="metric-card brand">
+              <div class="metric-label">عدد الألواح المطلوبة</div>
+              <div class="metric-value">${solar.panelCount} <span style="font-size:14px;font-weight:600;">لوح</span></div>
+              <div class="metric-unit">${solar.watt} واط/اللوح</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">إجمالي قدرة المنظومة</div>
+              <div class="metric-value">${solar.kwpActual}</div>
+              <div class="metric-unit">كيلوواط بيك (kWp)</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">الإنفرتر / VFD المناسب</div>
+              <div class="metric-value" style="font-size:17px;">${solar.inv ? (solar.inv.brand||'') : 'غير متاح'}</div>
+              <div class="metric-unit">${solar.inv ? solar.inv.specs : 'يُرجى التواصل لتأكيد المقاس'}</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">الطاقة المنتجة يومياً (تقريبي)</div>
+              <div class="metric-value">${solar.dailyKwh}</div>
+              <div class="metric-unit">كيلوواط/ساعة — عند ${solar.psh} ساعة شمس</div>
+            </div>
+          </div>
+          ${solar.totalCost != null ? `
+          <div class="calc-note info" style="margin-top:var(--space-2);">
+            <i class="ti ti-currency-dollar" aria-hidden="true"></i>
+            <span>السعر التقريبي للمنظومة (ألواح + إنفرتر): <strong>${solar.totalCost.toLocaleString('ar-EG')} ج.م</strong> — سعر استرشادي قابل للتحديث، التأكيد النهائي من فريق المبيعات.</span>
+          </div>` : `
+          <div class="calc-note warn" style="margin-top:var(--space-2);">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <span>سعر المنظومة غير متاح حالياً — يُرجى التواصل مع فريق المبيعات لتأكيد السعر التفصيلي.</span>
+          </div>`}
+        </div>
+        <div class="calc-divider"></div>
+        ` : ''}
+
         <!-- Detail calculations -->
         <p class="pipe-section-title">تفاصيل المعادلات</p>
         <div class="detail-list">
@@ -712,6 +869,7 @@
       const D_mm   = D_m * 1000;
       const D_in   = D_mm / 25.4;
       const D_near = nearestPipe(D_in);
+      const solar  = computeSolarSystem(kw_std, hp_std);
 
       // Build summary note
       const note = `=== بيانات حاسبة نظام الضخ ===
@@ -731,7 +889,14 @@
 ▸ الرفع الديناميكي (TDH): ${TDH.toFixed(0)} متر
 ▸ قدرة الموتور الحسابية: ${hp_c} حصان (${kw_c} كيلوواط)
 ▸ أقرب قدرة تجارية: ${hp_std} حصان / ${kw_std} كيلوواط
-▸ قطر الماسورة: ${D_near}" (${D_mm.toFixed(0)} مم)`;
+▸ قطر الماسورة: ${D_near}" (${D_mm.toFixed(0)} مم)${solar ? `
+
+=== منظومة الطاقة الشمسية ===
+▸ عدد الألواح: ${solar.panelCount} لوح (${solar.watt} واط)
+▸ إجمالي القدرة: ${solar.kwpActual} كيلوواط بيك
+▸ الإنفرتر/VFD المناسب: ${solar.inv ? (solar.inv.brand||'')+' '+solar.inv.specs : 'يُرجى التأكيد من المبيعات'}
+▸ الطاقة المنتجة يومياً: ${solar.dailyKwh} كيلوواط/ساعة (عند ${solar.psh} ساعة شمس)${solar.totalCost != null ? `
+▸ السعر التقريبي للمنظومة: ${solar.totalCost.toLocaleString('ar-EG')} ج.م` : ''}` : ''}`;
 
       sessionStorage.setItem('pump_calc_note', note);
       window.location.href = 'contact.html';
@@ -740,6 +905,7 @@
     /* ── Init ── */
     updateCrops();
     calc();
+    loadSolarProducts();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
