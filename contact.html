@@ -90,9 +90,15 @@
 
     <section class="section contact-grid">
       <div class="tally-panel">
-        <div id="calcSummaryBox" style="display:none;align-items:center;gap:8px;background:rgba(46,158,91,.08);border:1px solid rgba(46,158,91,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-family:Cairo,sans-serif;font-size:13.5px;color:#1f6b3c;">
-          <i class="fa fa-circle-check" aria-hidden="true"></i>
-          <span>تم إرفاق بيانات حاسبتك تلقائياً مع هذا الطلب — فقط أكمل بياناتك بالأسفل واضغط إرسال.</span>
+        <div id="calcSummaryBox" style="display:none;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,250,245,.95));border:1.5px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <i class="fa fa-circle-check" style="color:#2e9e5b;font-size:18px;" aria-hidden="true"></i>
+            <strong style="font-family:Cairo,sans-serif;font-size:15px;">تم إرفاق بيانات حاسبتك تلقائياً مع هذا الطلب</strong>
+          </div>
+          <p style="font-family:Cairo,sans-serif;font-size:13.5px;color:var(--ink-soft,#5a5a5a);margin:0 0 12px;line-height:1.7;">
+            دي بياناتك ونتائج الحاسبة اللي هتترسل مع طلبك تلقائياً. فقط أكمل بيانات التواصل في الفورم بالأسفل واضغط إرسال.
+          </p>
+          <pre id="calcSummaryText" style="white-space:pre-wrap;font-family:Cairo,sans-serif;font-size:13px;background:rgba(0,0,0,.035);border-radius:10px;padding:12px 14px;margin:0;max-height:260px;overflow:auto;direction:rtl;text-align:right;"></pre>
         </div>
         <iframe
           id="tallyFrame"
@@ -177,6 +183,7 @@
       if (!note) return;
 
       const box   = document.getElementById('calcSummaryBox');
+      const text  = document.getElementById('calcSummaryText');
       const frame = document.getElementById('tallyFrame');
 
       // Silently prefill the hidden "details" field in the Tally form
@@ -186,8 +193,9 @@
         frame.setAttribute('data-tally-src', base + sep + 'details=' + encodeURIComponent(note));
       }
 
-      // Show a small confirmation that data was attached automatically
-      if (box) box.style.display = 'flex';
+      // Show the data to the customer so they can see what was attached
+      if (text) text.textContent = note;
+      if (box) box.style.display = 'block';
 
       // Data only needs to travel once
       sessionStorage.removeItem('pump_calc_note');
