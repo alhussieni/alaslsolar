@@ -90,7 +90,12 @@
 
     <section class="section contact-grid">
       <div class="tally-panel">
+        <div id="calcSummaryBox" style="display:none;align-items:center;gap:8px;background:rgba(46,158,91,.08);border:1px solid rgba(46,158,91,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-family:Cairo,sans-serif;font-size:13.5px;color:#1f6b3c;">
+          <i class="fa fa-circle-check" aria-hidden="true"></i>
+          <span>تم إرفاق بيانات حاسبتك تلقائياً مع هذا الطلب — فقط أكمل بياناتك بالأسفل واضغط إرسال.</span>
+        </div>
         <iframe
+          id="tallyFrame"
           data-tally-src="https://tally.so/embed/68pyyJ?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
           loading="lazy"
           width="100%"
@@ -163,6 +168,29 @@
         render(lang);
         document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>render(b.dataset.lang)));
       } catch(e) {}
+    })();
+  </script>
+
+  <script>
+    (function attachCalcSummary() {
+      const note = sessionStorage.getItem('pump_calc_note');
+      if (!note) return;
+
+      const box   = document.getElementById('calcSummaryBox');
+      const frame = document.getElementById('tallyFrame');
+
+      // Silently prefill the hidden "details" field in the Tally form
+      if (frame) {
+        const base = frame.getAttribute('data-tally-src');
+        const sep  = base.includes('?') ? '&' : '?';
+        frame.setAttribute('data-tally-src', base + sep + 'details=' + encodeURIComponent(note));
+      }
+
+      // Show a small confirmation that data was attached automatically
+      if (box) box.style.display = 'flex';
+
+      // Data only needs to travel once
+      sessionStorage.removeItem('pump_calc_note');
     })();
   </script>
 </body>
