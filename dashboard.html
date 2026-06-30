@@ -3,126 +3,552 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0d0b0a">
-  
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <title>Admin Dashboard | Al Asl Solar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
   <link rel="stylesheet" href="styles.css">
-  <title>Articles | Al Asl Solar</title>
-  <meta name="description" content="Read Al Asl Solar articles, updates, and renewable energy insights.">
-  <meta property="og:title" content="Articles | Al Asl Solar">
-  <meta property="og:description" content="Solar energy articles, project updates, and renewable energy insights.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://alaslsolar.com/articles.html">
-  <meta property="og:image" content="https://alaslsolar.com/solar.jpg">
-  <link rel="canonical" href="https://alaslsolar.com/articles.html">
-  <link rel="alternate" hreflang="en" href="https://alaslsolar.com/articles.html">
-  <link rel="alternate" hreflang="ar" href="https://alaslsolar.com/articles.html">
-  <link rel="alternate" hreflang="es" href="https://alaslsolar.com/articles.html">
-  <link rel="alternate" hreflang="zh" href="https://alaslsolar.com/articles.html">
-  <link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/articles.html">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"Solar Energy Articles — Al Asl Solar","url":"https://alaslsolar.com/articles.html","description":"Solar energy guides, tips, and industry insights from Al Asl Solar.","blogPost":[{"@type":"BlogPosting","headline":"Solar Energy Applications: From the Farm to the Villa, the Factory, and the Hotel","url":"https://alaslsolar.com/articles/solar-energy-applications.html","datePublished":"2026-06-20","description":"A practical look at the most important solar energy applications across different sectors: solar irrigation for farms and agricultural land, solar street lighting poles for streets and compounds, factory and industrial facility applications, the right solution for villas and homes, and solar water heaters for hotels and large residential buildings."},{"@type":"BlogPosting","headline":"Maintenance and Longevity: How to Keep Your Solar System Running for as Long as Possible","url":"https://alaslsolar.com/articles/solar-panel-maintenance.html","datePublished":"2026-06-20","description":"A practical, step-by-step guide to maintaining solar panels, explaining the factors that extend or shorten a panel's expected lifespan, the most common faults and how to avoid them, plus tips for maintaining solar water heaters, and a full breakdown of what the warranty covers and doesn't cover before you decide to install."},{"@type":"BlogPosting","headline":"System Comparisons: How to Choose the Right Solar System for You","url":"https://alaslsolar.com/articles/solar-system-comparison.html","datePublished":"2026-06-20","description":"A comprehensive guide explaining the difference between On-Grid, Off-Grid, and Hybrid systems, a numbers-based comparison between solar energy and traditional electricity, plus an explanation of the different solar panel types and how to pick the right inverter for your needs. Everything you need to make the right decision before installing your system."},{"@type":"BlogPosting","headline":"What Is Solar Energy and How Does It Work?","url":"https://alaslsolar.com/articles/solar-energy-guide.html","datePublished":"2026-06-20","description":"A simple guide explaining what solar energy is and how a solar panel converts sunlight into electricity to power your home appliances, plus the main reasons people in Egypt are turning to it and its impact on the electricity bill."}]}</script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app.js"></script>
+  <script defer src="alasl-editor.bundle.js"></script>
+  <script defer src="dashboard.js"></script>
+  <style>
+    .faq-page-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: var(--space-3) var(--space-2);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, transform .18s;
+      text-align: center;
+    }
+    .faq-page-btn:hover { border-color: var(--brand); background: var(--brand-soft); transform: translateY(-2px); }
+    .faq-page-btn.active { border-color: var(--brand); background: var(--brand-soft); }
+    .fpb-icon { font-size: 22px; }
+    .fpb-label { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .fpb-count { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--brand-soft); color: var(--brand-dark); }
+  </style>
+
+  <style>
+    .dashboard-home-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      width: fit-content;
+      transition: background .18s;
+    }
+    .dashboard-home-btn:hover { background: rgba(255,255,255,0.2); }
+    @media (max-width: 860px) {
+      .dashboard-home-btn { display: flex; }
+      .dashboard-logo { display: block !important; }
+    }
+    .lang-tab-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .lang-tab-btn.active {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .lang-panel label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .lang-panel input,
+    .lang-panel textarea {
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Al Asl Solar home">
-      <img src="logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
-    </a>
-    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
-      <i class="fa fa-bars" aria-hidden="true"></i>
-      <span class="sr-only">Open menu</span>
-    </button>
-    <nav class="site-menu" id="siteMenu" aria-label="Main navigation">
-      <a href="index.html" data-i18n="nav_home">Home</a>
-      <a href="about.html" data-i18n="nav_about">About Us</a>
-      <a href="services.html" data-i18n="nav_services">Services</a>
-      <a href="projects.html" data-i18n="nav_projects">Projects</a>
-      <a href="articles.html" data-i18n="nav_articles">Articles</a>
-      <a href="calculators.html" data-i18n="nav_calculators">Calculators</a>
-      <a href="contact.html" data-i18n="nav_contact">Contact</a>      <div class="lang-switcher" role="group" aria-label="Language">
-        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
-          <i class="ti ti-world" aria-hidden="true"></i>
-          <span id="langLabel" data-i18n="language">Language</span>
-          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
-        </button>
-        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
-          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
-          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
-          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
-          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
-        </ul>
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <a class="dashboard-logo" href="index.html">
+        <img src="logo-white.png" alt="Al Asl Solar logo">
+      </a>
+      <div>
+        <a href="index.html" class="dashboard-home-btn" aria-label="الرئيسية">
+          <i class="fa fa-house" aria-hidden="true"></i>
+          <span>الرئيسية</span>
+        </a>
+        <p class="eyebrow">Admin</p>
+        <h1>Content Dashboard</h1>
+        <p>Add projects, upload images, and publish articles without editing code.</p>
       </div>
-    </nav>
-  </header>
-
-  <main id="main">
-    <section class="page-hero">
-      <p class="eyebrow" data-i18n="articles_kicker">Knowledge center</p>
-      <h1 data-i18n="articles_title">Solar articles and updates</h1>
-      <p data-i18n="articles_intro">Insights, announcements, and practical notes from Al Asl Solar.</p>
     </section>
-    <section class="section">
-      <div class="article-controls" data-articles-controls></div>
-      <div class="cards three" data-articles-grid>
-        <a class="article-card" href="articles/solar-energy-applications.html">
-          <img src="https://nymkmrdbicfuniobunth.supabase.co/storage/v1/object/public/site-media/articles/1781971754712-cc4be8794d7438.png" alt="Solar Energy Applications: From the Farm to the Villa, the Factory, and the Hotel" loading="lazy">
-          <div>
-            <span>20 June 2026</span>
-            <h2>Solar Energy Applications: From the Farm to the Villa, the Factory, and the Hotel</h2>
-            <p>A practical look at the most important solar energy applications across different sectors: solar irrigation for farms and agricultural land, solar street lighting poles for streets and compounds, factory and industrial facility applications, the right solution for villas and homes, and solar water heaters for hotels and large residential buildings.</p>
+
+    <section class="dashboard-card" data-auth-panel>
+      <h2>Login</h2>
+      <form class="admin-form" id="loginForm">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="email" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">Login</button>
+        <p class="form-note" data-auth-message></p>
+      </form>
+    </section>
+
+    <section class="dashboard-content" data-dashboard hidden>
+      <div class="dashboard-toolbar">
+        <div>
+          <h2>Manage Content</h2>
+          <p data-user-email></p>
+        </div>
+        <button class="btn btn-secondary dark" type="button" data-logout>Logout</button>
+      </div>
+
+
+      <!-- Stats Management -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card" id="statsCard">
+          <h3>🔢 Homepage Stats</h3>
+          <p style="color:var(--muted);font-size:14px;margin-bottom:var(--space-3)">
+            Edit the three numbers shown on the homepage. Changes go live immediately after saving.
+          </p>
+          <div id="statsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">Loading stats...</p>
           </div>
-        </a>
-        <a class="article-card" href="articles/solar-panel-maintenance.html">
-          <img src="https://nymkmrdbicfuniobunth.supabase.co/storage/v1/object/public/site-media/articles/1781971239124-f743e6d1de21d.png" alt="Maintenance and Longevity: How to Keep Your Solar System Running for as Long as Possible" loading="lazy">
-          <div>
-            <span>20 June 2026</span>
-            <h2>Maintenance and Longevity: How to Keep Your Solar System Running for as Long as Possible</h2>
-            <p>A practical, step-by-step guide to maintaining solar panels, explaining the factors that extend or shorten a panel's expected lifespan, the most common faults and how to avoid them, plus tips for maintaining solar water heaters, and a full breakdown of what the warranty covers and doesn't cover before you decide to install.</p>
+          <p class="form-note" id="statsMessage" style="margin-top:var(--space-2)"></p>
+        </article>
+      </div>
+
+
+                  <!-- FAQ Management -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card" id="faqCard">
+          <h3>❓ إدارة الأسئلة الشائعة</h3>
+          <p style="color:var(--muted);font-size:14px;margin:0 0 var(--space-3)">
+            اختر صفحة لعرض أسئلتها وإدارتها، أو أضف سؤالاً جديداً.
+          </p>
+
+          <!-- Page selector grid -->
+          <div id="faqPageSelector" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--space-3)">
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('home')" data-page="home">
+              <span class="fpb-icon">🏠</span>
+              <span class="fpb-label">الصفحة الرئيسية</span>
+              <span class="fpb-count" id="faqCount_home">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('services')" data-page="services">
+              <span class="fpb-icon">⚙️</span>
+              <span class="fpb-label">الخدمات</span>
+              <span class="fpb-count" id="faqCount_services">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('agriculture')" data-page="agriculture">
+              <span class="fpb-icon">🌱</span>
+              <span class="fpb-label">زراعة وري</span>
+              <span class="fpb-count" id="faqCount_agriculture">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('industrial')" data-page="industrial">
+              <span class="fpb-icon">🏭</span>
+              <span class="fpb-label">صناعة وتجارة</span>
+              <span class="fpb-count" id="faqCount_industrial">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('residential')" data-page="residential">
+              <span class="fpb-icon">🏡</span>
+              <span class="fpb-label">سكني</span>
+              <span class="fpb-count" id="faqCount_residential">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('about')" data-page="about">
+              <span class="fpb-icon">ℹ️</span>
+              <span class="fpb-label">من نحن</span>
+              <span class="fpb-count" id="faqCount_about">…</span>
+            </button>
+            <button type="button" class="faq-page-btn" onclick="openFaqPage('contact')" data-page="contact">
+              <span class="fpb-icon">📞</span>
+              <span class="fpb-label">تواصل معنا</span>
+              <span class="fpb-count" id="faqCount_contact">…</span>
+            </button>
           </div>
-        </a>
-        <a class="article-card" href="articles/solar-system-comparison.html">
-          <img src="https://nymkmrdbicfuniobunth.supabase.co/storage/v1/object/public/site-media/articles/1781970754989-dd3939963412b8.png" alt="System Comparisons: How to Choose the Right Solar System for You" loading="lazy">
-          <div>
-            <span>20 June 2026</span>
-            <h2>System Comparisons: How to Choose the Right Solar System for You</h2>
-            <p>A comprehensive guide explaining the difference between On-Grid, Off-Grid, and Hybrid systems, a numbers-based comparison between solar energy and traditional electricity, plus an explanation of the different solar panel types and how to pick the right inverter for your needs. Everything you need to make the right decision before installing your system.</p>
+
+          <!-- Page questions panel (hidden until page selected) -->
+          <div id="faqPagePanel" style="display:none">
+
+            <!-- Panel header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--brand-soft);border-radius:var(--radius);margin-bottom:var(--space-3)">
+              <div style="display:flex;align-items:center;gap:8px">
+                <button type="button" onclick="closeFaqPanel()"
+                  style="padding:4px 10px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">
+                  ← رجوع
+                </button>
+                <strong id="faqPanelTitle" style="font-size:16px"></strong>
+              </div>
+              <button type="button" onclick="toggleFaqAddForm()"
+                style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+                + إضافة سؤال
+              </button>
+            </div>
+
+            <!-- Add form (hidden by default) -->
+            <div id="faqAddFormWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+              <p style="font-weight:700;font-size:14px;margin:0 0 var(--space-2);color:var(--brand-dark)">إضافة سؤال جديد</p>
+              <form class="admin-form" id="faqAddForm">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                  <div>
+                    <label>السؤال بالعربية *</label>
+                    <input id="faq_new_q_ar" placeholder="اكتب السؤال..." dir="rtl" required>
+                  </div>
+                  <div>
+                    <label>الإجابة بالعربية *</label>
+                    <textarea id="faq_new_a_ar" rows="3" placeholder="اكتب الإجابة..." dir="rtl" required></textarea>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap">
+                  <div>
+                    <label style="font-size:12px;display:block;margin-bottom:4px">الترتيب</label>
+                    <input id="faq_new_sort" type="number" value="100" style="width:75px;min-height:38px">
+                  </div>
+                </div>
+                <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;align-items:center">
+                  <button class="btn btn-secondary" type="button" id="faqTranslateBtn" onclick="translateNewFaq()"
+                    style="min-height:38px;font-size:13px">✨ ترجمة تلقائية</button>
+                  <button class="btn btn-primary" type="submit" style="min-height:38px;font-size:13px">💾 حفظ السؤال</button>
+                  <button type="button" onclick="toggleFaqAddForm()"
+                    style="padding:6px 14px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+                </div>
+                <p class="form-note" id="faqAddMessage" style="margin-top:6px"></p>
+
+                <!-- Translation review (shown after translate) -->
+                <div id="faqTranslationPreview" style="display:none;margin-top:var(--space-3);padding:var(--space-2);background:#fff;border-radius:var(--radius);border:1px solid var(--line)">
+                  <p style="font-weight:700;font-size:12px;color:var(--brand);margin:0 0 var(--space-2)">راجع الترجمة وعدّل إن احتجت:</p>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-1)">
+                    <div><label style="font-size:11px">Q — English</label><input id="faq_new_q_en" placeholder="English question..."></div>
+                    <div><label style="font-size:11px">A — English</label><textarea id="faq_new_a_en" rows="2"></textarea></div>
+                    <div><label style="font-size:11px">Q — Español</label><input id="faq_new_q_es"></div>
+                    <div><label style="font-size:11px">A — Español</label><textarea id="faq_new_a_es" rows="2"></textarea></div>
+                    <div><label style="font-size:11px">Q — 中文</label><input id="faq_new_q_zh"></div>
+                    <div><label style="font-size:11px">A — 中文</label><textarea id="faq_new_a_zh" rows="2"></textarea></div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Questions list -->
+            <div id="faqList" style="display:grid;gap:var(--space-2)">
+              <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+            </div>
+            <p class="form-note" id="faqMessage"></p>
           </div>
-        </a>
-        <a class="article-card" href="articles/solar-energy-guide.html">
-          <img src="https://nymkmrdbicfuniobunth.supabase.co/storage/v1/object/public/site-media/articles/1781918114772-31d4dbd9f7078.png" alt="What Is Solar Energy and How Does It Work?" loading="lazy">
-          <div>
-            <span>20 June 2026</span>
-            <h2>What Is Solar Energy and How Does It Work?</h2>
-            <p>A simple guide explaining what solar energy is and how a solar panel converts sunlight into electricity to power your home appliances, plus the main reasons people in Egypt are turning to it and its impact on the electricity bill.</p>
+
+        </article>
+      </div>
+
+      <!-- ── Projects Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">📁 إدارة المشاريع</h3>
+            <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')" id="addProjectBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة مشروع
+            </button>
           </div>
-        </a>
+
+          <!-- Add form -->
+          <div id="projectAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="projectForm">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                <div>
+                  <label>عنوان المشروع *</label>
+                  <input id="projectTitle" name="title" required placeholder="اسم المشروع...">
+                </div>
+                <div>
+                  <label>التصنيف</label>
+                  <select id="projectCategory" name="category">
+                    <option value="Agriculture">زراعة</option>
+                    <option value="Commercial">تجاري</option>
+                    <option value="Hybrid">هجين</option>
+                    <option value="Residential">سكني</option>
+                    <option value="Maintenance">صيانة</option>
+                  </select>
+                </div>
+                <div>
+                  <label>الموقع</label>
+                  <input id="projectLocation" name="location" placeholder="المحافظة / المنطقة">
+                </div>
+                <div>
+                  <label>القدرة</label>
+                  <input id="projectCapacity" name="capacity" placeholder="مثال: 120 kW">
+                </div>
+                <div>
+                  <label>السنة</label>
+                  <input id="projectYear" name="year" type="number" min="2020" max="2035" placeholder="2025">
+                </div>
+                <div>
+                  <label>الترتيب</label>
+                  <input id="projectSort" name="sort_order" type="number" value="100" placeholder="100">
+                </div>
+              </div>
+              <div>
+                <label>ملخص المشروع *</label>
+                <textarea id="projectSummary" name="summary" rows="3" required placeholder="وصف مختصر للمشروع..."></textarea>
+              </div>
+
+              <!-- Multi-image uploader -->
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">الصور</label>
+                <div id="projectImagesWrap" style="display:grid;gap:var(--space-2)"></div>
+                <button type="button" onclick="addImageRow('projectImagesWrap','project')"
+                  style="margin-top:8px;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer;width:100%">
+                  + إضافة صورة
+                </button>
+              </div>
+
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" type="checkbox" checked>
+                <span style="font-weight:700">نشر المشروع</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المشروع</button>
+                <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" data-project-message></p>
+            </form>
+          </div>
+
+          <!-- Projects list -->
+          <div id="projectsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- ── Products Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">🛒 إدارة المنتجات</h3>
+            <button type="button" onclick="toggleSection('productAddWrap','addProductBtn')" id="addProductBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة منتج
+            </button>
+          </div>
+
+          <!-- Add / Edit form -->
+          <div id="productAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="productForm">
+              <input type="hidden" id="productEditId">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                <div>
+                  <label>التصنيف *</label>
+                  <select id="productCategory" name="category" required>
+                    <option value="inverters">⚡ إنفرترات</option>
+                    <option value="panels">☀️ ألواح شمسية</option>
+                    <option value="accessories">🔌 إكسسوارات</option>
+                    <option value="combiners">📦 صناديق جمع</option>
+                    <option value="structures">🏗️ شاسيهات</option>
+                    <option value="cables">🔶 كابلات</option>
+                  </select>
+                </div>
+                <div>
+                  <label>الماركة / البراند</label>
+                  <input id="productBrand" name="brand" placeholder="مثال: VEICHI">
+                </div>
+                <div>
+                  <label>اسم المنتج *</label>
+                  <input id="productName" name="name" required placeholder="اسم المنتج...">
+                </div>
+                <div>
+                  <label>المواصفات</label>
+                  <input id="productSpecs" name="specs" placeholder="مثال: 5.5 HP - 4 KW">
+                </div>
+                <div>
+                  <label>الوحدة</label>
+                  <select id="productUnit" name="unit">
+                    <option value="قطعة">قطعة</option>
+                    <option value="وات">وات</option>
+                    <option value="متر">متر</option>
+                    <option value="طقم">طقم</option>
+                  </select>
+                </div>
+                <div>
+                  <label>السعر (ج.م) *</label>
+                  <input id="productPrice" name="price" type="number" min="0" step="0.01" required placeholder="0.00">
+                </div>
+                <div>
+                  <label>ملاحظات</label>
+                  <input id="productNotes" name="notes" placeholder="ملاحظة إضافية...">
+                </div>
+                <div>
+                  <label>الموديل المتاح</label>
+                  <input id="productModel" name="model_available" placeholder="مثال: SI-5K, SUN2000-5KTL...">
+                </div>
+                <div style="grid-column:1/-1">
+                  <label>رابط الداتا شيت (PDF)</label>
+                  <input id="productDatasheet" name="datasheet_url" type="url" placeholder="https://..." style="width:100%">
+                </div>
+                <div style="grid-column:1/-1">
+                  <label style="font-weight:700;display:block;margin-bottom:6px">صورة المنتج</label>
+                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                    <div id="productImagePreview" style="width:64px;height:64px;border-radius:var(--radius);background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
+                      <span style="color:var(--muted);font-size:10px">بدون صورة</span>
+                    </div>
+                    <input type="file" id="productImageFile" accept="image/*" style="font-size:13px;flex:1;min-width:180px">
+                    <button type="button" onclick="removeProductImage()" id="removeProductImageBtn" style="display:none;padding:6px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;color:#c33;font-size:12px;cursor:pointer">إزالة الصورة</button>
+                  </div>
+                  <input type="hidden" id="productImageUrl">
+                  <p style="margin:6px 0 0;font-size:11px;color:var(--muted)">اختر صورة جديدة لرفعها، أو سيبها فاضية للاحتفاظ بالصورة الحالية لو كنت بتعدّل منتج موجود.</p>
+                </div>
+                <div>
+                  <label>الترتيب</label>
+                  <input id="productSort" name="sort_order" type="number" value="100" placeholder="100">
+                </div>
+              </div>
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" id="productPublished" type="checkbox" checked>
+                <span style="font-weight:700">نشر المنتج</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المنتج</button>
+                <button type="button" onclick="cancelProductForm()"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" id="productMessage" style="margin-top:6px"></p>
+            </form>
+          </div>
+
+          <!-- Filter by category -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--space-2)">
+            <button type="button" class="prod-dash-filter active" data-pcat="all"
+              onclick="filterDashProducts('all',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">الكل</button>
+            <button type="button" class="prod-dash-filter" data-pcat="inverters"
+              onclick="filterDashProducts('inverters',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">⚡ إنفرترات</button>
+            <button type="button" class="prod-dash-filter" data-pcat="panels"
+              onclick="filterDashProducts('panels',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">☀️ ألواح</button>
+            <button type="button" class="prod-dash-filter" data-pcat="accessories"
+              onclick="filterDashProducts('accessories',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔌 إكسسوارات</button>
+            <button type="button" class="prod-dash-filter" data-pcat="combiners"
+              onclick="filterDashProducts('combiners',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">📦 صناديق</button>
+            <button type="button" class="prod-dash-filter" data-pcat="structures"
+              onclick="filterDashProducts('structures',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🏗️ شاسيهات</button>
+            <button type="button" class="prod-dash-filter" data-pcat="cables"
+              onclick="filterDashProducts('cables',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔶 كابلات</button>
+          </div>
+
+          <!-- Products list -->
+          <div id="productsList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- ── Articles Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">📝 إدارة المقالات</h3>
+            <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn');openNewArticleEditor()" id="addArticleBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة مقال
+            </button>
+          </div>
+
+          <!-- Add form -->
+          <div id="articleAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="articleForm">
+              <div>
+                <label>التصنيف *</label>
+                <select id="articleCategory" name="category" required>
+                  <option value="intro">تعليمي (إيه هي الطاقة الشمسية)</option>
+                  <option value="compare">مقارنات بين الأنظمة</option>
+                  <option value="maintenance">الصيانة وطول العمر</option>
+                  <option value="applications">تطبيقات معينة</option>
+                </select>
+              </div>
+              <div style="margin-top:var(--space-2)">
+                <label>عنوان المقال *</label>
+                <input id="articleTitle_ar" name="title_ar" required placeholder="عنوان المقال...">
+              </div>
+              <div style="margin-top:var(--space-2)">
+                <label style="display:flex;align-items:center;gap:6px">
+                  رابط المقال (URL Slug) — بالإنجليزي *
+                  <span style="font-size:11px;color:var(--muted);font-weight:400">(حروف صغيرة وشرطة فقط، بدون مسافات)</span>
+                </label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:12px;color:var(--muted);white-space:nowrap">alaslsolar.com/articles/</span>
+                  <input id="articleSlug" name="slug_custom" required
+                    placeholder="solar-energy-guide"
+                    pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                    title="حروف إنجليزية صغيرة وأرقام وشرطة فقط"
+                    style="flex:1"
+                    oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/--+/g,'-')">
+                </div>
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">مثال: <code>solar-energy-basics</code> أو <code>pv-diesel-hybrid-guide</code></p>
+              </div>
+              <div style="margin-top:var(--space-2)">
+                <label>ملخص *</label>
+                <textarea id="articleSummary_ar" name="summary_ar" rows="3" required placeholder="ملخص يظهر في القائمة..."></textarea>
+              </div>
+              <div style="margin-top:var(--space-2)">
+                <label>المحتوى الكامل *</label>
+                <div class="rte-toolbar" data-rte-toolbar="new"></div>
+                <div class="rte-editor" id="articleContentEditor_new"></div>
+                <textarea id="articleContent_ar" name="content_ar" style="display:none"></textarea>
+              </div>
+              <p class="form-note" style="margin-top:6px">🌐 اكتب المقال بالعربي فقط — هيتم ترجمته تلقائيًا للإنجليزي والإسباني والصيني بعد الحفظ.</p>
+
+              <!-- Hero / cover image -->
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">صورة الغلاف (تظهر في كارت المقال)</label>
+                <div id="articleImagesWrap" style="display:grid;gap:var(--space-2)"></div>
+                <button type="button" onclick="addImageRow('articleImagesWrap','article')"
+                  style="margin-top:8px;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer;width:100%">
+                  + إضافة صورة غلاف
+                </button>
+              </div>
+
+              <label class="check-row" style="margin-top:var(--space-2)">
+                <input name="published" type="checkbox" checked>
+                <span style="font-weight:700">نشر المقال</span>
+              </label>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المقال</button>
+                <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" data-article-message></p>
+            </form>
+          </div>
+
+          <!-- Articles list -->
+          <div id="articlesList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
+        </article>
       </div>
     </section>
   </main>
-
-  <footer class="site-footer">
-    <div>
-      <strong>Al Asl Solar Energy</strong>
-      <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
-    </div>
-    <div class="social-links" aria-label="Social links">
-      <a href="https://linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
-      <a href="https://youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
-      <a href="https://facebook.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
-      <a href="https://instagram.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-      <a href="https://tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-    </div>
-  </footer>
-  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
-    <i class="fab fa-whatsapp" aria-hidden="true"></i>
-  </a>
 </body>
 </html>
