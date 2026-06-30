@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="حاسبة نظام الضخ الزراعي — احسب احتياجك من المياه وقدرة الموتور وقطر الماسورة بسهولة">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>حاسبة نظام الضخ الزراعي | الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap"></noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+
+  <style>
+    /* ── Calculator-specific overrides (uses site CSS variables) ── */
+
+    /* Disclaimer banner */
+    .calc-disclaimer {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #fffbf2, #fef3db);
+      border: 1.5px solid #f5c842;
+      margin-bottom: var(--space-4);
+    }
+    .calc-disclaimer i { color: #c8860a; font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .calc-disclaimer p { margin: 0; font-size: 14px; line-height: 1.75; color: var(--ink); }
+    .calc-disclaimer strong { color: #7a4f0a; }
+
+    /* Calculator layout */
+    .calc-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+      align-items: start;
+    }
+    @media(max-width:860px){ .calc-wrap { grid-template-columns: 1fr; } }
+
+    /* Input panels */
+    .calc-panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,245,0.95));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: var(--space-4);
+    }
+    .calc-panel-title {
+      font-size: 15px; font-weight: 800;
+      color: var(--ink);
+      margin: 0 0 var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 9px;
+    }
+    .calc-panel-title i { color: var(--brand); font-size: 19px; }
+
+    /* Field groups */
+    .field-group { display: grid; gap: var(--space-2); margin-bottom: var(--space-2); }
+    .field-group.g2 { grid-template-columns: 1fr 1fr; }
+    .field-group.g3 { grid-template-columns: 1fr 1fr 1fr; }
+    @media(max-width:520px){
+      .field-group.g2, .field-group.g3 { grid-template-columns: 1fr; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
+    .field input, .field select {
+      height: 42px; padding: 0 var(--space-2);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      width: 100%;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .field input:focus, .field select:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(200,117,45,0.13);
+    }
+    .field-hint { font-size: 11px; color: var(--steel); margin-top: 2px; }
+
+    /* Results panel */
+    .results-panel {
+      grid-column: 1 / -1;
+      background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(255,250,245,0.95));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: var(--space-4);
+    }
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--line);
+    }
+    .results-title { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0; }
+    .results-tags { display: flex; gap: 7px; flex-wrap: wrap; }
+    .rtag {
+      display: inline-block; font-size: 11px; font-weight: 800;
+      padding: 3px 11px; border-radius: 999px;
+      background: var(--brand-soft); color: var(--brand-dark);
+      letter-spacing: 0.04em;
+    }
+
+    /* Metric cards */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px,1fr));
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+    .metric-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,245,0.92));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: var(--space-3);
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .metric-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .metric-card.accent {
+      background: linear-gradient(135deg, #1d1a18, #2e2520);
+      border-color: transparent;
+      color: #fff;
+    }
+    .metric-card.brand {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      border-color: transparent;
+      color: #fff;
+    }
+    .metric-label { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .metric-card.accent .metric-label,
+    .metric-card.brand .metric-label { color: rgba(255,255,255,0.72); }
+    .metric-value { font-size: 26px; font-weight: 800; line-height: 1.1; }
+    .metric-card.accent .metric-value,
+    .metric-card.brand .metric-value { color: #fff; }
+    .metric-unit { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .metric-card.accent .metric-unit,
+    .metric-card.brand .metric-unit { color: rgba(255,255,255,0.68); }
+
+    /* HP badge */
+    .hp-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: var(--radius);
+      padding: 5px 12px;
+      font-size: 14px; font-weight: 800; color: #fff;
+    }
+
+    /* Pipe table */
+    .pipe-section { margin-top: var(--space-3); }
+    .pipe-section-title {
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: var(--space-2);
+    }
+    .pipe-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .pipe-table th {
+      text-align: right; padding: 9px 12px;
+      background: #f7f3ee;
+      border-bottom: 2px solid var(--line);
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .pipe-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .pipe-table tbody tr:last-child td { border-bottom: none; }
+    .pipe-table td strong { color: var(--ink); font-weight: 800; }
+    .pipe-table .rec td { background: linear-gradient(90deg, rgba(200,117,45,0.06), rgba(200,117,45,0.02)); }
+    .pipe-table .rec td strong { color: var(--brand-dark); }
+    .rec-badge {
+      display: inline-block; font-size: 10px; font-weight: 800;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--brand); color: #fff;
+      margin-inline-start: 6px; letter-spacing: 0.04em;
+    }
+
+    /* Detail rows */
+    .detail-list { margin-top: var(--space-3); display: grid; gap: 0; }
+    .detail-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: var(--space-2);
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--muted); font-weight: 600; flex-shrink: 0; }
+    .detail-value { text-align: left; font-weight: 700; color: var(--ink); }
+    .detail-formula { font-size: 11px; color: var(--steel); direction: ltr; text-align: left; margin-top: 2px; font-weight: 400; }
+
+    /* Notes */
+    .calc-note {
+      display: flex; gap: var(--space-2); align-items: flex-start;
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius);
+      font-size: 13px; line-height: 1.7;
+      margin-top: var(--space-2);
+    }
+    .calc-note i { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+    .calc-note.warn { background: #fffbf2; border: 1px solid #f5c842; color: var(--ink); }
+    .calc-note.warn i { color: #c8860a; }
+    .calc-note.info { background: var(--brand-soft); border: 1px solid #e8c49a; color: var(--ink); }
+    .calc-note.info i { color: var(--brand-dark); }
+
+    /* Footer disclaimer */
+    .footer-disclaimer {
+      margin-top: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      background: #0d0b0a;
+      color: rgba(255,255,255,0.82);
+      display: flex; gap: var(--space-3); align-items: flex-start;
+      font-size: 13px; line-height: 1.75;
+    }
+    .footer-disclaimer i { font-size: 22px; color: var(--brand); flex-shrink: 0; margin-top: 2px; }
+    .footer-disclaimer strong { color: #fff; }
+
+    /* Empty state */
+    .calc-empty {
+      text-align: center; padding: var(--space-5);
+      color: var(--muted);
+    }
+    .calc-empty i { font-size: 48px; display: block; margin-bottom: var(--space-2); color: var(--brand-soft); }
+    .calc-empty p { margin: 0; font-size: 15px; font-weight: 600; }
+
+    /* Divider */
+    .calc-divider { height: 1px; background: var(--line); margin: var(--space-3) 0; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطي إلى المحتوى</a>
+
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="الأصل للطاقة الشمسية">
+      <img src="logo-white.png" alt="شعار الأصل للطاقة الشمسية" width="120" height="70" loading="eager">
+    </a>
+    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
+      <i class="fa fa-bars" aria-hidden="true"></i>
+      <span class="sr-only">فتح القائمة</span>
+    </button>
+    <nav class="site-menu" id="siteMenu" aria-label="التنقل الرئيسي">
+      <a href="index.html" data-i18n="nav_home">الرئيسية</a>
+      <a href="about.html" data-i18n="nav_about">من نحن</a>
+      <a href="services.html" data-i18n="nav_services">الخدمات</a>
+      <a href="projects.html" data-i18n="nav_projects">المشاريع</a>
+      <a href="articles.html" data-i18n="nav_articles">المقالات</a>
+      <a href="products.html" data-i18n="nav_products">المنتجات</a>
+      <a href="calculators.html" aria-current="page" style="color:#e8954a;">الحاسبات</a>
+      <a href="contact.html" data-i18n="nav_contact">تواصل معنا</a>      <div class="lang-switcher" role="group" aria-label="اللغة">
+        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
+          <i class="ti ti-world" aria-hidden="true"></i>
+          <span id="langLabel" data-i18n="language">اللغة</span>
+          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
+        </button>
+        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="اختر اللغة">
+          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
+          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
+          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
+          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+      <p class="eyebrow">
+        <a href="calculators.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-weight:700;">الحاسبات</a>
+        <i class="ti ti-chevron-left" style="font-size:11px;margin:0 4px;color:rgba(255,255,255,.4);"></i>
+        <span style="color:#e8954a;">ضخ زراعي</span>
+        <i class="ti ti-chevron-left" style="font-size:11px;margin:0 4px;color:rgba(255,255,255,.4);"></i>
+        قدرة الموتور والغطاس
+      </p>
+      <h1>حاسبة نظام الضخ الزراعي</h1>
+      <p class="hero-slogan">احسب احتياجك من المياه · قدرة الموتور · قطر الماسورة</p>
+      <p style="color:rgba(255,255,255,0.72);font-size:15px;max-width:680px;margin-top:var(--space-2);">
+        أداة استرشادية لمساعدتك في التخطيط الأولي لنظام الضخ — أدخل بيانات حقلك واحصل على التوصيات فوراً.
+      </p>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="section reveal">
+
+      <!-- Disclaimer -->
+      <div class="calc-disclaimer">
+        <i class="fa fa-triangle-exclamation" aria-hidden="true"></i>
+        <p>
+          <strong>تنويه هام:</strong> جميع النتائج والأرقام الواردة في هذه الحاسبة هي
+          <strong>أرقام استرشادية تقريبية</strong> للمساعدة في التخطيط الأولي فقط.
+          للحصول على نتائج دقيقة وتصميم نظام احترافي، يُرجى
+          <strong>التواصل المباشر مع مهندسي الشركة</strong> ومراجعة <strong>كتالوجات المصنع</strong>.
+        </p>
+      </div>
+
+      <!-- Inputs + Results grid -->
+      <div class="calc-wrap">
+
+        <!-- Panel 1: Source & Distances -->
+        <div class="calc-panel">
+          <h2 class="calc-panel-title">
+            <i class="ti ti-ruler-measure"></i>
+            المصدر والمسافات
+          </h2>
+          <div class="field-group g3">
+            <div class="field">
+              <label for="swl">وش المياه</label>
+              <input type="number" id="swl" value="100" min="0" step="1" oninput="calc()">
+              <span class="field-hint">متر (عمق السطح)</span>
+            </div>
+            <div class="field">
+              <label for="farthest">أبعد نقطة</label>
+              <input type="number" id="farthest" value="50" min="0" step="1" oninput="calc()">
+              <span class="field-hint">متر — البيفوت: طول اليرج</span>
+            </div>
+            <div class="field">
+              <label for="elevation">الارتفاعات</label>
+              <input type="number" id="elevation" value="4" min="0" step="1" oninput="calc()">
+              <span class="field-hint">متر</span>
+            </div>
+          </div>
+          <div class="field-group g2">
+            <div class="field">
+              <label for="safety">الهبوط / مسافة الأمان</label>
+              <input type="number" id="safety" value="10" min="5" max="25" step="1" oninput="calc()">
+              <span class="field-hint">متر — هبوط 5-15 + أمان 5-10</span>
+            </div>
+            <div class="field">
+              <label for="area">مساحة الأرض</label>
+              <input type="number" id="area" value="5" min="0.5" step="0.5" oninput="calc()">
+              <span class="field-hint">فدان — (1 هكتار = 2.471 فدان)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Irrigation & Crop -->
+        <div class="calc-panel">
+          <h2 class="calc-panel-title">
+            <i class="ti ti-droplet"></i>
+            الري والمحصول
+          </h2>
+          <div class="field-group g3">
+            <div class="field">
+              <label for="irr_method">طريقة الري</label>
+              <select id="irr_method" onchange="updateCrops();calc()">
+                <option value="flood">غمر</option>
+                <option value="sprinkler" selected>رش</option>
+                <option value="drip">تنقيط</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="crop_type">نوع الزراعة</label>
+              <select id="crop_type" onchange="onCropChange()"></select>
+            </div>
+            <div class="field">
+              <label for="hours">ساعات التشغيل</label>
+              <input type="number" id="hours" value="7" min="1" max="16" step="1" oninput="calc()">
+              <span class="field-hint">ساعة / يوم</span>
+            </div>
+          </div>
+          <div class="field-group g3">
+            <div class="field">
+              <label for="pressure">الضغط المطلوب</label>
+              <input type="number" id="pressure" value="4" min="0" max="10" step="0.5" oninput="calc()">
+              <span class="field-hint">بار — البيفوت: 4 بار</span>
+            </div>
+            <div class="field">
+              <label for="flow_per_fed">معدل التصريف</label>
+              <input type="number" id="flow_per_fed" value="30" min="5" step="1" oninput="calc()">
+              <span class="field-hint">م³ / ساعة / فدان</span>
+            </div>
+            <div class="field">
+              <label for="velocity">سرعة الماء في الماسورة</label>
+              <select id="velocity" onchange="calc()">
+                <option value="1.5" selected>1.5 م/ث — موصى به</option>
+                <option value="2.0">2.0 م/ث — اقتصادي</option>
+                <option value="2.5">2.5 م/ث — أدنى حد</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results panel (full width) -->
+        <div class="results-panel" id="results">
+          <div class="calc-empty">
+            <i class="ti ti-calculator" aria-hidden="true"></i>
+            <p>عدّل أي قيمة أعلاه لعرض النتائج الاسترشادية فوراً</p>
+          </div>
+        </div>
+
+      </div><!-- /.calc-wrap -->
+    </section>
+
+    <!-- CTA Band -->
+    <section class="section cta-band reveal">
+      <h2>احصل على تصميم نظام ضخ شمسي لمزرعتك</h2>
+      <p>سيتم إرفاق بيانات حاسبتك تلقائياً مع طلب عرض السعر — لن نطلبها منك مرة أخرى.</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="ctaQuoteBtn" onclick="goToContact()">
+          <i class="fa fa-paper-plane" aria-hidden="true"></i>
+          اطلب عرض سعر
+        </button>
+        <a class="btn btn-secondary" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          واتساب
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Al Asl Solar Energy</strong>
+      <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
+    </div>
+    <div class="social-links" aria-label="روابط التواصل">
+      <a href="https://linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+      <a href="https://youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+      <a href="https://facebook.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+      <a href="https://instagram.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+      <a href="https://tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+    </div>
+  </footer>
+
+  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="تواصل معنا على واتساب">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+  </a>
+
+  <script>
+    /* ── Crop data ── */
+    const cropData = {
+      flood:     [{name:'قمح',flow:50,pressure:0},{name:'برسيم',flow:50,pressure:0},{name:'شعير',flow:50,pressure:0},{name:'خضراوات',flow:35,pressure:0}],
+      sprinkler: [{name:'برسيم',flow:30,pressure:30},{name:'قمح',flow:40,pressure:30},{name:'أشجار موالح',flow:12,pressure:30}],
+      drip:      [{name:'أشجار فواكهه',flow:20,pressure:15},{name:'أشجار موالح',flow:15,pressure:15},{name:'زيتون - ليمون - نخيل',flow:12,pressure:15}]
+    };
+
+    /* ── Standard sizes ── */
+    // Egyptian market standard motor sizes (kW → HP)
+    const stdMotors = [4,5.5,7.5,10,15,18.5,22,30,37,45,55,75,90,110,132,160,185,200,220];
+    const motorHP   = {4:5.5, 5.5:7.5, 7.5:10, 10:15, 15:20, 18.5:25, 22:30, 30:40, 37:50, 45:60, 55:75, 75:100, 90:125, 110:150, 132:180, 160:225, 185:250, 200:275, 220:300};
+    const stdPipes  = [1,1.25,1.5,2,2.5,3,4,5,6,8,10,12];
+    const KW_TO_HP  = 1.341;
+
+    function nearestPipe(d)  { return stdPipes.find(s => s >= d)  || stdPipes[stdPipes.length-1]; }
+    function nearestMotor(k) { return stdMotors.find(m => m >= k) || stdMotors[stdMotors.length-1]; }
+    function getHP(kw)       { return motorHP[kw] ?? r2(kw * KW_TO_HP); }
+    function r2(n)           { return Math.round(n*100)/100; }
+
+    function updateCrops() {
+      const method = document.getElementById('irr_method').value;
+      const sel    = document.getElementById('crop_type');
+      sel.innerHTML = '';
+      (cropData[method]||[]).forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.name; o.dataset.flow = c.flow; o.dataset.pressure = c.pressure;
+        o.textContent = c.name; sel.appendChild(o);
+      });
+      if (sel.options.length) {
+        document.getElementById('flow_per_fed').value = sel.options[0].dataset.flow;
+        document.getElementById('pressure').value     = sel.options[0].dataset.pressure;
+      }
+    }
+
+    function onCropChange() {
+      const sel = document.getElementById('crop_type');
+      const opt = sel.options[sel.selectedIndex];
+      if (opt && opt.dataset.flow) {
+        document.getElementById('flow_per_fed').value = opt.dataset.flow;
+        if (opt.dataset.pressure) document.getElementById('pressure').value = opt.dataset.pressure;
+      }
+      calc();
+    }
+
+    function calc() {
+      const swl    = parseFloat(document.getElementById('swl').value)         || 0;
+      const far    = parseFloat(document.getElementById('farthest').value)     || 0;
+      const elev   = parseFloat(document.getElementById('elevation').value)    || 0;
+      const safety = parseFloat(document.getElementById('safety').value)       || 10;
+      const area   = parseFloat(document.getElementById('area').value)         || 0;
+      const hours  = parseFloat(document.getElementById('hours').value)        || 7;
+      const pbar   = parseFloat(document.getElementById('pressure').value)     || 0;
+      const fpf    = parseFloat(document.getElementById('flow_per_fed').value) || 0;
+      const V      = parseFloat(document.getElementById('velocity').value)     || 1.5;
+      const method = document.getElementById('irr_method').value;
+      const crop   = document.getElementById('crop_type').value || '—';
+      const pm     = pbar * 10.2;
+
+      if (!swl || !area || !fpf) return;
+
+      /* ── Core calculations ── */
+      const FR    = (area * fpf) / hours;             // m³/h
+      const FR_s  = FR / 3600;                         // m³/s
+      const TDH   = swl + elev + safety + (far/10) + pm;
+      // Primary result is HP: (FR × TDH) ÷ (270 × η)
+      const hp_c   = r2((FR * TDH) / (270 * 0.75));
+      const kw_c   = r2(hp_c / KW_TO_HP);
+      // Match nearest standard motor by HP
+      const hpList = Object.values(motorHP);
+      const kwList = Object.keys(motorHP).map(Number);
+      const hp_std = hpList.find(h => h >= hp_c) || hpList[hpList.length-1];
+      const kw_std = kwList[hpList.indexOf(hp_std)];
+
+      /* ── Pipe diameter ── */
+      const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
+      const D_mm   = D_m * 1000;
+      const D_in   = D_mm / 25.4;
+      const D_near = nearestPipe(D_in);
+
+      /* ── Electrical ── */
+      const cable = kw_std>22?'25 ملم²':kw_std>15?'16 ملم²':kw_std>11?'10 ملم²':'6 ملم²';
+      const fuse  = Math.ceil(kw_std*1000/380/1.73*1.25);
+
+      const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method];
+
+      /* ── Pipe table rows ── */
+      const velRows = [1.5, 2.0, 2.5].map(v => {
+        const dm  = Math.sqrt((4*FR_s)/(Math.PI*v))*1000;
+        const di  = dm/25.4;
+        const dn  = nearestPipe(di);
+        const rec = v === 1.5;
+        return `<tr class="${rec?'rec':''}">
+          <td>${v} م/ث ${rec?'<span class="rec-badge">موصى به</span>':''}</td>
+          <td><strong>${dm.toFixed(1)} مم</strong></td>
+          <td><strong>${di.toFixed(2)}"</strong></td>
+          <td><strong>${dn}"</strong></td>
+          <td>${v===1.5?'أقل خسائر احتكاك':v===2.0?'اقتصادي متوازن':'أدنى تكلفة'}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('results').innerHTML = `
+        <div class="results-header">
+          <h3 class="results-title">النتائج الاسترشادية</h3>
+          <div class="results-tags">
+            <span class="rtag">${methodLabel}</span>
+            <span class="rtag">${crop}</span>
+            <span class="rtag">${area} فدان</span>
+          </div>
+        </div>
+
+        <!-- Main metrics -->
+        <div class="metrics-row">
+          <div class="metric-card accent">
+            <div class="metric-label">الرفع الديناميكي (TDH)</div>
+            <div class="metric-value">${TDH.toFixed(0)}</div>
+            <div class="metric-unit">متر</div>
+          </div>
+          <div class="metric-card accent">
+            <div class="metric-label">معدل التدفق المطلوب</div>
+            <div class="metric-value">${FR.toFixed(1)}</div>
+            <div class="metric-unit">م³ / ساعة</div>
+          </div>
+          <div class="metric-card accent">
+            <div class="metric-label">الكمية اليومية</div>
+            <div class="metric-value">${(area*fpf).toFixed(0)}</div>
+            <div class="metric-unit">م³ / يوم</div>
+          </div>
+        </div>
+
+        <!-- Motor metrics -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-label">القدرة الحسابية</div>
+            <div class="metric-value">${hp_c} <span style="font-size:14px;font-weight:600;">حصان</span></div>
+            <div class="metric-unit">${kw_c} كيلوواط</div>
+          </div>
+          <div class="metric-card brand">
+            <div class="metric-label">أقرب قدرة تجارية قياسية</div>
+            <div class="metric-value">${hp_std} <span style="font-size:14px;font-weight:600;">حصان (HP)</span></div>
+            <div class="hp-badge"><i class="ti ti-bolt" aria-hidden="true"></i>${kw_std} كيلوواط</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">قطر الماسورة الموصى به</div>
+            <div class="metric-value">${D_near}"</div>
+            <div class="metric-unit">${D_mm.toFixed(1)} مم — ${D_in.toFixed(2)}" حسابي</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">كابل التوصيل</div>
+            <div class="metric-value" style="font-size:18px;">${cable}</div>
+            <div class="metric-unit">قاطع: ${fuse} أمبير — 3 فاز</div>
+          </div>
+        </div>
+
+        <div class="calc-divider"></div>
+
+        <!-- Pipe table -->
+        <div class="pipe-section">
+          <p class="pipe-section-title">قطر الماسورة الرئيسية حسب سرعة التدفق</p>
+          <table class="pipe-table" aria-label="جدول قطر الماسورة">
+            <thead>
+              <tr>
+                <th>سرعة التدفق</th>
+                <th>القطر (مم)</th>
+                <th>القطر (بوصة حسابي)</th>
+                <th>أقرب بوصة تجارية</th>
+                <th>ملاحظة</th>
+              </tr>
+            </thead>
+            <tbody>${velRows}</tbody>
+          </table>
+        </div>
+
+        <div class="calc-divider"></div>
+
+        <!-- Detail calculations -->
+        <p class="pipe-section-title">تفاصيل المعادلات</p>
+        <div class="detail-list">
+          <div class="detail-row">
+            <span class="detail-label">معدل التدفق (FR)</span>
+            <div class="detail-value">
+              ${FR.toFixed(2)} م³/ساعة
+              <div class="detail-formula">(${area} فدان × ${fpf} م³/ساعة/فدان) ÷ ${hours} ساعات</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">الرفع الديناميكي (TDH)</span>
+            <div class="detail-value">
+              ${TDH.toFixed(1)} متر
+              <div class="detail-formula">${swl} + ${elev} + ${safety} + (${far}÷10) + ${pm.toFixed(1)} م ضغط</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">قدرة الموتور الحسابية</span>
+            <div class="detail-value">
+              ${hp_c} حصان = ${kw_c} كيلوواط
+              <div class="detail-formula">(FR × TDH) ÷ (270 × η=0.75)</div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">أقرب قدرة تجارية</span>
+            <div class="detail-value">${hp_std} حصان (HP) = ${kw_std} كيلوواط</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">قطر الماسورة (${V} م/ث)</span>
+            <div class="detail-value">
+              ${D_mm.toFixed(1)} مم = ${D_in.toFixed(2)}" → <strong>${D_near} بوصة</strong>
+              <div class="detail-formula">D = √(4 × ${FR_s.toFixed(5)} / π × ${V})</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="calc-note info">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          <span>المقاسات التجارية القياسية: 1" · 1¼" · 1½" · 2" · 2½" · 3" · 4" · 5" · 6" · 8". اختر دائماً المقاس الأعلى إذا كان الحسابي بين مقاسين.</span>
+        </div>
+        <div class="calc-note warn">
+          <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+          <span>القدرة الموصى بها <strong>${hp_std} حصان (${kw_std} كيلوواط)</strong> هي أقرب مقاس تجاري للقدرة الحسابية <strong>${hp_c} حصان</strong>. يُرجى مراجعة كتالوج المصنع للتأكد من توافق نقطة العمل مع منحنى الضخة عند TDH = ${TDH.toFixed(0)} متر.</span>
+        </div>
+
+        <!-- Footer disclaimer -->
+        <div class="footer-disclaimer">
+          <i class="fa fa-shield-halved" aria-hidden="true"></i>
+          <span>
+            ⚠️ <strong>تنويه:</strong> جميع الأرقام والنتائج الواردة أعلاه هي <strong>أرقام استرشادية تقريبية</strong> للتخطيط الأولي فقط، ولا تُغني عن الدراسة الهندسية المتخصصة. للحصول على تصميم دقيق واحترافي يُرجى <strong>التواصل المباشر مع مهندسي الشركة</strong> ومراجعة <strong>كتالوجات المصنع</strong> للتحقق من توافق منحنيات الضخة مع متطلبات النظام الفعلية.
+          </span>
+        </div>
+        <button onclick="goToContact()" style="margin-top:14px;width:100%;padding:13px;background:linear-gradient(135deg,#d07e2e,#b8621e);color:#fff;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 8px 24px rgba(200,117,45,0.32);">
+          <i class="fa fa-paper-plane"></i> اطلب عرض سعر — سيتم إرفاق بياناتك تلقائياً
+        </button>
+      `;
+    }
+
+    /* ── Save data & go to contact ── */
+    function goToContact() {
+      // Collect all current input values
+      const swl    = document.getElementById('swl').value;
+      const far    = document.getElementById('farthest').value;
+      const elev   = document.getElementById('elevation').value;
+      const safety = document.getElementById('safety').value;
+      const area   = document.getElementById('area').value;
+      const hours  = document.getElementById('hours').value;
+      const pbar   = document.getElementById('pressure').value;
+      const fpf    = document.getElementById('flow_per_fed').value;
+      const V      = document.getElementById('velocity').value;
+      const method = document.getElementById('irr_method').value;
+      const crop   = document.getElementById('crop_type').value;
+      const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method] || method;
+
+      // Re-calculate results to capture them
+      const pm     = parseFloat(pbar) * 10.2;
+      const FR     = (parseFloat(area) * parseFloat(fpf)) / parseFloat(hours);
+      const FR_s   = FR / 3600;
+      const TDH    = parseFloat(swl) + parseFloat(elev) + parseFloat(safety) + (parseFloat(far)/10) + pm;
+      const hp_c   = Math.round((FR * TDH) / (270 * 0.75) * 100) / 100;
+      const kw_c   = Math.round(hp_c / 1.341 * 100) / 100;
+      const hpList = Object.values(motorHP);
+      const kwList = Object.keys(motorHP).map(Number);
+      const hp_std = hpList.find(h => h >= hp_c) || hpList[hpList.length-1];
+      const kw_std = kwList[hpList.indexOf(hp_std)];
+      const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * parseFloat(V)));
+      const D_mm   = D_m * 1000;
+      const D_in   = D_mm / 25.4;
+      const D_near = nearestPipe(D_in);
+
+      // Build summary note
+      const note = `=== بيانات حاسبة نظام الضخ ===
+▸ مساحة الأرض: ${area} فدان
+▸ طريقة الري: ${methodLabel}
+▸ نوع الزراعة: ${crop}
+▸ وش المياه: ${swl} متر
+▸ أبعد نقطة: ${far} متر
+▸ الارتفاعات: ${elev} متر
+▸ الهبوط/الأمان: ${safety} متر
+▸ الضغط المطلوب: ${pbar} بار
+▸ معدل التصريف: ${fpf} م³/ساعة/فدان
+▸ ساعات التشغيل: ${hours} ساعة/يوم
+
+=== النتائج الاسترشادية ===
+▸ معدل التدفق: ${FR.toFixed(1)} م³/ساعة
+▸ الرفع الديناميكي (TDH): ${TDH.toFixed(0)} متر
+▸ قدرة الموتور الحسابية: ${hp_c} حصان (${kw_c} كيلوواط)
+▸ أقرب قدرة تجارية: ${hp_std} حصان / ${kw_std} كيلوواط
+▸ قطر الماسورة: ${D_near}" (${D_mm.toFixed(0)} مم)`;
+
+      sessionStorage.setItem('pump_calc_note', note);
+      window.location.href = 'contact.html';
+    }
+
+    /* ── Init ── */
+    updateCrops();
+    calc();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+</body>
+</html>
