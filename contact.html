@@ -1,170 +1,39 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Contact Al Asl Solar for solar energy, battery storage, PV-diesel hybrid systems, maintenance, and project consultation.">
-  <meta name="theme-color" content="#0d0b0a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="format-detection" content="telephone=no">
-  <meta property="og:title" content="Contact Al Asl Solar">
-  <meta property="og:description" content="Request a solar quotation or speak with our team in Egypt and Saudi Arabia.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://alaslsolar.com/contact.html">
-  <meta property="og:image" content="https://alaslsolar.com/solar.jpg">
-  <title>Contact Us | Al Asl Solar</title>
-  <link rel="canonical" href="https://alaslsolar.com/contact.html">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap"></noscript>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="https://tally.so/widgets/embed.js"></script>
-  <link rel="alternate" hreflang="en" href="https://alaslsolar.com/contact.html">
-  <link rel="alternate" hreflang="ar" href="https://alaslsolar.com/contact.html">
-  <link rel="alternate" hreflang="es" href="https://alaslsolar.com/contact.html">
-  <link rel="alternate" hreflang="zh" href="https://alaslsolar.com/contact.html">
-  <link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/contact.html">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ContactPage",
-    "name": "Contact Al Asl Solar",
-    "url": "https://alaslsolar.com/contact.html",
-    "mainEntity": {
-      "@type": "LocalBusiness",
-      "name": "Al Asl Solar Energy",
-      "email": "sales@alaslsolar.com",
-      "telephone": ["+201200074344", "+201208787702", "+966561274344"],
-      "url": "https://alaslsolar.com"
-    }
+/**
+ * article-lang-switcher.js
+ * Included only in static article pages (/articles/{slug}*.html)
+ * Redirects the user to the correct language variant when they
+ * click a language button, instead of just changing UI strings.
+ */
+(function () {
+  // Map lang code → file suffix
+  const SUFFIX = { en: "", ar: "-ar", es: "-es", zh: "-zh" };
+
+  // Extract the base slug from the current filename
+  // e.g. "my-article-ar.html" → "my-article"
+  //      "my-article.html"    → "my-article"
+  function getBaseSlug() {
+    const filename = window.location.pathname.split("/").pop() || "";
+    return filename
+      .replace(/\.html$/, "")
+      .replace(/-(ar|es|zh)$/, "");
   }
-  </script>
-  <script defer src="app.js"></script>
-</head>
-<body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Al Asl Solar home">
-      <img src="logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
-    </a>
-    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
-      <i class="fa fa-bars" aria-hidden="true"></i>
-      <span class="sr-only">Open menu</span>
-    </button>
-    <nav class="site-menu" id="siteMenu" aria-label="Main navigation">
-      <a href="index.html" data-i18n="nav_home">Home</a>
-      <a href="about.html" data-i18n="nav_about">About Us</a>
-      <a href="services.html" data-i18n="nav_services">Services</a>
-      <a href="projects.html" data-i18n="nav_projects">Projects</a>
-      <a href="articles.html" data-i18n="nav_articles">Articles</a>
-      <a href="products.html" data-i18n="nav_products">Products</a>
-      <a href="contact.html" data-i18n="nav_contact">Contact</a>
-      <a class="admin-link" href="dashboard.html" data-i18n="nav_admin">Admin Login</a>
-      <div class="lang-switcher" role="group" aria-label="Language">
-        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
-          <i class="ti ti-world" aria-hidden="true"></i>
-          <span id="langLabel" data-i18n="language">Language</span>
-          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
-        </button>
-        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
-          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
-          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
-          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
-          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
-        </ul>
-      </div>
-    </nav>
-  </header>
 
-  <main id="main">
-    <section class="page-hero">
-      <p class="eyebrow" data-i18n="contact_kicker">Talk to our team</p>
-      <h1 data-i18n="contact_title">Request a solar quotation</h1>
-      <p data-i18n="contact_intro">Send your project details through the form. You can also call or use WhatsApp directly.</p>
-    </section>
+  // Run after app.js has attached its own listeners so we can override
+  document.addEventListener("DOMContentLoaded", function () {
+    const baseSlug = getBaseSlug();
 
-    <section class="section contact-grid">
-      <div class="tally-panel">
-        <iframe
-          data-tally-src="https://tally.so/embed/68pyyJ?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
-          loading="lazy"
-          width="100%"
-          height="640"
-          frameborder="0"
-          marginheight="0"
-          marginwidth="0"
-          title="Al Asl Solar quotation form"></iframe>
-      </div>
+    document.querySelectorAll("[data-lang]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const lang   = btn.dataset.lang;
+        const suffix = SUFFIX[lang] ?? "";
+        const target = baseSlug + suffix + ".html";
 
-      <aside class="contact-panel">
-        <h2 data-i18n="contact_direct">Direct contact</h2>
-        <a href="tel:+201200074344">+20 120 007 4344</a>
-        <a href="tel:+201208787702">+20 120 878 7702</a>
-        <a href="tel:+966561274344">+966 56 127 4344</a>
-        <a href="mailto:sales@alaslsolar.com">sales@alaslsolar.com</a>
-        <a href="mailto:info@alaslsolar.com">info@alaslsolar.com</a>
-        <a href="mailto:alasl.renewable.energy@outlook.com">alasl.renewable.energy@outlook.com</a>
-        <a class="btn btn-primary contact-panel__cta" href="https://tally.so/r/68pyyJ" target="_blank" rel="noopener noreferrer" data-i18n="open_form">Open form in new tab</a>
-      </aside>
-    </section>
-  </main>
-
-    <!-- FAQ -->
-    <section class="section reveal">
-      <div class="section-heading">
-        <p class="eyebrow" data-i18n="faq_kicker">FAQ</p>
-        <h2 data-i18n="faq_title">Common questions</h2>
-      </div>
-      <div class="faq-list" id="faqContainerContact">
-        <!-- loaded from Supabase -->
-      </div>
-    </section>
-
-  <footer class="site-footer">
-    <div>
-      <strong>Al Asl Solar Energy</strong>
-      <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
-    </div>
-    <div class="social-links" aria-label="Social links">
-      <a href="https://www.facebook.com/AlaslSolar/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
-      <a href="https://www.instagram.com/alaslsolar/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-      <a href="https://www.linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
-      <a href="https://www.youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
-      <a href="https://www.tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-    </div>
-  </footer>
-
-  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
-    <i class="fab fa-whatsapp" aria-hidden="true"></i>
-  </a>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
-  <script>
-    (async function loadPageFaqs() {
-      try {
-        const client = getAlaslSupabase();
-        if (!client) return;
-        const { data } = await client.from('faqs').select('*')
-          .eq('published', true).eq('page', 'contact').order('sort_order');
-        if (!data || data.length === 0) return;
-        const lang = localStorage.getItem('alasl-lang') || 'en';
-        const qk = {en:'question_en',ar:'question_ar',es:'question_es',zh:'question_zh'};
-        const ak = {en:'answer_en',  ar:'answer_ar',  es:'answer_es',  zh:'answer_zh'};
-        function render(l) {
-          const c = document.getElementById('faqContainerContact');
-          if (!c) return;
-          c.innerHTML = data.map(f=>`<details><summary>${f[qk[l]]||f.question_en}</summary><p>${f[ak[l]]||f.answer_en}</p></details>`).join('');
+        // Only redirect if we'd land on a different file
+        const current = window.location.pathname.split("/").pop();
+        if (target !== current) {
+          window.location.href = target;
         }
-        render(lang);
-        document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>render(b.dataset.lang)));
-      } catch(e) {}
-    })();
-  </script>
-</body>
-</html>
+      });
+    });
+  });
+})();
