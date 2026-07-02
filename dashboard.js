@@ -1343,7 +1343,8 @@ function renderDashProducts() {
             ${p.published ? '' : '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي</span>'}
           </div>
           <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name_ar}</p>
-          <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs || ''} ${p.notes ? '— ' + p.notes : ''}</p>
+          <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs_ar || ''} ${p.notes ? '— ' + p.notes : ''}</p>
+          ${(p.power_kw || p.power_hp) ? `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark);font-weight:700">⚡ ${p.power_kw ? p.power_kw + ' KW' : ''}${p.power_kw && p.power_hp ? ' — ' : ''}${p.power_hp ? p.power_hp + ' HP' : ''}</p>` : (p.category === 'inverters' ? `<p style="margin:2px 0 0;font-size:11px;color:#e44">⚠️ القدرة غير مسجلة</p>` : '')}
           ${p.model_available ? `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark)">📋 موديل: ${p.model_available}</p>` : ''}
           ${p.datasheet_url ? `<a href="${p.datasheet_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:none">📄 داتا شيت</a>` : ''}
         </div>
@@ -1402,7 +1403,9 @@ function editProduct(id) {
   document.getElementById('productCategory').value = p.category;
   document.getElementById('productBrand').value = p.brand || '';
   document.getElementById('productName').value = p.name_ar;
-  document.getElementById('productSpecs').value = p.specs || '';
+  document.getElementById('productSpecs').value = p.specs_ar || '';
+  document.getElementById('productPowerKw').value = p.power_kw != null ? p.power_kw : '';
+  document.getElementById('productPowerHp').value = p.power_hp != null ? p.power_hp : '';
   document.getElementById('productModel').value = p.model_available || '';
   document.getElementById('productDatasheet').value = p.datasheet_url || '';
   document.getElementById('productUnit').value = p.unit || 'قطعة';
@@ -1421,6 +1424,8 @@ function cancelProductForm() {
   document.getElementById('productForm').reset();
   document.getElementById('productEditId').value = '';
   document.getElementById('productImageUrl').value = '';
+  document.getElementById('productPowerKw').value = '';
+  document.getElementById('productPowerHp').value = '';
   setProductImagePreview('');
   document.getElementById('productAddWrap').style.display = 'none';
 }
@@ -1460,11 +1465,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    const specsValue = document.getElementById('productSpecs').value.trim() || null;
+    const powerKwValue = document.getElementById('productPowerKw').value;
+    const powerHpValue = document.getElementById('productPowerHp').value;
+
     const payload = {
       category:   document.getElementById('productCategory').value,
       brand:      document.getElementById('productBrand').value.trim() || null,
       name_ar:    document.getElementById('productName').value.trim(),
-      specs:      document.getElementById('productSpecs').value.trim() || null,
+      specs_ar:   specsValue,
+      power_kw:   powerKwValue !== '' ? parseFloat(powerKwValue) : null,
+      power_hp:   powerHpValue !== '' ? parseFloat(powerHpValue) : null,
       model_available: document.getElementById('productModel').value.trim() || null,
       datasheet_url:   document.getElementById('productDatasheet').value.trim() || null,
       unit:       document.getElementById('productUnit').value,
