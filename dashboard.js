@@ -1322,6 +1322,24 @@ function filterDashProducts(cat, btn) {
   renderDashProducts();
 }
 
+// Same fallback logic as products.html: use power_kw/power_hp if set,
+// otherwise try to parse "X HP" / "Y KW" straight out of the specs text —
+// this is how the live site has always detected inverter power, so the
+// admin's warning must check the same way or it flags products that are
+// actually fine.
+function detectInvPower(p) {
+  let kw = p.power_kw != null ? parseFloat(p.power_kw) : null;
+  let hp = p.power_hp != null ? parseFloat(p.power_hp) : null;
+  if (!kw || !hp) {
+    const s = (p.specs_ar || '') + ' ' + (p.specs_en || '');
+    const kwM = s.match(/([\d.]+)\s*KW/i);
+    const hpM = s.match(/([\d.]+)\s*HP/i);
+    if (!kw && kwM) kw = parseFloat(kwM[1]);
+    if (!hp && hpM) hp = parseFloat(hpM[1]);
+  }
+  return { kw, hp };
+}
+
 function renderDashProducts() {
   const list = document.getElementById('productsList');
   if (!list) return;
@@ -1344,7 +1362,12 @@ function renderDashProducts() {
           </div>
           <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name_ar}</p>
           <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs_ar || ''} ${p.notes ? '— ' + p.notes : ''}</p>
-          ${(p.power_kw || p.power_hp) ? `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark);font-weight:700">⚡ ${p.power_kw ? p.power_kw + ' KW' : ''}${p.power_kw && p.power_hp ? ' — ' : ''}${p.power_hp ? p.power_hp + ' HP' : ''}</p>` : (p.category === 'inverters' ? `<p style="margin:2px 0 0;font-size:11px;color:#e44">⚠️ القدرة غير مسجلة</p>` : '')}
+          ${(() => {
+            if (p.category !== 'inverters') return '';
+            const { kw, hp } = detectInvPower(p);
+            if (kw || hp) return `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark);font-weight:700">⚡ ${kw ? kw + ' KW' : ''}${kw && hp ? ' — ' : ''}${hp ? hp + ' HP' : ''}</p>`;
+            return `<p style="margin:2px 0 0;font-size:11px;color:#e44">⚠️ القدرة غير مسجلة — اكتبها في المواصفات (مثال: 5.5 HP - 4 KW) أو في حقلي KW/HP</p>`;
+          })()}
           ${p.model_available ? `<p style="margin:2px 0 0;font-size:11px;color:var(--brand-dark)">📋 موديل: ${p.model_available}</p>` : ''}
           ${p.datasheet_url ? `<a href="${p.datasheet_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:none">📄 داتا شيت</a>` : ''}
         </div>
