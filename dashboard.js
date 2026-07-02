@@ -1419,16 +1419,63 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Show/hide the name, specs, and power fields based on the selected category.
+// Inverters: no free-text specs, name is auto-derived from the brand, and
+// KW/HP become the explicit required source of the power rating.
+// Everything else: keep the classic name + specs fields, power fields hidden.
+function toggleProductFieldsByCategory(cat) {
+  const nameWrap = document.getElementById('nameFieldWrap');
+  const nameInput = document.getElementById('productName');
+  const specsWrap = document.getElementById('specsFieldWrap');
+  const powerWrap = document.getElementById('powerFieldsWrap');
+  const kwInput = document.getElementById('productPowerKw');
+  const hpInput = document.getElementById('productPowerHp');
+  if (!nameWrap || !specsWrap || !powerWrap) return;
+
+  if (cat === 'inverters') {
+    nameInput.required = false;
+    if (nameWrap) nameWrap.style.display = 'none';
+    specsWrap.style.display = 'none';
+    powerWrap.style.display = 'grid';
+    if (kwInput) kwInput.required = true;
+    if (hpInput) hpInput.required = true;
+  } else {
+    nameInput.required = true;
+    if (nameWrap) nameWrap.style.display = 'block';
+    specsWrap.style.display = 'block';
+    powerWrap.style.display = 'none';
+    if (kwInput) kwInput.required = false;
+    if (hpInput) hpInput.required = false;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const catSelect = document.getElementById('productCategory');
+  if (catSelect) {
+    catSelect.addEventListener('change', () => toggleProductFieldsByCategory(catSelect.value));
+    toggleProductFieldsByCategory(catSelect.value);
+  }
+});
+
 function editProduct(id) {
   const p = allDashProducts.find(x => x.id === id);
   if (!p) return;
   document.getElementById('productEditId').value = p.id;
   document.getElementById('productCategory').value = p.category;
+  toggleProductFieldsByCategory(p.category);
   document.getElementById('productBrand').value = p.brand || '';
   document.getElementById('productName').value = p.name_ar;
   document.getElementById('productSpecs').value = p.specs_ar || '';
-  document.getElementById('productPowerKw').value = p.power_kw != null ? p.power_kw : '';
-  document.getElementById('productPowerHp').value = p.power_hp != null ? p.power_hp : '';
+  if (p.category === 'inverters') {
+    // Legacy products stored power only inside the specs text — pull it out
+    // so it lands in the new explicit fields the first time this is edited.
+    const { kw, hp } = detectInvPower(p);
+    document.getElementById('productPowerKw').value = kw != null ? kw : '';
+    document.getElementById('productPowerHp').value = hp != null ? hp : '';
+  } else {
+    document.getElementById('productPowerKw').value = p.power_kw != null ? p.power_kw : '';
+    document.getElementById('productPowerHp').value = p.power_hp != null ? p.power_hp : '';
+  }
   document.getElementById('productModel').value = p.model_available || '';
   document.getElementById('productDatasheet').value = p.datasheet_url || '';
   document.getElementById('productUnit').value = p.unit || 'قطعة';
@@ -1451,6 +1498,7 @@ function cancelProductForm() {
   document.getElementById('productPowerHp').value = '';
   setProductImagePreview('');
   document.getElementById('productAddWrap').style.display = 'none';
+  toggleProductFieldsByCategory(document.getElementById('productCategory').value);
 }
 
 async function toggleProductPublish(id, current) {
@@ -1488,17 +1536,34 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    const specsValue = document.getElementById('productSpecs').value.trim() || null;
+    const category = document.getElementById('productCategory').value;
+    const isInverter = category === 'inverters';
+    const brandValue = document.getElementById('productBrand').value.trim();
     const powerKwValue = document.getElementById('productPowerKw').value;
     const powerHpValue = document.getElementById('productPowerHp').value;
 
+    if (isInverter && (powerKwValue === '' || powerHpValue === '')) {
+      if (msg) msg.textContent = 'من فضلك سجّل القدرة بالكيلووات وبالحصان — دي المصدر اللي الموقع بيعرض بيه القدرة على كل الكروت.';
+      return;
+    }
+    if (isInverter && !brandValue) {
+      if (msg) msg.textContent = 'من فضلك اكتب الماركة — بيتولد منها اسم المنتج تلقائيًا للإنفرترات.';
+      return;
+    }
+
+    // Inverters: name is auto-derived from the brand ("Inverter" is the
+    // category, not part of the name), and specs text is replaced entirely
+    // by the explicit KW/HP fields above.
+    const nameValue = isInverter ? brandValue : document.getElementById('productName').value.trim();
+    const specsValue = isInverter ? null : (document.getElementById('productSpecs').value.trim() || null);
+
     const payload = {
-      category:   document.getElementById('productCategory').value,
-      brand:      document.getElementById('productBrand').value.trim() || null,
-      name_ar:    document.getElementById('productName').value.trim(),
+      category:   category,
+      brand:      brandValue || null,
+      name_ar:    nameValue,
       specs_ar:   specsValue,
-      power_kw:   powerKwValue !== '' ? parseFloat(powerKwValue) : null,
-      power_hp:   powerHpValue !== '' ? parseFloat(powerHpValue) : null,
+      power_kw:   isInverter && powerKwValue !== '' ? parseFloat(powerKwValue) : null,
+      power_hp:   isInverter && powerHpValue !== '' ? parseFloat(powerHpValue) : null,
       model_available: document.getElementById('productModel').value.trim() || null,
       datasheet_url:   document.getElementById('productDatasheet').value.trim() || null,
       unit:       document.getElementById('productUnit').value,
