@@ -909,14 +909,14 @@
     // ── Build the meta chips shown under the product name on each card ──
     function metaChips(p) {
       const chips = [];
-      if (p.brand) chips.push(`<span>${escapeHtml(p.brand)}</span>`);
 
       if (p.category === 'inverters') {
-        const { kw, hp } = parseInvPower(p);
-        if (kw) chips.push(`<span><strong>${kw}</strong> KW</span>`);
-        if (hp) chips.push(`<span>${hp} HP</span>`);
+        // Brand + KW + HP are already folded into the card title above, so we
+        // only surface the model number here (if the product has one) to
+        // avoid repeating the same info twice on the card.
         if (p.model_available) chips.push(`<span>${escapeHtml(p.model_available)}</span>`);
       } else {
+        if (p.brand) chips.push(`<span>${escapeHtml(p.brand)}</span>`);
         const specs = localSpecs(p);
         if (specs) {
           const short = specs.length > 40 ? specs.slice(0, 40) + '…' : specs;
@@ -948,12 +948,7 @@
 
     // ── Render a single product card ──
     function renderCard(p, cheapSet) {
-      const name = escapeHtml(localName(p));
       const icon = CAT_ICONS[p.category] || '📦';
-      const img = p.image_url
-        ? `<img src="${escapeHtml(p.image_url)}" alt="${name}" loading="lazy">`
-        : `<span class="prod-fallback-icon">${icon}</span>`;
-
       const isCheap = cheapSet && cheapSet.has(p.id || p);
       const badge = isCheap ? `<span class="cheaper-badge">${u('cheaper')}</span>` : '';
 
@@ -970,6 +965,24 @@
         cables: { ar: 'كابل', en: 'Cable', es: 'Cable', zh: '电缆' },
       }[p.category];
       const catText = (catLabel && catLabel[getLang()]) || '';
+
+      // Inverters: name_ar already repeats the word "Inverter" + brand, and the old
+      // meta chips repeated the brand again plus split KW/HP into separate chips.
+      // Build one clean combined title instead: "{Inverter} {Brand} {KW} KW - {HP} HP".
+      let name;
+      if (p.category === 'inverters') {
+        const { kw, hp } = parseInvPower(p);
+        const parts = [catText, p.brand || ''].filter(Boolean);
+        const power = [kw ? `${kw} KW` : '', hp ? `${hp} HP` : ''].filter(Boolean).join(' - ');
+        if (power) parts.push(power);
+        name = escapeHtml(parts.join(' '));
+      } else {
+        name = escapeHtml(localName(p));
+      }
+
+      const img = p.image_url
+        ? `<img src="${escapeHtml(p.image_url)}" alt="${name}" loading="lazy">`
+        : `<span class="prod-fallback-icon">${icon}</span>`;
 
       return `
         <div class="prod-card" data-cat="${p.category}">
