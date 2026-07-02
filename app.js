@@ -293,7 +293,36 @@ const translations = {
     form_send: "Prepare Email",
     contact_direct: "Direct contact",
     open_form: "Open form in new tab",
-    form_note: "Your email app should now open with the message ready to send."
+    form_note: "Your email app should now open with the message ready to send.",
+    skip_link: "Skip to content",
+    menu_open: "Open menu",
+    calc_data_attached_title: "Your calculator results are attached to this request",
+    calc_data_attached_text: "This is your info and calculator results that will be sent with your request automatically. Just complete your contact details below and press send.",
+    products_kicker: "Product Catalog",
+    products_title: "Products & Prices",
+    products_intro: "All prices are in Egyptian Pounds and subject to change. Contact us for the best offer.",
+    prod_note_label: "Note:",
+    prod_note_text: "Prices are approximate and may change — contact us to confirm before ordering.",
+    prod_sort_newest: "Newest",
+    prod_count_label: "products",
+    prod_loading: "Loading products…",
+    prod_empty_title: "No products found",
+    prod_empty_text: "Try changing the filter or search",
+    prod_sidebar_category: "Category",
+    prod_cat_all: "All Products",
+    prod_cat_panels: "☀️ Solar Panels",
+    prod_cat_inverters: "⚡ Inverters",
+    prod_cat_accessories: "🔌 Accessories",
+    prod_cat_cables: "🔶 Cables",
+    prod_cat_structures: "🏗️ Structures",
+    prod_cat_combiners: "📦 Combiner Boxes",
+    prod_sidebar_price: "Price (EGP)",
+    prod_price_from: "From",
+    prod_price_to: "To",
+    prod_apply_filter: "Apply Filter",
+    prod_reset_filter: "Reset",
+    prod_cta_title: "🤝 Need a quote?",
+    prod_cta_text: "Contact us and we'll prepare the best offer based on your needs and project size."
   },
   ar: {
     nav_home: "الرئيسية",
@@ -585,6 +614,38 @@ const translations = {
     svc_monitor_2: "تقارير الطاقة المنتجة مقابل التوقعات",
     svc_monitor_3: "تنبيهات الأعطال والإشعارات",
     svc_monitor_4: "مراجعات دورية للأداء",
+    article_loading: "جاري تحميل المقال…",
+    article_not_found: "تعذر العثور على هذا المقال.",
+    article_back_link: "العودة إلى المقالات",
+    skip_link: "تخطي إلى المحتوى",
+    menu_open: "فتح القائمة",
+    calc_data_attached_title: "تم إرفاق بيانات حاسبتك تلقائياً مع هذا الطلب",
+    calc_data_attached_text: "دي بياناتك ونتائج الحاسبة اللي هتترسل مع طلبك تلقائياً. فقط أكمل بيانات التواصل في الفورم بالأسفل واضغط إرسال.",
+    products_kicker: "قائمة المنتجات",
+    products_title: "المنتجات والأسعار",
+    products_intro: "جميع الأسعار بالجنيه المصري وقابلة للتحديث. تواصل معنا للحصول على أفضل عرض.",
+    prod_note_label: "ملاحظة:",
+    prod_note_text: "الأسعار تقريبية وقد تتغير — تواصل معنا للتأكيد قبل الطلب.",
+    prod_sort_newest: "الأحدث",
+    prod_count_label: "منتج",
+    prod_loading: "جاري تحميل المنتجات…",
+    prod_empty_title: "لا توجد منتجات",
+    prod_empty_text: "جرّب تغيير الفلتر أو البحث",
+    prod_sidebar_category: "الفئة",
+    prod_cat_all: "جميع المنتجات",
+    prod_cat_panels: "☀️ ألواح شمسية",
+    prod_cat_inverters: "⚡ إنفرترات",
+    prod_cat_accessories: "🔌 إكسسوارات",
+    prod_cat_cables: "🔶 كابلات",
+    prod_cat_structures: "🏗️ هياكل",
+    prod_cat_combiners: "📦 صناديق جمع",
+    prod_sidebar_price: "السعر (ج.م)",
+    prod_price_from: "من",
+    prod_price_to: "إلى",
+    prod_apply_filter: "تطبيق الفلتر",
+    prod_reset_filter: "إعادة ضبط",
+    prod_cta_title: "🤝 هل تحتاج عرض سعر؟",
+    prod_cta_text: "تواصل معنا وسنعدّ لك أفضل عرض بناءً على احتياجاتك وحجم مشروعك."
   },
   es: {
     nav_home: "Inicio",
@@ -875,7 +936,39 @@ const translations = {
     form_send: "Preparar correo",
     contact_direct: "Contacto directo",
     open_form: "Abrir formulario en una nueva pestaña",
-    form_note: "Su aplicación de correo debería abrirse con el mensaje listo para enviar."
+    form_note: "Su aplicación de correo debería abrirse con el mensaje listo para enviar.",
+    article_loading: "Cargando artículo…",
+    article_not_found: "No se pudo encontrar este artículo.",
+    article_back_link: "Volver a los artículos",
+    skip_link: "Saltar al contenido",
+    menu_open: "Abrir menú",
+    calc_data_attached_title: "Los resultados de tu calculadora se adjuntaron a esta solicitud",
+    calc_data_attached_text: "Esta es tu información y los resultados de la calculadora que se enviarán automáticamente con tu solicitud. Solo completa tus datos de contacto abajo y presiona enviar.",
+    products_kicker: "Catálogo de productos",
+    products_title: "Productos y precios",
+    products_intro: "Todos los precios están en libras egipcias y sujetos a cambios. Contáctanos para la mejor oferta.",
+    prod_note_label: "Nota:",
+    prod_note_text: "Los precios son aproximados y pueden cambiar — contáctanos para confirmar antes de pedir.",
+    prod_sort_newest: "Más recientes",
+    prod_count_label: "productos",
+    prod_loading: "Cargando productos…",
+    prod_empty_title: "No se encontraron productos",
+    prod_empty_text: "Intenta cambiar el filtro o la búsqueda",
+    prod_sidebar_category: "Categoría",
+    prod_cat_all: "Todos los productos",
+    prod_cat_panels: "☀️ Paneles solares",
+    prod_cat_inverters: "⚡ Inversores",
+    prod_cat_accessories: "🔌 Accesorios",
+    prod_cat_cables: "🔶 Cables",
+    prod_cat_structures: "🏗️ Estructuras",
+    prod_cat_combiners: "📦 Cajas combinadoras",
+    prod_sidebar_price: "Precio (EGP)",
+    prod_price_from: "Desde",
+    prod_price_to: "Hasta",
+    prod_apply_filter: "Aplicar filtro",
+    prod_reset_filter: "Restablecer",
+    prod_cta_title: "🤝 ¿Necesitas una cotización?",
+    prod_cta_text: "Contáctanos y prepararemos la mejor oferta según tus necesidades y el tamaño de tu proyecto."
   },
   zh: {
     nav_home: "首页",
@@ -1166,7 +1259,39 @@ const translations = {
     form_send: "准备邮件",
     contact_direct: "直接联系",
     open_form: "在新标签页打开表单",
-    form_note: "您的邮件应用现在应已打开，并准备好发送邮件。"
+    form_note: "您的邮件应用现在应已打开，并准备好发送邮件。",
+    article_loading: "正在加载文章…",
+    article_not_found: "未找到该文章。",
+    article_back_link: "返回文章列表",
+    skip_link: "跳到主要内容",
+    menu_open: "打开菜单",
+    calc_data_attached_title: "您的计算器结果已自动附加到此请求",
+    calc_data_attached_text: "这是将随您的请求自动发送的信息和计算器结果。只需在下方填写您的联系方式并点击发送即可。",
+    products_kicker: "产品目录",
+    products_title: "产品与价格",
+    products_intro: "所有价格均以埃及镑计价，可能会有变动。请联系我们获取最优报价。",
+    prod_note_label: "注意：",
+    prod_note_text: "价格为参考价，可能会变动 — 下单前请联系我们确认。",
+    prod_sort_newest: "最新",
+    prod_count_label: "件产品",
+    prod_loading: "正在加载产品…",
+    prod_empty_title: "未找到产品",
+    prod_empty_text: "请尝试更改筛选条件或搜索词",
+    prod_sidebar_category: "类别",
+    prod_cat_all: "所有产品",
+    prod_cat_panels: "☀️ 太阳能板",
+    prod_cat_inverters: "⚡ 逆变器",
+    prod_cat_accessories: "🔌 配件",
+    prod_cat_cables: "🔶 电缆",
+    prod_cat_structures: "🏗️ 支架结构",
+    prod_cat_combiners: "📦 汇流箱",
+    prod_sidebar_price: "价格（埃及镑）",
+    prod_price_from: "从",
+    prod_price_to: "到",
+    prod_apply_filter: "应用筛选",
+    prod_reset_filter: "重置",
+    prod_cta_title: "🤝 需要报价吗？",
+    prod_cta_text: "联系我们，我们将根据您的需求和项目规模为您准备最优报价。"
   }
 };
 
@@ -1655,9 +1780,27 @@ async function initAdminLink() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const storedLang = localStorage.getItem("alasl-lang");
-  const savedLang = storedLang || detectVisitorLanguage();
-  localStorage.setItem("alasl-lang", savedLang);
+  // Static per-language article pages (loaded via article-lang-switcher.js) declare
+  // their own language in the HTML source (<html lang="ar|en|es|zh">) — that
+  // declaration IS the language of the page's actual content, since each language
+  // lives in its own physical file. On these pages we must NOT let a stale
+  // localStorage value or the visitor's browser language override it, or the
+  // page ends up with a nav/footer in one language and an article body in another.
+  const isStaticArticlePage = !!document.querySelector('script[src*="article-lang-switcher"]');
+  const supportedLangs = ["en", "ar", "es", "zh"];
+  const pageDeclaredLang = document.documentElement.getAttribute("lang");
+
+  let savedLang;
+  if (isStaticArticlePage && supportedLangs.includes(pageDeclaredLang)) {
+    savedLang = pageDeclaredLang;
+    // Keep the site-wide preference in sync so navigating back to app pages
+    // (index, about, products…) continues in the same language.
+    localStorage.setItem("alasl-lang", savedLang);
+  } else {
+    const storedLang = localStorage.getItem("alasl-lang");
+    savedLang = storedLang || detectVisitorLanguage();
+    localStorage.setItem("alasl-lang", savedLang);
+  }
   document.documentElement.lang = savedLang;
   document.documentElement.dir = savedLang === "ar" ? "rtl" : "ltr";
 
