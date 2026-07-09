@@ -29,9 +29,21 @@ create table if not exists public.admin_users (
   created_at timestamptz default now()
 );
 
-insert into public.admin_users (email)
-values ('REDACTED')
-on conflict (email) do nothing;
+-- SECURITY NOTE: the admin email was previously hardcoded here in plaintext
+-- and committed to git history. That is a credential leak if this repo is
+-- (or ever becomes) public — anyone can read who holds is_admin() rights.
+-- Do NOT re-add a literal email address to this file. Instead, run this
+-- insert manually once, directly in the Supabase SQL editor (not via a
+-- file that gets committed):
+--
+--   insert into public.admin_users (email)
+--   values ('<admin-email-here>')
+--   on conflict (email) do nothing;
+--
+-- If the previous email was ever pushed to a public GitHub repo, treat it
+-- as exposed: rotate/replace it in admin_users, and rewrite git history
+-- (e.g. git filter-repo) to strip it from old commits, not just delete it
+-- going forward.
 
 create or replace function public.is_admin()
 returns boolean
