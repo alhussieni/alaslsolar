@@ -957,6 +957,13 @@ details[open] summary::after {
   padding: var(--space-4) clamp(var(--space-3), 5vw, var(--space-6));
   background: linear-gradient(100deg, #0a0908, var(--graphite));
   color: #fff;
+  /* Force a fixed left-to-right visual order for the footer bar
+     (brand block + social icons) so it stays identical on every page,
+     including RTL pages like calculators.html/products.html. Without
+     this, the flex items and icon order silently mirror on any page
+     with <html dir="rtl">, even though the underlying HTML is the
+     same on every page. */
+  direction: ltr;
 }
 
 .site-footer strong {
