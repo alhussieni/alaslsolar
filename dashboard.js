@@ -9,7 +9,14 @@ function slugify(value) {
   return String(value || "")
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9\u0600-\u06ff]+/g, "-")
+    // Only keep Latin letters/digits, Arabic base letters (U+0621–U+064A),
+    // and Arabic-Indic digits (U+0660–U+0669). Everything else — including
+    // Arabic punctuation like "؟" (U+061F), "،" (U+060C), "؛" (U+061B),
+    // and diacritics — gets collapsed to a hyphen instead of leaking into
+    // the URL. The previous \u0600-\u06ff range wrongly included that
+    // punctuation block, which is how "؟" ended up literally inside a
+    // generated slug/URL.
+    .replace(/[^a-z0-9\u0621-\u064A\u0660-\u0669]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
 
@@ -587,10 +594,17 @@ async function handleArticle(event) {
   try {
     const images = await collectImages('articleImagesWrap', 'articles');
     const titleAr = formData.get('title_ar');
+    // Use the admin-entered slug (already restricted to a-z0-9- via the
+    // input's pattern/oninput sanitizer in dashboard.html) instead of
+    // silently regenerating one from the Arabic title. Falling back to
+    // slugify(titleAr) only covers the case where the field was somehow
+    // left empty.
+    const slugCustom = (formData.get('slug_custom') || '').trim();
+    const slug = slugCustom || slugify(titleAr);
     const payload = {
       category:     formData.get('category') || 'general',
       title:        titleAr,
-      slug:         `${slugify(titleAr)}-${Date.now()}`,
+      slug:         `${slug}-${Date.now()}`,
       summary:      formData.get('summary_ar'),
       content:      formData.get('content_ar'),
       title_ar:     titleAr,

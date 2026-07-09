@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, follow">
+  <title>الصفحة غير موجودة | Al Asl Solar</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <script>
+    /*
+      GitHub Pages doesn't support server-side (true) 301 redirects — there's
+      no _redirects/netlify.toml/.htaccess mechanism available on this host.
+      This is the standard static-hosting workaround: GitHub Pages serves
+      this file for ANY unmatched URL, so we pattern-match the path here and
+      send a client-side redirect (302-equivalent, via location.replace so
+      it doesn't add a back-button entry) to the correct live page.
+
+      Known broken/legacy URLs are mapped below. Add new entries as needed —
+      match on a stable substring since some of these broken URLs have a
+      trailing random/timestamp suffix that varies.
+    */
+    var path = decodeURIComponent(window.location.pathname);
+
+    var redirects = [
+      // Old auto-generated Arabic slug that leaked a literal "؟" into the
+      // URL (bug in the slug generator — see dashboard.js / slugify()).
+      // Matches regardless of the trailing "-<number>" suffix.
+      { match: "الصيانة-وطول-العمر", target: "/articles/solar-panel-maintenance-ar.html" }
+    ];
+
+    for (var i = 0; i < redirects.length; i++) {
+      if (path.indexOf(redirects[i].match) !== -1) {
+        window.location.replace(redirects[i].target);
+        break;
+      }
+    }
+  </script>
+
+  <style>
+    .notfound-wrap {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-5) var(--space-3);
+      gap: var(--space-3);
+    }
+    .notfound-wrap h1 { font-size: 2rem; margin: 0; }
+    .notfound-wrap p { color: var(--muted); max-width: 40ch; }
+  </style>
+</head>
+<body>
+  <main id="main" class="notfound-wrap">
+    <h1>عذرًا، الصفحة مش موجودة</h1>
+    <p>الرابط اللي فتحته مش متاح أو اتنقل لمكان تاني.</p>
+    <p>
+      <a href="/index.html" class="btn btn-dark">الرجوع للصفحة الرئيسية</a>
+      &nbsp;
+      <a href="/articles.html">تصفح المقالات</a>
+    </p>
+  </main>
+</body>
+</html>
