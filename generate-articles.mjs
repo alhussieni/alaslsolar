@@ -89,26 +89,35 @@ const CSS_LINKS = `
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">`;
 
-function nav(depth = 1) {
+const NAV_I18N = {
+  en: { skip: "Skip to content", menu: "Open menu", nav: "Main navigation" },
+  ar: { skip: "تخطي إلى المحتوى", menu: "فتح القائمة", nav: "التنقل الرئيسي" },
+  es: { skip: "Saltar al contenido", menu: "Abrir menú", nav: "Navegación principal" },
+  zh: { skip: "跳到主要内容", menu: "打开菜单", nav: "主导航" },
+};
+
+function nav(depth = 1, lang = "en") {
   const prefix = depth === 1 ? "../" : "";
+  const t = NAV_I18N[lang] || NAV_I18N.en;
   return `
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#main">${t.skip}</a>
   <header class="site-header">
     <a class="brand" href="${prefix}index.html" aria-label="Al Asl Solar home">
       <img src="${prefix}logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
     </a>
     <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
       <i class="fa fa-bars" aria-hidden="true"></i>
-      <span class="sr-only">Open menu</span>
+      <span class="sr-only">${t.menu}</span>
     </button>
-    <nav class="site-menu" id="siteMenu" aria-label="Main navigation">
+    <nav class="site-menu" id="siteMenu" aria-label="${t.nav}">
       <a href="${prefix}index.html" data-i18n="nav_home">Home</a>
       <a href="${prefix}about.html" data-i18n="nav_about">About Us</a>
       <a href="${prefix}services.html" data-i18n="nav_services">Services</a>
+      <a href="${prefix}products.html" data-i18n="nav_products">Products</a>
       <a href="${prefix}projects.html" data-i18n="nav_projects">Projects</a>
       <a href="${prefix}articles.html" data-i18n="nav_articles">Articles</a>
+      <a href="${prefix}calculators.html" data-i18n="nav_calculators">Calculators</a>
       <a href="${prefix}contact.html" data-i18n="nav_contact">Contact</a>
-      <a class="admin-link" href="${prefix}dashboard.html">Admin</a>
       <div class="lang-switcher" role="group" aria-label="Language">
         <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
           <i class="ti ti-world" aria-hidden="true"></i>
@@ -161,7 +170,10 @@ function buildArticlePage(article, lang) {
   const dateDisplay = formatDate(article.created_at, lang);
 
   const pageUrl     = `${SITE_URL}/articles/${slug}${suffix}.html`;
-  const canonicalEn = `${SITE_URL}/articles/${slug}.html`; // canonical always points to EN
+  const canonicalUrl = pageUrl; // self-referencing canonical: every language
+                                 // variant points to itself, not to EN. Each
+                                 // language is declared instead via the
+                                 // hreflang alternates below.
 
   // hreflang links for all variants
   const hreflangLinks = Object.entries(LANGS)
@@ -213,7 +225,7 @@ function buildArticlePage(article, lang) {
   <meta property="og:type" content="article">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:image" content="${esc(image)}">
-  <link rel="canonical" href="${canonicalEn}">
+  <link rel="canonical" href="${canonicalUrl}">
 ${hreflangLinks}
   <script type="application/ld+json">${jsonLd}</script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -222,7 +234,7 @@ ${hreflangLinks}
   <script defer src="../article-lang-switcher.js"></script>
 </head>
 <body>
-${nav(1)}
+${nav(1, lang)}
 
   <main id="main">
     <section class="page-hero">
