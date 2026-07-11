@@ -400,8 +400,11 @@ function buildSitemap(articles) {
     { url: "/services-agriculture.html", priority: "0.9", freq: "monthly" },
     { url: "/services-industrial.html",  priority: "0.9", freq: "monthly" },
     { url: "/services-residential.html", priority: "0.9", freq: "monthly" },
+    { url: "/products.html",           priority: "0.8", freq: "weekly"  },
     { url: "/projects.html",           priority: "0.8", freq: "weekly"  },
     { url: "/articles.html",           priority: "0.8", freq: "weekly"  },
+    { url: "/calculators.html",        priority: "0.7", freq: "monthly" },
+    { url: "/pump-calculator.html",    priority: "0.6", freq: "monthly" },
     { url: "/contact.html",            priority: "0.8", freq: "yearly"  },
   ];
 
