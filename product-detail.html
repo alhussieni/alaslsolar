@@ -185,16 +185,16 @@
     const T = {
       ar: { back: 'الرجوع لكل المنتجات', loading: 'جاري تحميل بيانات المنتج…', error: 'تعذّر العثور على هذا المنتج — قد يكون غير منشور أو تم حذفه.',
             choosePower: 'اختر القدرة', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', datasheet: 'تحميل الداتا شيت',
-            quote: 'اطلب عرض سعر', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specNotes: 'ملاحظات' },
+            quote: 'اطلب عرض سعر', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specDetails: 'المواصفات', specChemistry: 'نوع الكيمياء', specNotes: 'ملاحظات' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
             choosePower: 'Choose Power', priceHint: 'Price is approximate and subject to change — contact us to confirm.', datasheet: 'Download Datasheet',
-            quote: 'Request a Quote', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specNotes: 'Notes' },
+            quote: 'Request a Quote', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specDetails: 'Specifications', specChemistry: 'Chemistry', specNotes: 'Notes' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
             choosePower: 'Elegir Potencia', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', datasheet: 'Descargar Ficha Técnica',
-            quote: 'Solicitar Presupuesto', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specNotes: 'Notas' },
+            quote: 'Solicitar Presupuesto', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specDetails: 'Especificaciones', specChemistry: 'Química', specNotes: 'Notas' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
             choosePower: '选择功率', priceHint: '价格为参考价，可能变动——请联系我们确认。', datasheet: '下载规格书',
-            quote: '获取报价', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specNotes: '备注' },
+            quote: '获取报价', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specDetails: '规格', specChemistry: '化学类型', specNotes: '备注' },
     };
 
     function getLang() { return localStorage.getItem('alasl-lang') || 'ar'; }
@@ -257,10 +257,10 @@
       const rowsSpec = [];
       if (row.brand) rowsSpec.push([t('specBrand'), escapeHtml(row.brand)]);
       const specs = localSpecs(row);
-      if (specs) rowsSpec.push([t('choosePower'), escapeHtml(specs)]);
+      if (specs) rowsSpec.push([t('specDetails'), escapeHtml(specs)]);
       if (row.model_available) rowsSpec.push([t('specModel'), escapeHtml(row.model_available)]);
       if (row.unit) rowsSpec.push([t('specUnit'), escapeHtml(row.unit)]);
-      if (row.notes) rowsSpec.push([t('specNotes'), escapeHtml(row.notes)]);
+      if (row.notes) rowsSpec.push([t('specChemistry'), escapeHtml(row.notes)]);
       document.getElementById('pdSpecsTable').innerHTML = rowsSpec.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
 
       const dsBtn = document.getElementById('pdDatasheetBtn');
