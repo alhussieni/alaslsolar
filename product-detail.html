@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-N97W09ZNSP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-N97W09ZNSP');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="تفاصيل المنتج — المواصفات، الداتا شيت، الصور، والأسعار حسب القدرة. الأصل للطاقة الشمسية.">
+  <meta name="theme-color" content="#0d0b0a">
+  <title id="pageTitle">تفاصيل المنتج | Al Asl Solar</title>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="supabase-config.js"></script>
+
+  <style>
+    .pd-wrap { max-width: 1100px; margin: 0 auto; padding: var(--space-4); display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+    .pd-back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: var(--space-2); }
+    .pd-back:hover { color: var(--brand-dark); }
+    .pd-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+    @media (min-width: 860px) { .pd-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+    .pd-gallery-main { width: 100%; aspect-ratio: 1/1; border-radius: var(--radius-lg); border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; overflow: hidden; }
+    .pd-gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+    .pd-gallery-main .pd-fallback-icon { font-size: 72px; opacity: .5; }
+    .pd-thumbs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .pd-thumb { width: 64px; height: 64px; border-radius: var(--radius); border: 2px solid var(--line); overflow: hidden; cursor: pointer; background: #fff; }
+    .pd-thumb.active { border-color: var(--brand); }
+    .pd-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .pd-cat-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--brand-dark); background: var(--brand-soft); padding: 4px 12px; border-radius: 999px; margin-bottom: 8px; }
+    .pd-title { font-size: clamp(22px, 3vw, 32px); font-weight: 800; margin: 0 0 6px; }
+    .pd-subtitle { color: var(--muted); font-size: 15px; margin: 0 0 var(--space-3); }
+
+    .pd-price-box { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3); margin-bottom: var(--space-3); }
+    .pd-price { font-size: 30px; font-weight: 800; color: var(--brand-dark); }
+    .pd-price .pd-unit { font-size: 14px; font-weight: 600; color: var(--muted); }
+    .pd-price-hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .pd-section-label { font-weight: 700; font-size: 14px; margin: 0 0 8px; }
+    .pd-variants { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-3); }
+    .pd-variant-btn { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; transition: .15s; color: var(--ink); }
+    .pd-variant-btn:hover { border-color: var(--brand); }
+    .pd-variant-btn.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+    .pd-specs-table { width: 100%; border-collapse: collapse; margin-bottom: var(--space-3); font-size: 14px; }
+    .pd-specs-table tr { border-bottom: 1px solid var(--line); }
+    .pd-specs-table td { padding: 8px 4px; }
+    .pd-specs-table td:first-child { color: var(--muted); width: 40%; }
+    .pd-specs-table td:last-child { font-weight: 700; }
+
+    .pd-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pd-ds-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); border: 1.5px solid var(--line); background: #fff; font-weight: 700; text-decoration: none; color: var(--ink); font-size: 14px; }
+    .pd-ds-btn:hover { border-color: var(--brand); }
+
+    .pd-state { text-align: center; padding: 60px var(--space-3); color: var(--muted); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip_link">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Al Asl Solar home">
+      <img src="logo-white.png" alt="شعار الأصل للطاقة الشمسية" width="120" height="70" loading="eager">
+    </a>
+    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
+      <i class="fa fa-bars" aria-hidden="true"></i>
+      <span class="sr-only" data-i18n="menu_open">Open menu</span>
+    </button>
+    <nav class="site-menu" id="siteMenu" aria-label="التنقل الرئيسي">
+      <a href="index.html" data-i18n="nav_home">Home</a>
+      <a href="about.html" data-i18n="nav_about">About Us</a>
+      <a href="services.html" data-i18n="nav_services">Services</a>
+      <a href="products.html" class="active" data-i18n="nav_products">Products</a>
+      <a href="projects.html" data-i18n="nav_projects">Projects</a>
+      <a href="articles.html" data-i18n="nav_articles">Articles</a>
+      <a href="calculators.html" data-i18n="nav_calculators">Calculators</a>
+      <a href="contact.html" data-i18n="nav_contact">Contact</a>
+      <div class="lang-switcher" role="group" aria-label="Language">
+        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
+          <i class="ti ti-world" aria-hidden="true"></i>
+          <span id="langLabel" data-i18n="language">Language</span>
+          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
+        </button>
+        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
+          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
+          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
+          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
+          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <div class="pd-wrap">
+      <a class="pd-back" href="products.html" id="pdBackLink"><i class="fa fa-arrow-right" aria-hidden="true"></i> <span id="pdBackText">الرجوع لكل المنتجات</span></a>
+
+      <div id="pdLoading" class="pd-state"><i class="fa fa-spinner fa-spin"></i> <span id="pdLoadingText">جاري تحميل بيانات المنتج…</span></div>
+      <div id="pdError" class="pd-state" hidden><i class="fa fa-exclamation-triangle"></i> <span id="pdErrorText">تعذّر العثور على هذا المنتج.</span></div>
+
+      <div id="pdContent" class="pd-grid" hidden>
+        <!-- Gallery -->
+        <div>
+          <div class="pd-gallery-main" id="pdGalleryMain"></div>
+          <div class="pd-thumbs" id="pdThumbs"></div>
+        </div>
+
+        <!-- Info -->
+        <div>
+          <span class="pd-cat-badge" id="pdCatBadge"></span>
+          <h1 class="pd-title" id="pdTitle"></h1>
+          <p class="pd-subtitle" id="pdSubtitle"></p>
+
+          <div class="pd-price-box">
+            <div class="pd-price"><span id="pdPrice"></span> <span class="pd-unit" id="pdPriceUnit"></span></div>
+            <p class="pd-price-hint" id="pdPriceHint">السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.</p>
+          </div>
+
+          <div id="pdVariantsWrap">
+            <p class="pd-section-label" id="pdVariantsLabel">اختر القدرة</p>
+            <div class="pd-variants" id="pdVariants"></div>
+          </div>
+
+          <table class="pd-specs-table" id="pdSpecsTable"></table>
+
+          <div class="pd-actions">
+            <a class="pd-ds-btn" id="pdDatasheetBtn" href="#" target="_blank" rel="noopener" hidden>
+              <i class="fa fa-file-pdf-o" aria-hidden="true"></i> <span id="pdDatasheetText">تحميل الداتا شيت</span>
+            </a>
+            <a class="btn btn-primary" href="contact.html" id="pdQuoteBtn">
+              <i class="fa fa-paper-plane" aria-hidden="true"></i> <span id="pdQuoteText">اطلب عرض سعر</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Al Asl Solar Energy</strong>
+      <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
+    </div>
+    <div class="social-links" aria-label="Social links">
+      <a href="https://linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+      <a href="https://youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+      <a href="https://facebook.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+      <a href="https://instagram.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+      <a href="https://tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+    </div>
+  </footer>
+
+  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+  </a>
+
+  <script defer src="app.js"></script>
+
+  <script>
+  (function () {
+    const CAT_ICONS = { inverters: '⚡', panels: '☀️', accessories: '🔌', combiners: '📦', structures: '🏗️', cables: '🔶', batteries: '🔋', offgrid: '🔆' };
+    const CAT_LABEL = {
+      inverters:   { ar: 'إنفرتر',            en: 'Inverter',           es: 'Inversor',           zh: '逆变器' },
+      panels:      { ar: 'لوح شمسي',          en: 'Solar Panel',        es: 'Panel Solar',        zh: '太阳能板' },
+      accessories: { ar: 'إكسسوار',           en: 'Accessory',          es: 'Accesorio',          zh: '配件' },
+      combiners:   { ar: 'صندوق تجميع',       en: 'Combiner Box',       es: 'Caja Combinadora',   zh: '汇流箱' },
+      structures:  { ar: 'هيكل',              en: 'Structure',          es: 'Estructura',         zh: '结构' },
+      cables:      { ar: 'كابل',              en: 'Cable',              es: 'Cable',               zh: '电缆' },
+      batteries:   { ar: 'بطارية',            en: 'Battery',            es: 'Batería',             zh: '电池' },
+      offgrid:     { ar: 'إنفرتر أوف جريد',   en: 'Off-Grid Inverter',  es: 'Inversor Off-Grid',  zh: '离网逆变器' },
+    };
+    const T = {
+      ar: { back: 'الرجوع لكل المنتجات', loading: 'جاري تحميل بيانات المنتج…', error: 'تعذّر العثور على هذا المنتج — قد يكون غير منشور أو تم حذفه.',
+            choosePower: 'اختر القدرة', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', datasheet: 'تحميل الداتا شيت',
+            quote: 'اطلب عرض سعر', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specNotes: 'ملاحظات' },
+      en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
+            choosePower: 'Choose Power', priceHint: 'Price is approximate and subject to change — contact us to confirm.', datasheet: 'Download Datasheet',
+            quote: 'Request a Quote', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specNotes: 'Notes' },
+      es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
+            choosePower: 'Elegir Potencia', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', datasheet: 'Descargar Ficha Técnica',
+            quote: 'Solicitar Presupuesto', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specNotes: 'Notas' },
+      zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
+            choosePower: '选择功率', priceHint: '价格为参考价，可能变动——请联系我们确认。', datasheet: '下载规格书',
+            quote: '获取报价', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specNotes: '备注' },
+    };
+
+    function getLang() { return localStorage.getItem('alasl-lang') || 'ar'; }
+    function t(key) { return (T[getLang()] || T.ar)[key]; }
+    function fmt(n) { return Number(n).toLocaleString('ar-EG'); }
+    function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function localName(r) { const l = getLang(); return r['name_' + l] || r['name_ar'] || r['name_en'] || r['name'] || ''; }
+    function localSpecs(r) { const l = getLang(); return r['specs_' + l] || r['specs_ar'] || r['specs_en'] || r['specs'] || ''; }
+
+    function unitLabel(p) {
+      if (p.category === 'panels') return t('watt');
+      if (p.category === 'cables') return t('meter');
+      return t('egp');
+    }
+
+    function parseInvPower(row) {
+      let kw = row.power_kw ? parseFloat(row.power_kw) : null;
+      let hp = row.power_hp ? parseFloat(row.power_hp) : null;
+      if (!kw || !hp) {
+        const s = row.specs_en || row.specs_ar || '';
+        const kwM = s.match(/([\d.]+)\s*KW/i);
+        const hpM = s.match(/([\d.]+)\s*HP/i);
+        if (kwM) kw = parseFloat(kwM[1]);
+        if (hpM) hp = parseFloat(hpM[1]);
+      }
+      return { kw, hp };
+    }
+
+    function variantLabel(p) {
+      if (p.category === 'inverters' || p.category === 'offgrid') {
+        const { kw, hp } = parseInvPower(p);
+        const parts = [kw ? kw + ' KW' : '', hp ? hp + ' HP' : ''].filter(Boolean);
+        if (parts.length) return parts.join(' / ');
+      }
+      const specs = localSpecs(p);
+      if (specs) return specs;
+      return localName(p) || '—';
+    }
+
+    let familyRows = [];
+    let selected = null;
+
+    function renderStaticText() {
+      document.getElementById('pdBackText').textContent = t('back');
+      document.getElementById('pdLoadingText').textContent = t('loading');
+      document.getElementById('pdErrorText').textContent = t('error');
+      document.getElementById('pdVariantsLabel').textContent = t('choosePower');
+      document.getElementById('pdPriceHint').textContent = t('priceHint');
+      document.getElementById('pdDatasheetText').textContent = t('datasheet');
+      document.getElementById('pdQuoteText').textContent = t('quote');
+    }
+
+    function selectVariant(row) {
+      selected = row;
+      document.querySelectorAll('.pd-variant-btn').forEach(b => b.classList.toggle('active', b.dataset.id === String(row.id)));
+
+      document.getElementById('pdPrice').textContent = fmt(row.price);
+      document.getElementById('pdPriceUnit').textContent = unitLabel(row);
+
+      const rowsSpec = [];
+      if (row.brand) rowsSpec.push([t('specBrand'), escapeHtml(row.brand)]);
+      const specs = localSpecs(row);
+      if (specs) rowsSpec.push([t('choosePower'), escapeHtml(specs)]);
+      if (row.model_available) rowsSpec.push([t('specModel'), escapeHtml(row.model_available)]);
+      if (row.unit) rowsSpec.push([t('specUnit'), escapeHtml(row.unit)]);
+      if (row.notes) rowsSpec.push([t('specNotes'), escapeHtml(row.notes)]);
+      document.getElementById('pdSpecsTable').innerHTML = rowsSpec.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+      const dsBtn = document.getElementById('pdDatasheetBtn');
+      const ds = row.datasheet_url || familyRows.find(r => r.datasheet_url)?.datasheet_url;
+      if (ds) { dsBtn.href = ds; dsBtn.hidden = false; } else { dsBtn.hidden = true; }
+    }
+
+    function renderGallery() {
+      const images = [...new Set(familyRows.map(r => r.image_url).filter(Boolean))];
+      const main = document.getElementById('pdGalleryMain');
+      const thumbs = document.getElementById('pdThumbs');
+      const icon = CAT_ICONS[familyRows[0].category] || '📦';
+
+      function show(url) {
+        main.innerHTML = url ? `<img src="${escapeHtml(url)}" alt="">` : `<span class="pd-fallback-icon">${icon}</span>`;
+      }
+
+      if (images.length === 0) {
+        show(null);
+        thumbs.innerHTML = '';
+        return;
+      }
+      show(images[0]);
+      thumbs.innerHTML = images.map((url, i) => `<div class="pd-thumb${i === 0 ? ' active' : ''}" data-url="${escapeHtml(url)}"><img src="${escapeHtml(url)}" alt=""></div>`).join('');
+      thumbs.querySelectorAll('.pd-thumb').forEach(el => {
+        el.addEventListener('click', () => {
+          thumbs.querySelectorAll('.pd-thumb').forEach(t2 => t2.classList.remove('active'));
+          el.classList.add('active');
+          show(el.dataset.url);
+        });
+      });
+    }
+
+    function render() {
+      renderStaticText();
+
+      const first = familyRows[0];
+      const catText = (CAT_LABEL[first.category] && CAT_LABEL[first.category][getLang()]) || first.category;
+      document.getElementById('pdCatBadge').textContent = `${CAT_ICONS[first.category] || '📦'} ${catText}`;
+
+      const title = [catText, first.brand].filter(Boolean).join(' ');
+      document.getElementById('pdTitle').textContent = title;
+      document.getElementById('pageTitle').textContent = title + ' | Al Asl Solar';
+      document.getElementById('pdSubtitle').textContent = first.model_available || '';
+
+      renderGallery();
+
+      // Sort variants by kw/power then price for a sensible left-to-right order
+      const sorted = [...familyRows].sort((a, b) => {
+        const pa = parseInvPower(a).kw, pb = parseInvPower(b).kw;
+        if (pa != null && pb != null && pa !== pb) return pa - pb;
+        return a.price - b.price;
+      });
+
+      const variantsWrap = document.getElementById('pdVariantsWrap');
+      if (sorted.length <= 1) {
+        variantsWrap.hidden = true;
+      } else {
+        variantsWrap.hidden = false;
+        document.getElementById('pdVariants').innerHTML = sorted.map(r =>
+          `<button type="button" class="pd-variant-btn" data-id="${r.id}">${escapeHtml(variantLabel(r))}</button>`
+        ).join('');
+        document.querySelectorAll('.pd-variant-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const row = sorted.find(r => String(r.id) === btn.dataset.id);
+            if (row) selectVariant(row);
+          });
+        });
+      }
+
+      selectVariant(sorted[0]);
+
+      document.getElementById('pdLoading').hidden = true;
+      document.getElementById('pdContent').hidden = false;
+    }
+
+    async function init() {
+      const params = new URLSearchParams(location.search);
+      const cat = params.get('cat') || '';
+      const brand = params.get('brand') || '';
+      const model = params.get('model') || '';
+
+      let attempts = 0;
+      while (attempts < 50) {
+        if (window.supabase && typeof window.supabase.createClient === 'function' && window.ALASL_SUPABASE_URL && window.ALASL_SUPABASE_ANON_KEY) break;
+        await new Promise(r => setTimeout(r, 100));
+        attempts++;
+      }
+
+      let sb = null;
+      try {
+        sb = window.alaslSupabase || (window.alaslSupabase = window.supabase.createClient(window.ALASL_SUPABASE_URL, window.ALASL_SUPABASE_ANON_KEY));
+      } catch (e) { console.error('Supabase init error:', e); }
+
+      const showError = () => {
+        document.getElementById('pdLoading').hidden = true;
+        renderStaticText();
+        document.getElementById('pdError').hidden = false;
+      };
+
+      if (!sb || !cat) { showError(); return; }
+
+      try {
+        const { data, error } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('model_available', model);
+        if (error || !data || data.length === 0) {
+          // model_available may be stored as null instead of '' — retry without that filter
+          const retry = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
+          const rows = (retry.data || []).filter(r => (r.model_available || '') === model);
+          if (rows.length === 0) { showError(); return; }
+          familyRows = rows;
+        } else {
+          familyRows = data;
+        }
+        render();
+      } catch (e) {
+        console.error('product-detail load error:', e);
+        showError();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
