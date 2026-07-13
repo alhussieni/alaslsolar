@@ -364,16 +364,32 @@
       if (!sb || !cat) { showError(); return; }
 
       try {
+        let rows;
         const { data, error } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('model_available', model);
         if (error || !data || data.length === 0) {
           // model_available may be stored as null instead of '' — retry without that filter
           const retry = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
-          const rows = (retry.data || []).filter(r => (r.model_available || '') === model);
+          rows = (retry.data || []).filter(r => (r.model_available || '') === model);
           if (rows.length === 0) { showError(); return; }
-          familyRows = rows;
         } else {
-          familyRows = data;
+          rows = data;
         }
+
+        // Brand-level logo fallback, same rule as products.html: a
+        // product's own image always wins; otherwise fall back to the
+        // brand's shared logo.
+        if (rows.some(r => !r.image_url) && brand) {
+          try {
+            const { data: logo } = await sb.from('brand_logos').select('logo_url').eq('brand', brand).maybeSingle();
+            if (logo && logo.logo_url) {
+              rows = rows.map(r => ({ ...r, image_url: r.image_url || logo.logo_url }));
+            }
+          } catch (e) {
+            console.error('brand_logos fetch error:', e);
+          }
+        }
+
+        familyRows = rows;
         render();
       } catch (e) {
         console.error('product-detail load error:', e);
