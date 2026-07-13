@@ -485,6 +485,55 @@
         </article>
       </div>
 
+      <!-- ── Brand Logos Management ── -->
+      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card" id="brandLogosCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">🏷️ شعارات الشركات (البراندات)</h3>
+            <button type="button" onclick="toggleSection('brandLogoAddWrap','addBrandLogoBtn')" id="addBrandLogoBtn"
+              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              + إضافة / تعديل شعار
+            </button>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+            شعار واحد لكل شركة/براند — بيظهر تلقائيًا مع كل منتجات نفس البراند اللي مالهاش صورة خاصة بيها.
+            لو منتج معين له صورة مرفوعة في فورم "إدارة المنتجات"، الصورة الخاصة دي بتفضل الأولوية دايمًا على شعار الشركة.
+          </p>
+
+          <!-- Add / Edit form -->
+          <div id="brandLogoAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <form class="admin-form" id="brandLogoForm">
+              <div>
+                <label>اسم البراند *</label>
+                <input id="brandLogoName" name="brand" required placeholder="مثال: VEICHI, Sinopoly, Deye...">
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">لازم يتطابق حرفيًا مع اسم "الماركة" المكتوب في فورم المنتجات — لو الاسم فيه اختلاف بسيط (مسافة زيادة، حروف كبيرة/صغيرة) الشعار مش هيظهر تلقائيًا.</p>
+              </div>
+              <div style="margin-top:var(--space-2)">
+                <label style="font-weight:700;display:block;margin-bottom:6px">شعار الشركة</label>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <div id="brandLogoPreview" style="width:64px;height:64px;border-radius:var(--radius);background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
+                    <span style="color:var(--muted);font-size:10px">بدون شعار</span>
+                  </div>
+                  <input type="file" id="brandLogoFile" accept="image/*" style="font-size:13px;flex:1;min-width:180px">
+                </div>
+                <p style="margin:6px 0 0;font-size:11px;color:var(--muted)">اختر صورة جديدة لرفعها، أو سيبها فاضية للاحتفاظ بالشعار الحالي لو كنت بتعدّل براند موجود.</p>
+              </div>
+              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ الشعار</button>
+                <button type="button" onclick="cancelBrandLogoForm()"
+                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              </div>
+              <p class="form-note" id="brandLogoMessage" style="margin-top:6px"></p>
+            </form>
+          </div>
+
+          <!-- Brand logos list -->
+          <div id="brandLogosList" style="display:grid;gap:var(--space-2)">
+            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          </div>
+        </article>
+      </div>
+
       <!-- ── Articles Management ── -->
       <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
         <article class="dashboard-card">

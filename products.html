@@ -1283,7 +1283,23 @@
           return;
         }
 
-        allProducts = data.filter(row => CATEGORIES.includes(row.category));
+        const rawProducts = data.filter(row => CATEGORIES.includes(row.category));
+
+        // Brand-level logo fallback: a product's own image_url always wins;
+        // if it has none, fall back to the brand's shared logo (set once in
+        // the admin "Brand Logos" panel and shared by every product with
+        // that brand).
+        let brandLogos = {};
+        try {
+          const { data: logos } = await sb.from('brand_logos').select('brand, logo_url');
+          (logos || []).forEach(l => { brandLogos[l.brand] = l.logo_url; });
+        } catch (e) {
+          console.error('brand_logos fetch error:', e);
+        }
+        allProducts = rawProducts.map(p => ({
+          ...p,
+          image_url: p.image_url || (p.brand && brandLogos[p.brand]) || null,
+        }));
         renderSubFilter();
         renderGrid();
       } catch (e) {

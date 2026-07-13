@@ -873,6 +873,7 @@ async function loadLists() {
   loadProjects();
   loadArticles();
   loadProducts();
+  loadBrandLogos();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1600,5 +1601,133 @@ document.addEventListener('DOMContentLoaded', () => {
     if (msg) { msg.textContent = '✅ تم الحفظ!'; setTimeout(() => { if (msg) msg.textContent = ''; }, 3000); }
     cancelProductForm();
     loadProducts();
+  });
+});
+
+// ══════════════════════════════════════════════════════════════
+// Brand Logos — one shared logo per brand, used as a fallback image
+// for every product of that brand that doesn't have its own photo.
+// ══════════════════════════════════════════════════════════════
+
+async function loadBrandLogos() {
+  const list = document.getElementById('brandLogosList');
+  if (!list || !client) return;
+  const { data, error } = await client.from('brand_logos').select('*').order('brand');
+  if (error) { list.innerHTML = `<p style="color:#c33;font-size:13px">خطأ في تحميل الشعارات: ${error.message}</p>`; return; }
+  renderBrandLogosList(data || []);
+}
+
+function renderBrandLogosList(rows) {
+  const list = document.getElementById('brandLogosList');
+  if (!list) return;
+  if (!rows.length) {
+    list.innerHTML = `<p style="color:var(--muted);font-size:14px">مفيش شعارات مضافة لسه.</p>`;
+    return;
+  }
+  list.innerHTML = rows.map(r => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff">
+      <div style="width:44px;height:44px;border-radius:var(--radius);background:#f9f6f2;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
+        <img src="${escapeHtmlAttr(r.logo_url)}" style="width:100%;height:100%;object-fit:cover" alt="">
+      </div>
+      <div style="flex:1;min-width:0">
+        <p style="margin:0;font-weight:700;font-size:14px">${escapeHtmlAttr(r.brand)}</p>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button type="button" onclick="editBrandLogo('${escapeHtmlAttr(r.brand)}','${escapeHtmlAttr(r.logo_url)}')"
+          style="padding:4px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">✏️ تعديل</button>
+        <button type="button" onclick="deleteBrandLogo('${escapeHtmlAttr(r.brand)}')"
+          style="padding:4px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;font-size:12px;cursor:pointer;color:#c33">🗑️ حذف</button>
+      </div>
+    </div>`).join('');
+}
+
+function escapeHtmlAttr(s) {
+  return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function setBrandLogoPreview(url) {
+  const prev = document.getElementById('brandLogoPreview');
+  if (!prev) return;
+  prev.innerHTML = url
+    ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`
+    : `<span style="color:var(--muted);font-size:10px">بدون شعار</span>`;
+}
+
+function editBrandLogo(brand, logoUrl) {
+  document.getElementById('brandLogoAddWrap').style.display = 'block';
+  document.getElementById('addBrandLogoBtn').textContent = '+ إضافة / تعديل شعار';
+  const nameInput = document.getElementById('brandLogoName');
+  nameInput.value = brand;
+  nameInput.dataset.originalBrand = brand; // needed so renaming a brand doesn't create a duplicate row
+  document.getElementById('brandLogoFile').value = '';
+  setBrandLogoPreview(logoUrl);
+  document.getElementById('brandLogoForm').dataset.currentLogoUrl = logoUrl;
+  document.getElementById('brandLogoAddWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelBrandLogoForm() {
+  document.getElementById('brandLogoAddWrap').style.display = 'none';
+  const form = document.getElementById('brandLogoForm');
+  form.reset();
+  delete form.dataset.currentLogoUrl;
+  document.getElementById('brandLogoName').dataset.originalBrand = '';
+  setBrandLogoPreview('');
+}
+
+async function deleteBrandLogo(brand) {
+  if (!confirm(`هل أنت متأكد من حذف شعار "${brand}"؟ منتجات البراند ده هترجع تعرض بدون صورة لحد ما تتحدد صورة تانية.`)) return;
+  if (!client) return;
+  await client.from('brand_logos').delete().eq('brand', brand);
+  loadBrandLogos();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const logoFile = document.getElementById('brandLogoFile');
+  if (logoFile) {
+    logoFile.addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => setBrandLogoPreview(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const form = document.getElementById('brandLogoForm');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('brandLogoMessage');
+    const brandInput = document.getElementById('brandLogoName');
+    const brand = brandInput.value.trim();
+    if (!brand) { if (msg) msg.textContent = 'اسم البراند مطلوب.'; return; }
+
+    let logoUrl = form.dataset.currentLogoUrl || null;
+    const file = document.getElementById('brandLogoFile')?.files[0];
+    if (file) {
+      try {
+        if (msg) msg.textContent = 'جاري رفع الشعار...';
+        logoUrl = await uploadImage(file, 'brand-logos');
+      } catch (err) {
+        if (msg) msg.textContent = 'خطأ في رفع الشعار: ' + err.message;
+        return;
+      }
+    }
+    if (!logoUrl) { if (msg) msg.textContent = 'من فضلك ارفع صورة الشعار.'; return; }
+
+    if (msg) msg.textContent = 'جاري الحفظ...';
+    const originalBrand = brandInput.dataset.originalBrand || '';
+    let error;
+    if (originalBrand && originalBrand !== brand) {
+      // Brand name was edited: move the row instead of leaving a duplicate.
+      ({ error } = await client.from('brand_logos').delete().eq('brand', originalBrand));
+      if (!error) ({ error } = await client.from('brand_logos').insert({ brand, logo_url: logoUrl }));
+    } else {
+      ({ error } = await client.from('brand_logos').upsert({ brand, logo_url: logoUrl, updated_at: new Date().toISOString() }));
+    }
+    if (error) { if (msg) msg.textContent = 'خطأ: ' + error.message; return; }
+    if (msg) { msg.textContent = '✅ تم الحفظ!'; setTimeout(() => { if (msg) msg.textContent = ''; }, 3000); }
+    cancelBrandLogoForm();
+    loadBrandLogos();
   });
 });
