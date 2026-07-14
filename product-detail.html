@@ -49,6 +49,17 @@
     .pd-price { font-size: 30px; font-weight: 800; color: var(--brand-dark); }
     .pd-price .pd-unit { font-size: 14px; font-weight: 600; color: var(--muted); }
     .pd-price-hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .stock-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      background: #fdecea;
+      color: #c0392b;
+      border-radius: 4px;
+      padding: 3px 8px;
+      margin-bottom: 6px;
+    }
+    .pd-variant-btn.out-of-stock { opacity: .55; text-decoration: line-through; }
 
     .pd-section-label { font-weight: 700; font-size: 14px; margin: 0 0 8px; }
     .pd-variants { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-3); }
@@ -125,6 +136,7 @@
           <p class="pd-subtitle" id="pdSubtitle"></p>
 
           <div class="pd-price-box">
+            <span class="stock-badge" id="pdStockBadge" hidden></span>
             <div class="pd-price"><span id="pdPrice"></span> <span class="pd-unit" id="pdPriceUnit"></span></div>
             <p class="pd-price-hint" id="pdPriceHint">السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.</p>
           </div>
@@ -184,16 +196,16 @@
     };
     const T = {
       ar: { back: 'الرجوع لكل المنتجات', loading: 'جاري تحميل بيانات المنتج…', error: 'تعذّر العثور على هذا المنتج — قد يكون غير منشور أو تم حذفه.',
-            choosePower: 'اختر القدرة', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', datasheet: 'تحميل الداتا شيت',
+            choosePower: 'اختر القدرة', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', outOfStock: 'غير متاح حاليًا', datasheet: 'تحميل الداتا شيت',
             quote: 'اطلب عرض سعر', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specDetails: 'المواصفات', specChemistry: 'نوع الكيمياء', specNotes: 'ملاحظات' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
-            choosePower: 'Choose Power', priceHint: 'Price is approximate and subject to change — contact us to confirm.', datasheet: 'Download Datasheet',
+            choosePower: 'Choose Power', priceHint: 'Price is approximate and subject to change — contact us to confirm.', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
             quote: 'Request a Quote', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specDetails: 'Specifications', specChemistry: 'Chemistry', specNotes: 'Notes' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
-            choosePower: 'Elegir Potencia', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', datasheet: 'Descargar Ficha Técnica',
+            choosePower: 'Elegir Potencia', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
             quote: 'Solicitar Presupuesto', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specDetails: 'Especificaciones', specChemistry: 'Química', specNotes: 'Notas' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
-            choosePower: '选择功率', priceHint: '价格为参考价，可能变动——请联系我们确认。', datasheet: '下载规格书',
+            choosePower: '选择功率', priceHint: '价格为参考价，可能变动——请联系我们确认。', outOfStock: '暂时缺货', datasheet: '下载规格书',
             quote: '获取报价', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specDetails: '规格', specChemistry: '化学类型', specNotes: '备注' },
     };
 
@@ -253,6 +265,10 @@
 
       document.getElementById('pdPrice').textContent = fmt(row.price);
       document.getElementById('pdPriceUnit').textContent = unitLabel(row);
+
+      const stockBadge = document.getElementById('pdStockBadge');
+      if (row.in_stock === false) { stockBadge.textContent = t('outOfStock'); stockBadge.hidden = false; }
+      else { stockBadge.hidden = true; }
 
       const rowsSpec = [];
       if (row.brand) rowsSpec.push([t('specBrand'), escapeHtml(row.brand)]);
@@ -321,7 +337,7 @@
       } else {
         variantsWrap.hidden = false;
         document.getElementById('pdVariants').innerHTML = sorted.map(r =>
-          `<button type="button" class="pd-variant-btn" data-id="${r.id}">${escapeHtml(variantLabel(r))}</button>`
+          `<button type="button" class="pd-variant-btn${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${escapeHtml(variantLabel(r))}</button>`
         ).join('');
         document.querySelectorAll('.pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {

@@ -1361,19 +1361,20 @@ function renderDashProducts() {
   const rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
   if (rows.length === 0) { list.innerHTML = '<p style="color:var(--muted);font-size:14px">لا توجد منتجات في هذا التصنيف.</p>'; return; }
 
-  const catLabels = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد' };
+  const catLabels = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد', well_motors:'🛠️ موتور آبار', pumps:'🌊 طلمبة', pipes:'🧵 ماسورة' };
 
   list.innerHTML = rows.map(p => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-3);border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:var(--space-2);flex-wrap:wrap">
       <div style="display:flex;gap:var(--space-2);flex:1;min-width:0">
         <div style="width:48px;height:48px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
-          ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:18px;opacity:.5">${({inverters:'⚡',panels:'☀️',accessories:'🔌',combiners:'📦',structures:'🏗️',cables:'🔶',batteries:'🔋',offgrid:'🔆'})[p.category] || '📦'}</span>`}
+          ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:18px;opacity:.5">${({inverters:'⚡',panels:'☀️',accessories:'🔌',combiners:'📦',structures:'🏗️',cables:'🔶',batteries:'🔋',offgrid:'🔆',well_motors:'🛠️',pumps:'🌊',pipes:'🧵'})[p.category] || '📦'}</span>`}
         </div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark)">${catLabels[p.category] || p.category}</span>
             ${p.brand ? `<span style="font-size:11px;color:var(--muted)">${p.brand}</span>` : ''}
             ${p.published ? '' : '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي</span>'}
+            ${p.in_stock === false ? '<span style="font-size:11px;color:#c60;font-weight:700">● غير متاح</span>' : ''}
           </div>
           <p style="margin:4px 0 2px;font-weight:700;font-size:14px">${p.name_ar}</p>
           <p style="margin:0;font-size:12px;color:var(--muted)">${p.specs_ar || ''} ${p.notes ? '— ' + p.notes : ''}</p>
@@ -1394,6 +1395,8 @@ function renderDashProducts() {
             style="padding:4px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">✏️ تعديل</button>
           <button type="button" onclick="toggleProductPublish('${p.id}',${p.published})"
             style="padding:4px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">${p.published ? '🙈 إخفاء' : '👁️ نشر'}</button>
+          <button type="button" onclick="toggleProductStock('${p.id}',${p.in_stock !== false})"
+            style="padding:4px 12px;border-radius:var(--radius);border:1px solid ${p.in_stock === false ? '#fcc' : 'var(--line)'};background:${p.in_stock === false ? '#fff3f3' : '#fff'};font-size:12px;cursor:pointer;color:${p.in_stock === false ? '#c33' : 'inherit'}">${p.in_stock === false ? '🔴 غير متاح' : '🟢 متاح'}</button>
           <button type="button" onclick="deleteProduct('${p.id}')"
             style="padding:4px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;font-size:12px;cursor:pointer;color:#c33">🗑️ حذف</button>
         </div>
@@ -1498,6 +1501,7 @@ function editProduct(id) {
   document.getElementById('productNotes').value = p.notes || '';
   document.getElementById('productSort').value = p.sort_order;
   document.getElementById('productPublished').checked = p.published;
+  document.getElementById('productInStock').checked = p.in_stock !== false;
   document.getElementById('productImageUrl').value = p.image_url || '';
   document.getElementById('productImageFile').value = '';
   setProductImagePreview(p.image_url || '');
@@ -1519,6 +1523,12 @@ function cancelProductForm() {
 async function toggleProductPublish(id, current) {
   if (!client) return;
   await client.from('products').update({ published: !current }).eq('id', id);
+  loadProducts();
+}
+
+async function toggleProductStock(id, current) {
+  if (!client) return;
+  await client.from('products').update({ in_stock: !current }).eq('id', id);
   loadProducts();
 }
 
@@ -1587,6 +1597,7 @@ document.addEventListener('DOMContentLoaded', () => {
       image_url:  imageUrl,
       sort_order: parseInt(document.getElementById('productSort').value) || 100,
       published:  document.getElementById('productPublished').checked,
+      in_stock:   document.getElementById('productInStock').checked,
       updated_at: new Date().toISOString(),
     };
     if (!payload.name_ar) { if (msg) msg.textContent = 'اسم المنتج مطلوب.'; return; }
