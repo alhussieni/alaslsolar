@@ -365,6 +365,9 @@
                     <option value="cables">🔶 كابلات</option>
                     <option value="batteries">🔋 بطاريات</option>
                     <option value="offgrid">🔆 إنفرتر أوف جريد</option>
+                    <option value="well_motors">🛠️ موتورات آبار</option>
+                    <option value="pumps">🌊 طلمبات ومضخات</option>
+                    <option value="pipes">🧵 مواسير</option>
                   </select>
                 </div>
                 <div>
@@ -438,6 +441,10 @@
                 <input name="published" id="productPublished" type="checkbox" checked>
                 <span style="font-weight:700">نشر المنتج</span>
               </label>
+              <label class="check-row" style="margin-top:6px">
+                <input name="in_stock" id="productInStock" type="checkbox" checked>
+                <span style="font-weight:700">متاح حاليًا (لو مطفي، المنتج يفضل ظاهر على الموقع لكن يوضح "غير متاح حاليًا")</span>
+              </label>
               <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
                 <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المنتج</button>
                 <button type="button" onclick="cancelProductForm()"
@@ -476,6 +483,15 @@
             <button type="button" class="prod-dash-filter" data-pcat="offgrid"
               onclick="filterDashProducts('offgrid',this)"
               style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔆 أوف جريد</button>
+            <button type="button" class="prod-dash-filter" data-pcat="well_motors"
+              onclick="filterDashProducts('well_motors',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🛠️ موتورات آبار</button>
+            <button type="button" class="prod-dash-filter" data-pcat="pumps"
+              onclick="filterDashProducts('pumps',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🌊 طلمبات</button>
+            <button type="button" class="prod-dash-filter" data-pcat="pipes"
+              onclick="filterDashProducts('pipes',this)"
+              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🧵 مواسير</button>
           </div>
 
           <!-- Products list -->

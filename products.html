@@ -53,6 +53,9 @@
         prod_cat_combiners: "📦 Combiner Boxes",
         prod_cat_batteries: "🔋 Batteries",
         prod_cat_offgrid: "🔆 Off-Grid Inverters",
+        prod_cat_well_motors: "🛠️ Well Motors",
+        prod_cat_pumps: "🌊 Pumps",
+        prod_cat_pipes: "🧵 HDPE Pipes",
         prod_cat_structures: "🏗️ Mounting Structures",
         prod_cat_cables: "🔶 Cables",
         prod_loading: "Loading products…",
@@ -112,6 +115,9 @@
         prod_cat_combiners: "📦 صناديق تجميع",
         prod_cat_batteries: "🔋 بطاريات",
         prod_cat_offgrid: "🔆 إنفرتر أوف جريد",
+        prod_cat_well_motors: "🛠️ موتورات آبار",
+        prod_cat_pumps: "🌊 طلمبات ومضخات",
+        prod_cat_pipes: "🧵 مواسير",
         prod_cat_structures: "🏗️ شاسيهات",
         prod_cat_cables: "🔶 كابلات",
         prod_loading: "جاري تحميل المنتجات…",
@@ -171,6 +177,9 @@
         prod_cat_combiners: "📦 Cajas combinadoras",
         prod_cat_batteries: "🔋 Baterías",
         prod_cat_offgrid: "🔆 Inversores Off-Grid",
+        prod_cat_well_motors: "🛠️ Motores de Pozo",
+        prod_cat_pumps: "🌊 Bombas",
+        prod_cat_pipes: "🧵 Tuberías",
         prod_cat_structures: "🏗️ Estructuras",
         prod_cat_cables: "🔶 Cables",
         prod_loading: "Cargando productos…",
@@ -230,6 +239,9 @@
         prod_cat_combiners: "📦 汇流箱",
         prod_cat_batteries: "🔋 电池",
         prod_cat_offgrid: "🔆 离网逆变器",
+        prod_cat_well_motors: "🛠️ 井用电机",
+        prod_cat_pumps: "🌊 水泵",
+        prod_cat_pipes: "🧵 HDPE管道",
         prod_cat_structures: "🏗️ 安装结构",
         prod_cat_cables: "🔶 电缆",
         prod_loading: "正在加载产品…",
@@ -630,6 +642,17 @@
       padding: 2px 6px;
       margin-bottom: 4px;
     }
+    .stock-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      background: #fdecea;
+      color: #c0392b;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-bottom: 4px;
+    }
+    .prod-card.out-of-stock .prod-card-media { filter: grayscale(60%); opacity: .75; }
 
     /* Loading / empty states */
     .prod-loading {
@@ -798,6 +821,18 @@
               <span class="prod-radio-text"><span data-i18n="prod_cat_offgrid">🔆 إنفرتر أوف جريد</span></span>
               <input type="radio" name="prodCat" value="offgrid">
             </label>
+            <label class="prod-radio-item" data-cat="well_motors">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_well_motors">🛠️ موتورات آبار</span></span>
+              <input type="radio" name="prodCat" value="well_motors">
+            </label>
+            <label class="prod-radio-item" data-cat="pumps">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_pumps">🌊 طلمبات ومضخات</span></span>
+              <input type="radio" name="prodCat" value="pumps">
+            </label>
+            <label class="prod-radio-item" data-cat="pipes">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_pipes">🧵 مواسير</span></span>
+              <input type="radio" name="prodCat" value="pipes">
+            </label>
           </div>
         </div>
 
@@ -861,11 +896,11 @@
   <script>
   (function () {
 
-    const CATEGORIES = ['inverters', 'panels', 'accessories', 'combiners', 'structures', 'cables', 'batteries', 'offgrid'];
+    const CATEGORIES = ['inverters', 'panels', 'accessories', 'combiners', 'structures', 'cables', 'batteries', 'offgrid', 'well_motors', 'pumps', 'pipes'];
     const CAT_ICONS = {
       inverters: '⚡', panels: '☀️', accessories: '🔌',
       combiners: '📦', structures: '🏗️', cables: '🔶',
-      batteries: '🔋', offgrid: '🔆',
+      batteries: '🔋', offgrid: '🔆', well_motors: '🛠️', pumps: '🌊', pipes: '🧵',
     };
 
     // ── Language helper ──
@@ -886,10 +921,10 @@
 
     // Currency unit labels per language
     const UNITS = {
-      ar: { egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', cheaper: 'الأوفر' },
-      en: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Best Price' },
-      es: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Más Barato' },
-      zh: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: '最优惠' },
+      ar: { egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', cheaper: 'الأوفر', outOfStock: 'غير متاح حاليًا' },
+      en: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Best Price', outOfStock: 'Currently Unavailable' },
+      es: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Más Barato', outOfStock: 'No Disponible' },
+      zh: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: '最优惠', outOfStock: '暂时缺货' },
     };
     function u(key) {
       return (UNITS[getLang()] || UNITS.ar)[key];
@@ -978,7 +1013,10 @@
     function renderCard(p, cheapSet) {
       const icon = CAT_ICONS[p.category] || '📦';
       const isCheap = cheapSet && cheapSet.has(p.id || p);
-      const badge = isCheap ? `<span class="cheaper-badge">${u('cheaper')}</span>` : '';
+      const outOfStock = p.in_stock === false;
+      const badge = outOfStock
+        ? `<span class="stock-badge">${u('outOfStock')}</span>`
+        : (isCheap ? `<span class="cheaper-badge">${u('cheaper')}</span>` : '');
 
       const ds = p.datasheet_url
         ? `<span class="prod-card-ds" onclick="event.preventDefault();event.stopPropagation();window.open('${escapeHtml(p.datasheet_url)}','_blank','noopener')"><i class="fa fa-file-pdf-o"></i> PDF</span>`
@@ -993,6 +1031,9 @@
         cables: { ar: 'كابل', en: 'Cable', es: 'Cable', zh: '电缆' },
         batteries: { ar: 'بطارية', en: 'Battery', es: 'Batería', zh: '电池' },
         offgrid: { ar: 'إنفرتر أوف جريد', en: 'Off-Grid Inverter', es: 'Inversor Off-Grid', zh: '离网逆变器' },
+        well_motors: { ar: 'موتور آبار', en: 'Well Motor', es: 'Motor de Pozo', zh: '井用电机' },
+        pumps: { ar: 'طلمبة/مضخة', en: 'Pump', es: 'Bomba', zh: '水泵' },
+        pipes: { ar: 'ماسورة', en: 'Pipe', es: 'Tubería', zh: '管道' },
       }[p.category];
       const catText = (catLabel && catLabel[getLang()]) || '';
 
@@ -1017,7 +1058,7 @@
       const detailHref = 'product-detail.html?' + familyQuery(p);
 
       return `
-        <a class="prod-card" data-cat="${p.category}" href="${detailHref}">
+        <a class="prod-card${outOfStock ? ' out-of-stock' : ''}" data-cat="${p.category}" href="${detailHref}">
           <div class="prod-card-media">${img}</div>
           <div class="prod-card-body">
             <div class="prod-card-top">
