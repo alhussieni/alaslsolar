@@ -1361,13 +1361,13 @@ function renderDashProducts() {
   const rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
   if (rows.length === 0) { list.innerHTML = '<p style="color:var(--muted);font-size:14px">لا توجد منتجات في هذا التصنيف.</p>'; return; }
 
-  const catLabels = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد', well_motors:'🛠️ موتور آبار', pumps:'🌊 طلمبة', pipes:'🧵 ماسورة' };
+  const catLabels = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد', well_motors:'🛠️ موتور آبار', pumps:'🌊 طلمبة', pipes:'🧵 ماسورة', street_lights:'💡 إنارة شوارع', flood_lights:'🔦 كشاف', garden_lights:'🪴 حديقة', solar_kits:'🧰 نظام منزلي', solar_safety:'🚧 سلامة طرق' };
 
   list.innerHTML = rows.map(p => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-3);border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:var(--space-2);flex-wrap:wrap">
       <div style="display:flex;gap:var(--space-2);flex:1;min-width:0">
         <div style="width:48px;height:48px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
-          ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:18px;opacity:.5">${({inverters:'⚡',panels:'☀️',accessories:'🔌',combiners:'📦',structures:'🏗️',cables:'🔶',batteries:'🔋',offgrid:'🔆',well_motors:'🛠️',pumps:'🌊',pipes:'🧵'})[p.category] || '📦'}</span>`}
+          ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:18px;opacity:.5">${({inverters:'⚡',panels:'☀️',accessories:'🔌',combiners:'📦',structures:'🏗️',cables:'🔶',batteries:'🔋',offgrid:'🔆',well_motors:'🛠️',pumps:'🌊',pipes:'🧵',street_lights:'💡',flood_lights:'🔦',garden_lights:'🪴',solar_kits:'🧰',solar_safety:'🚧'})[p.category] || '📦'}</span>`}
         </div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
