@@ -1,6 +1,56 @@
 --- /home/claude/orig_check/alaslsolar-main/pump-calculator.html	2026-07-20 06:15:32.000000000 +0000
-+++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-22 11:19:39.050812562 +0000
-@@ -469,8 +469,13 @@
++++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-22 11:30:59.169296169 +0000
+@@ -100,6 +100,9 @@
+       box-shadow: 0 0 0 3px rgba(200,117,45,0.13);
+     }
+     .field-hint { font-size: 11px; color: var(--steel); margin-top: 2px; }
++    .field-inline { display: flex; gap: 6px; }
++    .field-inline input { flex: 1 1 auto; min-width: 0; }
++    .field-inline select { flex: 0 0 auto; width: auto; min-width: 96px; }
+ 
+     /* Results panel */
+     .results-panel {
+@@ -359,8 +362,15 @@
+             </div>
+             <div class="field">
+               <label for="area">مساحة الأرض</label>
+-              <input type="number" id="area" value="5" min="0.5" step="0.5" oninput="calc()">
+-              <span class="field-hint">فدان — (1 هكتار = 2.471 فدان)</span>
++              <div class="field-inline">
++                <input type="number" id="area" value="5" min="0.1" step="0.5" oninput="calc()">
++                <select id="area_unit" onchange="calc()">
++                  <option value="feddan" selected>فدان</option>
++                  <option value="hectare">هكتار</option>
++                  <option value="m2">متر مربع</option>
++                </select>
++              </div>
++              <span class="field-hint">1 هكتار ≈ 2.38 فدان مصري — 1 فدان = 4200.83 م²</span>
+             </div>
+           </div>
+         </div>
+@@ -394,12 +404,18 @@
+             <div class="field">
+               <label for="pressure">الضغط المطلوب</label>
+               <input type="number" id="pressure" value="4" min="0" max="10" step="0.5" oninput="calc()">
+-              <span class="field-hint">بار — البيفوت: 4 بار</span>
++              <span class="field-hint">بار — الافتراضي: 4 بار</span>
+             </div>
+             <div class="field">
+               <label for="flow_per_fed">معدل التصريف</label>
+-              <input type="number" id="flow_per_fed" value="30" min="5" step="1" oninput="calc()">
+-              <span class="field-hint">م³ / ساعة / فدان</span>
++              <div class="field-inline">
++                <input type="number" id="flow_per_fed" value="30" min="1" step="1" oninput="calc()">
++                <select id="water_unit" onchange="onWaterUnitChange()">
++                  <option value="m3" selected>م³</option>
++                  <option value="gal">جالون أمريكي</option>
++                </select>
++              </div>
++              <span class="field-hint" id="flowUnitHint">م³ / ساعة / فدان</span>
+             </div>
+             <div class="field">
+               <label for="velocity">سرعة الماء في الماسورة</label>
+@@ -469,16 +485,51 @@
  
      /* ── Standard sizes ── */
      // Egyptian market standard motor sizes (kW → HP)
@@ -16,7 +66,106 @@
      const stdPipes  = [1,1.25,1.5,2,2.5,3,4,5,6,8,10,12];
      const KW_TO_HP  = 1.341;
  
-@@ -528,10 +533,12 @@
++    /* ── Unit conversion constants (دقيقة، من مصادر رسمية) ── */
++    const FEDDAN_M2   = 4200.833;      // 1 فدان مصري = 4200.833 م² (24 قيراط × 175.035 م²)
++    const HECTARE_M2  = 10000;         // تعريف رسمي دولي، دقيق تمامًا
++    const M3_TO_GAL   = 264.172052;    // 1 م³ = 264.172052 جالون أمريكي (1 US gal = 3.785411784 لتر بالضبط)
++
++    // معامل تحويل "وحدة المساحة المختارة" إلى فدان مصري (المرجع الداخلي لكل الحسابات والقيم بقاعدة المحاصيل)
++    const AREA_TO_FEDDAN = { feddan: 1, hectare: HECTARE_M2 / FEDDAN_M2, m2: 1 / FEDDAN_M2 };
++
+     function nearestPipe(d)  { return stdPipes.find(s => s >= d)  || stdPipes[stdPipes.length-1]; }
+     function nearestMotor(k) { return stdMotors.find(m => m >= k) || stdMotors[stdMotors.length-1]; }
+     function getHP(kw)       { return motorHP[kw] ?? r2(kw * KW_TO_HP); }
+     function r2(n)           { return Math.round(n*100)/100; }
+ 
++    // قيمة m³/hr/fed (كما مخزّنة في قاعدة بيانات المحاصيل) → القيمة المعروضة حسب وحدة المياه المختارة
++    function displayFlow(m3PerFedHr) {
++      const unit = document.getElementById('water_unit').value;
++      return unit === 'gal' ? r2(m3PerFedHr * M3_TO_GAL) : m3PerFedHr;
++    }
++
++    function setFlowUnitHint() {
++      const unit = document.getElementById('water_unit').value;
++      document.getElementById('flowUnitHint').textContent =
++        unit === 'gal' ? 'جالون أمريكي / ساعة / فدان' : 'م³ / ساعة / فدان';
++    }
++
++    function onWaterUnitChange() {
++      // تحويل الرقم المكتوب فعليًا في الحقل بين م³ وجالون بدل ما نمسحه
++      const unit  = document.getElementById('water_unit').value;
++      const input = document.getElementById('flow_per_fed');
++      const cur   = parseFloat(input.value) || 0;
++      input.value = unit === 'gal' ? r2(cur * M3_TO_GAL) : r2(cur / M3_TO_GAL);
++      setFlowUnitHint();
++      calc();
++    }
++
+     function updateCrops() {
+       const method = document.getElementById('irr_method').value;
+       const sel    = document.getElementById('crop_type');
+@@ -489,7 +540,7 @@
+         o.textContent = c.name; sel.appendChild(o);
+       });
+       if (sel.options.length) {
+-        document.getElementById('flow_per_fed').value = sel.options[0].dataset.flow;
++        document.getElementById('flow_per_fed').value = displayFlow(parseFloat(sel.options[0].dataset.flow));
+         document.getElementById('pressure').value     = sel.options[0].dataset.pressure;
+       }
+     }
+@@ -498,40 +549,48 @@
+       const sel = document.getElementById('crop_type');
+       const opt = sel.options[sel.selectedIndex];
+       if (opt && opt.dataset.flow) {
+-        document.getElementById('flow_per_fed').value = opt.dataset.flow;
++        document.getElementById('flow_per_fed').value = displayFlow(parseFloat(opt.dataset.flow));
+         if (opt.dataset.pressure) document.getElementById('pressure').value = opt.dataset.pressure;
+       }
+       calc();
+     }
+ 
+     function calc() {
+-      const swl    = parseFloat(document.getElementById('swl').value)         || 0;
+-      const far    = parseFloat(document.getElementById('farthest').value)     || 0;
+-      const elev   = parseFloat(document.getElementById('elevation').value)    || 0;
+-      const safety = parseFloat(document.getElementById('safety').value)       || 10;
+-      const area   = parseFloat(document.getElementById('area').value)         || 0;
+-      const hours  = parseFloat(document.getElementById('hours').value)        || 7;
+-      const pbar   = parseFloat(document.getElementById('pressure').value)     || 0;
+-      const fpf    = parseFloat(document.getElementById('flow_per_fed').value) || 0;
+-      const V      = parseFloat(document.getElementById('velocity').value)     || 1.5;
+-      const method = document.getElementById('irr_method').value;
+-      const crop   = document.getElementById('crop_type').value || '—';
+-      const pm     = pbar * 10.2;
++      const swl      = parseFloat(document.getElementById('swl').value)         || 0;
++      const far      = parseFloat(document.getElementById('farthest').value)     || 0;
++      const elev     = parseFloat(document.getElementById('elevation').value)    || 0;
++      const safety   = parseFloat(document.getElementById('safety').value)       || 10;
++      const areaRaw  = parseFloat(document.getElementById('area').value)         || 0;
++      const areaUnit = document.getElementById('area_unit').value;
++      const area     = areaRaw * (AREA_TO_FEDDAN[areaUnit] ?? 1);   // مساحة محوّلة لفدان مصري (المرجع الداخلي)
++      const hours    = parseFloat(document.getElementById('hours').value)        || 7;
++      const pbar     = parseFloat(document.getElementById('pressure').value)     || 0;
++      const waterUnit= document.getElementById('water_unit').value;
++      const fpfRaw   = parseFloat(document.getElementById('flow_per_fed').value) || 0;
++      const fpf      = waterUnit === 'gal' ? fpfRaw / M3_TO_GAL : fpfRaw;  // محوّل لـ م³/ساعة/فدان دايمًا للحساب الداخلي
++      const V        = parseFloat(document.getElementById('velocity').value)     || 1.5;
++      const method   = document.getElementById('irr_method').value;
++      const crop     = document.getElementById('crop_type').value || '—';
++      const pm       = pbar * 10.2;
+ 
+-      if (!swl || !area || !fpf) return;
++      if (!swl || !areaRaw || !fpfRaw) return;
+ 
+-      /* ── Core calculations ── */
++      /* ── Core calculations (دايمًا بالفدان والمتر المكعب داخليًا) ── */
+       const FR    = (area * fpf) / hours;             // m³/h
+       const FR_s  = FR / 3600;                         // m³/s
++      const FR_disp = waterUnit === 'gal' ? FR * M3_TO_GAL : FR;   // للعرض فقط حسب اختيار العميل
++      const FR_unit = waterUnit === 'gal' ? 'جالون/ساعة' : 'م³/ساعة';
+       const TDH   = swl + elev + safety + (far/10) + pm;
+-      // Primary result is HP: (FR × TDH) ÷ (270 × η)
++      // Primary result is HP: (FR × TDH) ÷ (270 × η)  — لازم FR بالمتر المكعب دايمًا هنا
        const hp_c   = r2((FR * TDH) / (270 * 0.75));
        const kw_c   = r2(hp_c / KW_TO_HP);
        // Match nearest standard motor by HP
@@ -33,7 +182,36 @@
  
        /* ── Pipe diameter ── */
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
-@@ -680,6 +687,11 @@
+@@ -579,13 +638,13 @@
+           </div>
+           <div class="metric-card accent">
+             <div class="metric-label">معدل التدفق المطلوب</div>
+-            <div class="metric-value">${FR.toFixed(1)}</div>
+-            <div class="metric-unit">م³ / ساعة</div>
++            <div class="metric-value">${FR_disp.toFixed(1)}</div>
++            <div class="metric-unit">${FR_unit}</div>
+           </div>
+           <div class="metric-card accent">
+             <div class="metric-label">الكمية اليومية</div>
+-            <div class="metric-value">${(area*fpf).toFixed(0)}</div>
+-            <div class="metric-unit">م³ / يوم</div>
++            <div class="metric-value">${(waterUnit === 'gal' ? (area*fpf*M3_TO_GAL) : (area*fpf)).toFixed(0)}</div>
++            <div class="metric-unit">${waterUnit === 'gal' ? 'جالون / يوم' : 'م³ / يوم'}</div>
+           </div>
+         </div>
+ 
+@@ -640,8 +699,8 @@
+           <div class="detail-row">
+             <span class="detail-label">معدل التدفق (FR)</span>
+             <div class="detail-value">
+-              ${FR.toFixed(2)} م³/ساعة
+-              <div class="detail-formula">(${area} فدان × ${fpf} م³/ساعة/فدان) ÷ ${hours} ساعات</div>
++              ${FR_disp.toFixed(2)} ${FR_unit}
++              <div class="detail-formula">(${areaRaw} ${areaUnit === 'feddan' ? 'فدان' : areaUnit === 'hectare' ? 'هكتار' : 'م²'} = ${area.toFixed(3)} فدان) × ${fpf.toFixed(2)} م³/ساعة/فدان ÷ ${hours} ساعات</div>
+             </div>
+           </div>
+           <div class="detail-row">
+@@ -680,6 +739,11 @@
            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
            <span>القدرة الموصى بها <strong>${hp_std} حصان (${kw_std} كيلوواط)</strong> هي أقرب مقاس تجاري للقدرة الحسابية <strong>${hp_c} حصان</strong>. يُرجى مراجعة كتالوج المصنع للتأكد من توافق نقطة العمل مع منحنى الضخة عند TDH = ${TDH.toFixed(0)} متر.</span>
          </div>
@@ -45,7 +223,46 @@
  
          <!-- Footer disclaimer -->
          <div class="footer-disclaimer">
-@@ -717,10 +729,8 @@
+@@ -697,30 +761,35 @@
+     /* ── Save data & go to contact ── */
+     function goToContact() {
+       // Collect all current input values
+-      const swl    = document.getElementById('swl').value;
+-      const far    = document.getElementById('farthest').value;
+-      const elev   = document.getElementById('elevation').value;
+-      const safety = document.getElementById('safety').value;
+-      const area   = document.getElementById('area').value;
+-      const hours  = document.getElementById('hours').value;
+-      const pbar   = document.getElementById('pressure').value;
+-      const fpf    = document.getElementById('flow_per_fed').value;
+-      const V      = document.getElementById('velocity').value;
+-      const method = document.getElementById('irr_method').value;
+-      const crop   = document.getElementById('crop_type').value;
++      const swl      = document.getElementById('swl').value;
++      const far      = document.getElementById('farthest').value;
++      const elev     = document.getElementById('elevation').value;
++      const safety   = document.getElementById('safety').value;
++      const areaRaw  = document.getElementById('area').value;
++      const areaUnit = document.getElementById('area_unit').value;
++      const areaUnitLabel = {feddan:'فدان', hectare:'هكتار', m2:'م²'}[areaUnit] || areaUnit;
++      const area     = parseFloat(areaRaw) * (AREA_TO_FEDDAN[areaUnit] ?? 1);  // فدان مصري (مرجع داخلي)
++      const hours    = document.getElementById('hours').value;
++      const pbar     = document.getElementById('pressure').value;
++      const waterUnit= document.getElementById('water_unit').value;
++      const fpfRaw   = document.getElementById('flow_per_fed').value;
++      const fpf      = waterUnit === 'gal' ? parseFloat(fpfRaw) / M3_TO_GAL : parseFloat(fpfRaw); // م³/ساعة/فدان (مرجع داخلي)
++      const V        = document.getElementById('velocity').value;
++      const method   = document.getElementById('irr_method').value;
++      const crop     = document.getElementById('crop_type').value;
+       const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method] || method;
+ 
+       // Re-calculate results to capture them
+       const pm     = parseFloat(pbar) * 10.2;
+-      const FR     = (parseFloat(area) * parseFloat(fpf)) / parseFloat(hours);
++      const FR     = (area * fpf) / parseFloat(hours);   // م³/ساعة دايمًا (مرجع داخلي)
++      const FR_disp = waterUnit === 'gal' ? FR * M3_TO_GAL : FR;
++      const FR_unit = waterUnit === 'gal' ? 'جالون/ساعة' : 'م³/ساعة';
+       const FR_s   = FR / 3600;
        const TDH    = parseFloat(swl) + parseFloat(elev) + parseFloat(safety) + (parseFloat(far)/10) + pm;
        const hp_c   = Math.round((FR * TDH) / (270 * 0.75) * 100) / 100;
        const kw_c   = Math.round(hp_c / 1.341 * 100) / 100;
@@ -58,3 +275,34 @@
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * parseFloat(V)));
        const D_mm   = D_m * 1000;
        const D_in   = D_mm / 25.4;
+@@ -728,7 +797,7 @@
+ 
+       // Build summary note
+       const note = `=== بيانات حاسبة نظام الضخ ===
+-▸ مساحة الأرض: ${area} فدان
++▸ مساحة الأرض: ${areaRaw} ${areaUnitLabel} (= ${area.toFixed(3)} فدان)
+ ▸ طريقة الري: ${methodLabel}
+ ▸ نوع الزراعة: ${crop}
+ ▸ وش المياه: ${swl} متر
+@@ -736,11 +805,11 @@
+ ▸ الارتفاعات: ${elev} متر
+ ▸ الهبوط/الأمان: ${safety} متر
+ ▸ الضغط المطلوب: ${pbar} بار
+-▸ معدل التصريف: ${fpf} م³/ساعة/فدان
++▸ معدل التصريف: ${fpfRaw} ${waterUnit === 'gal' ? 'جالون أمريكي' : 'م³'}/ساعة/فدان
+ ▸ ساعات التشغيل: ${hours} ساعة/يوم
+ 
+ === النتائج الاسترشادية ===
+-▸ معدل التدفق: ${FR.toFixed(1)} م³/ساعة
++▸ معدل التدفق: ${FR_disp.toFixed(1)} ${FR_unit}
+ ▸ الرفع الديناميكي (TDH): ${TDH.toFixed(0)} متر
+ ▸ قدرة الموتور الحسابية: ${hp_c} حصان (${kw_c} كيلوواط)
+ ▸ أقرب قدرة تجارية: ${hp_std} حصان / ${kw_std} كيلوواط
+@@ -751,6 +820,7 @@
+     }
+ 
+     /* ── Init ── */
++    setFlowUnitHint();
+     updateCrops();
+     calc();
+   </script>
