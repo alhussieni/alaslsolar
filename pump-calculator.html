@@ -503,6 +503,26 @@
     // معامل تحويل "وحدة المساحة المختارة" إلى فدان مصري (المرجع الداخلي لكل الحسابات والقيم بقاعدة المحاصيل)
     const AREA_TO_FEDDAN = { feddan: 1, hectare: HECTARE_M2 / FEDDAN_M2, m2: 1 / FEDDAN_M2 };
 
+    /* ── جدول سعة الكابلات الرسمي (IEC 60364-5-52، Table B.52.4) ──
+       نحاس، عزل PVC، 3 موصلات محمّلة، طريقة تركيب D1 (كابل مدفون في مجرى/قنوات بالأرض)
+       — الأنسب لكابل تغذية طلمبة غاطسة. ظروف مرجعية: حرارة أرض 20°م، دائرة واحدة بدون تجميع.
+       ملاحظة: القيم دي محافظة (PVC)؛ كابل XLPE لنفس المقطع بيتحمل أعلى بـ15-25% تقريبًا.
+       أي انحراف عن الظروف المرجعية (حرارة تربة أعلى، دفن أعمق، تجميع كابلات) يحتاج معامل تصحيح
+       من نفس المعيار (جداول B.52.14 إلى B.52.21) قبل الاعتماد النهائي. */
+    const cableAmpacityD1 = {1.5:18, 2.5:24, 4:30, 6:38, 10:50, 16:64, 25:82, 35:98, 50:116, 70:143, 95:169, 120:192, 150:217, 185:243, 240:280, 300:316};
+    const cableSizesD1 = Object.keys(cableAmpacityD1).map(Number).sort((a,b)=>a-b);
+
+    function nearestCable(current) {
+      const found = cableSizesD1.find(s => cableAmpacityD1[s] >= current);
+      if (found) return { size: found, parallel: 1 };
+      // التيار أكبر من أقصى مقطع مؤكد (300 ملم²) → كابلات متوازية لكل فاز
+      // (IEC 60364-5-52 يشترط حد أدنى 50 ملم² نحاس للكابلات المتوازية — 300 ملم² أكبر من كده بأمان)
+      const maxSize = cableSizesD1[cableSizesD1.length - 1];
+      const n = Math.ceil(current / cableAmpacityD1[maxSize]);
+      return { size: maxSize, parallel: n };
+    }
+
+
     function nearestPipe(d)  { return stdPipes.find(s => s >= d)  || stdPipes[stdPipes.length-1]; }
     function nearestMotor(k) { return stdMotors.find(m => m >= k) || stdMotors[stdMotors.length-1]; }
     function getHP(kw)       { return motorHP[kw] ?? r2(kw * KW_TO_HP); }
@@ -599,8 +619,11 @@
       const D_near = nearestPipe(D_in);
 
       /* ── Electrical ── */
-      const cable = kw_std>22?'25 ملم²':kw_std>15?'16 ملم²':kw_std>11?'10 ملم²':'6 ملم²';
-      const fuse  = Math.ceil(kw_std*1000/380/1.73*1.25);
+      const fuse   = Math.ceil(kw_std*1000/380/1.73*1.25);
+      const cableSel = nearestCable(fuse);
+      const cable  = cableSel.parallel > 1
+        ? `${cableSel.parallel} × ${cableSel.size} ملم² (متوازي/فاز)`
+        : `${cableSel.size} ملم²`;
 
       const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method];
 
@@ -625,7 +648,7 @@
           <div class="results-tags">
             <span class="rtag">${methodLabel}</span>
             <span class="rtag">${crop}</span>
-            <span class="rtag">${area} فدان</span>
+            <span class="rtag">${areaRaw} ${areaUnit === 'feddan' ? 'فدان' : areaUnit === 'hectare' ? 'هكتار' : 'م²'}</span>
           </div>
         </div>
 
@@ -669,6 +692,7 @@
             <div class="metric-label">كابل التوصيل</div>
             <div class="metric-value" style="font-size:18px;">${cable}</div>
             <div class="metric-unit">قاطع: ${fuse} أمبير — 3 فاز</div>
+            <div class="metric-unit" style="font-size:10px;opacity:0.75;">نحاس PVC، IEC 60364-5-52 (مدفون بالأرض) — بدون معاملات تصحيح</div>
           </div>
         </div>
 
