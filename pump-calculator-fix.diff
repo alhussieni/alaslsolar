@@ -1,0 +1,44 @@
+--- /home/claude/orig_check/alaslsolar-main/pump-calculator.html	2026-07-20 06:15:32.000000000 +0000
++++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-22 07:27:05.367346136 +0000
+@@ -528,10 +528,12 @@
+       const hp_c   = r2((FR * TDH) / (270 * 0.75));
+       const kw_c   = r2(hp_c / KW_TO_HP);
+       // Match nearest standard motor by HP
+-      const hpList = Object.values(motorHP);
+-      const kwList = Object.keys(motorHP).map(Number);
+-      const hp_std = hpList.find(h => h >= hp_c) || hpList[hpList.length-1];
+-      const kw_std = kwList[hpList.indexOf(hp_std)];
++      // ملاحظة: لا تستخدم Object.keys/values هنا — جافاسكريبت تعيد ترتيب مفاتيح
++      // الأوبجكت العددية الصحيحة تصاعديًا تلقائيًا وتضع المفاتيح العشرية (5.5, 18.5, 7.5)
++      // في آخر القائمة، فيكسر الترتيب التصاعدي المفترض. استخدم stdMotors المرتبة يدويًا.
++      const kw_std   = stdMotors.find(kw => motorHP[kw] >= hp_c) || stdMotors[stdMotors.length-1];
++      const hp_std   = motorHP[kw_std];
++      const exceedsMax = hp_c > motorHP[stdMotors[stdMotors.length-1]];
+ 
+       /* ── Pipe diameter ── */
+       const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
+@@ -680,6 +682,11 @@
+           <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+           <span>القدرة الموصى بها <strong>${hp_std} حصان (${kw_std} كيلوواط)</strong> هي أقرب مقاس تجاري للقدرة الحسابية <strong>${hp_c} حصان</strong>. يُرجى مراجعة كتالوج المصنع للتأكد من توافق نقطة العمل مع منحنى الضخة عند TDH = ${TDH.toFixed(0)} متر.</span>
+         </div>
++        ${exceedsMax ? `
++        <div class="calc-note warn">
++          <i class="ti ti-alert-triangle" aria-hidden="true"></i>
++          <span><strong>تنبيه:</strong> القدرة الحسابية (${hp_c} حصان) تتجاوز أكبر مقاس منفرد متاح في الجدول (${motorHP[stdMotors[stdMotors.length-1]]} حصان). موتور واحد غير كافٍ لهذا التطبيق — يلزم دراسة استخدام أكثر من طلمبة على التوازي، أو طلمبة صناعية أعلى قدرة، أو محطة رفع (booster). يُرجى التواصل مع مهندسي الشركة قبل اتخاذ أي قرار شراء.</span>
++        </div>` : ''}
+ 
+         <!-- Footer disclaimer -->
+         <div class="footer-disclaimer">
+@@ -717,10 +724,8 @@
+       const TDH    = parseFloat(swl) + parseFloat(elev) + parseFloat(safety) + (parseFloat(far)/10) + pm;
+       const hp_c   = Math.round((FR * TDH) / (270 * 0.75) * 100) / 100;
+       const kw_c   = Math.round(hp_c / 1.341 * 100) / 100;
+-      const hpList = Object.values(motorHP);
+-      const kwList = Object.keys(motorHP).map(Number);
+-      const hp_std = hpList.find(h => h >= hp_c) || hpList[hpList.length-1];
+-      const kw_std = kwList[hpList.indexOf(hp_std)];
++      const kw_std = stdMotors.find(kw => motorHP[kw] >= hp_c) || stdMotors[stdMotors.length-1];
++      const hp_std = motorHP[kw_std];
+       const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * parseFloat(V)));
+       const D_mm   = D_m * 1000;
+       const D_in   = D_mm / 25.4;
