@@ -1,5 +1,5 @@
 --- /home/claude/orig_check/alaslsolar-main/pump-calculator.html	2026-07-20 06:15:32.000000000 +0000
-+++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-23 03:49:55.968229684 +0000
++++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-23 09:10:41.160777052 +0000
 @@ -76,9 +76,21 @@
      .field-group { display: grid; gap: var(--space-2); margin-bottom: var(--space-2); }
      .field-group.g2 { grid-template-columns: 1fr 1fr; }
@@ -22,17 +22,28 @@
  
      .field { display: flex; flex-direction: column; gap: 5px; }
      .field label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
-@@ -100,6 +112,9 @@
+@@ -100,6 +112,20 @@
        box-shadow: 0 0 0 3px rgba(200,117,45,0.13);
      }
      .field-hint { font-size: 11px; color: var(--steel); margin-top: 2px; }
++    .product-recs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-2); }
++    .prodrec-loading, .prodrec-empty { grid-column: 1/-1; text-align: center; color: var(--steel); font-size: 13px; padding: var(--space-3) 0; }
++    .prodrec-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: var(--space-2); background: #fff; display: flex; flex-direction: column; gap: 4px; transition: border-color .15s, box-shadow .15s; }
++    .prodrec-card:hover { border-color: var(--brand); box-shadow: 0 2px 10px rgba(200,117,45,0.12); }
++    .prodrec-cat { font-size: 10px; font-weight: 800; color: var(--brand); letter-spacing: .03em; }
++    .prodrec-name { font-size: 14px; font-weight: 700; color: var(--ink); }
++    .prodrec-specs { font-size: 12px; color: var(--steel); }
++    .prodrec-price { font-size: 16px; font-weight: 800; color: var(--ink); margin-top: 2px; }
++    .prodrec-link { margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--brand); text-decoration: none; }
++    .prodrec-link:hover { text-decoration: underline; }
++    .prodrec-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; background:rgba(200,117,45,.12); color:var(--brand); margin-inline-start:6px; }
 +    .field-inline { display: flex; gap: 6px; }
 +    .field-inline input { flex: 1 1 auto; min-width: 0; }
 +    .field-inline select { flex: 0 0 auto; width: auto; min-width: 96px; }
  
      /* Results panel */
      .results-panel {
-@@ -359,8 +374,15 @@
+@@ -359,8 +385,28 @@
              </div>
              <div class="field">
                <label for="area">مساحة الأرض</label>
@@ -47,10 +58,23 @@
 +                </select>
 +              </div>
 +              <span class="field-hint">1 هكتار ≈ 2.38 فدان مصري — 1 فدان = 4200.83 م²</span>
++            </div>
++          </div>
++          <div class="field-group g2">
++            <div class="field">
++              <label for="well_dia">قطر تنصيب البئر</label>
++              <select id="well_dia" onchange="calc()">
++                <option value="4">4 بوصة</option>
++                <option value="6" selected>6 بوصة</option>
++                <option value="8">8 بوصة</option>
++                <option value="10">10 بوصة</option>
++                <option value="12">12 بوصة</option>
++              </select>
++              <span class="field-hint">قطر مواسير البئر الداخلي — يحدد الموتور/الطلمبة اللي هتنزل فعليًا، مختلف عن قطر ماسورة التوصيل</span>
              </div>
            </div>
          </div>
-@@ -390,16 +412,11 @@
+@@ -390,16 +436,11 @@
                <span class="field-hint">ساعة / يوم</span>
              </div>
            </div>
@@ -70,7 +94,7 @@
              </div>
              <div class="field">
                <label for="velocity">سرعة الماء في الماسورة</label>
-@@ -410,6 +427,19 @@
+@@ -410,6 +451,19 @@
                </select>
              </div>
            </div>
@@ -90,7 +114,7 @@
          </div>
  
          <!-- Results panel (full width) -->
-@@ -463,22 +493,91 @@
+@@ -463,22 +517,301 @@
      /* ── Crop data ── */
      const cropData = {
        flood:     [{name:'قمح',flow:50,pressure:0},{name:'برسيم',flow:50,pressure:0},{name:'شعير',flow:50,pressure:0},{name:'خضراوات',flow:35,pressure:0}],
@@ -141,6 +165,216 @@
 +      return { size: maxSize, parallel: n };
 +    }
 +
++    /* ══════════════════════════════════════════════════════════════
++       ربط الحاسبة بكتالوج المنتجات الحقيقي (Supabase)
++       ══════════════════════════════════════════════════════════════
++       specs_ar نص حر بصيغ مختلفة لكل فئة — تم فحص العيّنة الكاملة من
++       القاعدة الفعلية (well_motors, pumps, inverters, pipes) وبناء
++       الـregex عليها. فئة "pumps" فيها صيغتين: منظّمة (موتور+قطر خروج+حصان)
++       وصيغة موديل حرة (بدون قطر خروج صريح) — المطابقة بالقطر فيها
++       tier ثاني غير مؤكد ويُعرض للعميل بتحذير صريح. */
++
++    function parseWellMotorSpecs(s) {
++      if (!s) return null;
++      const m = s.match(/([\d.]+)\s*حصان.*?(\d+)\s*"/);
++      return m ? { hp: parseFloat(m[1]), dia: parseInt(m[2]) } : null;
++    }
++
++    function parsePumpSpecs(s) {
++      if (!s) return null;
++      const motorPart  = s.match(/موتور\s*([\d",.\-\s()]+?)\s*-\s*قطر خروج/);
++      const outletPart = s.match(/قطر خروج\s*([\d.]+)/);
++      if (motorPart && outletPart) {
++        const motorDias = [...motorPart[1].matchAll(/(\d+(?:\.\d+)?)/g)].map(m => parseFloat(m[1]));
++        const hpMatch = s.match(/([\d.]+)\s*حصان/);
++        if (motorDias.length && hpMatch) {
++          return { motorDias, outletDia: parseFloat(outletPart[1]), hp: parseFloat(hpMatch[1]), verified: true };
++        }
++      }
++      const hpOnly = s.match(/^\s*([\d.]+)\s*حصان/);
++      return hpOnly ? { motorDias: null, outletDia: null, hp: parseFloat(hpOnly[1]), verified: false } : null;
++    }
++
++    function parseInverterSpecs(s) {
++      if (!s) return null;
++      const m = s.match(/([\d.]+)\s*HP\s*-\s*([\d.]+)\s*KW/i);
++      return m ? { hp: parseFloat(m[1]), kw: parseFloat(m[2]) } : null;
++    }
++
++    function parsePipeDia(name) {
++      if (!name) return null;
++      const m = name.match(/(\d+)\s*بوصة/);
++      return m ? parseInt(m[1]) : null;
++    }
++
++    function parsePipePressure(s) {
++      if (!s) return null;
++      const m = s.match(/(Standard|Heavy)\s*([\d.]+)\s*بار/i);
++      return m ? { type: m[1], bar: parseFloat(m[2]) } : null;
++    }
++
++    // انتظار جاهزية عميل Supabase (سكريبت المكتبة بيتحمّل بعد سكريبت الحاسبة في الصفحة)
++    function waitForSupabaseClient(maxWaitMs) {
++      maxWaitMs = maxWaitMs || 4000;
++      return new Promise(resolve => {
++        const start = Date.now();
++        (function poll() {
++          const client = (typeof getAlaslSupabase === 'function') ? getAlaslSupabase() : null;
++          if (client) return resolve(client);
++          if (Date.now() - start > maxWaitMs) return resolve(null);
++          setTimeout(poll, 120);
++        })();
++      });
++    }
++
++    let productCache = null;   // يتم الجلب مرة واحدة وإعادة استخدامه بين إعادة الحسابات
++
++    async function fetchAllProducts() {
++      if (productCache) return productCache;
++      const client = await waitForSupabaseClient();
++      if (!client) return null;
++      try {
++        const { data, error } = await client
++          .from('products')
++          .select('category,brand,name_ar,specs_ar,price,currency,in_stock,published,calc_featured,model_available')
++          .in('category', ['well_motors','pumps','inverters','pipes'])
++          .eq('published', true);
++        if (error || !data) return null;
++        productCache = data.filter(r => r.in_stock !== false);
++        return productCache;
++      } catch (e) { return null; }
++    }
++
++    // يختار أقرب "قدرة/قطر متاح ≥ الهدف"، ولو مفيش أعلى يرجّع أكبر قيمة متاحة (مع علم exceeds)
++    function pickNearestGE(items, valueFn, target) {
++      if (!items.length) return null;
++      const sorted = [...items].sort((a,b)=>valueFn(a)-valueFn(b));
++      const found = sorted.find(x => valueFn(x) >= target);
++      const picked = found || sorted[sorted.length-1];
++      return { item: picked, exceeds: !found };
++    }
++
++    // من بين عدة منتجات بنفس القيمة المطابقة: يفضّل calc_featured، بعدين الأرخص
++    function bestOf(candidates) {
++      if (!candidates.length) return null;
++      const featured = candidates.filter(c => c.row.calc_featured);
++      const pool = featured.length ? featured : candidates;
++      return pool.reduce((a,b) => (parseFloat(b.row.price)||Infinity) < (parseFloat(a.row.price)||Infinity) ? b : a);
++    }
++
++    function fmtPrice(row) {
++      const p = parseFloat(row.price);
++      if (!p) return 'السعر عند الطلب';
++      return p.toLocaleString('ar-EG') + ' ' + (row.currency || 'جنيه');
++    }
++
++    function prodLink(row) {
++      const params = new URLSearchParams();
++      params.set('cat', row.category || '');
++      params.set('brand', row.brand || '');
++      params.set('model', row.model_available || '');
++      return 'product-detail.html?' + params.toString();
++    }
++
++    function prodCard(catLabel, row, specsLine, badge) {
++      return `<div class="prodrec-card">
++        <div class="prodrec-cat">${catLabel}${badge ? `<span class="prodrec-badge">${badge}</span>` : ''}</div>
++        <div class="prodrec-name">${row.brand ? row.brand + ' — ' : ''}${row.name_ar || ''}</div>
++        <div class="prodrec-specs">${specsLine}</div>
++        <div class="prodrec-price">${fmtPrice(row)}</div>
++        <a class="prodrec-link" href="${prodLink(row)}" target="_blank" rel="noopener">عرض المنتج ←</a>
++      </div>`;
++    }
++
++    async function renderProductRecs(hp_c, kw_c, D_near, TDH, wellDia) {
++      const box = document.getElementById('productRecs');
++      if (!box) return;
++      const products = await fetchAllProducts();
++      if (!products) {
++        box.innerHTML = `<div class="prodrec-empty">تعذّر تحميل الكتالوج الآن — جرّب تحديث الصفحة، أو تصفّح <a href="products.html" class="prodrec-link">صفحة المنتجات</a> يدويًا.</div>`;
++        return;
++      }
++
++      const cards = [];
++
++      /* ── موتور غاطس (well_motors) — مطابقة بالقطر + أقرب حصان ≥ المحسوب ── */
++      const motors = products.filter(r => r.category === 'well_motors')
++        .map(r => ({ row: r, parsed: parseWellMotorSpecs(r.specs_ar) }))
++        .filter(x => x.parsed && x.parsed.dia === wellDia);
++      if (motors.length) {
++        const groups = {};
++        motors.forEach(x => { (groups[x.parsed.hp] = groups[x.parsed.hp] || []).push(x); });
++        const byHp = Object.keys(groups).map(Number);
++        const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
++        if (nearest) {
++          const chosen = bestOf(groups[nearest.item.hp]);
++          cards.push(prodCard('موتور غاطس ' + wellDia + '"', chosen.row,
++            `${nearest.item.hp} حصان — قطر ${wellDia}"`,
++            nearest.exceeds ? 'أعلى مقاس متاح' : null));
++        }
++      } else {
++        cards.push(`<div class="prodrec-empty">مفيش موتور غاطس بقطر ${wellDia}" متاح في الكتالوج حاليًا.</div>`);
++      }
++
++      /* ── طلمبة (pumps) — تفضيل المطابقة المؤكدة بالقطر، وإلا fallback بالحصان فقط ── */
++      const pumpsAll = products.filter(r => r.category === 'pumps')
++        .map(r => ({ row: r, parsed: parsePumpSpecs(r.specs_ar) }))
++        .filter(x => x.parsed);
++      const pumpsVerified = pumpsAll.filter(x => x.parsed.verified && x.parsed.motorDias.includes(wellDia));
++      const pumpsPool = pumpsVerified.length ? pumpsVerified : pumpsAll;
++      if (pumpsPool.length) {
++        const groups = {};
++        pumpsPool.forEach(x => { (groups[x.parsed.hp] = groups[x.parsed.hp] || []).push(x); });
++        const byHp = Object.keys(groups).map(Number);
++        const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
++        if (nearest) {
++          const chosen = bestOf(groups[nearest.item.hp]);
++          const unverifiedBadge = !pumpsVerified.length ? 'راجع توافق القطر يدويًا' : (nearest.exceeds ? 'أعلى مقاس متاح' : null);
++          cards.push(prodCard('طلمبة', chosen.row, `${nearest.item.hp} حصان`, unverifiedBadge));
++        }
++      }
++
++      /* ── إنفرتر (inverters) — أقرب كيلوواط متاح ≥ الهدف ── */
++      const invs = products.filter(r => r.category === 'inverters')
++        .map(r => ({ row: r, parsed: parseInverterSpecs(r.specs_ar) }))
++        .filter(x => x.parsed);
++      if (invs.length) {
++        const groups = {};
++        invs.forEach(x => { (groups[x.parsed.kw] = groups[x.parsed.kw] || []).push(x); });
++        const byKw = Object.keys(groups).map(Number);
++        const nearest = pickNearestGE(byKw.map(k=>({kw:k})), x=>x.kw, kw_c);
++        if (nearest) {
++          const chosen = bestOf(groups[nearest.item.kw]);
++          cards.push(prodCard('إنفرتر ضخ شمسي', chosen.row,
++            `${nearest.item.kw} كيلوواط`,
++            nearest.exceeds ? 'أعلى مقاس متاح' : null));
++        }
++      }
++
++      /* ── ماسورة (pipes) — مطابقة بالقطر + تصنيف الضغط (Standard/Heavy) حسب TDH ── */
++      const reqBar = TDH / 10.197;   // الضغط التشغيلي التقريبي من رفع الطلمبة نفسه
++      const pipesAtDia = products.filter(r => r.category === 'pipes')
++        .map(r => ({ row: r, dia: parsePipeDia(r.name_ar), pressure: parsePipePressure(r.specs_ar) }))
++        .filter(x => x.dia === D_near && x.pressure);
++      if (pipesAtDia.length) {
++        const adequate = pipesAtDia.filter(x => x.pressure.bar >= reqBar);
++        let chosen;
++        if (adequate.length) {
++          chosen = adequate.reduce((a,b) => (parseFloat(b.row.price)||Infinity) < (parseFloat(a.row.price)||Infinity) ? b : a);
++        } else {
++          // مفيش تصنيف كافٍ — نختار الأعلى تحمّلاً (الأقرب للكفاية)، مش الأرخص، عشان ده الاختيار الأسلم فنيًا
++          chosen = pipesAtDia.reduce((a,b) => b.pressure.bar > a.pressure.bar ? b : a);
++        }
++        cards.push(prodCard('ماسورة توصيل ' + D_near + '"', chosen.row,
++          `تحمّل ${chosen.pressure.type} ${chosen.pressure.bar} بار`,
++          adequate.length ? null : 'ضغط التحمّل أقل من المطلوب تقريبًا — راجع فنيًا'));
++      } else {
++        cards.push(`<div class="prodrec-empty">مفيش ماسورة ${D_near}" متاحة في الكتالوج حاليًا.</div>`);
++      }
++
++      box.innerHTML = cards.join('');
++    }
++
 +
      function nearestPipe(d)  { return stdPipes.find(s => s >= d)  || stdPipes[stdPipes.length-1]; }
      function nearestMotor(k) { return stdMotors.find(m => m >= k) || stdMotors[stdMotors.length-1]; }
@@ -186,7 +420,7 @@
      function updateCrops() {
        const method = document.getElementById('irr_method').value;
        const sel    = document.getElementById('crop_type');
-@@ -489,7 +588,7 @@
+@@ -489,7 +822,7 @@
          o.textContent = c.name; sel.appendChild(o);
        });
        if (sel.options.length) {
@@ -195,7 +429,7 @@
          document.getElementById('pressure').value     = sel.options[0].dataset.pressure;
        }
      }
-@@ -498,40 +597,48 @@
+@@ -498,40 +831,49 @@
        const sel = document.getElementById('crop_type');
        const opt = sel.options[sel.selectedIndex];
        if (opt && opt.dataset.flow) {
@@ -232,6 +466,7 @@
 +      const fpfRaw   = parseFloat(document.getElementById('flow_per_fed').value) || 0;
 +      const fpf      = waterUnit === 'gal' ? fpfRaw / M3_TO_GAL : fpfRaw;  // محوّل لـ م³/ساعة/فدان دايمًا للحساب الداخلي
 +      const V        = parseFloat(document.getElementById('velocity').value)     || 1.5;
++      const wellDia  = parseInt(document.getElementById('well_dia').value)       || 6;
 +      const method   = document.getElementById('irr_method').value;
 +      const crop     = document.getElementById('crop_type').value || '—';
 +      const pm       = pbar * 10.2;
@@ -264,7 +499,7 @@
  
        /* ── Pipe diameter ── */
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
-@@ -540,8 +647,11 @@
+@@ -540,8 +882,11 @@
        const D_near = nearestPipe(D_in);
  
        /* ── Electrical ── */
@@ -278,7 +513,7 @@
  
        const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method];
  
-@@ -566,7 +676,7 @@
+@@ -566,7 +911,7 @@
            <div class="results-tags">
              <span class="rtag">${methodLabel}</span>
              <span class="rtag">${crop}</span>
@@ -287,7 +522,7 @@
            </div>
          </div>
  
-@@ -579,13 +689,13 @@
+@@ -579,13 +924,13 @@
            </div>
            <div class="metric-card accent">
              <div class="metric-label">معدل التدفق المطلوب</div>
@@ -305,7 +540,7 @@
            </div>
          </div>
  
-@@ -610,6 +720,7 @@
+@@ -610,11 +955,20 @@
              <div class="metric-label">كابل التوصيل</div>
              <div class="metric-value" style="font-size:18px;">${cable}</div>
              <div class="metric-unit">قاطع: ${fuse} أمبير — 3 فاز</div>
@@ -313,7 +548,20 @@
            </div>
          </div>
  
-@@ -640,8 +751,8 @@
+         <div class="calc-divider"></div>
+ 
++        <!-- Real product recommendations (loaded async from Supabase) -->
++        <p class="pipe-section-title">المنتجات الموصى بها من الكتالوج</p>
++        <div id="productRecs" class="product-recs">
++          <div class="prodrec-loading">جارٍ البحث في الكتالوج…</div>
++        </div>
++
++        <div class="calc-divider"></div>
++
+         <!-- Pipe table -->
+         <div class="pipe-section">
+           <p class="pipe-section-title">قطر الماسورة الرئيسية حسب سرعة التدفق</p>
+@@ -640,8 +994,8 @@
            <div class="detail-row">
              <span class="detail-label">معدل التدفق (FR)</span>
              <div class="detail-value">
@@ -324,7 +572,7 @@
              </div>
            </div>
            <div class="detail-row">
-@@ -680,6 +791,11 @@
+@@ -680,6 +1034,11 @@
            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
            <span>القدرة الموصى بها <strong>${hp_std} حصان (${kw_std} كيلوواط)</strong> هي أقرب مقاس تجاري للقدرة الحسابية <strong>${hp_c} حصان</strong>. يُرجى مراجعة كتالوج المصنع للتأكد من توافق نقطة العمل مع منحنى الضخة عند TDH = ${TDH.toFixed(0)} متر.</span>
          </div>
@@ -336,7 +584,15 @@
  
          <!-- Footer disclaimer -->
          <div class="footer-disclaimer">
-@@ -697,30 +813,35 @@
+@@ -692,35 +1051,43 @@
+           <i class="fa fa-paper-plane"></i> اطلب عرض سعر — سيتم إرفاق بياناتك تلقائياً
+         </button>
+       `;
++
++      // جلب توصيات المنتجات الحقيقية من الكتالوج (غير متزامن، بيملأ قسمه بنفسه لما يخلص)
++      renderProductRecs(hp_c, kw_c, D_near, TDH, wellDia);
+     }
+ 
      /* ── Save data & go to contact ── */
      function goToContact() {
        // Collect all current input values
@@ -388,7 +644,7 @@
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * parseFloat(V)));
        const D_mm   = D_m * 1000;
        const D_in   = D_mm / 25.4;
-@@ -728,7 +849,7 @@
+@@ -728,7 +1095,7 @@
  
        // Build summary note
        const note = `=== بيانات حاسبة نظام الضخ ===
@@ -397,7 +653,7 @@
  ▸ طريقة الري: ${methodLabel}
  ▸ نوع الزراعة: ${crop}
  ▸ وش المياه: ${swl} متر
-@@ -736,11 +857,11 @@
+@@ -736,11 +1103,11 @@
  ▸ الارتفاعات: ${elev} متر
  ▸ الهبوط/الأمان: ${safety} متر
  ▸ الضغط المطلوب: ${pbar} بار
@@ -411,7 +667,7 @@
  ▸ الرفع الديناميكي (TDH): ${TDH.toFixed(0)} متر
  ▸ قدرة الموتور الحسابية: ${hp_c} حصان (${kw_c} كيلوواط)
  ▸ أقرب قدرة تجارية: ${hp_std} حصان / ${kw_std} كيلوواط
-@@ -751,6 +872,7 @@
+@@ -751,6 +1118,7 @@
      }
  
      /* ── Init ── */
