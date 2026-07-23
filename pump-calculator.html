@@ -76,8 +76,20 @@
     .field-group { display: grid; gap: var(--space-2); margin-bottom: var(--space-2); }
     .field-group.g2 { grid-template-columns: 1fr 1fr; }
     .field-group.g3 { grid-template-columns: 1fr 1fr 1fr; }
+    .field-group.g1 { grid-template-columns: 1fr; }
     @media(max-width:520px){
       .field-group.g2, .field-group.g3 { grid-template-columns: 1fr; }
+    }
+    /* حقول تتعبّى تلقائيًا من قاعدة بيانات المحاصيل عند اختيار طريقة الري/المحصول،
+       لكنها تفضل قابلة للتعديل اليدوي من العميل — لون مميز (برتقالي العلامة) يفرّقها
+       عن الحقول اليدوية البحتة (حدود رمادية عادية) */
+    .field.auto-fill label::after {
+      content: ' (تلقائي — قابل للتعديل)';
+      font-size: 10px; font-weight: 600; color: var(--brand); opacity: 0.85;
+    }
+    .field.auto-fill input, .field.auto-fill select {
+      border-color: var(--brand);
+      background: rgba(200,117,45,0.06);
     }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
@@ -364,7 +376,7 @@
               <label for="area">مساحة الأرض</label>
               <div class="field-inline">
                 <input type="number" id="area" value="5" min="0.1" step="0.5" oninput="calc()">
-                <select id="area_unit" onchange="calc()">
+                <select id="area_unit" onchange="onAreaUnitChange()">
                   <option value="feddan" selected>فدان</option>
                   <option value="hectare">هكتار</option>
                   <option value="m2">متر مربع</option>
@@ -400,22 +412,11 @@
               <span class="field-hint">ساعة / يوم</span>
             </div>
           </div>
-          <div class="field-group g3">
-            <div class="field">
+          <div class="field-group g2">
+            <div class="field auto-fill">
               <label for="pressure">الضغط المطلوب</label>
               <input type="number" id="pressure" value="4" min="0" max="10" step="0.5" oninput="calc()">
-              <span class="field-hint">بار — الافتراضي: 4 بار</span>
-            </div>
-            <div class="field">
-              <label for="flow_per_fed">معدل التصريف</label>
-              <div class="field-inline">
-                <input type="number" id="flow_per_fed" value="30" min="1" step="1" oninput="calc()">
-                <select id="water_unit" onchange="onWaterUnitChange()">
-                  <option value="m3" selected>م³</option>
-                  <option value="gal">جالون أمريكي</option>
-                </select>
-              </div>
-              <span class="field-hint" id="flowUnitHint">م³ / ساعة / فدان</span>
+              <span class="field-hint">بار — الافتراضي: 4 بار (يتغيّر تلقائيًا حسب المحصول المختار)</span>
             </div>
             <div class="field">
               <label for="velocity">سرعة الماء في الماسورة</label>
@@ -424,6 +425,19 @@
                 <option value="2.0">2.0 م/ث — اقتصادي</option>
                 <option value="2.5">2.5 م/ث — أدنى حد</option>
               </select>
+            </div>
+          </div>
+          <div class="field-group g1">
+            <div class="field auto-fill">
+              <label for="flow_per_fed">معدل التصريف</label>
+              <div class="field-inline">
+                <input type="number" id="flow_per_fed" value="30" min="1" step="1" oninput="calc()">
+                <select id="water_unit" onchange="onWaterUnitChange()">
+                  <option value="m3" selected>م³</option>
+                  <option value="gal">جالون أمريكي</option>
+                </select>
+              </div>
+              <span class="field-hint" id="flowUnitHint">م³ / ساعة / فدان — يتغيّر تلقائيًا حسب المحصول المختار</span>
             </div>
           </div>
         </div>
@@ -479,8 +493,8 @@
     /* ── Crop data ── */
     const cropData = {
       flood:     [{name:'قمح',flow:50,pressure:0},{name:'برسيم',flow:50,pressure:0},{name:'شعير',flow:50,pressure:0},{name:'خضراوات',flow:35,pressure:0}],
-      sprinkler: [{name:'برسيم',flow:30,pressure:30},{name:'قمح',flow:40,pressure:30},{name:'أشجار موالح',flow:12,pressure:30}],
-      drip:      [{name:'أشجار فواكهه',flow:20,pressure:15},{name:'أشجار موالح',flow:15,pressure:15},{name:'زيتون - ليمون - نخيل',flow:12,pressure:15}]
+      sprinkler: [{name:'برسيم',flow:30,pressure:4},{name:'قمح',flow:40,pressure:4},{name:'أشجار موالح',flow:12,pressure:4}],
+      drip:      [{name:'أشجار فواكهه',flow:20,pressure:1.5},{name:'أشجار موالح',flow:15,pressure:1.5},{name:'زيتون - ليمون - نخيل',flow:12,pressure:1.5}]
     };
 
     /* ── Standard sizes ── */
@@ -532,6 +546,20 @@
     function displayFlow(m3PerFedHr) {
       const unit = document.getElementById('water_unit').value;
       return unit === 'gal' ? r2(m3PerFedHr * M3_TO_GAL) : m3PerFedHr;
+    }
+
+    let lastAreaUnit = 'feddan';   // لتتبّع الوحدة السابقة وتحويل الرقم المكتوب فعليًا بدل تفسيره غلط
+
+    function onAreaUnitChange() {
+      const newUnit = document.getElementById('area_unit').value;
+      const input   = document.getElementById('area');
+      const cur     = parseFloat(input.value) || 0;
+      // تحويل: القيمة الحالية بالوحدة القديمة → فدان (مرجع داخلي) → الوحدة الجديدة
+      const feddanEquiv = cur * (AREA_TO_FEDDAN[lastAreaUnit] ?? 1);
+      const newVal       = feddanEquiv / (AREA_TO_FEDDAN[newUnit] ?? 1);
+      input.value = r2(newVal);
+      lastAreaUnit = newUnit;
+      calc();
     }
 
     function setFlowUnitHint() {
