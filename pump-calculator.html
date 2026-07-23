@@ -466,6 +466,43 @@
           </div>
         </div>
 
+        <!-- Product suggestion preferences (hidden until settings load; visitor can override admin's default brand) -->
+        <div class="calc-panel" id="prodPrefsPanel" style="display:none">
+          <h2 class="calc-panel-title">
+            <i class="ti ti-tag"></i>
+            تفضيلات المنتجات المقترحة
+          </h2>
+          <p class="field-hint" style="margin-bottom:var(--space-2)">اختياري — الاقتراحات هتتظبط تلقائيًا على أفضل مقاس متاح من الماركة المختارة.</p>
+          <div class="field-group g3">
+            <div class="field">
+              <label for="pref_well_motor_brand">ماركة الموتور الغاطس</label>
+              <select id="pref_well_motor_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
+            </div>
+            <div class="field">
+              <label for="pref_cooling">نوع تبريد الموتور</label>
+              <select id="pref_cooling" onchange="calc()">
+                <option value="">أي نوع</option>
+                <option value="oil">تبريد زيت</option>
+                <option value="water">تبريد مياه</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pref_pump_brand">ماركة الطلمبة</label>
+              <select id="pref_pump_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
+            </div>
+          </div>
+          <div class="field-group g2">
+            <div class="field">
+              <label for="pref_inverter_brand">ماركة الإنفرتر</label>
+              <select id="pref_inverter_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
+            </div>
+            <div class="field">
+              <label for="pref_pipe_brand">ماركة الماسورة</label>
+              <select id="pref_pipe_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
+            </div>
+          </div>
+        </div>
+
         <!-- Results panel (full width) -->
         <div class="results-panel" id="results">
           <div class="calc-empty">
@@ -623,6 +660,7 @@
     }
 
     let productCache = null;   // يتم الجلب مرة واحدة وإعادة استخدامه بين إعادة الحسابات
+    let calcSettingsCache = null;
 
     async function fetchAllProducts() {
       if (productCache) return productCache;
@@ -638,6 +676,59 @@
         productCache = data.filter(r => r.in_stock !== false);
         return productCache;
       } catch (e) { return null; }
+    }
+
+    async function fetchCalcSettings() {
+      if (calcSettingsCache) return calcSettingsCache;
+      const client = await waitForSupabaseClient();
+      if (!client) return null;
+      try {
+        const { data, error } = await client.from('calc_settings').select('*').eq('id', 1).single();
+        if (error || !data) return null;
+        calcSettingsCache = data;
+        return calcSettingsCache;
+      } catch (e) { return null; }
+    }
+
+    // تُستدعى مرة واحدة عند تحميل الصفحة: تجيب الإعدادات + المنتجات، تُظهر/تُخفي
+    // لوحة التفضيلات وقسم الاقتراحات بالكامل، وتعبّي القوائم بماركات الفئة الفعلية
+    // مع تعيين اختيار الأدمن الافتراضي كأول قيمة مختارة (قابلة للتغيير من الزائر).
+    async function initProductPrefs() {
+      const [settings, products] = await Promise.all([fetchCalcSettings(), fetchAllProducts()]);
+      const prefsPanel = document.getElementById('prodPrefsPanel');
+      const recsSection = document.getElementById('prodRecsSection');
+      const dividerTop = document.getElementById('prodRecsDividerTop');
+      if (!settings || !settings.suggestions_enabled) {
+        if (prefsPanel) prefsPanel.style.display = 'none';
+        if (recsSection) recsSection.style.display = 'none';
+        if (dividerTop) dividerTop.style.display = 'none';
+        return;
+      }
+      if (prefsPanel) prefsPanel.style.display = '';
+      if (recsSection) recsSection.style.display = '';
+      if (dividerTop) dividerTop.style.display = '';
+
+      const brandsByCat = {};
+      (products || []).forEach(r => {
+        if (!r.brand) return;
+        (brandsByCat[r.category] = brandsByCat[r.category] || new Set()).add(r.brand);
+      });
+
+      const fillSelect = (id, cat, preferredBrand) => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const brands = [...(brandsByCat[cat] || [])].sort();
+        sel.innerHTML = '<option value="">أي ماركة متاحة</option>' +
+          brands.map(b => `<option value="${b}">${b}</option>`).join('');
+        if (preferredBrand && brands.includes(preferredBrand)) sel.value = preferredBrand;
+      };
+
+      fillSelect('pref_well_motor_brand', 'well_motors', settings.preferred_well_motor_brand);
+      fillSelect('pref_pump_brand',       'pumps',       settings.preferred_pump_brand);
+      fillSelect('pref_inverter_brand',   'inverters',   settings.preferred_inverter_brand);
+      fillSelect('pref_pipe_brand',       'pipes',       settings.preferred_pipe_brand);
+
+      calc();  // إعادة حساب عشان الاقتراحات تظهر بالماركات الافتراضية فور تجهيزها
     }
 
     // يختار أقرب "قدرة/قطر متاح ≥ الهدف"، ولو مفيش أعلى يرجّع أكبر قيمة متاحة (مع علم exceeds)
@@ -681,9 +772,17 @@
       </div>`;
     }
 
+    function parseCoolingType(nameAr) {
+      if (!nameAr) return null;
+      if (/تبريد\s*(مياه|مياة|ماء)/.test(nameAr)) return 'water';
+      if (/تبريد\s*زيت/.test(nameAr)) return 'oil';
+      return null; // غير محدد صراحة — الغالبية العظمى تبريد زيت تقليدي (المعيار الشائع)
+    }
+
     async function renderProductRecs(hp_c, kw_c, D_near, TDH, wellDia) {
       const box = document.getElementById('productRecs');
       if (!box) return;
+      if (calcSettingsCache && !calcSettingsCache.suggestions_enabled) return; // القسم مخفي أصلاً
       const products = await fetchAllProducts();
       if (!products) {
         box.innerHTML = `<div class="prodrec-empty">تعذّر تحميل الكتالوج الآن — جرّب تحديث الصفحة، أو تصفّح <a href="products.html" class="prodrec-link">صفحة المنتجات</a> يدويًا.</div>`;
@@ -691,54 +790,97 @@
       }
 
       const cards = [];
+      const prefMotorBrand = document.getElementById('pref_well_motor_brand')?.value || '';
+      const prefCooling    = document.getElementById('pref_cooling')?.value || '';
+      const prefPumpBrand  = document.getElementById('pref_pump_brand')?.value || '';
+      const prefInvBrand   = document.getElementById('pref_inverter_brand')?.value || '';
+      const prefPipeBrand  = document.getElementById('pref_pipe_brand')?.value || '';
 
-      /* ── موتور غاطس (well_motors) — مطابقة بالقطر + أقرب حصان ≥ المحسوب ── */
-      const motors = products.filter(r => r.category === 'well_motors')
-        .map(r => ({ row: r, parsed: parseWellMotorSpecs(r.specs_ar) }))
+      /* ── موتور غاطس (well_motors) — مطابقة بالقطر + ماركة/تبريد مختارين + أقرب حصان ≥ المحسوب ── */
+      let motors = products.filter(r => r.category === 'well_motors')
+        .map(r => ({ row: r, parsed: parseWellMotorSpecs(r.specs_ar), cooling: parseCoolingType(r.name_ar) }))
         .filter(x => x.parsed && x.parsed.dia === wellDia);
-      if (motors.length) {
-        const groups = {};
-        motors.forEach(x => { (groups[x.parsed.hp] = groups[x.parsed.hp] || []).push(x); });
-        const byHp = Object.keys(groups).map(Number);
-        const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
-        if (nearest) {
-          const chosen = bestOf(groups[nearest.item.hp]);
-          cards.push(prodCard('موتور غاطس ' + wellDia + '"', chosen.row,
-            `${nearest.item.hp} حصان — قطر ${wellDia}"`,
-            nearest.exceeds ? 'أعلى مقاس متاح' : null));
-        }
-      } else {
+
+      if (!motors.length) {
         cards.push(`<div class="prodrec-empty">مفيش موتور غاطس بقطر ${wellDia}" متاح في الكتالوج حاليًا.</div>`);
+      } else {
+        if (prefMotorBrand) {
+          const byBrand = motors.filter(x => x.row.brand === prefMotorBrand);
+          if (!byBrand.length) {
+            cards.push(`<div class="prodrec-empty">الماركة المفضّلة "${prefMotorBrand}" مش متاحة بقطر ${wellDia}" حاليًا. جرّب ماركة تانية من قائمة "ماركة الموتور الغاطس" فوق.</div>`);
+            motors = [];
+          } else motors = byBrand;
+        }
+        if (motors.length && prefCooling) {
+          const byCooling = motors.filter(x => prefCooling === 'oil' ? (x.cooling === 'oil' || x.cooling === null) : x.cooling === 'water');
+          if (!byCooling.length) {
+            cards.push(`<div class="prodrec-empty">نوع التبريد المختار (${prefCooling === 'oil' ? 'زيت' : 'مياه'}) مش متاح بالماركة/القطر ده حاليًا.</div>`);
+            motors = [];
+          } else motors = byCooling;
+        }
+        if (motors.length) {
+          const groups = {};
+          motors.forEach(x => { (groups[x.parsed.hp] = groups[x.parsed.hp] || []).push(x); });
+          const byHp = Object.keys(groups).map(Number);
+          const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
+          if (nearest && nearest.exceeds && prefMotorBrand) {
+            cards.push(`<div class="prodrec-empty">الماركة المفضّلة "${prefMotorBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${hp_c} حصان) — أعلى مقاس متاح منها ${nearest.item.hp} حصان بس. تحب تجرب ماركة تانية من القائمة فوق؟</div>`);
+          } else if (nearest) {
+            const chosen = bestOf(groups[nearest.item.hp]);
+            cards.push(prodCard('موتور غاطس ' + wellDia + '"', chosen.row,
+              `${nearest.item.hp} حصان — قطر ${wellDia}"`,
+              nearest.exceeds ? 'أعلى مقاس متاح' : null));
+          }
+        }
       }
 
-      /* ── طلمبة (pumps) — تفضيل المطابقة المؤكدة بالقطر، وإلا fallback بالحصان فقط ── */
+      /* ── طلمبة (pumps) — تفضيل المطابقة المؤكدة بالقطر، وإلا fallback بالحصان فقط، مع فلتر الماركة ── */
       const pumpsAll = products.filter(r => r.category === 'pumps')
         .map(r => ({ row: r, parsed: parsePumpSpecs(r.specs_ar) }))
         .filter(x => x.parsed);
       const pumpsVerified = pumpsAll.filter(x => x.parsed.verified && x.parsed.motorDias.includes(wellDia));
-      const pumpsPool = pumpsVerified.length ? pumpsVerified : pumpsAll;
+      let pumpsPool = pumpsVerified.length ? pumpsVerified : pumpsAll;
+
+      if (prefPumpBrand) {
+        const byBrand = pumpsPool.filter(x => x.row.brand === prefPumpBrand);
+        if (!byBrand.length) {
+          cards.push(`<div class="prodrec-empty">ماركة الطلمبة المفضّلة "${prefPumpBrand}" مش متاحة بالمقاس ده حاليًا. جرّب ماركة تانية من قائمة "ماركة الطلمبة" فوق.</div>`);
+          pumpsPool = [];
+        } else pumpsPool = byBrand;
+      }
       if (pumpsPool.length) {
         const groups = {};
         pumpsPool.forEach(x => { (groups[x.parsed.hp] = groups[x.parsed.hp] || []).push(x); });
         const byHp = Object.keys(groups).map(Number);
         const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
-        if (nearest) {
+        if (nearest && nearest.exceeds && prefPumpBrand) {
+          cards.push(`<div class="prodrec-empty">ماركة الطلمبة المفضّلة "${prefPumpBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${hp_c} حصان) — أعلى مقاس متاح منها ${nearest.item.hp} حصان بس. تحب تجرب ماركة تانية من القائمة فوق؟</div>`);
+        } else if (nearest) {
           const chosen = bestOf(groups[nearest.item.hp]);
           const unverifiedBadge = !pumpsVerified.length ? 'راجع توافق القطر يدويًا' : (nearest.exceeds ? 'أعلى مقاس متاح' : null);
           cards.push(prodCard('طلمبة', chosen.row, `${nearest.item.hp} حصان`, unverifiedBadge));
         }
       }
 
-      /* ── إنفرتر (inverters) — أقرب كيلوواط متاح ≥ الهدف ── */
-      const invs = products.filter(r => r.category === 'inverters')
+      /* ── إنفرتر (inverters) — أقرب كيلوواط متاح ≥ الهدف، مع فلتر الماركة ── */
+      let invs = products.filter(r => r.category === 'inverters')
         .map(r => ({ row: r, parsed: parseInverterSpecs(r.specs_ar) }))
         .filter(x => x.parsed);
+      if (prefInvBrand) {
+        const byBrand = invs.filter(x => x.row.brand === prefInvBrand);
+        if (!byBrand.length) {
+          cards.push(`<div class="prodrec-empty">ماركة الإنفرتر المفضّلة "${prefInvBrand}" مش متاحة بالقدرة دي حاليًا. جرّب ماركة تانية من قائمة "ماركة الإنفرتر" فوق.</div>`);
+          invs = [];
+        } else invs = byBrand;
+      }
       if (invs.length) {
         const groups = {};
         invs.forEach(x => { (groups[x.parsed.kw] = groups[x.parsed.kw] || []).push(x); });
         const byKw = Object.keys(groups).map(Number);
         const nearest = pickNearestGE(byKw.map(k=>({kw:k})), x=>x.kw, kw_c);
-        if (nearest) {
+        if (nearest && nearest.exceeds && prefInvBrand) {
+          cards.push(`<div class="prodrec-empty">ماركة الإنفرتر المفضّلة "${prefInvBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${kw_c} كيلوواط) — أعلى مقاس متاح منها ${nearest.item.kw} كيلوواط بس. تحب تجرب ماركة تانية من القائمة فوق؟</div>`);
+        } else if (nearest) {
           const chosen = bestOf(groups[nearest.item.kw]);
           cards.push(prodCard('إنفرتر ضخ شمسي', chosen.row,
             `${nearest.item.kw} كيلوواط`,
@@ -746,25 +888,34 @@
         }
       }
 
-      /* ── ماسورة (pipes) — مطابقة بالقطر + تصنيف الضغط (Standard/Heavy) حسب TDH ── */
+      /* ── ماسورة (pipes) — مطابقة بالقطر + تصنيف الضغط (Standard/Heavy) حسب TDH، مع فلتر الماركة ── */
       const reqBar = TDH / 10.197;   // الضغط التشغيلي التقريبي من رفع الطلمبة نفسه
-      const pipesAtDia = products.filter(r => r.category === 'pipes')
+      let pipesAtDia = products.filter(r => r.category === 'pipes')
         .map(r => ({ row: r, dia: parsePipeDia(r.name_ar), pressure: parsePipePressure(r.specs_ar) }))
         .filter(x => x.dia === D_near && x.pressure);
-      if (pipesAtDia.length) {
-        const adequate = pipesAtDia.filter(x => x.pressure.bar >= reqBar);
-        let chosen;
-        if (adequate.length) {
-          chosen = adequate.reduce((a,b) => (parseFloat(b.row.price)||Infinity) < (parseFloat(a.row.price)||Infinity) ? b : a);
-        } else {
-          // مفيش تصنيف كافٍ — نختار الأعلى تحمّلاً (الأقرب للكفاية)، مش الأرخص، عشان ده الاختيار الأسلم فنيًا
-          chosen = pipesAtDia.reduce((a,b) => b.pressure.bar > a.pressure.bar ? b : a);
-        }
-        cards.push(prodCard('ماسورة توصيل ' + D_near + '"', chosen.row,
-          `تحمّل ${chosen.pressure.type} ${chosen.pressure.bar} بار`,
-          adequate.length ? null : 'ضغط التحمّل أقل من المطلوب تقريبًا — راجع فنيًا'));
-      } else {
+
+      if (!pipesAtDia.length) {
         cards.push(`<div class="prodrec-empty">مفيش ماسورة ${D_near}" متاحة في الكتالوج حاليًا.</div>`);
+      } else {
+        if (prefPipeBrand) {
+          const byBrand = pipesAtDia.filter(x => x.row.brand === prefPipeBrand);
+          if (!byBrand.length) {
+            cards.push(`<div class="prodrec-empty">ماركة الماسورة المفضّلة "${prefPipeBrand}" مش متاحة بقطر ${D_near}" حاليًا. جرّب ماركة تانية من قائمة "ماركة الماسورة" فوق.</div>`);
+            pipesAtDia = [];
+          } else pipesAtDia = byBrand;
+        }
+        if (pipesAtDia.length) {
+          const adequate = pipesAtDia.filter(x => x.pressure.bar >= reqBar);
+          let chosen;
+          if (adequate.length) {
+            chosen = adequate.reduce((a,b) => (parseFloat(b.row.price)||Infinity) < (parseFloat(a.row.price)||Infinity) ? b : a);
+          } else {
+            chosen = pipesAtDia.reduce((a,b) => b.pressure.bar > a.pressure.bar ? b : a);
+          }
+          cards.push(prodCard('ماسورة توصيل ' + D_near + '"', chosen.row,
+            `تحمّل ${chosen.pressure.type} ${chosen.pressure.bar} بار`,
+            adequate.length ? null : 'ضغط التحمّل أقل من المطلوب تقريبًا — راجع فنيًا'));
+        }
       }
 
       box.innerHTML = cards.join('');
@@ -959,12 +1110,14 @@
           </div>
         </div>
 
-        <div class="calc-divider"></div>
+        <div class="calc-divider" id="prodRecsDividerTop"></div>
 
-        <!-- Real product recommendations (loaded async from Supabase) -->
-        <p class="pipe-section-title">المنتجات الموصى بها من الكتالوج</p>
-        <div id="productRecs" class="product-recs">
-          <div class="prodrec-loading">جارٍ البحث في الكتالوج…</div>
+        <!-- Real product recommendations (loaded async from Supabase) — hidden entirely if admin disabled it -->
+        <div id="prodRecsSection" style="display:none">
+          <p class="pipe-section-title">المنتجات الموصى بها من الكتالوج</p>
+          <div id="productRecs" class="product-recs">
+            <div class="prodrec-loading">جارٍ البحث في الكتالوج…</div>
+          </div>
         </div>
 
         <div class="calc-divider"></div>
@@ -1121,6 +1274,7 @@
     setFlowUnitHint();
     updateCrops();
     calc();
+    initProductPrefs();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -874,6 +874,7 @@ async function loadLists() {
   loadArticles();
   loadProducts();
   loadBrandLogos();
+  loadCalcSettings();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1613,6 +1614,56 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelProductForm();
     loadProducts();
   });
+});
+
+// ══════════════════════════════════════════════════════════════
+// Calculator Suggestions Settings — تفعيل/إلغاء قسم المنتجات الموصى بها
+// في حاسبة الضخ، واختيار الماركة الافتراضية (رقم 1) لكل فئة.
+// ══════════════════════════════════════════════════════════════
+
+const CALC_SETTINGS_CATS = [
+  { cat: 'well_motors', selectId: 'calcBrandWellMotors', col: 'preferred_well_motor_brand' },
+  { cat: 'pumps',       selectId: 'calcBrandPumps',       col: 'preferred_pump_brand' },
+  { cat: 'inverters',   selectId: 'calcBrandInverters',   col: 'preferred_inverter_brand' },
+  { cat: 'pipes',       selectId: 'calcBrandPipes',       col: 'preferred_pipe_brand' },
+];
+
+async function loadCalcSettings() {
+  if (!client) return;
+  const { data: settings, error: sErr } = await client.from('calc_settings').select('*').eq('id', 1).single();
+  if (sErr) { console.error('calc_settings load error', sErr); return; }
+
+  document.getElementById('calcSuggestionsEnabled').checked = !!settings.suggestions_enabled;
+
+  // نجيب الماركات المتاحة فعليًا لكل فئة (منشورة فقط) ونعبّي كل قائمة
+  for (const c of CALC_SETTINGS_CATS) {
+    const sel = document.getElementById(c.selectId);
+    if (!sel) continue;
+    const { data: rows } = await client.from('products').select('brand').eq('category', c.cat).eq('published', true);
+    const brands = [...new Set((rows || []).map(r => r.brand).filter(Boolean))].sort();
+    const current = settings[c.col] || '';
+    sel.innerHTML = '<option value="">— بدون تفضيل (أي ماركة) —</option>' +
+      brands.map(b => `<option value="${escapeHtmlAttr(b)}" ${b === current ? 'selected' : ''}>${escapeHtmlAttr(b)}</option>`).join('');
+  }
+}
+
+async function saveCalcSettings(event) {
+  event.preventDefault();
+  const msg = document.getElementById('calcSettingsMessage');
+  const payload = { suggestions_enabled: document.getElementById('calcSuggestionsEnabled').checked, updated_at: new Date().toISOString() };
+  CALC_SETTINGS_CATS.forEach(c => {
+    const v = document.getElementById(c.selectId).value;
+    payload[c.col] = v || null;
+  });
+  const { error } = await client.from('calc_settings').update(payload).eq('id', 1);
+  msg.style.color = error ? '#c33' : '#2a7a2a';
+  msg.textContent = error ? ('خطأ: ' + error.message) : '✅ تم حفظ إعدادات الحاسبة';
+  setTimeout(() => { msg.textContent = ''; }, 3500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('calcSettingsForm');
+  if (form) form.addEventListener('submit', saveCalcSettings);
 });
 
 // ══════════════════════════════════════════════════════════════
