@@ -675,22 +675,12 @@
     // قسم الاقتراحات بالكامل، وتحدد اختيار الأدمن الافتراضي كبداية لكل فئة
     // (الزائر بعدين يقدر يغيّره من القائمة المنسدلة جوه كل كارت).
     async function initProductPrefs() {
-      const [settings, products] = await Promise.all([fetchCalcSettings(), fetchAllProducts()]);
-      const recsSection = document.getElementById('prodRecsSection');
-      const dividerTop = document.getElementById('prodRecsDividerTop');
-      if (!settings || !settings.suggestions_enabled) {
-        if (recsSection) recsSection.style.display = 'none';
-        if (dividerTop) dividerTop.style.display = 'none';
-        return;
-      }
-      if (recsSection) recsSection.style.display = '';
-      if (dividerTop) dividerTop.style.display = '';
-
+      const settings = await fetchCalcSettings();
+      if (!settings) return;
       visitorPrefs.well_motor_brand = settings.preferred_well_motor_brand || '';
       visitorPrefs.pump_brand       = settings.preferred_pump_brand || '';
       visitorPrefs.inverter_brand   = settings.preferred_inverter_brand || '';
       visitorPrefs.pipe_brand       = settings.preferred_pipe_brand || '';
-
       calc();  // إعادة حساب عشان الاقتراحات تظهر بالماركات الافتراضية فور تجهيزها
     }
 
@@ -754,8 +744,22 @@
 
     async function renderProductRecs(hp_c, kw_c, D_near, TDH, wellDia) {
       const box = document.getElementById('productRecs');
+      const recsSection = document.getElementById('prodRecsSection');
+      const dividerTop = document.getElementById('prodRecsDividerTop');
       if (!box) return;
-      if (calcSettingsCache && !calcSettingsCache.suggestions_enabled) return; // القسم مخفي أصلاً
+
+      // نجيب الإعدادات لو لسه مجيبناهاش (أول مرة)، ونحدّث الإظهار/الإخفاء في كل مرة —
+      // لازم يتعمل هنا مش في دالة تُستدعى مرة واحدة بس، لأن calc() بيعيد بناء
+      // القالب كله من الصفر في كل استدعاء (بما فيه هذا القسم بحالته المخفية الأصلية).
+      const settings = await fetchCalcSettings();
+      if (!settings || !settings.suggestions_enabled) {
+        if (recsSection) recsSection.style.display = 'none';
+        if (dividerTop) dividerTop.style.display = 'none';
+        return;
+      }
+      if (recsSection) recsSection.style.display = '';
+      if (dividerTop) dividerTop.style.display = '';
+
       const products = await fetchAllProducts();
       if (!products) {
         box.innerHTML = `<div class="prodrec-empty">تعذّر تحميل الكتالوج الآن — جرّب تحديث الصفحة، أو تصفّح <a href="products.html" class="prodrec-link">صفحة المنتجات</a> يدويًا.</div>`;
