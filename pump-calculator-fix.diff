@@ -1,5 +1,5 @@
 --- /home/claude/orig_check/alaslsolar-main/pump-calculator.html	2026-07-20 06:15:32.000000000 +0000
-+++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-25 05:16:08.192010146 +0000
++++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-25 18:19:25.106863026 +0000
 @@ -76,9 +76,21 @@
      .field-group { display: grid; gap: var(--space-2); margin-bottom: var(--space-2); }
      .field-group.g2 { grid-template-columns: 1fr 1fr; }
@@ -123,7 +123,7 @@
          </div>
  
          <!-- Results panel (full width) -->
-@@ -463,22 +526,425 @@
+@@ -463,22 +526,429 @@
      /* ── Crop data ── */
      const cropData = {
        flood:     [{name:'قمح',flow:50,pressure:0},{name:'برسيم',flow:50,pressure:0},{name:'شعير',flow:50,pressure:0},{name:'خضراوات',flow:35,pressure:0}],
@@ -280,22 +280,12 @@
 +    // قسم الاقتراحات بالكامل، وتحدد اختيار الأدمن الافتراضي كبداية لكل فئة
 +    // (الزائر بعدين يقدر يغيّره من القائمة المنسدلة جوه كل كارت).
 +    async function initProductPrefs() {
-+      const [settings, products] = await Promise.all([fetchCalcSettings(), fetchAllProducts()]);
-+      const recsSection = document.getElementById('prodRecsSection');
-+      const dividerTop = document.getElementById('prodRecsDividerTop');
-+      if (!settings || !settings.suggestions_enabled) {
-+        if (recsSection) recsSection.style.display = 'none';
-+        if (dividerTop) dividerTop.style.display = 'none';
-+        return;
-+      }
-+      if (recsSection) recsSection.style.display = '';
-+      if (dividerTop) dividerTop.style.display = '';
-+
++      const settings = await fetchCalcSettings();
++      if (!settings) return;
 +      visitorPrefs.well_motor_brand = settings.preferred_well_motor_brand || '';
 +      visitorPrefs.pump_brand       = settings.preferred_pump_brand || '';
 +      visitorPrefs.inverter_brand   = settings.preferred_inverter_brand || '';
 +      visitorPrefs.pipe_brand       = settings.preferred_pipe_brand || '';
-+
 +      calc();  // إعادة حساب عشان الاقتراحات تظهر بالماركات الافتراضية فور تجهيزها
 +    }
 +
@@ -359,8 +349,22 @@
 +
 +    async function renderProductRecs(hp_c, kw_c, D_near, TDH, wellDia) {
 +      const box = document.getElementById('productRecs');
++      const recsSection = document.getElementById('prodRecsSection');
++      const dividerTop = document.getElementById('prodRecsDividerTop');
 +      if (!box) return;
-+      if (calcSettingsCache && !calcSettingsCache.suggestions_enabled) return; // القسم مخفي أصلاً
++
++      // نجيب الإعدادات لو لسه مجيبناهاش (أول مرة)، ونحدّث الإظهار/الإخفاء في كل مرة —
++      // لازم يتعمل هنا مش في دالة تُستدعى مرة واحدة بس، لأن calc() بيعيد بناء
++      // القالب كله من الصفر في كل استدعاء (بما فيه هذا القسم بحالته المخفية الأصلية).
++      const settings = await fetchCalcSettings();
++      if (!settings || !settings.suggestions_enabled) {
++        if (recsSection) recsSection.style.display = 'none';
++        if (dividerTop) dividerTop.style.display = 'none';
++        return;
++      }
++      if (recsSection) recsSection.style.display = '';
++      if (dividerTop) dividerTop.style.display = '';
++
 +      const products = await fetchAllProducts();
 +      if (!products) {
 +        box.innerHTML = `<div class="prodrec-empty">تعذّر تحميل الكتالوج الآن — جرّب تحديث الصفحة، أو تصفّح <a href="products.html" class="prodrec-link">صفحة المنتجات</a> يدويًا.</div>`;
@@ -553,7 +557,7 @@
      function updateCrops() {
        const method = document.getElementById('irr_method').value;
        const sel    = document.getElementById('crop_type');
-@@ -489,7 +955,7 @@
+@@ -489,7 +959,7 @@
          o.textContent = c.name; sel.appendChild(o);
        });
        if (sel.options.length) {
@@ -562,7 +566,7 @@
          document.getElementById('pressure').value     = sel.options[0].dataset.pressure;
        }
      }
-@@ -498,40 +964,49 @@
+@@ -498,40 +968,49 @@
        const sel = document.getElementById('crop_type');
        const opt = sel.options[sel.selectedIndex];
        if (opt && opt.dataset.flow) {
@@ -632,7 +636,7 @@
  
        /* ── Pipe diameter ── */
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
-@@ -540,8 +1015,11 @@
+@@ -540,8 +1019,11 @@
        const D_near = nearestPipe(D_in);
  
        /* ── Electrical ── */
@@ -646,7 +650,7 @@
  
        const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method];
  
-@@ -566,7 +1044,7 @@
+@@ -566,7 +1048,7 @@
            <div class="results-tags">
              <span class="rtag">${methodLabel}</span>
              <span class="rtag">${crop}</span>
@@ -655,7 +659,7 @@
            </div>
          </div>
  
-@@ -579,13 +1057,13 @@
+@@ -579,13 +1061,13 @@
            </div>
            <div class="metric-card accent">
              <div class="metric-label">معدل التدفق المطلوب</div>
@@ -673,7 +677,7 @@
            </div>
          </div>
  
-@@ -610,6 +1088,17 @@
+@@ -610,6 +1092,17 @@
              <div class="metric-label">كابل التوصيل</div>
              <div class="metric-value" style="font-size:18px;">${cable}</div>
              <div class="metric-unit">قاطع: ${fuse} أمبير — 3 فاز</div>
@@ -691,7 +695,7 @@
            </div>
          </div>
  
-@@ -640,8 +1129,8 @@
+@@ -640,8 +1133,8 @@
            <div class="detail-row">
              <span class="detail-label">معدل التدفق (FR)</span>
              <div class="detail-value">
@@ -702,7 +706,7 @@
              </div>
            </div>
            <div class="detail-row">
-@@ -680,6 +1169,11 @@
+@@ -680,6 +1173,11 @@
            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
            <span>القدرة الموصى بها <strong>${hp_std} حصان (${kw_std} كيلوواط)</strong> هي أقرب مقاس تجاري للقدرة الحسابية <strong>${hp_c} حصان</strong>. يُرجى مراجعة كتالوج المصنع للتأكد من توافق نقطة العمل مع منحنى الضخة عند TDH = ${TDH.toFixed(0)} متر.</span>
          </div>
@@ -714,7 +718,7 @@
  
          <!-- Footer disclaimer -->
          <div class="footer-disclaimer">
-@@ -692,35 +1186,43 @@
+@@ -692,35 +1190,43 @@
            <i class="fa fa-paper-plane"></i> اطلب عرض سعر — سيتم إرفاق بياناتك تلقائياً
          </button>
        `;
@@ -774,7 +778,7 @@
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * parseFloat(V)));
        const D_mm   = D_m * 1000;
        const D_in   = D_mm / 25.4;
-@@ -728,7 +1230,7 @@
+@@ -728,7 +1234,7 @@
  
        // Build summary note
        const note = `=== بيانات حاسبة نظام الضخ ===
@@ -783,7 +787,7 @@
  ▸ طريقة الري: ${methodLabel}
  ▸ نوع الزراعة: ${crop}
  ▸ وش المياه: ${swl} متر
-@@ -736,11 +1238,11 @@
+@@ -736,11 +1242,11 @@
  ▸ الارتفاعات: ${elev} متر
  ▸ الهبوط/الأمان: ${safety} متر
  ▸ الضغط المطلوب: ${pbar} بار
@@ -797,7 +801,7 @@
  ▸ الرفع الديناميكي (TDH): ${TDH.toFixed(0)} متر
  ▸ قدرة الموتور الحسابية: ${hp_c} حصان (${kw_c} كيلوواط)
  ▸ أقرب قدرة تجارية: ${hp_std} حصان / ${kw_std} كيلوواط
-@@ -751,8 +1253,10 @@
+@@ -751,8 +1257,10 @@
      }
  
      /* ── Init ── */
