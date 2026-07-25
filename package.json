@@ -5,7 +5,9 @@
   "main": "alasl-editor.bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "node generate-articles.mjs"
+    "generate": "node generate-articles.mjs && node generate-projects.mjs",
+    "generate:articles": "node generate-articles.mjs",
+    "generate:projects": "node generate-projects.mjs"
   },
   "keywords": [],
   "author": "",

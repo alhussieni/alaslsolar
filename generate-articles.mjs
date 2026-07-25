@@ -21,6 +21,7 @@ import { marked } from "marked";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { upsertMarkerBlock, readMarkerBlock } from "./sitemap-utils.mjs";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 // Supabase credentials are read from environment variables (set as GitHub
@@ -502,9 +503,17 @@ async function main() {
   fs.writeFileSync(path.join(__dir, "articles.html"), articlesListHtml, "utf8");
   console.log("   📄  articles.html  (updated)");
 
-  // 3. Update sitemap.xml
-  const sitemapXml = buildSitemap(articles);
-  fs.writeFileSync(path.join(__dir, "sitemap.xml"), sitemapXml, "utf8");
+  // 3. Update sitemap.xml — preserve whatever generate-projects.mjs last
+  //    wrote inside the PROJECTS marker block, since these two generators
+  //    run independently and each only owns its own section.
+  const sitemapPath = path.join(__dir, "sitemap.xml");
+  const previousSitemap = fs.existsSync(sitemapPath) ? fs.readFileSync(sitemapPath, "utf8") : "";
+  const preservedProjectsBlock = readMarkerBlock(previousSitemap, "PROJECTS");
+  let sitemapXml = buildSitemap(articles);
+  if (preservedProjectsBlock) {
+    sitemapXml = upsertMarkerBlock(sitemapXml, "PROJECTS", preservedProjectsBlock);
+  }
+  fs.writeFileSync(sitemapPath, sitemapXml, "utf8");
   console.log("   🗺️   sitemap.xml  (updated)");
 
   console.log(`\n✨  Done! Generated ${articles.length * 4} article pages (EN + AR + ES + ZH).`);
