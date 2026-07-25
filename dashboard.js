@@ -363,6 +363,7 @@ function addImageRow(containerId, type) {
       <input type="file" accept="image/*" id="imgFile_${idx}" style="font-size:13px">
       <select id="imgPos_${idx}" style="min-height:36px;font-size:13px">
         <option value="hero">صورة رئيسية (Hero) — تظهر في أعلى الصفحة</option>
+        <option value="logo">شعار العميل (Logo) — يظهر بجانب العنوان</option>
         <option value="inline">داخل المحتوى (Inline) — تظهر بين الفقرات</option>
         <option value="gallery">معرض صور (Gallery) — تظهر في نهاية الصفحة</option>
       </select>
@@ -413,6 +414,15 @@ async function collectImages(containerId, folder) {
    PROJECTS
    ═══════════════════════════════════════════ */
 
+function autoSlugProject() {
+  const slugField = document.getElementById('projectSlug');
+  const titleField = document.getElementById('projectTitle');
+  if (!slugField || !titleField) return;
+  // Only auto-fill while the admin hasn't typed a custom slug themselves.
+  if (slugField.dataset.userEdited === 'true') return;
+  slugField.value = slugify(titleField.value);
+}
+
 async function handleProject(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -422,6 +432,8 @@ async function handleProject(event) {
 
   try {
     const images = await collectImages('projectImagesWrap', 'projects');
+    const slugRaw = (formData.get('slug') || '').trim();
+    const slug = `${slugify(slugRaw || formData.get('title'))}-${Date.now()}`;
     const payload = {
       title:      formData.get('title'),
       category:   formData.get('category'),
@@ -429,6 +441,8 @@ async function handleProject(event) {
       capacity:   formData.get('capacity') || null,
       year:       formData.get('year') ? Number(formData.get('year')) : null,
       summary:    formData.get('summary'),
+      slug:       slug,
+      content_ar: formData.get('content_ar') || null,
       sort_order: Number(formData.get('sort_order')) || 100,
       image_url:  images[0]?.url || null,
       images:     images,
@@ -438,6 +452,7 @@ async function handleProject(event) {
     if (error) throw error;
     form.reset();
     document.getElementById('projectImagesWrap').innerHTML = '';
+    delete document.getElementById('projectSlug').dataset.userEdited;
     if (msgEl) msgEl.textContent = '✅ تم حفظ المشروع!';
     setTimeout(() => { if (msgEl) msgEl.textContent = ''; toggleSection('projectAddWrap','addProjectBtn'); }, 2000);
     loadProjects();
@@ -485,7 +500,7 @@ async function loadProjects() {
             <input id="pf_title_${p.id}" value="${escP(p.title)}"></div>
           <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">التصنيف</label>
             <select id="pf_cat_${p.id}" style="min-height:38px">
-              ${['Agriculture','Commercial','Hybrid','Residential','Maintenance'].map(c=>`<option ${p.category===c?'selected':''}>${c}</option>`).join('')}
+              ${['Agriculture','Commercial','Institutional','Heritage','Hybrid','Residential','Maintenance'].map(c=>`<option ${p.category===c?'selected':''}>${c}</option>`).join('')}
             </select></div>
           <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">الموقع</label>
             <input id="pf_loc_${p.id}" value="${escP(p.location||'')}"></div>
@@ -498,6 +513,11 @@ async function loadProjects() {
         </div>
         <div style="margin-top:var(--space-2)"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">الملخص *</label>
           <textarea id="pf_sum_${p.id}" rows="3">${escP(p.summary)}</textarea></div>
+        <div style="margin-top:var(--space-2)"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">الرابط الدائم (Slug)</label>
+          <input id="pf_slug_${p.id}" value="${escP(p.slug||'')}"></div>
+        <div style="margin-top:var(--space-2)"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">قصة المشروع الكاملة (لصفحة جوجل)</label>
+          <textarea id="pf_content_${p.id}" rows="8">${escP(p.content_ar||'')}</textarea></div>
+        ${p.slug ? `<p style="margin-top:6px;font-size:12px"><a href="../projects/${escP(p.slug)}.html" target="_blank" rel="noopener">🔗 معاينة صفحة المشروع (بعد آخر تحديث أسبوعي)</a></p>` : ''}
 
         <!-- Existing images -->
         ${imgs.length > 0 ? `
@@ -566,6 +586,8 @@ async function saveProject(id) {
       capacity:   document.getElementById('pf_cap_' + id)?.value.trim() || null,
       year:       Number(document.getElementById('pf_year_' + id)?.value) || null,
       summary:    document.getElementById('pf_sum_' + id)?.value.trim(),
+      slug:       document.getElementById('pf_slug_' + id)?.value.trim() || null,
+      content_ar: document.getElementById('pf_content_' + id)?.value.trim() || null,
       sort_order: Number(document.getElementById('pf_sort_' + id)?.value) || 100,
       image_url:  allImgs[0]?.url || null,
       images:     allImgs,
@@ -874,7 +896,6 @@ async function loadLists() {
   loadArticles();
   loadProducts();
   loadBrandLogos();
-  loadCalcSettings();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1614,56 +1635,6 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelProductForm();
     loadProducts();
   });
-});
-
-// ══════════════════════════════════════════════════════════════
-// Calculator Suggestions Settings — تفعيل/إلغاء قسم المنتجات الموصى بها
-// في حاسبة الضخ، واختيار الماركة الافتراضية (رقم 1) لكل فئة.
-// ══════════════════════════════════════════════════════════════
-
-const CALC_SETTINGS_CATS = [
-  { cat: 'well_motors', selectId: 'calcBrandWellMotors', col: 'preferred_well_motor_brand' },
-  { cat: 'pumps',       selectId: 'calcBrandPumps',       col: 'preferred_pump_brand' },
-  { cat: 'inverters',   selectId: 'calcBrandInverters',   col: 'preferred_inverter_brand' },
-  { cat: 'pipes',       selectId: 'calcBrandPipes',       col: 'preferred_pipe_brand' },
-];
-
-async function loadCalcSettings() {
-  if (!client) return;
-  const { data: settings, error: sErr } = await client.from('calc_settings').select('*').eq('id', 1).single();
-  if (sErr) { console.error('calc_settings load error', sErr); return; }
-
-  document.getElementById('calcSuggestionsEnabled').checked = !!settings.suggestions_enabled;
-
-  // نجيب الماركات المتاحة فعليًا لكل فئة (منشورة فقط) ونعبّي كل قائمة
-  for (const c of CALC_SETTINGS_CATS) {
-    const sel = document.getElementById(c.selectId);
-    if (!sel) continue;
-    const { data: rows } = await client.from('products').select('brand').eq('category', c.cat).eq('published', true);
-    const brands = [...new Set((rows || []).map(r => r.brand).filter(Boolean))].sort();
-    const current = settings[c.col] || '';
-    sel.innerHTML = '<option value="">— بدون تفضيل (أي ماركة) —</option>' +
-      brands.map(b => `<option value="${escapeHtmlAttr(b)}" ${b === current ? 'selected' : ''}>${escapeHtmlAttr(b)}</option>`).join('');
-  }
-}
-
-async function saveCalcSettings(event) {
-  event.preventDefault();
-  const msg = document.getElementById('calcSettingsMessage');
-  const payload = { suggestions_enabled: document.getElementById('calcSuggestionsEnabled').checked, updated_at: new Date().toISOString() };
-  CALC_SETTINGS_CATS.forEach(c => {
-    const v = document.getElementById(c.selectId).value;
-    payload[c.col] = v || null;
-  });
-  const { error } = await client.from('calc_settings').update(payload).eq('id', 1);
-  msg.style.color = error ? '#c33' : '#2a7a2a';
-  msg.textContent = error ? ('خطأ: ' + error.message) : '✅ تم حفظ إعدادات الحاسبة';
-  setTimeout(() => { msg.textContent = ''; }, 3500);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('calcSettingsForm');
-  if (form) form.addEventListener('submit', saveCalcSettings);
 });
 
 // ══════════════════════════════════════════════════════════════

@@ -274,13 +274,15 @@
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
                 <div>
                   <label>عنوان المشروع *</label>
-                  <input id="projectTitle" name="title" required placeholder="اسم المشروع...">
+                  <input id="projectTitle" name="title" required placeholder="اسم المشروع..." oninput="autoSlugProject()">
                 </div>
                 <div>
                   <label>التصنيف</label>
                   <select id="projectCategory" name="category">
                     <option value="Agriculture">زراعة</option>
                     <option value="Commercial">تجاري</option>
+                    <option value="Institutional">مؤسسي</option>
+                    <option value="Heritage">تراث</option>
                     <option value="Hybrid">هجين</option>
                     <option value="Residential">سكني</option>
                     <option value="Maintenance">صيانة</option>
@@ -304,8 +306,16 @@
                 </div>
               </div>
               <div>
-                <label>ملخص المشروع *</label>
+                <label>ملخص المشروع * <span style="font-weight:400;color:var(--muted)">(يظهر في الكارت وفي نتائج جوجل — يفضّل 150-160 حرف)</span></label>
                 <textarea id="projectSummary" name="summary" rows="3" required placeholder="وصف مختصر للمشروع..."></textarea>
+              </div>
+              <div>
+                <label>الرابط الدائم (Slug) <span style="font-weight:400;color:var(--muted)">— يتولّد تلقائيًا، وتقدر تعدّله</span></label>
+                <input id="projectSlug" name="slug" placeholder="مثال: alwadi-group-poultry-farm-solar" oninput="this.dataset.userEdited='true'">
+              </div>
+              <div>
+                <label>قصة المشروع الكاملة (تظهر في صفحة المشروع المستقلة على جوجل)</label>
+                <textarea id="projectContent" name="content_ar" rows="8" placeholder="اكتب هنا القصة الكاملة للمشروع — التحدي، الحل، والنتيجة..."></textarea>
               </div>
 
               <!-- Multi-image uploader -->
@@ -322,6 +332,9 @@
                 <input name="published" type="checkbox" checked>
                 <span style="font-weight:700">نشر المشروع</span>
               </label>
+              <p class="form-note" style="margin-top:6px;color:var(--muted)">
+                ℹ️ صفحة المشروع المستقلة على جوجل بتتحدث تلقائيًا يوم الاثنين كل أسبوع، أو يدويًا من GitHub Actions → Generate Articles → Run workflow.
+              </p>
               <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
                 <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المشروع</button>
                 <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')"
@@ -567,50 +580,6 @@
           <div id="brandLogosList" style="display:grid;gap:var(--space-2)">
             <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
           </div>
-        </article>
-      </div>
-
-      <!-- ── Calculator Suggestions Settings ── -->
-      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
-        <article class="dashboard-card" id="calcSettingsCard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">🧮 إعدادات اقتراحات حاسبة الضخ</h3>
-          </div>
-          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
-            تحكّم في ظهور قسم "المنتجات الموصى بها" في حاسبة الضخ، واختر الماركة الافتراضية (الاختيار رقم 1) لكل فئة —
-            الزائر يقدر يغيّرها بنفسه من القائمة المنسدلة، لكن اختيارك هنا هو اللي هيظهر أولًا.
-          </p>
-
-          <form class="admin-form" id="calcSettingsForm">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-2);padding:10px;background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
-              <input type="checkbox" id="calcSuggestionsEnabled" style="width:18px;height:18px;">
-              <label for="calcSuggestionsEnabled" style="margin:0;font-weight:700;cursor:pointer">تفعيل قسم "المنتجات الموصى بها" في الحاسبة</label>
-            </div>
-
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-2)">
-              <div>
-                <label>الماركة الافتراضية — موتور غاطس</label>
-                <select id="calcBrandWellMotors"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
-              </div>
-              <div>
-                <label>الماركة الافتراضية — طلمبة</label>
-                <select id="calcBrandPumps"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
-              </div>
-              <div>
-                <label>الماركة الافتراضية — إنفرتر</label>
-                <select id="calcBrandInverters"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
-              </div>
-              <div>
-                <label>الماركة الافتراضية — ماسورة</label>
-                <select id="calcBrandPipes"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
-              </div>
-            </div>
-
-            <div style="margin-top:var(--space-2)">
-              <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ إعدادات الحاسبة</button>
-            </div>
-            <p class="form-note" id="calcSettingsMessage" style="margin-top:6px"></p>
-          </form>
         </article>
       </div>
 
