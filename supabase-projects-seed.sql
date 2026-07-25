@@ -3,6 +3,17 @@
 -- Run this ONCE in the Supabase SQL editor (Project → SQL Editor → New query)
 -- ============================================================
 
+-- 0) Remove the old demo/placeholder rows (from the original template)
+--    that are currently showing on the live site instead of the real
+--    projects below. Matched by their exact placeholder titles, so this
+--    is safe to run even if you don't have any of these rows.
+delete from public.projects
+where title in (
+  'Solar irrigation stations',
+  'Business and facility systems',
+  'PV-diesel hybrid upgrades'
+);
+
 -- 1) Add the new columns used by the SEO project pages
 alter table public.projects
   add column if not exists slug text unique,
