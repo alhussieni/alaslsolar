@@ -123,6 +123,8 @@ const translations = {
     filter_commercial: "Commercial",
     filter_hybrid: "Hybrid",
     filter_residential: "Residential",
+    filter_institutional: "Institutional",
+    filter_heritage: "Heritage",
 
 
     cta_band_title: "Ready to reduce your energy costs?",
@@ -455,6 +457,8 @@ const translations = {
     filter_commercial: "تجاري",
     filter_hybrid: "هجين",
     filter_residential: "سكني",
+    filter_institutional: "مؤسسي",
+    filter_heritage: "تراث",
 
     contact_kicker: "تواصل مع الفريق",
     contact_title: "اطلب عرض سعر للطاقة الشمسية",
@@ -788,6 +792,8 @@ const translations = {
     filter_commercial: "Comercial",
     filter_hybrid: "Híbrido",
     filter_residential: "Residencial",
+    filter_institutional: "Institucional",
+    filter_heritage: "Patrimonio",
 
 
     cta_band_title: "¿Listo para reducir sus costos de energía?",
@@ -1121,6 +1127,8 @@ const translations = {
     filter_commercial: "商业",
     filter_hybrid: "混合",
     filter_residential: "住宅",
+    filter_institutional: "机构",
+    filter_heritage: "文化遗产",
 
 
     cta_band_title: "准备好降低能源成本了吗？",
@@ -1448,14 +1456,15 @@ function renderProjects(projects) {
   grid.innerHTML = projects.map((project) => {
     const image = normalizeAssetPath(project.image_url || project.image);
     const meta = projectMeta(project);
+    const tag = project.slug ? "a" : "article";
+    const href = project.slug ? ` href="projects/${escapeHtml(project.slug)}.html"` : "";
 
     return `
-      <article class="project-card" data-category="${escapeHtml(project.category || "Project")}" style="--project-image:url('${escapeHtml(image)}')">
+      <${tag} class="project-card" data-category="${escapeHtml(project.category || "Project")}" style="--project-image:url('${escapeHtml(image)}')"${href}>
         <span>${escapeHtml(project.category || "Project")}</span>
         <h2>${escapeHtml(project.title)}</h2>
         ${meta ? `<p class="project-meta">${escapeHtml(meta)}</p>` : ""}
-        <p>${escapeHtml(project.summary)}</p>
-      </article>
+      </${tag}>
     `;
   }).join("");
   applyProjectFilter(document.querySelector("[data-project-filters] .active")?.dataset.filter || "all");
@@ -1491,7 +1500,7 @@ async function initProjects() {
     try {
       const { data, error } = await client
         .from("projects")
-        .select("title,category,location,capacity,year,summary,image_url,published,sort_order,created_at")
+        .select("title,category,location,capacity,year,summary,image_url,slug,published,sort_order,created_at")
         .eq("published", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
