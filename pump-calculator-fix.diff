@@ -1,5 +1,5 @@
 --- /home/claude/orig_check/alaslsolar-main/pump-calculator.html	2026-07-20 06:15:32.000000000 +0000
-+++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-23 09:29:21.486921854 +0000
++++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-25 05:16:08.192010146 +0000
 @@ -76,9 +76,21 @@
      .field-group { display: grid; gap: var(--space-2); margin-bottom: var(--space-2); }
      .field-group.g2 { grid-template-columns: 1fr 1fr; }
@@ -22,7 +22,7 @@
  
      .field { display: flex; flex-direction: column; gap: 5px; }
      .field label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
-@@ -100,6 +112,20 @@
+@@ -100,6 +112,29 @@
        box-shadow: 0 0 0 3px rgba(200,117,45,0.13);
      }
      .field-hint { font-size: 11px; color: var(--steel); margin-top: 2px; }
@@ -31,7 +31,16 @@
 +    .prodrec-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: var(--space-2); background: #fff; display: flex; flex-direction: column; gap: 4px; transition: border-color .15s, box-shadow .15s; }
 +    .prodrec-card:hover { border-color: var(--brand); box-shadow: 0 2px 10px rgba(200,117,45,0.12); }
 +    .prodrec-cat { font-size: 10px; font-weight: 800; color: var(--brand); letter-spacing: .03em; }
++    .prodrec-name-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 +    .prodrec-name { font-size: 14px; font-weight: 700; color: var(--ink); }
++    .prodrec-brand-select {
++      flex: 0 0 auto; max-width: 108px;
++      font-family: 'Cairo', sans-serif; font-size: 10px; font-weight: 700; color: var(--brand);
++      border: 1px solid var(--line); border-radius: 20px; padding: 2px 6px;
++      background: #fff; cursor: pointer; height: auto;
++    }
++    .prodrec-brand-select:hover, .prodrec-brand-select:focus { border-color: var(--brand); outline: none; }
++    .prodrec-empty .prodrec-brand-select { margin-inline-start: 6px; }
 +    .prodrec-specs { font-size: 12px; color: var(--steel); }
 +    .prodrec-price { font-size: 16px; font-weight: 800; color: var(--ink); margin-top: 2px; }
 +    .prodrec-link { margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--brand); text-decoration: none; }
@@ -43,7 +52,7 @@
  
      /* Results panel */
      .results-panel {
-@@ -359,8 +385,28 @@
+@@ -359,8 +394,28 @@
              </div>
              <div class="field">
                <label for="area">مساحة الأرض</label>
@@ -74,7 +83,7 @@
              </div>
            </div>
          </div>
-@@ -390,16 +436,11 @@
+@@ -390,16 +445,11 @@
                <span class="field-hint">ساعة / يوم</span>
              </div>
            </div>
@@ -94,7 +103,7 @@
              </div>
              <div class="field">
                <label for="velocity">سرعة الماء في الماسورة</label>
-@@ -410,6 +451,56 @@
+@@ -410,6 +460,19 @@
                </select>
              </div>
            </div>
@@ -111,47 +120,10 @@
 +              <span class="field-hint" id="flowUnitHint">م³ / ساعة / فدان — يتغيّر تلقائيًا حسب المحصول المختار</span>
 +            </div>
 +          </div>
-+        </div>
-+
-+        <!-- Product suggestion preferences (hidden until settings load; visitor can override admin's default brand) -->
-+        <div class="calc-panel" id="prodPrefsPanel" style="display:none">
-+          <h2 class="calc-panel-title">
-+            <i class="ti ti-tag"></i>
-+            تفضيلات المنتجات المقترحة
-+          </h2>
-+          <p class="field-hint" style="margin-bottom:var(--space-2)">اختياري — الاقتراحات هتتظبط تلقائيًا على أفضل مقاس متاح من الماركة المختارة.</p>
-+          <div class="field-group g3">
-+            <div class="field">
-+              <label for="pref_well_motor_brand">ماركة الموتور الغاطس</label>
-+              <select id="pref_well_motor_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
-+            </div>
-+            <div class="field">
-+              <label for="pref_cooling">نوع تبريد الموتور</label>
-+              <select id="pref_cooling" onchange="calc()">
-+                <option value="">أي نوع</option>
-+                <option value="oil">تبريد زيت</option>
-+                <option value="water">تبريد مياه</option>
-+              </select>
-+            </div>
-+            <div class="field">
-+              <label for="pref_pump_brand">ماركة الطلمبة</label>
-+              <select id="pref_pump_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
-+            </div>
-+          </div>
-+          <div class="field-group g2">
-+            <div class="field">
-+              <label for="pref_inverter_brand">ماركة الإنفرتر</label>
-+              <select id="pref_inverter_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
-+            </div>
-+            <div class="field">
-+              <label for="pref_pipe_brand">ماركة الماسورة</label>
-+              <select id="pref_pipe_brand" onchange="calc()"><option value="">أي ماركة متاحة</option></select>
-+            </div>
-+          </div>
          </div>
  
          <!-- Results panel (full width) -->
-@@ -463,22 +554,415 @@
+@@ -463,22 +526,425 @@
      /* ── Crop data ── */
      const cropData = {
        flood:     [{name:'قمح',flow:50,pressure:0},{name:'برسيم',flow:50,pressure:0},{name:'شعير',flow:50,pressure:0},{name:'خضراوات',flow:35,pressure:0}],
@@ -295,43 +267,34 @@
 +      } catch (e) { return null; }
 +    }
 +
++    // حالة اختيار الزائر الحالية لكل فئة — تتعبّى مبدئيًا من تفضيل الأدمن،
++    // وتتغيّر لما الزائر يختار من القائمة المنسدلة جوه الكارت نفسه.
++    let visitorPrefs = { well_motor_brand: '', cooling: '', pump_brand: '', inverter_brand: '', pipe_brand: '' };
++
++    function onCardBrandChange(key, value) {
++      visitorPrefs[key] = value;
++      calc();
++    }
++
 +    // تُستدعى مرة واحدة عند تحميل الصفحة: تجيب الإعدادات + المنتجات، تُظهر/تُخفي
-+    // لوحة التفضيلات وقسم الاقتراحات بالكامل، وتعبّي القوائم بماركات الفئة الفعلية
-+    // مع تعيين اختيار الأدمن الافتراضي كأول قيمة مختارة (قابلة للتغيير من الزائر).
++    // قسم الاقتراحات بالكامل، وتحدد اختيار الأدمن الافتراضي كبداية لكل فئة
++    // (الزائر بعدين يقدر يغيّره من القائمة المنسدلة جوه كل كارت).
 +    async function initProductPrefs() {
 +      const [settings, products] = await Promise.all([fetchCalcSettings(), fetchAllProducts()]);
-+      const prefsPanel = document.getElementById('prodPrefsPanel');
 +      const recsSection = document.getElementById('prodRecsSection');
 +      const dividerTop = document.getElementById('prodRecsDividerTop');
 +      if (!settings || !settings.suggestions_enabled) {
-+        if (prefsPanel) prefsPanel.style.display = 'none';
 +        if (recsSection) recsSection.style.display = 'none';
 +        if (dividerTop) dividerTop.style.display = 'none';
 +        return;
 +      }
-+      if (prefsPanel) prefsPanel.style.display = '';
 +      if (recsSection) recsSection.style.display = '';
 +      if (dividerTop) dividerTop.style.display = '';
 +
-+      const brandsByCat = {};
-+      (products || []).forEach(r => {
-+        if (!r.brand) return;
-+        (brandsByCat[r.category] = brandsByCat[r.category] || new Set()).add(r.brand);
-+      });
-+
-+      const fillSelect = (id, cat, preferredBrand) => {
-+        const sel = document.getElementById(id);
-+        if (!sel) return;
-+        const brands = [...(brandsByCat[cat] || [])].sort();
-+        sel.innerHTML = '<option value="">أي ماركة متاحة</option>' +
-+          brands.map(b => `<option value="${b}">${b}</option>`).join('');
-+        if (preferredBrand && brands.includes(preferredBrand)) sel.value = preferredBrand;
-+      };
-+
-+      fillSelect('pref_well_motor_brand', 'well_motors', settings.preferred_well_motor_brand);
-+      fillSelect('pref_pump_brand',       'pumps',       settings.preferred_pump_brand);
-+      fillSelect('pref_inverter_brand',   'inverters',   settings.preferred_inverter_brand);
-+      fillSelect('pref_pipe_brand',       'pipes',       settings.preferred_pipe_brand);
++      visitorPrefs.well_motor_brand = settings.preferred_well_motor_brand || '';
++      visitorPrefs.pump_brand       = settings.preferred_pump_brand || '';
++      visitorPrefs.inverter_brand   = settings.preferred_inverter_brand || '';
++      visitorPrefs.pipe_brand       = settings.preferred_pipe_brand || '';
 +
 +      calc();  // إعادة حساب عشان الاقتراحات تظهر بالماركات الافتراضية فور تجهيزها
 +    }
@@ -367,10 +330,20 @@
 +      return 'product-detail.html?' + params.toString();
 +    }
 +
-+    function prodCard(catLabel, row, specsLine, badge) {
++    function brandDropdownHtml(catKey, brands, current) {
++      if (!catKey || !brands || !brands.length) return '';
++      const opts = ['<option value="">أي ماركة</option>']
++        .concat(brands.map(b => `<option value="${b}" ${b === current ? 'selected' : ''}>${b}</option>`));
++      return `<select class="prodrec-brand-select" onchange="onCardBrandChange('${catKey}', this.value)" title="غيّر الماركة">${opts.join('')}</select>`;
++    }
++
++    function prodCard(catLabel, row, specsLine, badge, catKey, brands, currentBrand) {
 +      return `<div class="prodrec-card">
 +        <div class="prodrec-cat">${catLabel}${badge ? `<span class="prodrec-badge">${badge}</span>` : ''}</div>
-+        <div class="prodrec-name">${row.brand ? row.brand + ' — ' : ''}${row.name_ar || ''}</div>
++        <div class="prodrec-name-row">
++          <div class="prodrec-name">${row.brand ? row.brand + ' — ' : ''}${row.name_ar || ''}</div>
++          ${brandDropdownHtml(catKey, brands, currentBrand)}
++        </div>
 +        <div class="prodrec-specs">${specsLine}</div>
 +        <div class="prodrec-price">${fmtPrice(row)}</div>
 +        <a class="prodrec-link" href="${prodLink(row)}" target="_blank" rel="noopener">عرض المنتج ←</a>
@@ -395,11 +368,16 @@
 +      }
 +
 +      const cards = [];
-+      const prefMotorBrand = document.getElementById('pref_well_motor_brand')?.value || '';
-+      const prefCooling    = document.getElementById('pref_cooling')?.value || '';
-+      const prefPumpBrand  = document.getElementById('pref_pump_brand')?.value || '';
-+      const prefInvBrand   = document.getElementById('pref_inverter_brand')?.value || '';
-+      const prefPipeBrand  = document.getElementById('pref_pipe_brand')?.value || '';
++      const prefMotorBrand = visitorPrefs.well_motor_brand;
++      const prefCooling    = visitorPrefs.cooling;
++      const prefPumpBrand  = visitorPrefs.pump_brand;
++      const prefInvBrand   = visitorPrefs.inverter_brand;
++      const prefPipeBrand  = visitorPrefs.pipe_brand;
++
++      // كل الماركات المتاحة لكل فئة (بدون فلترة بالمقاس) — تُستخدم لتعبئة القائمة المنسدلة جوه كل كارت
++      const brandsByCat = {};
++      products.forEach(r => { if (r.brand) (brandsByCat[r.category] = brandsByCat[r.category] || new Set()).add(r.brand); });
++      const brandsOf = cat => [...(brandsByCat[cat] || [])].sort();
 +
 +      /* ── موتور غاطس (well_motors) — مطابقة بالقطر + ماركة/تبريد مختارين + أقرب حصان ≥ المحسوب ── */
 +      let motors = products.filter(r => r.category === 'well_motors')
@@ -412,7 +390,7 @@
 +        if (prefMotorBrand) {
 +          const byBrand = motors.filter(x => x.row.brand === prefMotorBrand);
 +          if (!byBrand.length) {
-+            cards.push(`<div class="prodrec-empty">الماركة المفضّلة "${prefMotorBrand}" مش متاحة بقطر ${wellDia}" حاليًا. جرّب ماركة تانية من قائمة "ماركة الموتور الغاطس" فوق.</div>`);
++            cards.push(`<div class="prodrec-empty">الماركة المفضّلة "${prefMotorBrand}" مش متاحة بقطر ${wellDia}" حاليًا. ${brandDropdownHtml('well_motor_brand', brandsOf('well_motors'), prefMotorBrand)}</div>`);
 +            motors = [];
 +          } else motors = byBrand;
 +        }
@@ -429,12 +407,13 @@
 +          const byHp = Object.keys(groups).map(Number);
 +          const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
 +          if (nearest && nearest.exceeds && prefMotorBrand) {
-+            cards.push(`<div class="prodrec-empty">الماركة المفضّلة "${prefMotorBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${hp_c} حصان) — أعلى مقاس متاح منها ${nearest.item.hp} حصان بس. تحب تجرب ماركة تانية من القائمة فوق؟</div>`);
++            cards.push(`<div class="prodrec-empty">الماركة المفضّلة "${prefMotorBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${hp_c} حصان) — أعلى مقاس متاح منها ${nearest.item.hp} حصان بس. ${brandDropdownHtml('well_motor_brand', brandsOf('well_motors'), prefMotorBrand)}</div>`);
 +          } else if (nearest) {
 +            const chosen = bestOf(groups[nearest.item.hp]);
 +            cards.push(prodCard('موتور غاطس ' + wellDia + '"', chosen.row,
 +              `${nearest.item.hp} حصان — قطر ${wellDia}"`,
-+              nearest.exceeds ? 'أعلى مقاس متاح' : null));
++              nearest.exceeds ? 'أعلى مقاس متاح' : null,
++              'well_motor_brand', brandsOf('well_motors'), chosen.row.brand));
 +          }
 +        }
 +      }
@@ -449,7 +428,7 @@
 +      if (prefPumpBrand) {
 +        const byBrand = pumpsPool.filter(x => x.row.brand === prefPumpBrand);
 +        if (!byBrand.length) {
-+          cards.push(`<div class="prodrec-empty">ماركة الطلمبة المفضّلة "${prefPumpBrand}" مش متاحة بالمقاس ده حاليًا. جرّب ماركة تانية من قائمة "ماركة الطلمبة" فوق.</div>`);
++          cards.push(`<div class="prodrec-empty">ماركة الطلمبة المفضّلة "${prefPumpBrand}" مش متاحة بالمقاس ده حاليًا. ${brandDropdownHtml('pump_brand', brandsOf('pumps'), prefPumpBrand)}</div>`);
 +          pumpsPool = [];
 +        } else pumpsPool = byBrand;
 +      }
@@ -459,11 +438,12 @@
 +        const byHp = Object.keys(groups).map(Number);
 +        const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
 +        if (nearest && nearest.exceeds && prefPumpBrand) {
-+          cards.push(`<div class="prodrec-empty">ماركة الطلمبة المفضّلة "${prefPumpBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${hp_c} حصان) — أعلى مقاس متاح منها ${nearest.item.hp} حصان بس. تحب تجرب ماركة تانية من القائمة فوق؟</div>`);
++          cards.push(`<div class="prodrec-empty">ماركة الطلمبة المفضّلة "${prefPumpBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${hp_c} حصان) — أعلى مقاس متاح منها ${nearest.item.hp} حصان بس. ${brandDropdownHtml('pump_brand', brandsOf('pumps'), prefPumpBrand)}</div>`);
 +        } else if (nearest) {
 +          const chosen = bestOf(groups[nearest.item.hp]);
 +          const unverifiedBadge = !pumpsVerified.length ? 'راجع توافق القطر يدويًا' : (nearest.exceeds ? 'أعلى مقاس متاح' : null);
-+          cards.push(prodCard('طلمبة', chosen.row, `${nearest.item.hp} حصان`, unverifiedBadge));
++          cards.push(prodCard('طلمبة', chosen.row, `${nearest.item.hp} حصان`, unverifiedBadge,
++            'pump_brand', brandsOf('pumps'), chosen.row.brand));
 +        }
 +      }
 +
@@ -474,7 +454,7 @@
 +      if (prefInvBrand) {
 +        const byBrand = invs.filter(x => x.row.brand === prefInvBrand);
 +        if (!byBrand.length) {
-+          cards.push(`<div class="prodrec-empty">ماركة الإنفرتر المفضّلة "${prefInvBrand}" مش متاحة بالقدرة دي حاليًا. جرّب ماركة تانية من قائمة "ماركة الإنفرتر" فوق.</div>`);
++          cards.push(`<div class="prodrec-empty">ماركة الإنفرتر المفضّلة "${prefInvBrand}" مش متاحة بالقدرة دي حاليًا. ${brandDropdownHtml('inverter_brand', brandsOf('inverters'), prefInvBrand)}</div>`);
 +          invs = [];
 +        } else invs = byBrand;
 +      }
@@ -484,12 +464,13 @@
 +        const byKw = Object.keys(groups).map(Number);
 +        const nearest = pickNearestGE(byKw.map(k=>({kw:k})), x=>x.kw, kw_c);
 +        if (nearest && nearest.exceeds && prefInvBrand) {
-+          cards.push(`<div class="prodrec-empty">ماركة الإنفرتر المفضّلة "${prefInvBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${kw_c} كيلوواط) — أعلى مقاس متاح منها ${nearest.item.kw} كيلوواط بس. تحب تجرب ماركة تانية من القائمة فوق؟</div>`);
++          cards.push(`<div class="prodrec-empty">ماركة الإنفرتر المفضّلة "${prefInvBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${kw_c} كيلوواط) — أعلى مقاس متاح منها ${nearest.item.kw} كيلوواط بس. ${brandDropdownHtml('inverter_brand', brandsOf('inverters'), prefInvBrand)}</div>`);
 +        } else if (nearest) {
 +          const chosen = bestOf(groups[nearest.item.kw]);
 +          cards.push(prodCard('إنفرتر ضخ شمسي', chosen.row,
 +            `${nearest.item.kw} كيلوواط`,
-+            nearest.exceeds ? 'أعلى مقاس متاح' : null));
++            nearest.exceeds ? 'أعلى مقاس متاح' : null,
++            'inverter_brand', brandsOf('inverters'), chosen.row.brand));
 +        }
 +      }
 +
@@ -505,7 +486,7 @@
 +        if (prefPipeBrand) {
 +          const byBrand = pipesAtDia.filter(x => x.row.brand === prefPipeBrand);
 +          if (!byBrand.length) {
-+            cards.push(`<div class="prodrec-empty">ماركة الماسورة المفضّلة "${prefPipeBrand}" مش متاحة بقطر ${D_near}" حاليًا. جرّب ماركة تانية من قائمة "ماركة الماسورة" فوق.</div>`);
++            cards.push(`<div class="prodrec-empty">ماركة الماسورة المفضّلة "${prefPipeBrand}" مش متاحة بقطر ${D_near}" حاليًا. ${brandDropdownHtml('pipe_brand', brandsOf('pipes'), prefPipeBrand)}</div>`);
 +            pipesAtDia = [];
 +          } else pipesAtDia = byBrand;
 +        }
@@ -519,7 +500,8 @@
 +          }
 +          cards.push(prodCard('ماسورة توصيل ' + D_near + '"', chosen.row,
 +            `تحمّل ${chosen.pressure.type} ${chosen.pressure.bar} بار`,
-+            adequate.length ? null : 'ضغط التحمّل أقل من المطلوب تقريبًا — راجع فنيًا'));
++            adequate.length ? null : 'ضغط التحمّل أقل من المطلوب تقريبًا — راجع فنيًا',
++            'pipe_brand', brandsOf('pipes'), chosen.row.brand));
 +        }
 +      }
 +
@@ -571,7 +553,7 @@
      function updateCrops() {
        const method = document.getElementById('irr_method').value;
        const sel    = document.getElementById('crop_type');
-@@ -489,7 +973,7 @@
+@@ -489,7 +955,7 @@
          o.textContent = c.name; sel.appendChild(o);
        });
        if (sel.options.length) {
@@ -580,7 +562,7 @@
          document.getElementById('pressure').value     = sel.options[0].dataset.pressure;
        }
      }
-@@ -498,40 +982,49 @@
+@@ -498,40 +964,49 @@
        const sel = document.getElementById('crop_type');
        const opt = sel.options[sel.selectedIndex];
        if (opt && opt.dataset.flow) {
@@ -650,7 +632,7 @@
  
        /* ── Pipe diameter ── */
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
-@@ -540,8 +1033,11 @@
+@@ -540,8 +1015,11 @@
        const D_near = nearestPipe(D_in);
  
        /* ── Electrical ── */
@@ -664,7 +646,7 @@
  
        const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method];
  
-@@ -566,7 +1062,7 @@
+@@ -566,7 +1044,7 @@
            <div class="results-tags">
              <span class="rtag">${methodLabel}</span>
              <span class="rtag">${crop}</span>
@@ -673,7 +655,7 @@
            </div>
          </div>
  
-@@ -579,13 +1075,13 @@
+@@ -579,13 +1057,13 @@
            </div>
            <div class="metric-card accent">
              <div class="metric-label">معدل التدفق المطلوب</div>
@@ -691,7 +673,7 @@
            </div>
          </div>
  
-@@ -610,6 +1106,17 @@
+@@ -610,6 +1088,17 @@
              <div class="metric-label">كابل التوصيل</div>
              <div class="metric-value" style="font-size:18px;">${cable}</div>
              <div class="metric-unit">قاطع: ${fuse} أمبير — 3 فاز</div>
@@ -709,7 +691,7 @@
            </div>
          </div>
  
-@@ -640,8 +1147,8 @@
+@@ -640,8 +1129,8 @@
            <div class="detail-row">
              <span class="detail-label">معدل التدفق (FR)</span>
              <div class="detail-value">
@@ -720,7 +702,7 @@
              </div>
            </div>
            <div class="detail-row">
-@@ -680,6 +1187,11 @@
+@@ -680,6 +1169,11 @@
            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
            <span>القدرة الموصى بها <strong>${hp_std} حصان (${kw_std} كيلوواط)</strong> هي أقرب مقاس تجاري للقدرة الحسابية <strong>${hp_c} حصان</strong>. يُرجى مراجعة كتالوج المصنع للتأكد من توافق نقطة العمل مع منحنى الضخة عند TDH = ${TDH.toFixed(0)} متر.</span>
          </div>
@@ -732,7 +714,7 @@
  
          <!-- Footer disclaimer -->
          <div class="footer-disclaimer">
-@@ -692,35 +1204,43 @@
+@@ -692,35 +1186,43 @@
            <i class="fa fa-paper-plane"></i> اطلب عرض سعر — سيتم إرفاق بياناتك تلقائياً
          </button>
        `;
@@ -792,7 +774,7 @@
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * parseFloat(V)));
        const D_mm   = D_m * 1000;
        const D_in   = D_mm / 25.4;
-@@ -728,7 +1248,7 @@
+@@ -728,7 +1230,7 @@
  
        // Build summary note
        const note = `=== بيانات حاسبة نظام الضخ ===
@@ -801,7 +783,7 @@
  ▸ طريقة الري: ${methodLabel}
  ▸ نوع الزراعة: ${crop}
  ▸ وش المياه: ${swl} متر
-@@ -736,11 +1256,11 @@
+@@ -736,11 +1238,11 @@
  ▸ الارتفاعات: ${elev} متر
  ▸ الهبوط/الأمان: ${safety} متر
  ▸ الضغط المطلوب: ${pbar} بار
@@ -815,7 +797,7 @@
  ▸ الرفع الديناميكي (TDH): ${TDH.toFixed(0)} متر
  ▸ قدرة الموتور الحسابية: ${hp_c} حصان (${kw_c} كيلوواط)
  ▸ أقرب قدرة تجارية: ${hp_std} حصان / ${kw_std} كيلوواط
-@@ -751,8 +1271,10 @@
+@@ -751,8 +1253,10 @@
      }
  
      /* ── Init ── */
