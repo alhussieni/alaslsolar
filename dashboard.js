@@ -401,8 +401,16 @@ async function collectImages(containerId, folder) {
     const pos = document.getElementById('imgPos_' + idx)?.value || 'hero';
     const caption = document.getElementById('imgCaption_' + idx)?.value.trim() || '';
     if (fileInput?.files[0]) {
+      const file = fileInput.files[0];
+      // صيغة HEIC/HEIF (شائعة جدًا في صور آيفون المرفوعة مباشرة) مش بتتعرض في
+      // معظم المتصفحات (Chrome, Firefox, Edge) — نرفض الرفع ونطلب تحويلها الأول
+      // بدل ما نرفع صورة هتظهر مكسورة للزوار.
+      if (/\.(heic|heif)$/i.test(file.name) || /heic|heif/i.test(file.type)) {
+        alert(`الصورة "${file.name}" بصيغة HEIC (صيغة آيفون) ومعظم المتصفحات مش بتعرضها. حوّلها لـJPG أو PNG الأول (من الآيفون: الإعدادات ← الكاميرا ← التنسيقات ← الأكثر توافقًا)، وبعدين ارفعها تاني.`);
+        continue;
+      }
       try {
-        const url = await uploadImage(fileInput.files[0], folder);
+        const url = await uploadImage(file, folder);
         if (url) images.push({ url, position: pos, caption });
       } catch(e) { console.error('Image upload error:', e); }
     }
@@ -444,7 +452,7 @@ async function handleProject(event) {
       slug:       slug,
       content_ar: formData.get('content_ar') || null,
       sort_order: Number(formData.get('sort_order')) || 100,
-      image_url:  images[0]?.url || null,
+      image_url:  images.find(i => i.position === 'hero')?.url || images[0]?.url || null,
       images:     images,
       published:  formData.get('published') === 'on',
     };
@@ -586,10 +594,10 @@ async function saveProject(id) {
       capacity:   document.getElementById('pf_cap_' + id)?.value.trim() || null,
       year:       Number(document.getElementById('pf_year_' + id)?.value) || null,
       summary:    document.getElementById('pf_sum_' + id)?.value.trim(),
-      slug:       document.getElementById('pf_slug_' + id)?.value.trim() || null,
+      slug:       document.getElementById('pf_slug_' + id)?.value.trim() || slugify(document.getElementById('pf_title_' + id)?.value.trim() || ''),
       content_ar: document.getElementById('pf_content_' + id)?.value.trim() || null,
       sort_order: Number(document.getElementById('pf_sort_' + id)?.value) || 100,
-      image_url:  allImgs[0]?.url || null,
+      image_url:  allImgs.find(i => i.position === 'hero')?.url || allImgs[0]?.url || null,
       images:     allImgs,
       updated_at: new Date().toISOString(),
     };
@@ -641,7 +649,7 @@ async function handleArticle(event) {
       content_en:   formData.get('content_en') || null,
       content_es:   formData.get('content_es') || null,
       content_zh:   formData.get('content_zh') || null,
-      image_url:    images[0]?.url || null,
+      image_url:    images.find(i => i.position === 'hero')?.url || images[0]?.url || null,
       images,
       published:    formData.get('published') === 'on',
     };
@@ -849,7 +857,7 @@ async function saveArticle(id) {
       title_ar:   titleAr,
       summary_ar: summaryAr,
       content_ar: contentAr,
-      image_url:  allImgs[0]?.url || null,
+      image_url:  allImgs.find(i => i.position === 'hero')?.url || allImgs[0]?.url || null,
       images:     allImgs,
       updated_at: new Date().toISOString(),
     };

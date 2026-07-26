@@ -355,7 +355,6 @@ function buildArticlesPage(articles) {
       <a href="projects.html" data-i18n="nav_projects">Projects</a>
       <a href="articles.html" data-i18n="nav_articles">Articles</a>
       <a href="contact.html" data-i18n="nav_contact">Contact</a>
-      <a class="admin-link" href="dashboard.html">Admin</a>
       <div class="lang-switcher" role="group" aria-label="Language">
         <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
           <i class="ti ti-world" aria-hidden="true"></i>
