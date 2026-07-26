@@ -1,5 +1,5 @@
 --- /home/claude/orig_check/alaslsolar-main/pump-calculator.html	2026-07-20 06:15:32.000000000 +0000
-+++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-25 18:19:25.106863026 +0000
++++ /home/claude/repo_fix/alaslsolar-main/pump-calculator.html	2026-07-26 06:07:00.808359805 +0000
 @@ -76,9 +76,21 @@
      .field-group { display: grid; gap: var(--space-2); margin-bottom: var(--space-2); }
      .field-group.g2 { grid-template-columns: 1fr 1fr; }
@@ -123,7 +123,7 @@
          </div>
  
          <!-- Results panel (full width) -->
-@@ -463,22 +526,429 @@
+@@ -463,22 +526,428 @@
      /* ── Crop data ── */
      const cropData = {
        flood:     [{name:'قمح',flow:50,pressure:0},{name:'برسيم',flow:50,pressure:0},{name:'شعير',flow:50,pressure:0},{name:'خضراوات',flow:35,pressure:0}],
@@ -335,8 +335,7 @@
 +          ${brandDropdownHtml(catKey, brands, currentBrand)}
 +        </div>
 +        <div class="prodrec-specs">${specsLine}</div>
-+        <div class="prodrec-price">${fmtPrice(row)}</div>
-+        <a class="prodrec-link" href="${prodLink(row)}" target="_blank" rel="noopener">عرض المنتج ←</a>
++        <a class="prodrec-link" href="${prodLink(row)}" target="_blank" rel="noopener">عرض المنتج والسعر ←</a>
 +      </div>`;
 +    }
 +
@@ -557,7 +556,7 @@
      function updateCrops() {
        const method = document.getElementById('irr_method').value;
        const sel    = document.getElementById('crop_type');
-@@ -489,7 +959,7 @@
+@@ -489,7 +958,7 @@
          o.textContent = c.name; sel.appendChild(o);
        });
        if (sel.options.length) {
@@ -566,7 +565,7 @@
          document.getElementById('pressure').value     = sel.options[0].dataset.pressure;
        }
      }
-@@ -498,40 +968,49 @@
+@@ -498,40 +967,49 @@
        const sel = document.getElementById('crop_type');
        const opt = sel.options[sel.selectedIndex];
        if (opt && opt.dataset.flow) {
@@ -615,8 +614,8 @@
 +      /* ── Core calculations (دايمًا بالفدان والمتر المكعب داخليًا) ── */
        const FR    = (area * fpf) / hours;             // m³/h
        const FR_s  = FR / 3600;                         // m³/s
-+      const FR_disp = waterUnit === 'gal' ? FR * M3_TO_GAL : FR;   // للعرض فقط حسب اختيار العميل
-+      const FR_unit = waterUnit === 'gal' ? 'جالون/ساعة' : 'م³/ساعة';
++      const FR_disp = waterUnit === 'gal' ? (FR * M3_TO_GAL) / 60 : FR;   // GPM هو المعيار الأمريكي الفعلي لتصنيف الطلمبات، مش جالون/ساعة
++      const FR_unit = waterUnit === 'gal' ? 'جالون/دقيقة (GPM)' : 'م³/ساعة';
        const TDH   = swl + elev + safety + (far/10) + pm;
 -      // Primary result is HP: (FR × TDH) ÷ (270 × η)
 +      // Primary result is HP: (FR × TDH) ÷ (270 × η)  — لازم FR بالمتر المكعب دايمًا هنا
@@ -636,7 +635,7 @@
  
        /* ── Pipe diameter ── */
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * V));
-@@ -540,8 +1019,11 @@
+@@ -540,8 +1018,11 @@
        const D_near = nearestPipe(D_in);
  
        /* ── Electrical ── */
@@ -650,7 +649,7 @@
  
        const methodLabel = {flood:'غمر', sprinkler:'رش', drip:'تنقيط'}[method];
  
-@@ -566,7 +1048,7 @@
+@@ -566,7 +1047,7 @@
            <div class="results-tags">
              <span class="rtag">${methodLabel}</span>
              <span class="rtag">${crop}</span>
@@ -659,7 +658,7 @@
            </div>
          </div>
  
-@@ -579,13 +1061,13 @@
+@@ -579,13 +1060,13 @@
            </div>
            <div class="metric-card accent">
              <div class="metric-label">معدل التدفق المطلوب</div>
@@ -677,7 +676,7 @@
            </div>
          </div>
  
-@@ -610,6 +1092,17 @@
+@@ -610,6 +1091,17 @@
              <div class="metric-label">كابل التوصيل</div>
              <div class="metric-value" style="font-size:18px;">${cable}</div>
              <div class="metric-unit">قاطع: ${fuse} أمبير — 3 فاز</div>
@@ -695,7 +694,7 @@
            </div>
          </div>
  
-@@ -640,8 +1133,8 @@
+@@ -640,8 +1132,8 @@
            <div class="detail-row">
              <span class="detail-label">معدل التدفق (FR)</span>
              <div class="detail-value">
@@ -706,7 +705,7 @@
              </div>
            </div>
            <div class="detail-row">
-@@ -680,6 +1173,11 @@
+@@ -680,6 +1172,11 @@
            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
            <span>القدرة الموصى بها <strong>${hp_std} حصان (${kw_std} كيلوواط)</strong> هي أقرب مقاس تجاري للقدرة الحسابية <strong>${hp_c} حصان</strong>. يُرجى مراجعة كتالوج المصنع للتأكد من توافق نقطة العمل مع منحنى الضخة عند TDH = ${TDH.toFixed(0)} متر.</span>
          </div>
@@ -718,7 +717,7 @@
  
          <!-- Footer disclaimer -->
          <div class="footer-disclaimer">
-@@ -692,35 +1190,43 @@
+@@ -692,35 +1189,43 @@
            <i class="fa fa-paper-plane"></i> اطلب عرض سعر — سيتم إرفاق بياناتك تلقائياً
          </button>
        `;
@@ -763,8 +762,8 @@
        const pm     = parseFloat(pbar) * 10.2;
 -      const FR     = (parseFloat(area) * parseFloat(fpf)) / parseFloat(hours);
 +      const FR     = (area * fpf) / parseFloat(hours);   // م³/ساعة دايمًا (مرجع داخلي)
-+      const FR_disp = waterUnit === 'gal' ? FR * M3_TO_GAL : FR;
-+      const FR_unit = waterUnit === 'gal' ? 'جالون/ساعة' : 'م³/ساعة';
++      const FR_disp = waterUnit === 'gal' ? (FR * M3_TO_GAL) / 60 : FR;
++      const FR_unit = waterUnit === 'gal' ? 'جالون/دقيقة (GPM)' : 'م³/ساعة';
        const FR_s   = FR / 3600;
        const TDH    = parseFloat(swl) + parseFloat(elev) + parseFloat(safety) + (parseFloat(far)/10) + pm;
        const hp_c   = Math.round((FR * TDH) / (270 * 0.75) * 100) / 100;
@@ -778,7 +777,7 @@
        const D_m    = Math.sqrt((4 * FR_s) / (Math.PI * parseFloat(V)));
        const D_mm   = D_m * 1000;
        const D_in   = D_mm / 25.4;
-@@ -728,7 +1234,7 @@
+@@ -728,7 +1233,7 @@
  
        // Build summary note
        const note = `=== بيانات حاسبة نظام الضخ ===
@@ -787,7 +786,7 @@
  ▸ طريقة الري: ${methodLabel}
  ▸ نوع الزراعة: ${crop}
  ▸ وش المياه: ${swl} متر
-@@ -736,11 +1242,11 @@
+@@ -736,11 +1241,11 @@
  ▸ الارتفاعات: ${elev} متر
  ▸ الهبوط/الأمان: ${safety} متر
  ▸ الضغط المطلوب: ${pbar} بار
@@ -801,7 +800,7 @@
  ▸ الرفع الديناميكي (TDH): ${TDH.toFixed(0)} متر
  ▸ قدرة الموتور الحسابية: ${hp_c} حصان (${kw_c} كيلوواط)
  ▸ أقرب قدرة تجارية: ${hp_std} حصان / ${kw_std} كيلوواط
-@@ -751,8 +1257,10 @@
+@@ -751,8 +1256,10 @@
      }
  
      /* ── Init ── */
