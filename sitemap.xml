@@ -3,73 +3,73 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://alaslsolar.com/</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/about.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/services.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/services-agriculture.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/services-industrial.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/services-residential.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/products.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/projects.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/articles.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/calculators.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/pump-calculator.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://alaslsolar.com/contact.html</loc>
-    <lastmod>2026-07-20</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -155,54 +155,34 @@
   </url>
 <!-- PROJECTS:START -->
   <url>
-    <loc>https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar.html</loc>
-    <lastmod>2026-07-25</lastmod>
+    <loc>https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid.html</loc>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar-zh.html"/>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid.html"/>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid-en.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid-zh.html"/>
+  </url>
+  <url>
+    <loc>https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid.html</loc>
+    <lastmod>2026-07-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid.html"/>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid-en.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid-zh.html"/>
   </url>
   <url>
     <loc>https://alaslsolar.com/projects/louta-agriculture-investment-solar-irrigation.html</loc>
-    <lastmod>2026-07-25</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
       <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/louta-agriculture-investment-solar-irrigation.html"/>
       <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/louta-agriculture-investment-solar-irrigation-en.html"/>
       <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/louta-agriculture-investment-solar-irrigation-es.html"/>
       <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/louta-agriculture-investment-solar-irrigation-zh.html"/>
-  </url>
-  <url>
-    <loc>https://alaslsolar.com/projects/aqar-group-real-estate-solar-feasibility-study.html</loc>
-    <lastmod>2026-07-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/aqar-group-real-estate-solar-feasibility-study.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/aqar-group-real-estate-solar-feasibility-study-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/aqar-group-real-estate-solar-feasibility-study-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/aqar-group-real-estate-solar-feasibility-study-zh.html"/>
-  </url>
-  <url>
-    <loc>https://alaslsolar.com/projects/green-sadat-sustainability-initiative.html</loc>
-    <lastmod>2026-07-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative-zh.html"/>
-  </url>
-  <url>
-    <loc>https://alaslsolar.com/projects/montessori-house-solar-energy.html</loc>
-    <lastmod>2026-07-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/montessori-house-solar-energy.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/montessori-house-solar-energy-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/montessori-house-solar-energy-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/montessori-house-solar-energy-zh.html"/>
   </url>
   <url>
     <loc>https://alaslsolar.com/projects/bait-yakan-heritage-solar-maintenance.html</loc>
@@ -216,7 +196,7 @@
   </url>
   <url>
     <loc>https://alaslsolar.com/projects/elshazly-vineyard-farm-solar.html</loc>
-    <lastmod>2026-07-25</lastmod>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
       <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/elshazly-vineyard-farm-solar.html"/>
@@ -225,44 +205,24 @@
       <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/elshazly-vineyard-farm-solar-zh.html"/>
   </url>
   <url>
-    <loc>https://alaslsolar.com/projects/dr-mohamed-ibrahim-citrus-farm-solar.html</loc>
-    <lastmod>2026-07-25</lastmod>
+    <loc>https://alaslsolar.com/projects/green-sadat-sustainability-initiative.html</loc>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/dr-mohamed-ibrahim-citrus-farm-solar.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/dr-mohamed-ibrahim-citrus-farm-solar-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/dr-mohamed-ibrahim-citrus-farm-solar-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/dr-mohamed-ibrahim-citrus-farm-solar-zh.html"/>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative.html"/>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative-en.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/green-sadat-sustainability-initiative-zh.html"/>
   </url>
   <url>
-    <loc>https://alaslsolar.com/projects/awlad-salama-livestock-farm-solar.html</loc>
-    <lastmod>2026-07-25</lastmod>
+    <loc>https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar.html</loc>
+    <lastmod>2026-07-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/awlad-salama-livestock-farm-solar.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/awlad-salama-livestock-farm-solar-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/awlad-salama-livestock-farm-solar-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/awlad-salama-livestock-farm-solar-zh.html"/>
-  </url>
-  <url>
-    <loc>https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid.html</loc>
-    <lastmod>2026-07-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/alqalaa-import-export-solar-offgrid-zh.html"/>
-  </url>
-  <url>
-    <loc>https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid.html</loc>
-    <lastmod>2026-07-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid.html"/>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid-en.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/french-village-sharm-elsheikh-solar-offgrid-zh.html"/>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar.html"/>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar-en.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/projects/alwadi-group-poultry-farm-solar-zh.html"/>
   </url>
   <!-- PROJECTS:END -->
 </urlset>
