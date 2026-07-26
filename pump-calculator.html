@@ -730,8 +730,7 @@
           ${brandDropdownHtml(catKey, brands, currentBrand)}
         </div>
         <div class="prodrec-specs">${specsLine}</div>
-        <div class="prodrec-price">${fmtPrice(row)}</div>
-        <a class="prodrec-link" href="${prodLink(row)}" target="_blank" rel="noopener">عرض المنتج ←</a>
+        <a class="prodrec-link" href="${prodLink(row)}" target="_blank" rel="noopener">عرض المنتج والسعر ←</a>
       </div>`;
     }
 
@@ -998,8 +997,8 @@
       /* ── Core calculations (دايمًا بالفدان والمتر المكعب داخليًا) ── */
       const FR    = (area * fpf) / hours;             // m³/h
       const FR_s  = FR / 3600;                         // m³/s
-      const FR_disp = waterUnit === 'gal' ? FR * M3_TO_GAL : FR;   // للعرض فقط حسب اختيار العميل
-      const FR_unit = waterUnit === 'gal' ? 'جالون/ساعة' : 'م³/ساعة';
+      const FR_disp = waterUnit === 'gal' ? (FR * M3_TO_GAL) / 60 : FR;   // GPM هو المعيار الأمريكي الفعلي لتصنيف الطلمبات، مش جالون/ساعة
+      const FR_unit = waterUnit === 'gal' ? 'جالون/دقيقة (GPM)' : 'م³/ساعة';
       const TDH   = swl + elev + safety + (far/10) + pm;
       // Primary result is HP: (FR × TDH) ÷ (270 × η)  — لازم FR بالمتر المكعب دايمًا هنا
       const hp_c   = r2((FR * TDH) / (270 * 0.75));
@@ -1219,8 +1218,8 @@
       // Re-calculate results to capture them
       const pm     = parseFloat(pbar) * 10.2;
       const FR     = (area * fpf) / parseFloat(hours);   // م³/ساعة دايمًا (مرجع داخلي)
-      const FR_disp = waterUnit === 'gal' ? FR * M3_TO_GAL : FR;
-      const FR_unit = waterUnit === 'gal' ? 'جالون/ساعة' : 'م³/ساعة';
+      const FR_disp = waterUnit === 'gal' ? (FR * M3_TO_GAL) / 60 : FR;
+      const FR_unit = waterUnit === 'gal' ? 'جالون/دقيقة (GPM)' : 'م³/ساعة';
       const FR_s   = FR / 3600;
       const TDH    = parseFloat(swl) + parseFloat(elev) + parseFloat(safety) + (parseFloat(far)/10) + pm;
       const hp_c   = Math.round((FR * TDH) / (270 * 0.75) * 100) / 100;
