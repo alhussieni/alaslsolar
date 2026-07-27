@@ -351,7 +351,7 @@ function toggleSection(wrapId, btnId) {
 
 let imageRowCounter = 0;
 
-function addImageRow(containerId, type) {
+function addImageRow(containerId, type, presetFile) {
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
   const idx = ++imageRowCounter;
@@ -377,17 +377,40 @@ function addImageRow(containerId, type) {
   `;
   wrap.appendChild(row);
 
-  // Preview on file select
-  document.getElementById('imgFile_' + idx).addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file) return;
+  const fileInput = document.getElementById('imgFile_' + idx);
+  const showPreview = (file) => {
     const reader = new FileReader();
     reader.onload = e => {
       const prev = document.getElementById('imgPreview_' + idx);
       if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
     };
     reader.readAsDataURL(file);
+  };
+
+  // Preview on manual file select
+  fileInput.addEventListener('change', function() {
+    if (this.files[0]) showPreview(this.files[0]);
   });
+
+  // لو الصف ده جزء من رفع مجموعة صور دفعة واحدة، نحط الملف جاهز في حقل
+  // الرفع نفسه (عبر DataTransfer، لأن input.files للقراءة فقط أصلًا) ونعرض
+  // معاينته على طول، ونخلي وضعها الافتراضي "معرض صور" (الأنسب لدفعة صور).
+  if (presetFile) {
+    const dt = new DataTransfer();
+    dt.items.add(presetFile);
+    fileInput.files = dt.files;
+    showPreview(presetFile);
+    const posSelect = document.getElementById('imgPos_' + idx);
+    if (posSelect) posSelect.value = 'gallery';
+  }
+}
+
+// رفع مجموعة صور دفعة واحدة: بيضيف صف مستقل تلقائيًا لكل صورة من الصور
+// المختارة، بدل ما الأدمن يضغط "إضافة صورة" ويختار ملف واحد كل مرة يدويًا.
+function handleBulkImageUpload(containerId, type, inputEl) {
+  const files = Array.from(inputEl.files || []);
+  files.forEach(file => addImageRow(containerId, type, file));
+  inputEl.value = '';  // نفضّي الاختيار عشان لو الأدمن رفع نفس الدفعة تاني بالغلط ميتكررش
 }
 
 async function collectImages(containerId, folder) {
