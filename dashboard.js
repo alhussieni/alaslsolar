@@ -1,5 +1,14 @@
 const client = getAlaslSupabase();
 
+// التنقل بين أقسام لوحة التحكم (سايدبار) — يعرض قسم واحد بس في كل مرة
+function showDashSection(targetId, btn) {
+  document.querySelectorAll('.dash-main > [id^="section-"]').forEach(el => {
+    el.style.display = (el.id === targetId) ? '' : 'none';
+  });
+  document.querySelectorAll('.dash-nav-item').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
 function setText(selector, text) {
   const element = document.querySelector(selector);
   if (element) element.textContent = text || "";
@@ -927,6 +936,7 @@ async function loadLists() {
   loadArticles();
   loadProducts();
   loadBrandLogos();
+  loadCalcSettings();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1672,6 +1682,55 @@ document.addEventListener('DOMContentLoaded', () => {
 // Brand Logos — one shared logo per brand, used as a fallback image
 // for every product of that brand that doesn't have its own photo.
 // ══════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════
+// Calculator Suggestions Settings — تفعيل/إلغاء قسم المنتجات الموصى بها
+// في حاسبة الضخ، واختيار الماركة الافتراضية (رقم 1) لكل فئة.
+// ══════════════════════════════════════════════════════════════
+
+const CALC_SETTINGS_CATS = [
+  { cat: 'well_motors', selectId: 'calcBrandWellMotors', col: 'preferred_well_motor_brand' },
+  { cat: 'pumps',       selectId: 'calcBrandPumps',       col: 'preferred_pump_brand' },
+  { cat: 'inverters',   selectId: 'calcBrandInverters',   col: 'preferred_inverter_brand' },
+  { cat: 'pipes',       selectId: 'calcBrandPipes',       col: 'preferred_pipe_brand' },
+];
+
+async function loadCalcSettings() {
+  if (!client) return;
+  const { data: settings, error: sErr } = await client.from('calc_settings').select('*').eq('id', 1).single();
+  if (sErr) { console.error('calc_settings load error', sErr); return; }
+
+  document.getElementById('calcSuggestionsEnabled').checked = !!settings.suggestions_enabled;
+
+  for (const c of CALC_SETTINGS_CATS) {
+    const sel = document.getElementById(c.selectId);
+    if (!sel) continue;
+    const { data: rows } = await client.from('products').select('brand').eq('category', c.cat).eq('published', true);
+    const brands = [...new Set((rows || []).map(r => r.brand).filter(Boolean))].sort();
+    const current = settings[c.col] || '';
+    sel.innerHTML = '<option value="">— بدون تفضيل (أي ماركة) —</option>' +
+      brands.map(b => `<option value="${escapeHtmlAttr(b)}" ${b === current ? 'selected' : ''}>${escapeHtmlAttr(b)}</option>`).join('');
+  }
+}
+
+async function saveCalcSettings(event) {
+  event.preventDefault();
+  const msg = document.getElementById('calcSettingsMessage');
+  const payload = { suggestions_enabled: document.getElementById('calcSuggestionsEnabled').checked, updated_at: new Date().toISOString() };
+  CALC_SETTINGS_CATS.forEach(c => {
+    const v = document.getElementById(c.selectId).value;
+    payload[c.col] = v || null;
+  });
+  const { error } = await client.from('calc_settings').update(payload).eq('id', 1);
+  msg.style.color = error ? '#c33' : '#2a7a2a';
+  msg.textContent = error ? ('خطأ: ' + error.message) : '✅ تم حفظ إعدادات الحاسبة';
+  setTimeout(() => { msg.textContent = ''; }, 3500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('calcSettingsForm');
+  if (form) form.addEventListener('submit', saveCalcSettings);
+});
 
 async function loadBrandLogos() {
   const list = document.getElementById('brandLogosList');

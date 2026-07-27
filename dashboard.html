@@ -15,6 +15,51 @@
   <script defer src="alasl-editor.bundle.js"></script>
   <script defer src="dashboard.js"></script>
   <style>
+    .dash-shell-flex { display: flex; gap: 24px; align-items: flex-start; }
+    .dash-sidebar {
+      flex: 0 0 220px;
+      position: sticky;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #fff;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 10px;
+    }
+    .dash-nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: right;
+      cursor: pointer;
+      width: 100%;
+    }
+    .dash-nav-item:hover { background: var(--brand-soft); }
+    .dash-nav-item.active { background: var(--brand); color: #fff; }
+    .dash-nav-count {
+      font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+      background: rgba(0,0,0,0.06); color: inherit;
+    }
+    .dash-nav-item.active .dash-nav-count { background: rgba(255,255,255,0.25); }
+    .dash-main { flex: 1 1 auto; min-width: 0; }
+    @media (max-width: 860px) {
+      .dash-shell-flex { flex-direction: column; }
+      .dash-sidebar { flex-direction: row; overflow-x: auto; position: static; width: 100%; }
+      .dash-nav-item { width: auto; white-space: nowrap; }
+    }
+  </style>
+  <style>
     .faq-page-btn {
       display: flex;
       flex-direction: column;
@@ -122,9 +167,35 @@
         <button class="btn btn-secondary dark" type="button" data-logout>Logout</button>
       </div>
 
+      <div class="dash-shell-flex">
+        <nav class="dash-sidebar" aria-label="أقسام لوحة التحكم">
+          <button class="dash-nav-item active" data-target="section-stats" onclick="showDashSection('section-stats', this)">
+            <span>🔢 الإحصائيات</span>
+          </button>
+          <button class="dash-nav-item" data-target="section-faq" onclick="showDashSection('section-faq', this)">
+            <span>❓ الأسئلة الشائعة</span>
+          </button>
+          <button class="dash-nav-item" data-target="section-projects" onclick="showDashSection('section-projects', this)">
+            <span>📁 المشاريع</span>
+          </button>
+          <button class="dash-nav-item" data-target="section-products" onclick="showDashSection('section-products', this)">
+            <span>🛒 المنتجات</span>
+          </button>
+          <button class="dash-nav-item" data-target="section-brands" onclick="showDashSection('section-brands', this)">
+            <span>🏷️ شعارات الماركات</span>
+          </button>
+          <button class="dash-nav-item" data-target="section-calc" onclick="showDashSection('section-calc', this)">
+            <span>🧮 إعدادات الحاسبة</span>
+          </button>
+          <button class="dash-nav-item" data-target="section-articles" onclick="showDashSection('section-articles', this)">
+            <span>📝 المقالات</span>
+          </button>
+        </nav>
+
+        <div class="dash-main">
 
       <!-- Stats Management -->
-      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+      <div class="dashboard-grid" id="section-stats" style="grid-template-columns:1fr;margin-bottom:0">
         <article class="dashboard-card" id="statsCard">
           <h3>🔢 Homepage Stats</h3>
           <p style="color:var(--muted);font-size:14px;margin-bottom:var(--space-3)">
@@ -139,7 +210,7 @@
 
 
                   <!-- FAQ Management -->
-      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+      <div class="dashboard-grid" id="section-faq" style="grid-template-columns:1fr;margin-bottom:0;display:none">
         <article class="dashboard-card" id="faqCard">
           <h3>❓ إدارة الأسئلة الشائعة</h3>
           <p style="color:var(--muted);font-size:14px;margin:0 0 var(--space-3)">
@@ -258,7 +329,7 @@
       </div>
 
       <!-- ── Projects Management ── -->
-      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+      <div class="dashboard-grid" id="section-projects" style="grid-template-columns:1fr;margin-bottom:0;display:none">
         <article class="dashboard-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
             <h3 style="margin:0">📁 إدارة المشاريع</h3>
@@ -360,7 +431,7 @@
       </div>
 
       <!-- ── Products Management ── -->
-      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+      <div class="dashboard-grid" id="section-products" style="grid-template-columns:1fr;margin-bottom:0;display:none">
         <article class="dashboard-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
             <h3 style="margin:0">🛒 إدارة المنتجات</h3>
@@ -543,7 +614,7 @@
       </div>
 
       <!-- ── Brand Logos Management ── -->
-      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+      <div class="dashboard-grid" id="section-brands" style="grid-template-columns:1fr;margin-bottom:0;display:none">
         <article class="dashboard-card" id="brandLogosCard">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
             <h3 style="margin:0">🏷️ شعارات الشركات (البراندات)</h3>
@@ -591,8 +662,52 @@
         </article>
       </div>
 
+      <!-- ── Calculator Suggestions Settings ── -->
+      <div class="dashboard-grid" id="section-calc" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+        <article class="dashboard-card" id="calcSettingsCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">🧮 إعدادات اقتراحات حاسبة الضخ</h3>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+            تحكّم في ظهور قسم "المنتجات الموصى بها" في حاسبة الضخ، واختر الماركة الافتراضية (الاختيار رقم 1) لكل فئة —
+            الزائر يقدر يغيّرها بنفسه من القائمة المنسدلة، لكن اختيارك هنا هو اللي هيظهر أولًا.
+          </p>
+
+          <form class="admin-form" id="calcSettingsForm">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-2);padding:10px;background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+              <input type="checkbox" id="calcSuggestionsEnabled" style="width:18px;height:18px;">
+              <label for="calcSuggestionsEnabled" style="margin:0;font-weight:700;cursor:pointer">تفعيل قسم "المنتجات الموصى بها" في الحاسبة</label>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-2)">
+              <div>
+                <label>الماركة الافتراضية — موتور غاطس</label>
+                <select id="calcBrandWellMotors"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
+              </div>
+              <div>
+                <label>الماركة الافتراضية — طلمبة</label>
+                <select id="calcBrandPumps"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
+              </div>
+              <div>
+                <label>الماركة الافتراضية — إنفرتر</label>
+                <select id="calcBrandInverters"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
+              </div>
+              <div>
+                <label>الماركة الافتراضية — ماسورة</label>
+                <select id="calcBrandPipes"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
+              </div>
+            </div>
+
+            <div style="margin-top:var(--space-2)">
+              <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ إعدادات الحاسبة</button>
+            </div>
+            <p class="form-note" id="calcSettingsMessage" style="margin-top:6px"></p>
+          </form>
+        </article>
+      </div>
+
       <!-- ── Articles Management ── -->
-      <div class="dashboard-grid" style="grid-template-columns:1fr;margin-bottom:0">
+      <div class="dashboard-grid" id="section-articles" style="grid-template-columns:1fr;margin-bottom:0;display:none">
         <article class="dashboard-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
             <h3 style="margin:0">📝 إدارة المقالات</h3>
@@ -675,6 +790,9 @@
           </div>
         </article>
       </div>
+
+        </div><!-- /.dash-main -->
+      </div><!-- /.dash-shell-flex -->
     </section>
   </main>
 </body>
