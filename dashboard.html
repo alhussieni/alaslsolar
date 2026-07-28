@@ -53,6 +53,31 @@
     }
     .dash-nav-item.active .dash-nav-count { background: rgba(255,255,255,0.25); }
     .dash-main { flex: 1 1 auto; min-width: 0; }
+    .dash-subsidebar {
+      flex: 0 0 190px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .prod-dash-filter {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 12px; border-radius: var(--radius); border: none;
+      background: transparent; color: var(--ink); font-family: 'Cairo', sans-serif;
+      font-size: 13px; font-weight: 600; text-align: right; cursor: pointer; width: 100%;
+    }
+    .prod-dash-filter:hover { background: var(--brand-soft); }
+    .prod-dash-filter.active { background: var(--brand); color: #fff; }
+    .prod-cat-count {
+      font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+      background: rgba(0,0,0,0.06); color: inherit;
+    }
+    .prod-dash-filter.active .prod-cat-count { background: rgba(255,255,255,0.25); }
+    @media (max-width: 860px) {
+      .dash-subsidebar { flex-direction: row; overflow-x: auto; max-height: none; flex-wrap: nowrap; }
+      .prod-dash-filter { width: auto; white-space: nowrap; }
+    }
     @media (max-width: 860px) {
       .dash-shell-flex { flex-direction: column; }
       .dash-sidebar { flex-direction: row; overflow-x: auto; position: static; width: 100%; }
@@ -551,64 +576,84 @@
             </form>
           </div>
 
-          <!-- Filter by category -->
-          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--space-2)">
-            <button type="button" class="prod-dash-filter active" data-pcat="all"
-              onclick="filterDashProducts('all',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">الكل</button>
-            <button type="button" class="prod-dash-filter" data-pcat="inverters"
-              onclick="filterDashProducts('inverters',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">⚡ إنفرترات</button>
-            <button type="button" class="prod-dash-filter" data-pcat="panels"
-              onclick="filterDashProducts('panels',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">☀️ ألواح</button>
-            <button type="button" class="prod-dash-filter" data-pcat="accessories"
-              onclick="filterDashProducts('accessories',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔌 إكسسوارات</button>
-            <button type="button" class="prod-dash-filter" data-pcat="combiners"
-              onclick="filterDashProducts('combiners',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">📦 صناديق</button>
-            <button type="button" class="prod-dash-filter" data-pcat="structures"
-              onclick="filterDashProducts('structures',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🏗️ شاسيهات</button>
-            <button type="button" class="prod-dash-filter" data-pcat="cables"
-              onclick="filterDashProducts('cables',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔶 كابلات</button>
-            <button type="button" class="prod-dash-filter" data-pcat="batteries"
-              onclick="filterDashProducts('batteries',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔋 بطاريات</button>
-            <button type="button" class="prod-dash-filter" data-pcat="offgrid"
-              onclick="filterDashProducts('offgrid',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔆 أوف جريد</button>
-            <button type="button" class="prod-dash-filter" data-pcat="well_motors"
-              onclick="filterDashProducts('well_motors',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🛠️ موتورات آبار</button>
-            <button type="button" class="prod-dash-filter" data-pcat="pumps"
-              onclick="filterDashProducts('pumps',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🌊 طلمبات</button>
-            <button type="button" class="prod-dash-filter" data-pcat="pipes"
-              onclick="filterDashProducts('pipes',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🧵 مواسير</button>
-            <button type="button" class="prod-dash-filter" data-pcat="street_lights"
-              onclick="filterDashProducts('street_lights',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">💡 إنارة شوارع</button>
-            <button type="button" class="prod-dash-filter" data-pcat="flood_lights"
-              onclick="filterDashProducts('flood_lights',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🔦 كشافات</button>
-            <button type="button" class="prod-dash-filter" data-pcat="garden_lights"
-              onclick="filterDashProducts('garden_lights',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🪴 حدائق</button>
-            <button type="button" class="prod-dash-filter" data-pcat="solar_kits"
-              onclick="filterDashProducts('solar_kits',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🧰 أنظمة منزلية</button>
-            <button type="button" class="prod-dash-filter" data-pcat="solar_safety"
-              onclick="filterDashProducts('solar_safety',this)"
-              style="padding:5px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">🚧 سلامة الطرق</button>
-          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <nav class="dash-subsidebar" aria-label="تصنيفات المنتجات">
+              <button type="button" class="prod-dash-filter active" data-pcat="all"
+                onclick="filterDashProducts('all',this)">
+                <span>الكل</span><span class="prod-cat-count" data-pcat-count="all">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="inverters"
+                onclick="filterDashProducts('inverters',this)">
+                <span>⚡ إنفرترات</span><span class="prod-cat-count" data-pcat-count="inverters">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="panels"
+                onclick="filterDashProducts('panels',this)">
+                <span>☀️ ألواح</span><span class="prod-cat-count" data-pcat-count="panels">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="accessories"
+                onclick="filterDashProducts('accessories',this)">
+                <span>🔌 إكسسوارات</span><span class="prod-cat-count" data-pcat-count="accessories">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="combiners"
+                onclick="filterDashProducts('combiners',this)">
+                <span>📦 صناديق</span><span class="prod-cat-count" data-pcat-count="combiners">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="structures"
+                onclick="filterDashProducts('structures',this)">
+                <span>🏗️ شاسيهات</span><span class="prod-cat-count" data-pcat-count="structures">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="cables"
+                onclick="filterDashProducts('cables',this)">
+                <span>🔶 كابلات</span><span class="prod-cat-count" data-pcat-count="cables">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="batteries"
+                onclick="filterDashProducts('batteries',this)">
+                <span>🔋 بطاريات</span><span class="prod-cat-count" data-pcat-count="batteries">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="offgrid"
+                onclick="filterDashProducts('offgrid',this)">
+                <span>🔆 أوف جريد</span><span class="prod-cat-count" data-pcat-count="offgrid">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="well_motors"
+                onclick="filterDashProducts('well_motors',this)">
+                <span>🛠️ موتورات آبار</span><span class="prod-cat-count" data-pcat-count="well_motors">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="pumps"
+                onclick="filterDashProducts('pumps',this)">
+                <span>🌊 طلمبات</span><span class="prod-cat-count" data-pcat-count="pumps">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="pipes"
+                onclick="filterDashProducts('pipes',this)">
+                <span>🧵 مواسير</span><span class="prod-cat-count" data-pcat-count="pipes">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="street_lights"
+                onclick="filterDashProducts('street_lights',this)">
+                <span>💡 إنارة شوارع</span><span class="prod-cat-count" data-pcat-count="street_lights">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="flood_lights"
+                onclick="filterDashProducts('flood_lights',this)">
+                <span>🔦 كشافات</span><span class="prod-cat-count" data-pcat-count="flood_lights">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="garden_lights"
+                onclick="filterDashProducts('garden_lights',this)">
+                <span>🪴 حدائق</span><span class="prod-cat-count" data-pcat-count="garden_lights">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="solar_kits"
+                onclick="filterDashProducts('solar_kits',this)">
+                <span>🧰 أنظمة منزلية</span><span class="prod-cat-count" data-pcat-count="solar_kits">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="solar_safety"
+                onclick="filterDashProducts('solar_safety',this)">
+                <span>🚧 سلامة الطرق</span><span class="prod-cat-count" data-pcat-count="solar_safety">0</span>
+              </button>
+            </nav>
 
-          <!-- Products list -->
-          <div id="productsList" style="display:grid;gap:var(--space-2)">
-            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+            <div style="flex:1;min-width:0">
+              <!-- Products list -->
+              <div id="productsList" style="display:grid;gap:var(--space-2)">
+                <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
