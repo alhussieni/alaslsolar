@@ -1382,22 +1382,25 @@ async function loadProducts() {
   const { data, error } = await client.from('products').select('*').order('sort_order', { ascending: true });
   if (error) { list.innerHTML = '<p style="color:red;font-size:14px">خطأ: ' + error.message + '</p>'; return; }
   allDashProducts = data || [];
+  updateProductCatCounts();
   renderDashProducts();
 }
 
 function filterDashProducts(cat, btn) {
   currentProdCat = cat;
-  document.querySelectorAll('.prod-dash-filter').forEach(b => {
-    b.style.background = '#fff';
-    b.style.borderColor = 'var(--line)';
-    b.style.color = 'var(--ink)';
-  });
-  if (btn) {
-    btn.style.background = 'var(--brand)';
-    btn.style.borderColor = 'var(--brand)';
-    btn.style.color = '#fff';
-  }
+  document.querySelectorAll('.prod-dash-filter').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
   renderDashProducts();
+}
+
+// تحديث عداد كل تصنيف في السايدبار الفرعي بناءً على المنتجات المحمّلة فعليًا
+function updateProductCatCounts() {
+  const counts = { all: allDashProducts.length };
+  allDashProducts.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
+  document.querySelectorAll('[data-pcat-count]').forEach(el => {
+    const cat = el.getAttribute('data-pcat-count');
+    el.textContent = counts[cat] || 0;
+  });
 }
 
 // Same fallback logic as products.html: use power_kw/power_hp if set,
