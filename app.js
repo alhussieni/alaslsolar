@@ -1828,6 +1828,82 @@ async function initAdminLink() {
   }
 }
 
+// ── Project gallery lightbox (slider with thumbnail strip) ─────────────────
+function initProjectGallery() {
+  const items = Array.from(document.querySelectorAll(".project-gallery-item"));
+  if (!items.length) return;
+
+  const photos = items.map((el) => ({
+    full: el.dataset.full,
+    caption: el.dataset.caption || "",
+  }));
+
+  const box = document.createElement("div");
+  box.className = "project-lightbox";
+  box.innerHTML = `
+    <button type="button" class="project-lightbox-close" aria-label="إغلاق">×</button>
+    <div class="project-lightbox-main">
+      <button type="button" class="project-lightbox-prev" aria-label="السابق">‹</button>
+      <img src="" alt="">
+      <button type="button" class="project-lightbox-next" aria-label="التالي">›</button>
+    </div>
+    <p class="project-lightbox-caption"></p>
+    <div class="project-lightbox-thumbs"></div>
+  `;
+  document.body.appendChild(box);
+
+  const mainImg = box.querySelector(".project-lightbox-main img");
+  const caption = box.querySelector(".project-lightbox-caption");
+  const thumbsWrap = box.querySelector(".project-lightbox-thumbs");
+
+  photos.forEach((photo, idx) => {
+    const thumb = document.createElement("button");
+    thumb.type = "button";
+    thumb.className = "project-lightbox-thumb";
+    thumb.innerHTML = `<img src="${photo.full}" alt="">`;
+    thumb.addEventListener("click", () => show(idx));
+    thumbsWrap.appendChild(thumb);
+  });
+
+  const thumbEls = Array.from(thumbsWrap.children);
+  let current = 0;
+
+  function show(idx) {
+    current = (idx + photos.length) % photos.length;
+    const photo = photos[current];
+    mainImg.src = photo.full;
+    mainImg.alt = photo.caption || "";
+    caption.textContent = photo.caption;
+    thumbEls.forEach((el, i) => el.classList.toggle("active", i === current));
+    thumbEls[current]?.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+
+  function open(idx) {
+    show(idx);
+    box.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function close() {
+    box.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  items.forEach((el, idx) => el.addEventListener("click", () => open(idx)));
+  box.querySelector(".project-lightbox-close").addEventListener("click", close);
+  box.querySelector(".project-lightbox-prev").addEventListener("click", () => show(current - 1));
+  box.querySelector(".project-lightbox-next").addEventListener("click", () => show(current + 1));
+  box.addEventListener("click", (e) => {
+    if (e.target === box) close();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!box.classList.contains("open")) return;
+    if (e.key === "Escape") close();
+    if (e.key === "ArrowLeft") show(current - 1);
+    if (e.key === "ArrowRight") show(current + 1);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Static per-language article pages (loaded via article-lang-switcher.js) declare
   // their own language in the HTML source (<html lang="ar|en|es|zh">) — that
@@ -1867,6 +1943,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initArticles();
   initArticleDetail();
   initLangDropdown();
+  initProjectGallery();
 
   applyLanguage(savedLang);
 

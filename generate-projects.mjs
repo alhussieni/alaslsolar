@@ -149,7 +149,9 @@ function buildProjectPage(project, lang) {
   const catLabel = CATEGORY_LABEL_AR[project.category] || project.category || "";
   const heroImage = assetHref(project.image_url) || "../solar.jpg";
   const absoluteImage = heroImage.startsWith("http") ? heroImage : `${SITE_URL}/${heroImage.replace(/^\.\.\//, "")}`;
-  const gallery = Array.isArray(project.images) ? project.images.filter((i) => i && i.url && i.position !== "logo") : [];
+  const gallery = Array.isArray(project.images)
+    ? project.images.filter((i) => i && i.url && i.position !== "logo" && i.url !== project.image_url)
+    : [];
   const logoImage = Array.isArray(project.images) ? project.images.find((i) => i && i.url && i.position === "logo") : null;
   const dateISO = project.created_at
     ? new Date(project.created_at).toISOString().split("T")[0]
@@ -175,8 +177,14 @@ function buildProjectPage(project, lang) {
     : "";
 
   const galleryHtml = gallery.length
-    ? `<div class="project-gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:1.5rem">
-        ${gallery.map((img) => `<img src="${esc(assetHref(img.url))}" alt="${esc(title)}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius)">`).join("\n        ")}
+    ? `<div class="project-gallery">
+        ${gallery
+          .map(
+            (img, idx) => `<button type="button" class="project-gallery-item" data-full="${esc(assetHref(img.url))}" data-caption="${esc(img.caption || "")}" aria-label="${esc(img.caption || title)}">
+          <img src="${esc(assetHref(img.url))}" alt="${esc(img.caption || title)}" loading="lazy">
+        </button>`
+          )
+          .join("\n        ")}
       </div>`
     : "";
 
@@ -242,19 +250,20 @@ ${hreflangLinks}
 ${nav(lang)}
 
   <main id="main">
-    <section class="page-hero page-hero--plain">
-      ${catLabel ? `<p class="eyebrow">${esc(catLabel)}</p>` : ""}
-      <h1>${esc(title)}</h1>
-      ${metaLine ? `<p style="opacity:.8">${esc(metaLine)}</p>` : ""}
-      ${logoBadge}
-      <p class="article-lang-switcher" style="margin-top:0.5rem;font-size:0.9rem;opacity:0.75;">
-        ${langLinks}
-      </p>
+    <section class="project-hero" style="--project-hero-image:url('${esc(heroImage)}')">
+      <div class="project-hero-inner">
+        ${catLabel ? `<p class="eyebrow">${esc(catLabel)}</p>` : ""}
+        <h1>${esc(title)}</h1>
+        ${metaLine ? `<p class="project-hero-meta">${esc(metaLine)}</p>` : ""}
+        ${logoBadge}
+        <p class="article-lang-switcher" style="margin-top:0.5rem;font-size:0.9rem;opacity:0.85;">
+          ${langLinks}
+        </p>
+      </div>
     </section>
 
     <section class="section">
       <article class="article-detail-content">
-        <img src="${esc(heroImage)}" alt="${esc(title)}" loading="eager">
         <div>${body}</div>
         ${galleryHtml}
       </article>
