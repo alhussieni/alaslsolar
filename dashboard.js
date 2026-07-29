@@ -235,9 +235,9 @@ function rteToolbarHtml(suffix) {
   `;
 }
 
-function initRichEditor(suffix, { initialHtml, hiddenFieldId } = {}) {
+function initRichEditor(suffix, { initialHtml, hiddenFieldId, editorElId } = {}) {
   const toolbarEl = document.querySelector(`[data-rte-toolbar="${suffix}"]`);
-  const editorEl = document.getElementById(`articleContentEditor_${suffix}`);
+  const editorEl = document.getElementById(editorElId || `articleContentEditor_${suffix}`);
   if (!toolbarEl || !editorEl || !window.AlaslEditor) return;
 
   toolbarEl.innerHTML = rteToolbarHtml(suffix);
@@ -313,7 +313,7 @@ function openNewArticleEditor() {
 
 function openNewProjectEditor() {
   if (alaslEditors["proj_new"]) return; // already initialized
-  initRichEditor("proj_new", { initialHtml: "<p></p>", hiddenFieldId: "projectContent" });
+  initRichEditor("proj_new", { initialHtml: "<p></p>", hiddenFieldId: "projectContent", editorElId: "projectContentEditor_proj_new" });
 }
 
 function updateAuthState(session) {
@@ -630,7 +630,7 @@ function toggleProjectEdit(id) {
     const hidden = document.getElementById('pf_content_' + id);
     const editorEl = document.getElementById('projectContentEditor_' + suffix);
     if (hidden && editorEl) {
-      initRichEditor(suffix, { initialHtml: hidden.value, hiddenFieldId: 'pf_content_' + id });
+      initRichEditor(suffix, { initialHtml: hidden.value, hiddenFieldId: 'pf_content_' + id, editorElId: 'projectContentEditor_' + suffix });
     }
   }
 }
