@@ -989,7 +989,16 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("faqAddForm")?.addEventListener("submit", handleFaqAdd);
   document.querySelector("[data-logout]").addEventListener("click", handleLogout);
 
-  client.auth.onAuthStateChange((_event, session) => updateAuthState(session));
+  client.auth.onAuthStateChange((_event, session) => {
+    // Supabase silently checks/renews the session whenever the tab regains
+    // focus (e.g. switching back from Word after copying an article), which
+    // fires this callback as "TOKEN_REFRESHED" even though nothing about the
+    // logged-in state actually changed. Reloading the lists on that event
+    // wipes out any edit panel that's open with unsaved content. Only react
+    // to events that mean the session genuinely changed.
+    if (_event === "TOKEN_REFRESHED") return;
+    updateAuthState(session);
+  });
   requireSession();
 });
 
