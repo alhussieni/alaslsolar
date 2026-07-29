@@ -1,5 +1,5 @@
 --- repo2/dashboard.js	2026-07-29 19:05:46.984367475 +0000
-+++ work/dashboard.js	2026-07-29 19:14:00.738286714 +0000
++++ work/dashboard.js	2026-07-29 19:40:27.441830239 +0000
 @@ -235,9 +235,9 @@
    `;
  }
@@ -48,7 +48,30 @@
          </div>
          ${p.slug ? `<p style="margin-top:6px;font-size:12px"><a href="../projects/${escP(p.slug)}.html" target="_blank" rel="noopener">🔗 معاينة صفحة المشروع (بعد آخر تحديث أسبوعي)</a></p>` : ''}
  
-@@ -630,7 +627,7 @@
+@@ -600,10 +597,18 @@
+         <div style="margin-top:var(--space-2)">
+           <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">إضافة صور جديدة</label>
+           <div id="projNewImgs_${p.id}" style="display:grid;gap:var(--space-1)"></div>
+-          <button type="button" onclick="addImageRow('projNewImgs_${p.id}','project')"
+-            style="margin-top:6px;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer;width:100%">
+-            + إضافة صورة
+-          </button>
++          <div style="display:flex;gap:6px;margin-top:6px">
++            <button type="button" onclick="addImageRow('projNewImgs_${p.id}','project')"
++              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer">
++              + إضافة صورة
++            </button>
++            <button type="button" onclick="document.getElementById('projBulkImages_${p.id}').click()"
++              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px solid var(--brand);background:var(--brand);color:#fff;font-size:12px;font-weight:700;cursor:pointer">
++              📁 رفع مجموعة صور
++            </button>
++            <input type="file" id="projBulkImages_${p.id}" accept="image/*" multiple style="display:none"
++              onchange="handleBulkImageUpload('projNewImgs_${p.id}','project', this)">
++          </div>
+         </div>
+ 
+         <p class="form-note" id="projEditMsg_${p.id}" style="margin-top:6px"></p>
+@@ -630,7 +635,7 @@
      const hidden = document.getElementById('pf_content_' + id);
      const editorEl = document.getElementById('projectContentEditor_' + suffix);
      if (hidden && editorEl) {
@@ -57,7 +80,7 @@
      }
    }
  }
-@@ -778,6 +775,7 @@
+@@ -778,6 +783,7 @@
      const heroImg = imgs.find(i => i.position === 'hero') || imgs[0];
      const rawContent = a.content_ar || a.content || '';
      const isHtmlContent = rawContent.trim().startsWith('<');
@@ -65,7 +88,7 @@
      return `
      <div style="border:1px solid var(--line);border-radius:var(--radius-lg);background:#fff;overflow:hidden">
        <div style="display:flex;align-items:center;gap:10px;padding:10px var(--space-3);background:#f9f6f2;border-bottom:1px solid var(--line);cursor:pointer"
-@@ -820,14 +818,10 @@
+@@ -820,14 +826,10 @@
              <textarea id="af_sum_${a.id}" rows="3">${escP(a.summary_ar || a.summary)}</textarea></div>
            <div>
              <label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">المحتوى (عربي) *</label>
@@ -84,3 +107,26 @@
            </div>
          </div>
  
+@@ -861,10 +863,18 @@
+         <div style="margin-top:var(--space-2)">
+           <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">إضافة صور جديدة</label>
+           <div id="artNewImgs_${a.id}" style="display:grid;gap:var(--space-1)"></div>
+-          <button type="button" onclick="addImageRow('artNewImgs_${a.id}','article')"
+-            style="margin-top:6px;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer;width:100%">
+-            + إضافة صورة
+-          </button>
++          <div style="display:flex;gap:6px;margin-top:6px">
++            <button type="button" onclick="addImageRow('artNewImgs_${a.id}','article')"
++              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer">
++              + إضافة صورة
++            </button>
++            <button type="button" onclick="document.getElementById('artBulkImages_${a.id}').click()"
++              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px solid var(--brand);background:var(--brand);color:#fff;font-size:12px;font-weight:700;cursor:pointer">
++              📁 رفع مجموعة صور
++            </button>
++            <input type="file" id="artBulkImages_${a.id}" accept="image/*" multiple style="display:none"
++              onchange="handleBulkImageUpload('artNewImgs_${a.id}','article', this)">
++          </div>
+         </div>
+ 
+         <p class="form-note" id="artEditMsg_${a.id}" style="margin-top:6px"></p>
