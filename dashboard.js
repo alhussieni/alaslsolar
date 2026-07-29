@@ -597,10 +597,18 @@ async function loadProjects() {
         <div style="margin-top:var(--space-2)">
           <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">إضافة صور جديدة</label>
           <div id="projNewImgs_${p.id}" style="display:grid;gap:var(--space-1)"></div>
-          <button type="button" onclick="addImageRow('projNewImgs_${p.id}','project')"
-            style="margin-top:6px;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer;width:100%">
-            + إضافة صورة
-          </button>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button type="button" onclick="addImageRow('projNewImgs_${p.id}','project')"
+              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer">
+              + إضافة صورة
+            </button>
+            <button type="button" onclick="document.getElementById('projBulkImages_${p.id}').click()"
+              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px solid var(--brand);background:var(--brand);color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+              📁 رفع مجموعة صور
+            </button>
+            <input type="file" id="projBulkImages_${p.id}" accept="image/*" multiple style="display:none"
+              onchange="handleBulkImageUpload('projNewImgs_${p.id}','project', this)">
+          </div>
         </div>
 
         <p class="form-note" id="projEditMsg_${p.id}" style="margin-top:6px"></p>
@@ -855,10 +863,18 @@ async function loadArticles() {
         <div style="margin-top:var(--space-2)">
           <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px">إضافة صور جديدة</label>
           <div id="artNewImgs_${a.id}" style="display:grid;gap:var(--space-1)"></div>
-          <button type="button" onclick="addImageRow('artNewImgs_${a.id}','article')"
-            style="margin-top:6px;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer;width:100%">
-            + إضافة صورة
-          </button>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button type="button" onclick="addImageRow('artNewImgs_${a.id}','article')"
+              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:12px;cursor:pointer">
+              + إضافة صورة
+            </button>
+            <button type="button" onclick="document.getElementById('artBulkImages_${a.id}').click()"
+              style="flex:1;padding:5px 12px;border-radius:var(--radius);border:1.5px solid var(--brand);background:var(--brand);color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+              📁 رفع مجموعة صور
+            </button>
+            <input type="file" id="artBulkImages_${a.id}" accept="image/*" multiple style="display:none"
+              onchange="handleBulkImageUpload('artNewImgs_${a.id}','article', this)">
+          </div>
         </div>
 
         <p class="form-note" id="artEditMsg_${a.id}" style="margin-top:6px"></p>
