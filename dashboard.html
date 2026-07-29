@@ -360,7 +360,7 @@
         <article class="dashboard-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
             <h3 style="margin:0">📁 إدارة المشاريع</h3>
-            <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')" id="addProjectBtn"
+            <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn');openNewProjectEditor()" id="addProjectBtn"
               style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
               + إضافة مشروع
             </button>
@@ -413,7 +413,9 @@
               </div>
               <div>
                 <label>قصة المشروع الكاملة (تظهر في صفحة المشروع المستقلة على جوجل)</label>
-                <textarea id="projectContent" name="content_ar" rows="8" placeholder="اكتب هنا القصة الكاملة للمشروع — التحدي، الحل، والنتيجة..."></textarea>
+                <div class="rte-toolbar" data-rte-toolbar="proj_new"></div>
+                <div class="rte-editor" id="projectContentEditor_proj_new"></div>
+                <textarea id="projectContent" name="content_ar" style="display:none"></textarea>
               </div>
 
               <!-- Multi-image uploader -->

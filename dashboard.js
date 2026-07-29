@@ -311,6 +311,11 @@ function openNewArticleEditor() {
   initRichEditor("new", { initialHtml: "<p></p>", hiddenFieldId: "articleContent_ar" });
 }
 
+function openNewProjectEditor() {
+  if (alaslEditors["proj_new"]) return; // already initialized
+  initRichEditor("proj_new", { initialHtml: "<p></p>", hiddenFieldId: "projectContent" });
+}
+
 function updateAuthState(session) {
   const authPanel = document.querySelector("[data-auth-panel]");
   const dashboard = document.querySelector("[data-dashboard]");
@@ -493,6 +498,7 @@ async function handleProject(event) {
     form.reset();
     document.getElementById('projectImagesWrap').innerHTML = '';
     delete document.getElementById('projectSlug').dataset.userEdited;
+    if (alaslEditors["proj_new"]) alaslEditors["proj_new"].commands.setContent("<p></p>");
     if (msgEl) msgEl.textContent = '✅ تم حفظ المشروع!';
     setTimeout(() => { if (msgEl) msgEl.textContent = ''; toggleSection('projectAddWrap','addProjectBtn'); }, 2000);
     loadProjects();
@@ -513,6 +519,8 @@ async function loadProjects() {
   container.innerHTML = data.map(p => {
     const imgs = Array.isArray(p.images) ? p.images : [];
     const heroImg = imgs.find(i => i.position === 'hero') || imgs[0];
+    const rawContent = p.content_ar || '';
+    const isHtmlContent = rawContent.trim().startsWith('<');
     return `
     <div style="border:1px solid var(--line);border-radius:var(--radius-lg);background:#fff;overflow:hidden">
       <div style="display:flex;align-items:center;gap:10px;padding:10px var(--space-3);background:#f9f6f2;border-bottom:1px solid var(--line);cursor:pointer"
@@ -555,8 +563,17 @@ async function loadProjects() {
           <textarea id="pf_sum_${p.id}" rows="3">${escP(p.summary)}</textarea></div>
         <div style="margin-top:var(--space-2)"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">الرابط الدائم (Slug)</label>
           <input id="pf_slug_${p.id}" value="${escP(p.slug||'')}"></div>
-        <div style="margin-top:var(--space-2)"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">قصة المشروع الكاملة (لصفحة جوجل)</label>
-          <textarea id="pf_content_${p.id}" rows="8">${escP(p.content_ar||'')}</textarea></div>
+        <div style="margin-top:var(--space-2)">
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">قصة المشروع الكاملة (لصفحة جوجل)</label>
+          ${isHtmlContent ? `
+            <div class="rte-toolbar" data-rte-toolbar="proj_${p.id}"></div>
+            <div class="rte-editor" id="projectContentEditor_proj_${p.id}"></div>
+            <textarea id="pf_content_${p.id}" style="display:none">${escP(rawContent)}</textarea>
+          ` : `
+            <textarea id="pf_content_${p.id}" rows="8">${escP(rawContent)}</textarea>
+            <p class="form-note" style="margin-top:4px">هذا مشروع قديم مكتوب بصيغة Markdown النصية، فلا يستخدم المحرر الغني الجديد. احفظ محتوى جديد من المحرر الغني (بإضافة مشروع جديد أو بإعادة كتابته هنا) عشان يتفعّل له تلقائيًا.</p>
+          `}
+        </div>
         ${p.slug ? `<p style="margin-top:6px;font-size:12px"><a href="../projects/${escP(p.slug)}.html" target="_blank" rel="noopener">🔗 معاينة صفحة المشروع (بعد آخر تحديث أسبوعي)</a></p>` : ''}
 
         <!-- Existing images -->
@@ -604,7 +621,18 @@ function escP(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'
 
 function toggleProjectEdit(id) {
   const el = document.getElementById('projEdit_' + id);
-  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (!el) return;
+  const opening = el.style.display === 'none';
+  el.style.display = opening ? 'block' : 'none';
+
+  const suffix = 'proj_' + id;
+  if (opening && !alaslEditors[suffix]) {
+    const hidden = document.getElementById('pf_content_' + id);
+    const editorEl = document.getElementById('projectContentEditor_' + suffix);
+    if (hidden && editorEl) {
+      initRichEditor(suffix, { initialHtml: hidden.value, hiddenFieldId: 'pf_content_' + id });
+    }
+  }
 }
 
 async function saveProject(id) {
