@@ -1,0 +1,86 @@
+--- repo2/dashboard.js	2026-07-29 19:05:46.984367475 +0000
++++ work/dashboard.js	2026-07-29 19:14:00.738286714 +0000
+@@ -235,9 +235,9 @@
+   `;
+ }
+ 
+-function initRichEditor(suffix, { initialHtml, hiddenFieldId } = {}) {
++function initRichEditor(suffix, { initialHtml, hiddenFieldId, editorElId } = {}) {
+   const toolbarEl = document.querySelector(`[data-rte-toolbar="${suffix}"]`);
+-  const editorEl = document.getElementById(`articleContentEditor_${suffix}`);
++  const editorEl = document.getElementById(editorElId || `articleContentEditor_${suffix}`);
+   if (!toolbarEl || !editorEl || !window.AlaslEditor) return;
+ 
+   toolbarEl.innerHTML = rteToolbarHtml(suffix);
+@@ -313,7 +313,7 @@
+ 
+ function openNewProjectEditor() {
+   if (alaslEditors["proj_new"]) return; // already initialized
+-  initRichEditor("proj_new", { initialHtml: "<p></p>", hiddenFieldId: "projectContent" });
++  initRichEditor("proj_new", { initialHtml: "<p></p>", hiddenFieldId: "projectContent", editorElId: "projectContentEditor_proj_new" });
+ }
+ 
+ function updateAuthState(session) {
+@@ -521,6 +521,7 @@
+     const heroImg = imgs.find(i => i.position === 'hero') || imgs[0];
+     const rawContent = p.content_ar || '';
+     const isHtmlContent = rawContent.trim().startsWith('<');
++    const editorContent = isHtmlContent ? rawContent : (window.marked ? window.marked.parse(rawContent) : rawContent);
+     return `
+     <div style="border:1px solid var(--line);border-radius:var(--radius-lg);background:#fff;overflow:hidden">
+       <div style="display:flex;align-items:center;gap:10px;padding:10px var(--space-3);background:#f9f6f2;border-bottom:1px solid var(--line);cursor:pointer"
+@@ -565,14 +566,10 @@
+           <input id="pf_slug_${p.id}" value="${escP(p.slug||'')}"></div>
+         <div style="margin-top:var(--space-2)">
+           <label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">قصة المشروع الكاملة (لصفحة جوجل)</label>
+-          ${isHtmlContent ? `
+-            <div class="rte-toolbar" data-rte-toolbar="proj_${p.id}"></div>
+-            <div class="rte-editor" id="projectContentEditor_proj_${p.id}"></div>
+-            <textarea id="pf_content_${p.id}" style="display:none">${escP(rawContent)}</textarea>
+-          ` : `
+-            <textarea id="pf_content_${p.id}" rows="8">${escP(rawContent)}</textarea>
+-            <p class="form-note" style="margin-top:4px">هذا مشروع قديم مكتوب بصيغة Markdown النصية، فلا يستخدم المحرر الغني الجديد. احفظ محتوى جديد من المحرر الغني (بإضافة مشروع جديد أو بإعادة كتابته هنا) عشان يتفعّل له تلقائيًا.</p>
+-          `}
++          <div class="rte-toolbar" data-rte-toolbar="proj_${p.id}"></div>
++          <div class="rte-editor" id="projectContentEditor_proj_${p.id}"></div>
++          <textarea id="pf_content_${p.id}" style="display:none">${escP(editorContent)}</textarea>
++          ${!isHtmlContent ? `<p class="form-note" style="margin-top:4px">⚠️ ده مشروع قديم كان نص عادي — اتحول تلقائيًا لتنسيق قابل للتعديل. راجعه قبل ما تحفظ.</p>` : ''}
+         </div>
+         ${p.slug ? `<p style="margin-top:6px;font-size:12px"><a href="../projects/${escP(p.slug)}.html" target="_blank" rel="noopener">🔗 معاينة صفحة المشروع (بعد آخر تحديث أسبوعي)</a></p>` : ''}
+ 
+@@ -630,7 +627,7 @@
+     const hidden = document.getElementById('pf_content_' + id);
+     const editorEl = document.getElementById('projectContentEditor_' + suffix);
+     if (hidden && editorEl) {
+-      initRichEditor(suffix, { initialHtml: hidden.value, hiddenFieldId: 'pf_content_' + id });
++      initRichEditor(suffix, { initialHtml: hidden.value, hiddenFieldId: 'pf_content_' + id, editorElId: 'projectContentEditor_' + suffix });
+     }
+   }
+ }
+@@ -778,6 +775,7 @@
+     const heroImg = imgs.find(i => i.position === 'hero') || imgs[0];
+     const rawContent = a.content_ar || a.content || '';
+     const isHtmlContent = rawContent.trim().startsWith('<');
++    const editorContent = isHtmlContent ? rawContent : (window.marked ? window.marked.parse(rawContent) : rawContent);
+     return `
+     <div style="border:1px solid var(--line);border-radius:var(--radius-lg);background:#fff;overflow:hidden">
+       <div style="display:flex;align-items:center;gap:10px;padding:10px var(--space-3);background:#f9f6f2;border-bottom:1px solid var(--line);cursor:pointer"
+@@ -820,14 +818,10 @@
+             <textarea id="af_sum_${a.id}" rows="3">${escP(a.summary_ar || a.summary)}</textarea></div>
+           <div>
+             <label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">المحتوى (عربي) *</label>
+-            ${isHtmlContent ? `
+-              <div class="rte-toolbar" data-rte-toolbar="${a.id}"></div>
+-              <div class="rte-editor" id="articleContentEditor_${a.id}"></div>
+-              <textarea id="af_con_${a.id}" style="display:none">${escP(rawContent)}</textarea>
+-            ` : `
+-              <textarea id="af_con_${a.id}" rows="6">${escP(rawContent)}</textarea>
+-              <p class="form-note" style="margin-top:4px">هذا مقال قديم مكتوب بصيغة Markdown النصية، فلا يستخدم المحرر الغني الجديد.</p>
+-            `}
++            <div class="rte-toolbar" data-rte-toolbar="${a.id}"></div>
++            <div class="rte-editor" id="articleContentEditor_${a.id}"></div>
++            <textarea id="af_con_${a.id}" style="display:none">${escP(editorContent)}</textarea>
++            ${!isHtmlContent ? `<p class="form-note" style="margin-top:4px">⚠️ ده مقال قديم كان نص عادي — اتحول تلقائيًا لتنسيق قابل للتعديل. راجعه قبل ما تحفظ.</p>` : ''}
+           </div>
+         </div>
+ 

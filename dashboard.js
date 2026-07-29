@@ -521,6 +521,7 @@ async function loadProjects() {
     const heroImg = imgs.find(i => i.position === 'hero') || imgs[0];
     const rawContent = p.content_ar || '';
     const isHtmlContent = rawContent.trim().startsWith('<');
+    const editorContent = isHtmlContent ? rawContent : (window.marked ? window.marked.parse(rawContent) : rawContent);
     return `
     <div style="border:1px solid var(--line);border-radius:var(--radius-lg);background:#fff;overflow:hidden">
       <div style="display:flex;align-items:center;gap:10px;padding:10px var(--space-3);background:#f9f6f2;border-bottom:1px solid var(--line);cursor:pointer"
@@ -565,14 +566,10 @@ async function loadProjects() {
           <input id="pf_slug_${p.id}" value="${escP(p.slug||'')}"></div>
         <div style="margin-top:var(--space-2)">
           <label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">قصة المشروع الكاملة (لصفحة جوجل)</label>
-          ${isHtmlContent ? `
-            <div class="rte-toolbar" data-rte-toolbar="proj_${p.id}"></div>
-            <div class="rte-editor" id="projectContentEditor_proj_${p.id}"></div>
-            <textarea id="pf_content_${p.id}" style="display:none">${escP(rawContent)}</textarea>
-          ` : `
-            <textarea id="pf_content_${p.id}" rows="8">${escP(rawContent)}</textarea>
-            <p class="form-note" style="margin-top:4px">هذا مشروع قديم مكتوب بصيغة Markdown النصية، فلا يستخدم المحرر الغني الجديد. احفظ محتوى جديد من المحرر الغني (بإضافة مشروع جديد أو بإعادة كتابته هنا) عشان يتفعّل له تلقائيًا.</p>
-          `}
+          <div class="rte-toolbar" data-rte-toolbar="proj_${p.id}"></div>
+          <div class="rte-editor" id="projectContentEditor_proj_${p.id}"></div>
+          <textarea id="pf_content_${p.id}" style="display:none">${escP(editorContent)}</textarea>
+          ${!isHtmlContent ? `<p class="form-note" style="margin-top:4px">⚠️ ده مشروع قديم كان نص عادي — اتحول تلقائيًا لتنسيق قابل للتعديل. راجعه قبل ما تحفظ.</p>` : ''}
         </div>
         ${p.slug ? `<p style="margin-top:6px;font-size:12px"><a href="../projects/${escP(p.slug)}.html" target="_blank" rel="noopener">🔗 معاينة صفحة المشروع (بعد آخر تحديث أسبوعي)</a></p>` : ''}
 
@@ -778,6 +775,7 @@ async function loadArticles() {
     const heroImg = imgs.find(i => i.position === 'hero') || imgs[0];
     const rawContent = a.content_ar || a.content || '';
     const isHtmlContent = rawContent.trim().startsWith('<');
+    const editorContent = isHtmlContent ? rawContent : (window.marked ? window.marked.parse(rawContent) : rawContent);
     return `
     <div style="border:1px solid var(--line);border-radius:var(--radius-lg);background:#fff;overflow:hidden">
       <div style="display:flex;align-items:center;gap:10px;padding:10px var(--space-3);background:#f9f6f2;border-bottom:1px solid var(--line);cursor:pointer"
@@ -820,14 +818,10 @@ async function loadArticles() {
             <textarea id="af_sum_${a.id}" rows="3">${escP(a.summary_ar || a.summary)}</textarea></div>
           <div>
             <label style="font-size:12px;font-weight:700;display:block;margin-bottom:3px">المحتوى (عربي) *</label>
-            ${isHtmlContent ? `
-              <div class="rte-toolbar" data-rte-toolbar="${a.id}"></div>
-              <div class="rte-editor" id="articleContentEditor_${a.id}"></div>
-              <textarea id="af_con_${a.id}" style="display:none">${escP(rawContent)}</textarea>
-            ` : `
-              <textarea id="af_con_${a.id}" rows="6">${escP(rawContent)}</textarea>
-              <p class="form-note" style="margin-top:4px">هذا مقال قديم مكتوب بصيغة Markdown النصية، فلا يستخدم المحرر الغني الجديد.</p>
-            `}
+            <div class="rte-toolbar" data-rte-toolbar="${a.id}"></div>
+            <div class="rte-editor" id="articleContentEditor_${a.id}"></div>
+            <textarea id="af_con_${a.id}" style="display:none">${escP(editorContent)}</textarea>
+            ${!isHtmlContent ? `<p class="form-note" style="margin-top:4px">⚠️ ده مقال قديم كان نص عادي — اتحول تلقائيًا لتنسيق قابل للتعديل. راجعه قبل ما تحفظ.</p>` : ''}
           </div>
         </div>
 
