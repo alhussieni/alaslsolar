@@ -1,0 +1,10 @@
+--- repo2/dashboard.html	2026-07-29 19:05:46.984367475 +0000
++++ work/dashboard.html	2026-07-29 19:13:05.735825639 +0000
+@@ -12,6 +12,7 @@
+   <link rel="stylesheet" href="styles.css">
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="supabase-config.js"></script>
++  <script defer src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+   <script defer src="alasl-editor.bundle.js"></script>
+   <script defer src="dashboard.js"></script>
+   <style>
