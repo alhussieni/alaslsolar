@@ -497,6 +497,62 @@
       align-items: center;
       gap: 8px;
     }
+
+    /* ── Multi-level collapsible filter tree ── */
+    .ftree-search{position:relative;margin-bottom:10px}
+    .ftree-search input{width:100%;padding:9px 34px 9px 12px;border:1.5px solid var(--line);
+      border-radius:var(--radius);font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink)}
+    .ftree-search input:focus{outline:none;border-color:var(--brand)}
+    .ftree-search svg{position:absolute;right:11px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none}
+    [dir="rtl"] .ftree-search svg{right:auto;left:11px}
+
+    .ftree-scroll{max-height:520px;overflow-y:auto;margin:0 -4px;padding:0 4px}
+    .ftree-scroll::-webkit-scrollbar{width:6px}
+    .ftree-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+
+    .ftree-heading{margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.02em}
+    .ftree-node:first-child .ftree-heading{margin-top:0}
+
+    .ftree-row{display:flex;align-items:center;gap:8px;padding:7px 6px;border-radius:8px;
+      cursor:pointer;font-size:13.5px;color:var(--ink);user-select:none}
+    .ftree-row:hover{background:var(--brand-soft)}
+    .ftree-row.selected{background:var(--brand-soft);color:var(--brand-dark);font-weight:800}
+
+    .ftree-toggle{width:16px;height:16px;flex:0 0 16px;display:flex;align-items:center;justify-content:center;
+      color:var(--muted);transition:transform .15s;cursor:pointer}
+    .ftree-toggle.no-children{visibility:hidden}
+    .ftree-node.open > .ftree-row > .ftree-toggle{transform:rotate(90deg)}
+
+    .ftree-box{width:16px;height:16px;flex:0 0 16px;border:1.5px solid var(--line);border-radius:4px;
+      display:flex;align-items:center;justify-content:center;background:#fff;transition:.12s}
+    .ftree-box svg{width:10px;height:10px;opacity:0;transition:.12s}
+    .ftree-row.checked .ftree-box{background:var(--brand);border-color:var(--brand)}
+    .ftree-row.checked .ftree-box svg{opacity:1;stroke:#fff}
+    .ftree-row.indeterminate .ftree-box{background:var(--brand);border-color:var(--brand);opacity:.55}
+
+    .ftree-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .ftree-count{font-size:11px;color:var(--muted);font-weight:700;background:var(--bg);
+      border-radius:999px;padding:1px 7px;flex:0 0 auto}
+    .ftree-row.selected .ftree-count{background:#fff;color:var(--brand-dark)}
+
+    .ftree-children{margin-inline-start:24px;border-inline-start:1.5px dashed var(--line);
+      padding-inline-start:8px;overflow:hidden;max-height:0;transition:max-height .18s ease}
+    .ftree-node.open > .ftree-children{max-height:3000px}
+    .ftree-lvl3 .ftree-row{color:var(--muted);font-size:13px}
+    .ftree-lvl3 .ftree-row.selected{color:var(--brand-dark)}
+    .ftree-empty{padding:14px 6px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* Active filter chips, shown above the product grid */
+    .active-chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:var(--space-3)}
+    .active-chip{display:flex;align-items:center;gap:6px;background:var(--brand-soft);color:var(--brand-dark);
+      border-radius:999px;padding:6px 8px 6px 14px;font-size:12.5px;font-weight:700}
+    [dir="rtl"] .active-chip{padding:6px 14px 6px 8px}
+    .active-chip button{background:#fff;border:none;width:18px;height:18px;border-radius:50%;cursor:pointer;
+      color:var(--brand-dark);font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center}
+    .active-chip-clear{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;
+      font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer}
+    .active-chip-clear:hover{border-color:var(--brand);color:var(--brand-dark)}
     .prod-price-field {
       flex: 1;
       display: flex;
@@ -555,7 +611,7 @@
     .prod-btn-reset:hover { border-color: var(--brand); color: var(--brand-dark); }
 
     /* Product grid */
-    .prod-grid-wrap { grid-column: 1; }
+    .prod-grid-wrap { grid-column: 1; grid-row: 2; }
     .prod-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -677,6 +733,7 @@
     /* Loading / empty states */
     .prod-loading {
       grid-column: 1;
+      grid-row: 2;
       text-align: center;
       padding: var(--space-5);
       color: var(--muted);
@@ -788,6 +845,7 @@
 
       <!-- Product grid -->
       <div class="prod-grid-wrap">
+        <div class="active-chips" id="activeChips" hidden></div>
         <div class="prod-grid" id="prodGrid" hidden></div>
 
         <!-- Empty state -->
@@ -801,95 +859,15 @@
       <!-- Sidebar -->
       <aside class="prod-sidebar">
 
-        <!-- Category filter -->
+        <!-- Category filter tree (built dynamically in JS from live product + category data) -->
         <div class="prod-sidebar-section">
           <p class="prod-sidebar-label" data-i18n="prod_sidebar_category">الفئة</p>
-          <div class="prod-radio-list" id="catRadioList" role="radiogroup" aria-label="تصفية الفئة">
-            <label class="prod-radio-item active" data-cat="all">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_all">جميع المنتجات</span></span>
-              <input type="radio" name="prodCat" value="all" checked>
-            </label>
-
-            <p class="prod-radio-group-label" data-section="irrigation_wells" data-i18n="prod_section_irrigation" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الري والآبار</p>
-            <label class="prod-radio-item" data-cat="well_motors" data-section="irrigation_wells">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_well_motors">🛠️ موتورات آبار</span></span>
-              <input type="radio" name="prodCat" value="well_motors">
-            </label>
-            <label class="prod-radio-item" data-cat="pumps" data-section="irrigation_wells">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_pumps">🌊 طلمبات ومضخات</span></span>
-              <input type="radio" name="prodCat" value="pumps">
-            </label>
-            <label class="prod-radio-item" data-cat="pipes" data-section="irrigation_wells">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_pipes">🧵 مواسير</span></span>
-              <input type="radio" name="prodCat" value="pipes">
-            </label>
-
-            <p class="prod-radio-group-label" data-section="inverters" data-i18n="prod_section_inverters" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الإنفرتر</p>
-            <label class="prod-radio-item" data-cat="inverters" data-section="inverters">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_inverters">⚡ إنفرترات</span></span>
-              <input type="radio" name="prodCat" value="inverters">
-            </label>
-            <label class="prod-radio-item" data-cat="offgrid" data-section="inverters">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_offgrid">🔆 إنفرتر أوف جريد</span></span>
-              <input type="radio" name="prodCat" value="offgrid">
-            </label>
-
-            <p class="prod-radio-group-label" data-section="panels" data-i18n="prod_section_panels" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الألواح الشمسية</p>
-            <label class="prod-radio-item" data-cat="panels" data-section="panels">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_panels">☀️ ألواح شمسية</span></span>
-              <input type="radio" name="prodCat" value="panels">
-            </label>
-
-            <p class="prod-radio-group-label" data-section="install_components" data-i18n="prod_section_install" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">مكوّنات التركيب</p>
-            <label class="prod-radio-item" data-cat="structures" data-section="install_components">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_structures">🏗️ هياكل</span></span>
-              <input type="radio" name="prodCat" value="structures">
-            </label>
-            <label class="prod-radio-item" data-cat="cables" data-section="install_components">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_cables">🔶 كابلات</span></span>
-              <input type="radio" name="prodCat" value="cables">
-            </label>
-            <label class="prod-radio-item" data-cat="combiners" data-section="install_components">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_combiners">📦 صناديق تجميع</span></span>
-              <input type="radio" name="prodCat" value="combiners">
-            </label>
-            <label class="prod-radio-item" data-cat="accessories" data-section="install_components">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_accessories">🔌 إكسسوارات</span></span>
-              <input type="radio" name="prodCat" value="accessories">
-            </label>
-
-            <p class="prod-radio-group-label" data-section="standalone_lighting" data-i18n="prod_section_lighting" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الإضاءة الشمسية المستقلة</p>
-            <label class="prod-radio-item" data-cat="street_lights" data-section="standalone_lighting">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_street_lights">💡 إنارة شوارع شمسية</span></span>
-              <input type="radio" name="prodCat" value="street_lights">
-            </label>
-            <label class="prod-radio-item" data-cat="flood_lights" data-section="standalone_lighting">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_flood_lights">🔦 كشافات شمسية</span></span>
-              <input type="radio" name="prodCat" value="flood_lights">
-            </label>
-            <label class="prod-radio-item" data-cat="garden_lights" data-section="standalone_lighting">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_garden_lights">🪴 إضاءة حدائق شمسية</span></span>
-              <input type="radio" name="prodCat" value="garden_lights">
-            </label>
-            <label class="prod-radio-item" data-cat="solar_safety" data-section="standalone_lighting">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_solar_safety">🚧 سلامة الطرق الشمسية</span></span>
-              <input type="radio" name="prodCat" value="solar_safety">
-            </label>
-            <label class="prod-radio-item" data-cat="solar_kits" data-section="standalone_lighting">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_solar_kits">🧰 أنظمة طاقة شمسية منزلية</span></span>
-              <input type="radio" name="prodCat" value="solar_kits">
-            </label>
-
-            <p class="prod-radio-group-label" data-section="batteries" data-i18n="prod_section_batteries" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">بطاريات وتخزين الطاقة</p>
-            <label class="prod-radio-item" data-cat="batteries" data-section="batteries">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_batteries">🔋 بطاريات</span></span>
-              <input type="radio" name="prodCat" value="batteries">
-            </label>
+          <div class="ftree-search">
+            <input type="text" id="ftreeSearch" placeholder="ابحث في التصنيفات أو الماركات…">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
           </div>
+          <div class="ftree-scroll" id="filterTree"></div>
         </div>
-
-        <!-- Dynamic sub-filter (brand / power) — shown depending on selected category -->
-        <div class="prod-sidebar-section" id="dynamicSubFilter" hidden></div>
 
         <!-- Price filter -->
         <div class="prod-sidebar-section">
@@ -1008,10 +986,12 @@
     }
 
     // ── State ──
-    let allProducts = [];     // flat list of every product across categories, each tagged with .category
-    let currentCat = 'all';
-    let currentBrand = 'all'; // sub-filter: brand (inverters, panels)
-    let currentPower = 'all'; // sub-filter: power in KW (inverters only)
+    let allProducts = [];        // flat list of every product across categories, each tagged with .category
+    let filterTree = [];         // built once per load from allProducts + category_settings
+    let selectedFilters = new Set(); // node ids the user checked, e.g. "panels" / "panels::Longi" / "pumps::Ferat::5"
+    let nodeLabels = {};         // id -> human label, for the active-filter chips
+    let openNodes = new Set();   // ids currently expanded in the tree UI
+    let lastSectionOf = {};      // category -> main_section, cached so we can rebuild the tree on language change
     let priceMin = null;
     let priceMax = null;
 
@@ -1220,7 +1200,34 @@
         </a>`;
     }
 
-    // ── Apply category + price filters and render grid ──
+    // ── Which product field holds the "power" tier for a given category's tree ──
+    function powerFieldFor(cat) {
+      if (cat === 'well_motors' || cat === 'pumps') return 'power_hp';
+      if (cat === 'inverters' || cat === 'offgrid') return 'power_kw';
+      if (cat === 'panels') return 'power_w';
+      return null;
+    }
+    function fmtPower(v) { return String(Number(v)); } // normalizes "5.50" / 5.5 / "5.5" to the same key
+
+    // Does this product satisfy at least one of the checked tree nodes?
+    // A node id is "category", "category::brand" or "category::brand::power" —
+    // checking a parent implicitly covers everything under it.
+    function productMatchesSelection(p) {
+      if (selectedFilters.size === 0) return true;
+      for (const id of selectedFilters) {
+        const parts = id.split('::');
+        if (parts[0] !== p.category) continue;
+        if (parts.length === 1) return true;
+        if (parts[1] !== (p.brand || '—')) continue;
+        if (parts.length === 2) return true;
+        const field = powerFieldFor(p.category);
+        const val = field && p[field] != null ? fmtPower(p[field]) : null;
+        if (val !== null && parts[2] === val) return true;
+      }
+      return false;
+    }
+
+    // ── Apply category-tree + price filters and render grid ──
     function renderGrid() {
       const grid = document.getElementById('prodGrid');
       const empty = document.getElementById('prodEmpty');
@@ -1228,12 +1235,7 @@
       if (!grid) return;
 
       let filtered = allProducts.filter(p => {
-        if (currentCat !== 'all' && p.category !== currentCat) return false;
-        if (currentBrand !== 'all' && p.brand !== currentBrand) return false;
-        if (currentPower !== 'all' && p.category === 'inverters') {
-          const { kw } = parseInvPower(p);
-          if (String(kw) !== String(currentPower)) return false;
-        }
+        if (!productMatchesSelection(p)) return false;
         if (priceMin !== null && p.price < priceMin) return false;
         if (priceMax !== null && p.price > priceMax) return false;
         return true;
@@ -1273,108 +1275,197 @@
         .join('');
     }
 
-    // ── Category radio handling ──
-    function setActiveCategory(cat) {
-      currentCat = cat;
-      currentBrand = 'all';
-      currentPower = 'all';
-      document.querySelectorAll('.prod-radio-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.cat === cat);
-      });
-      renderSubFilter();
+    // ── i18n lookup shared with the rest of the site (translations is defined in app.js) ──
+    function tr(key) {
+      const dict = (typeof translations !== 'undefined' && translations[getLang()]) || {};
+      return dict[key] || (typeof translations !== 'undefined' && translations.ar && translations.ar[key]) || key;
+    }
+
+    // Section grouping + per-section category order — mirrors the taxonomy
+    // agreed on for the products page (irrigation → inverters → panels →
+    // install components → standalone lighting → batteries).
+    const SECTIONS = [
+      { id: 'irrigation_wells',    i18n: 'prod_section_irrigation', cats: ['well_motors', 'pumps', 'pipes'] },
+      { id: 'inverters',           i18n: 'prod_section_inverters',  cats: ['inverters', 'offgrid', 'ongrid', 'hybrid'] },
+      { id: 'panels',              i18n: 'prod_section_panels',     cats: ['panels'] },
+      { id: 'install_components',  i18n: 'prod_section_install',    cats: ['structures', 'cables', 'combiners', 'accessories'] },
+      { id: 'standalone_lighting', i18n: 'prod_section_lighting',   cats: ['street_lights', 'flood_lights', 'garden_lights', 'solar_safety', 'solar_kits'] },
+      { id: 'batteries',           i18n: 'prod_section_batteries',  cats: ['batteries'] },
+    ];
+    const CAT_I18N_KEY = {
+      well_motors: 'prod_cat_well_motors', pumps: 'prod_cat_pumps', pipes: 'prod_cat_pipes',
+      inverters: 'prod_cat_inverters', offgrid: 'prod_cat_offgrid',
+      panels: 'prod_cat_panels', structures: 'prod_cat_structures', cables: 'prod_cat_cables',
+      combiners: 'prod_cat_combiners', accessories: 'prod_cat_accessories',
+      street_lights: 'prod_cat_street_lights', flood_lights: 'prod_cat_flood_lights',
+      garden_lights: 'prod_cat_garden_lights', solar_safety: 'prod_cat_solar_safety',
+      solar_kits: 'prod_cat_solar_kits', batteries: 'prod_cat_batteries',
+    };
+    // Categories deep enough (brand + power variants) to get a 3-level branch;
+    // everything else in the tree is a flat, childless leaf.
+    const BRAND_POWER_CATS = new Set(['well_motors', 'pumps', 'inverters', 'offgrid', 'panels']);
+    const POWER_UNIT_LABEL = { power_hp: 'HP', power_kw: 'KW', power_w: 'W' };
+
+    // ── Build the tree structure from the live product list + category_settings ──
+    // Runs once per data load (not per render) — cheap even at 1000+ products
+    // since it's a handful of GROUP BY-style passes over an in-memory array.
+    function buildFilterTree(sectionOf) {
+      nodeLabels = { all: tr('prod_cat_all') };
+      const presentCats = new Set(allProducts.map(p => p.category));
+
+      filterTree = SECTIONS.map(section => {
+        const cats = section.cats.filter(c => presentCats.has(c)); // hides empty/placeholder cats (e.g. ongrid, hybrid) automatically
+        if (!cats.length) return null;
+
+        const catNodes = cats.map(cat => {
+          const catProducts = allProducts.filter(p => p.category === cat);
+          const label = tr(CAT_I18N_KEY[cat] || cat);
+          nodeLabels[cat] = label;
+
+          let children;
+          if (BRAND_POWER_CATS.has(cat)) {
+            const byBrand = {};
+            catProducts.forEach(p => { (byBrand[p.brand || '—'] = byBrand[p.brand || '—'] || []).push(p); });
+            const field = powerFieldFor(cat);
+            const unit = POWER_UNIT_LABEL[field] || '';
+
+            children = Object.keys(byBrand).sort().map(brand => {
+              const brandProducts = byBrand[brand];
+              const brandId = `${cat}::${brand}`;
+              nodeLabels[brandId] = brand;
+
+              let powerChildren;
+              if (field) {
+                const byPower = {};
+                brandProducts.forEach(p => {
+                  if (p[field] == null) return;
+                  const key = fmtPower(p[field]);
+                  (byPower[key] = byPower[key] || 0);
+                  byPower[key]++;
+                });
+                const powerKeys = Object.keys(byPower).sort((a, b) => Number(a) - Number(b));
+                if (powerKeys.length) {
+                  powerChildren = powerKeys.map(key => {
+                    const powerId = `${brandId}::${key}`;
+                    const label = `${key} ${unit}`;
+                    nodeLabels[powerId] = label;
+                    return { id: powerId, label, count: byPower[key] };
+                  });
+                }
+              }
+
+              return { id: brandId, label: brand, count: brandProducts.length, children: powerChildren };
+            });
+          }
+
+          return { id: cat, label, count: catProducts.length, children };
+        });
+
+        return { id: section.id, label: tr(section.i18n), count: catProducts_total(catNodes), children: catNodes };
+      }).filter(Boolean);
+    }
+    function catProducts_total(catNodes) { return catNodes.reduce((sum, n) => sum + n.count, 0); }
+
+    // ── Render the tree (re-run on every open/check/search change — cheap DOM diff via innerHTML) ──
+    function nodeMatchesSearch(node, q) {
+      if (!q) return true;
+      if (node.label.toLowerCase().includes(q)) return true;
+      return !!(node.children && node.children.some(c => nodeMatchesSearch(c, q)));
+    }
+    function findTreeNode(id, list) {
+      for (const n of (list || filterTree)) {
+        if (n.id === id) return n;
+        if (n.children) { const f = findTreeNode(id, n.children); if (f) return f; }
+      }
+      return null;
+    }
+    function renderTreeNode(node, level, q) {
+      if (!nodeMatchesSearch(node, q)) return '';
+      const hasChildren = node.children && node.children.length;
+      const isOpen = openNodes.has(node.id) || (q && hasChildren);
+      const isChecked = selectedFilters.has(node.id);
+      const childIds = hasChildren ? node.children.map(c => c.id) : [];
+      const childSelected = childIds.filter(id => selectedFilters.has(id)).length;
+      const isIndeterminate = !isChecked && childSelected > 0 && childSelected < childIds.length;
+
+      const rowClasses = ['ftree-row'];
+      if (isChecked) rowClasses.push('checked', 'selected');
+      else if (isIndeterminate) rowClasses.push('indeterminate');
+
+      const headingHtml = level === 1
+        ? `<p class="ftree-heading">${node.label}</p>`
+        : '';
+
+      const rowHtml = level === 1 ? '' : `
+        <div class="${rowClasses.join(' ')}">
+          <span class="ftree-toggle ${hasChildren ? '' : 'no-children'}" data-action="toggle" data-id="${node.id}">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 6l6 6-6 6"/></svg>
+          </span>
+          <span class="ftree-box" data-action="check" data-id="${node.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M5 13l4 4L19 7"/></svg>
+          </span>
+          <span class="ftree-label" data-action="check" data-id="${node.id}">${escapeHtml(node.label)}</span>
+          <span class="ftree-count">${node.count ?? ''}</span>
+        </div>`;
+
+      const childrenHtml = hasChildren
+        ? `<div class="ftree-children">${node.children.map(c => renderTreeNode(c, level + 1, q)).join('')}</div>`
+        : '';
+
+      // Level 1 = section heading (not selectable, just a divider + label).
+      // Level 2/3 = real filterable nodes (category / brand / power).
+      const openClass = level === 1 ? 'open' : (isOpen ? 'open' : '');
+      return `<div class="ftree-node ftree-lvl${level} ${openClass}" data-id="${node.id}">${headingHtml}${rowHtml}${childrenHtml}</div>`;
+    }
+    function renderTree() {
+      const el = document.getElementById('filterTree');
+      if (!el) return;
+      const q = (document.getElementById('ftreeSearch')?.value || '').trim().toLowerCase();
+      const html = filterTree.map(n => renderTreeNode(n, 1, q)).join('');
+      el.innerHTML = html || `<p class="ftree-empty">${tr('prod_tree_no_match')}</p>`;
+      renderChips();
+    }
+
+    function toggleOpen(id) {
+      if (openNodes.has(id)) openNodes.delete(id); else openNodes.add(id);
+      renderTree();
+    }
+    function toggleCheck(id) {
+      if (selectedFilters.has(id)) {
+        selectedFilters.delete(id);
+      } else {
+        selectedFilters.add(id);
+        openNodes.add(id); // reveal children immediately so the user can refine right away
+      }
+      renderTree();
       renderGrid();
     }
 
-    // ── Sub-filter labels per language ──
-    const SUBFILTER_LABELS = {
-      brand: { ar: 'الماركة', en: 'Brand', es: 'Marca', zh: '品牌' },
-      power: { ar: 'القدرة (KW)', en: 'Power (KW)', es: 'Potencia (KW)', zh: '功率 (KW)' },
-      allBrands: { ar: 'كل الماركات', en: 'All Brands', es: 'Todas las marcas', zh: '全部品牌' },
-      allPowers: { ar: 'كل القدرات', en: 'All Powers', es: 'Todas las potencias', zh: '全部功率' },
-    };
-    function sl(key) { return (SUBFILTER_LABELS[key] && SUBFILTER_LABELS[key][getLang()]) || SUBFILTER_LABELS[key].ar; }
-
-    // ── Build & inject the dynamic sub-filter (brand / power) based on currentCat ──
-    function renderSubFilter() {
-      const wrap = document.getElementById('dynamicSubFilter');
+    // ── Active filter chips above the grid ──
+    function renderChips() {
+      const wrap = document.getElementById('activeChips');
       if (!wrap) return;
-
-      // Only inverters and panels currently have a sub-filter
-      if (currentCat !== 'inverters' && currentCat !== 'panels') {
-        wrap.hidden = true;
-        wrap.innerHTML = '';
-        return;
-      }
-
-      const inCat = allProducts.filter(p => p.category === currentCat);
-      const brands = [...new Set(inCat.map(p => p.brand).filter(Boolean))].sort();
-
-      let html = `
-        <div class="prod-subfilter-group">
-          <p class="prod-sidebar-label">${sl('brand')}</p>
-          <div class="prod-sub-radio-list" id="brandRadioList">
-            <label class="prod-sub-radio-item${currentBrand === 'all' ? ' active' : ''}" data-brand="all">
-              <span>${sl('allBrands')}</span>
-              <input type="radio" name="prodBrand" value="all" ${currentBrand === 'all' ? 'checked' : ''}>
-            </label>
-            ${brands.map(b => {
-              const count = inCat.filter(p => p.brand === b).length;
-              return `<label class="prod-sub-radio-item${currentBrand === b ? ' active' : ''}" data-brand="${escapeHtml(b)}">
-                <span>${escapeHtml(b)}</span>
-                <input type="radio" name="prodBrand" value="${escapeHtml(b)}" ${currentBrand === b ? 'checked' : ''}>
-              </label>`;
-            }).join('')}
-          </div>
-        </div>`;
-
-      // Power chips only for inverters, scoped to the selected brand (or all brands)
-      if (currentCat === 'inverters') {
-        const scoped = currentBrand === 'all' ? inCat : inCat.filter(p => p.brand === currentBrand);
-        const powers = [...new Map(
-          scoped.map(p => { const { kw } = parseInvPower(p); return [kw, kw]; }).filter(([kw]) => kw)
-        ).keys()].sort((a, b) => a - b);
-
-        html += `
-        <div class="prod-subfilter-group">
-          <p class="prod-sidebar-label">${sl('power')}</p>
-          <div class="prod-chip-list" id="powerChipList">
-            <button type="button" class="prod-chip${currentPower === 'all' ? ' active' : ''}" data-power="all">${sl('allPowers')}</button>
-            ${powers.map(kw => `<button type="button" class="prod-chip${String(currentPower) === String(kw) ? ' active' : ''}" data-power="${kw}">${kw} KW</button>`).join('')}
-          </div>
-        </div>`;
-      }
-
-      wrap.innerHTML = html;
+      if (selectedFilters.size === 0) { wrap.hidden = true; wrap.innerHTML = ''; return; }
       wrap.hidden = false;
-
-      // Wire up brand radios
-      wrap.querySelectorAll('#brandRadioList input[type="radio"]').forEach(input => {
-        input.addEventListener('change', () => {
-          const item = input.closest('.prod-sub-radio-item');
-          currentBrand = item ? item.dataset.brand : 'all';
-          currentPower = 'all'; // reset power when brand changes
-          renderSubFilter();
-          renderGrid();
-        });
-      });
-
-      // Wire up power chips
-      wrap.querySelectorAll('#powerChipList .prod-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-          currentPower = chip.dataset.power;
-          wrap.querySelectorAll('#powerChipList .prod-chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
-          renderGrid();
-        });
-      });
+      const chips = Array.from(selectedFilters).map(id => `
+        <span class="active-chip">${escapeHtml(nodeLabels[id] || id)}
+          <button type="button" data-remove="${id}" aria-label="إزالة">✕</button>
+        </span>`).join('');
+      wrap.innerHTML = chips + `<button type="button" class="active-chip-clear" id="clearAllChips">${tr('prod_clear_all')}</button>`;
     }
 
-    document.querySelectorAll('#catRadioList input[type="radio"]').forEach(input => {
-      input.addEventListener('change', () => {
-        const item = input.closest('.prod-radio-item');
-        setActiveCategory(item ? item.dataset.cat : 'all');
-      });
+    document.getElementById('filterTree')?.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-action]');
+      if (!t) return;
+      const id = t.getAttribute('data-id');
+      if (t.getAttribute('data-action') === 'toggle') toggleOpen(id); else toggleCheck(id);
     });
+    document.getElementById('activeChips')?.addEventListener('click', (e) => {
+      if (e.target.id === 'clearAllChips') { selectedFilters.clear(); renderTree(); renderGrid(); return; }
+      const removeId = e.target.closest('[data-remove]')?.getAttribute('data-remove');
+      if (removeId) { selectedFilters.delete(removeId); renderTree(); renderGrid(); }
+    });
+    document.getElementById('ftreeSearch')?.addEventListener('input', renderTree);
 
     // ── Price filter apply / reset ──
     document.getElementById('btnApplyFilter')?.addEventListener('click', () => {
@@ -1388,18 +1479,16 @@
     document.getElementById('btnResetFilter')?.addEventListener('click', () => {
       priceMin = null;
       priceMax = null;
-      currentBrand = 'all';
-      currentPower = 'all';
+      selectedFilters.clear();
+      openNodes.clear();
       const fFrom = document.getElementById('priceFrom');
       const fTo = document.getElementById('priceTo');
       if (fFrom) fFrom.value = '';
       if (fTo) fTo.value = '';
-      const allRadio = document.querySelector('.prod-radio-item[data-cat="all"]');
-      if (allRadio) {
-        const input = allRadio.querySelector('input[type="radio"]');
-        if (input) input.checked = true;
-      }
-      setActiveCategory('all');
+      const search = document.getElementById('ftreeSearch');
+      if (search) search.value = '';
+      renderTree();
+      renderGrid();
     });
 
     // Allow Enter key inside price fields to trigger apply
@@ -1413,7 +1502,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('[data-lang]').forEach(btn => {
         btn.addEventListener('click', () => {
-          setTimeout(() => { renderSubFilter(); renderGrid(); }, 50);
+          setTimeout(() => {
+            const search = document.getElementById('ftreeSearch');
+            if (search) search.placeholder = tr('prod_tree_search');
+            buildFilterTree(lastSectionOf); renderTree(); renderGrid();
+          }, 50);
         });
       });
     });
@@ -1458,7 +1551,7 @@
       try {
         const [{ data, error }, { data: catSettings }] = await Promise.all([
           sb.from('products').select('*').order('sort_order', { ascending: true }),
-          sb.from('category_settings').select('category_key, visible'),
+          sb.from('category_settings').select('category_key, visible, main_section, sort_order'),
         ]);
 
         loading.hidden = true;
@@ -1471,31 +1564,16 @@
           return;
         }
 
-        // Categories the admin switched off — hidden from both the radio
-        // filter list and the product grid. A category with no row in
-        // category_settings defaults to visible so nothing disappears
-        // silently if the table is ever missing an entry.
+        // Categories the admin switched off never make it into allProducts or
+        // the filter tree. A category with no row in category_settings
+        // defaults to visible so nothing disappears silently if the table is
+        // ever missing an entry.
         const hiddenCats = new Set(
           (catSettings || []).filter(c => c.visible === false).map(c => c.category_key)
         );
-        document.querySelectorAll('#catRadioList [data-cat]').forEach(label => {
-          const cat = label.getAttribute('data-cat');
-          if (cat !== 'all' && hiddenCats.has(cat)) {
-            label.hidden = true;
-            if (currentCat === cat) setActiveCategory('all'); // don't get stuck filtered on a category that just vanished
-          }
-        });
-        if (currentCat !== 'all' && hiddenCats.has(currentCat)) setActiveCategory('all');
-
-        // Hide a section header too if every category under it is now hidden
-        const sectionsWithVisibleItem = new Set(
-          Array.from(document.querySelectorAll('#catRadioList label[data-cat][data-section]'))
-            .filter(label => !label.hidden)
-            .map(label => label.getAttribute('data-section'))
-        );
-        document.querySelectorAll('#catRadioList p[data-section]').forEach(header => {
-          header.hidden = !sectionsWithVisibleItem.has(header.getAttribute('data-section'));
-        });
+        const sectionOf = {};
+        (catSettings || []).forEach(c => { sectionOf[c.category_key] = c.main_section; });
+        lastSectionOf = sectionOf;
 
         const rawProducts = data.filter(row => CATEGORIES.includes(row.category) && !hiddenCats.has(row.category));
 
@@ -1514,7 +1592,8 @@
           ...p,
           image_url: p.image_url || (p.brand && brandLogos[p.brand]) || null,
         }));
-        renderSubFilter();
+        buildFilterTree(sectionOf);
+        renderTree();
         renderGrid();
       } catch (e) {
         console.error('loadProducts error:', e);
