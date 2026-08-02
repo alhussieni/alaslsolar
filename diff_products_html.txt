@@ -1,0 +1,42 @@
+--- orig/alaslsolar-main/products.html	2026-08-02 02:42:53.000000000 +0000
++++ project/alaslsolar-main/products.html	2026-08-02 06:05:56.639924905 +0000
+@@ -1444,10 +1444,10 @@
+       }
+ 
+       try {
+-        const { data, error } = await sb
+-          .from('products')
+-          .select('*')
+-          .order('sort_order', { ascending: true });
++        const [{ data, error }, { data: catSettings }] = await Promise.all([
++          sb.from('products').select('*').order('sort_order', { ascending: true }),
++          sb.from('category_settings').select('category_key, visible'),
++        ]);
+ 
+         loading.hidden = true;
+ 
+@@ -1459,7 +1459,23 @@
+           return;
+         }
+ 
+-        const rawProducts = data.filter(row => CATEGORIES.includes(row.category));
++        // Categories the admin switched off — hidden from both the radio
++        // filter list and the product grid. A category with no row in
++        // category_settings defaults to visible so nothing disappears
++        // silently if the table is ever missing an entry.
++        const hiddenCats = new Set(
++          (catSettings || []).filter(c => c.visible === false).map(c => c.category_key)
++        );
++        document.querySelectorAll('#catRadioList [data-cat]').forEach(label => {
++          const cat = label.getAttribute('data-cat');
++          if (cat !== 'all' && hiddenCats.has(cat)) {
++            label.hidden = true;
++            if (currentCat === cat) setActiveCategory('all'); // don't get stuck filtered on a category that just vanished
++          }
++        });
++        if (currentCat !== 'all' && hiddenCats.has(currentCat)) setActiveCategory('all');
++
++        const rawProducts = data.filter(row => CATEGORIES.includes(row.category) && !hiddenCats.has(row.category));
+ 
+         // Brand-level logo fallback: a product's own image_url always wins;
+         // if it has none, fall back to the brand's shared logo (set once in
