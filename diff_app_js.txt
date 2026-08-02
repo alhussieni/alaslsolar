@@ -1,6 +1,6 @@
 --- orig/alaslsolar-main/app.js	2026-08-02 02:42:53.000000000 +0000
-+++ project/alaslsolar-main/app.js	2026-08-02 06:10:25.286283931 +0000
-@@ -312,6 +312,12 @@
++++ project/alaslsolar-main/app.js	2026-08-02 11:13:47.725616421 +0000
+@@ -312,6 +312,15 @@
      prod_empty_text: "Try changing the filter or search",
      prod_sidebar_category: "Category",
      prod_cat_all: "All Products",
@@ -10,10 +10,13 @@
 +    prod_section_install: "Installation Components",
 +    prod_section_lighting: "Standalone Solar Lighting",
 +    prod_section_batteries: "Batteries & Storage",
++    prod_tree_search: "Search categories or brands…",
++    prod_tree_no_match: "No matches",
++    prod_clear_all: "Clear all",
      prod_cat_panels: "☀️ Solar Panels",
      prod_cat_inverters: "⚡ Inverters",
      prod_cat_accessories: "🔌 Accessories",
-@@ -647,6 +653,12 @@
+@@ -647,6 +656,15 @@
      prod_empty_text: "جرّب تغيير الفلتر أو البحث",
      prod_sidebar_category: "الفئة",
      prod_cat_all: "جميع المنتجات",
@@ -23,10 +26,13 @@
 +    prod_section_install: "مكوّنات التركيب",
 +    prod_section_lighting: "الإضاءة الشمسية المستقلة",
 +    prod_section_batteries: "بطاريات وتخزين الطاقة",
++    prod_tree_search: "ابحث في التصنيفات أو الماركات…",
++    prod_tree_no_match: "مفيش نتايج مطابقة",
++    prod_clear_all: "مسح الكل",
      prod_cat_panels: "☀️ ألواح شمسية",
      prod_cat_inverters: "⚡ إنفرترات",
      prod_cat_accessories: "🔌 إكسسوارات",
-@@ -982,6 +994,12 @@
+@@ -982,6 +1000,15 @@
      prod_empty_text: "Intenta cambiar el filtro o la búsqueda",
      prod_sidebar_category: "Categoría",
      prod_cat_all: "Todos los productos",
@@ -36,10 +42,13 @@
 +    prod_section_install: "Componentes de Instalación",
 +    prod_section_lighting: "Iluminación Solar Independiente",
 +    prod_section_batteries: "Baterías y Almacenamiento",
++    prod_tree_search: "Buscar categorías o marcas…",
++    prod_tree_no_match: "Sin resultados",
++    prod_clear_all: "Borrar todo",
      prod_cat_panels: "☀️ Paneles solares",
      prod_cat_inverters: "⚡ Inversores",
      prod_cat_accessories: "🔌 Accesorios",
-@@ -1317,6 +1335,12 @@
+@@ -1317,6 +1344,15 @@
      prod_empty_text: "请尝试更改筛选条件或搜索词",
      prod_sidebar_category: "类别",
      prod_cat_all: "所有产品",
@@ -49,6 +58,9 @@
 +    prod_section_install: "安装组件",
 +    prod_section_lighting: "独立太阳能照明",
 +    prod_section_batteries: "电池与储能",
++    prod_tree_search: "搜索类别或品牌…",
++    prod_tree_no_match: "没有匹配结果",
++    prod_clear_all: "清除全部",
      prod_cat_panels: "☀️ 太阳能板",
      prod_cat_inverters: "⚡ 逆变器",
      prod_cat_accessories: "🔌 配件",
