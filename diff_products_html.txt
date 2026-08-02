@@ -1,5 +1,5 @@
 --- orig/alaslsolar-main/products.html	2026-08-02 02:42:53.000000000 +0000
-+++ project/alaslsolar-main/products.html	2026-08-02 19:23:05.863964798 +0000
++++ project/alaslsolar-main/products.html	2026-08-02 19:37:26.874669934 +0000
 @@ -337,7 +337,7 @@
      /* ── Shop layout: sidebar + content ── */
      .prod-shop {
@@ -9,25 +9,33 @@
        gap: var(--space-4);
        max-width: 1280px;
        margin: 0 auto;
-@@ -357,7 +357,7 @@
+@@ -345,6 +345,7 @@
+       align-items: start;
+     }
+     [dir="rtl"] .prod-shop { direction: rtl; }
++    .prod-content-col { grid-column: 2; min-width: 0; }
+ 
+     /* Toolbar: count + sort */
+     .prod-toolbar {
+@@ -357,7 +358,6 @@
        border-radius: var(--radius-lg);
        padding: 10px 16px;
        margin-bottom: var(--space-3);
 -      grid-column: 1;
-+      grid-column: 2;
      }
      .prod-count {
        font-size: 14px;
-@@ -385,7 +385,7 @@
+@@ -385,8 +385,7 @@
  
      /* Sidebar */
      .prod-sidebar {
 -      grid-column: 2;
+-      grid-row: 1 / span 2;
 +      grid-column: 1;
-       grid-row: 1 / span 2;
        background: #fff;
        border: 1px solid var(--line);
-@@ -497,6 +497,67 @@
+       border-radius: var(--radius-lg);
+@@ -497,6 +496,67 @@
        align-items: center;
        gap: 8px;
      }
@@ -95,16 +103,17 @@
      .prod-price-field {
        flex: 1;
        display: flex;
-@@ -555,7 +616,7 @@
+@@ -555,7 +615,8 @@
      .prod-btn-reset:hover { border-color: var(--brand); color: var(--brand-dark); }
  
      /* Product grid */
 -    .prod-grid-wrap { grid-column: 1; }
-+    .prod-grid-wrap { grid-column: 2; grid-row: 2; }
++    /* No grid-column/grid-row here anymore — .prod-grid-wrap is a normal
++       block child of .prod-content-col now, not a direct .prod-shop item. */
      .prod-grid {
        display: grid;
        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-@@ -672,11 +733,46 @@
+@@ -672,11 +733,44 @@
        padding: 2px 6px;
        margin-bottom: 4px;
      }
@@ -147,37 +156,91 @@
      /* Loading / empty states */
      .prod-loading {
 -      grid-column: 1;
-+      grid-column: 2;
-+      grid-row: 2;
        text-align: center;
        padding: var(--space-5);
        color: var(--muted);
-@@ -774,6 +870,14 @@
+@@ -710,8 +804,7 @@
+     @media (max-width: 900px) {
+       .prod-shop { grid-template-columns: 1fr; }
+       .prod-sidebar { grid-column: 1; grid-row: auto; position: static; order: -1; }
+-      .prod-toolbar { grid-column: 1; }
+-      .prod-grid-wrap { grid-column: 1; }
++      .prod-content-col { grid-column: 1; }
+       .prod-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+     }
+     @media (max-width: 480px) {
+@@ -772,113 +865,66 @@
+     <!-- Shop layout: toolbar + grid + sidebar -->
+     <div class="prod-shop">
  
-       <!-- Toolbar -->
-       <div class="prod-toolbar">
-+        <div class="prod-view-toggle" role="group" aria-label="نمط العرض">
-+          <button type="button" class="prod-view-btn active" id="viewGridBtn" aria-label="عرض شبكي">
-+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-+          </button>
-+          <button type="button" class="prod-view-btn" id="viewListBtn" aria-label="عرض قائمة">
-+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
-+          </button>
+-      <!-- Toolbar -->
+-      <div class="prod-toolbar">
+-        <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
+-          <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
+-        </select>
+-        <span class="prod-count" id="prodCount"><strong>0</strong> <span data-i18n="prod_count_label">منتج</span></span>
+-      </div>
++      <!-- Content column: toolbar + loading + grid, all stacked in normal
++           block flow inside ONE grid cell. This is deliberate — earlier this
++           column's pieces were separate direct grid items sharing rows with
++           the sidebar, so a tall sidebar (deep tree expansion) forced those
++           rows to stretch and left a blank gap above the cards. Grouping
++           them removes that coupling: this column's height is now only ever
++           its own content's height, never the sidebar's. -->
++      <div class="prod-content-col">
++
++        <!-- Toolbar -->
++        <div class="prod-toolbar">
++          <div class="prod-view-toggle" role="group" aria-label="نمط العرض">
++            <button type="button" class="prod-view-btn active" id="viewGridBtn" aria-label="عرض شبكي">
++              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
++            </button>
++            <button type="button" class="prod-view-btn" id="viewListBtn" aria-label="عرض قائمة">
++              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
++            </button>
++          </div>
++          <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
++            <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
++          </select>
++          <span class="prod-count" id="prodCount"><strong>0</strong> <span data-i18n="prod_count_label">منتج</span></span>
 +        </div>
-         <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
-           <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
-         </select>
-@@ -788,7 +892,9 @@
  
-       <!-- Product grid -->
-       <div class="prod-grid-wrap">
-+        <div class="active-chips" id="activeChips" hidden></div>
-         <div class="prod-grid" id="prodGrid" hidden></div>
-+        <div class="prod-pagination" id="prodPagination" hidden></div>
+-      <!-- Loading state -->
+-      <div id="productsLoading" class="prod-loading">
+-        <i class="fa fa-spinner fa-spin"></i>
+-        <span data-i18n="prod_loading">جاري تحميل المنتجات…</span>
+-      </div>
++        <!-- Loading state -->
++        <div id="productsLoading" class="prod-loading">
++          <i class="fa fa-spinner fa-spin"></i>
++          <span data-i18n="prod_loading">جاري تحميل المنتجات…</span>
++        </div>
  
-         <!-- Empty state -->
-         <div class="prod-empty" id="prodEmpty" hidden>
-@@ -801,84 +907,16 @@
+-      <!-- Product grid -->
+-      <div class="prod-grid-wrap">
+-        <div class="prod-grid" id="prodGrid" hidden></div>
+-
+-        <!-- Empty state -->
+-        <div class="prod-empty" id="prodEmpty" hidden>
+-          <div class="prod-empty-icon">📦</div>
+-          <h3 data-i18n="prod_empty_title">لا توجد منتجات</h3>
+-          <p data-i18n="prod_empty_text">جرّب تغيير الفلتر أو البحث</p>
++        <!-- Product grid -->
++        <div class="prod-grid-wrap">
++          <div class="active-chips" id="activeChips" hidden></div>
++          <div class="prod-grid" id="prodGrid" hidden></div>
++          <div class="prod-pagination" id="prodPagination" hidden></div>
++
++          <!-- Empty state -->
++          <div class="prod-empty" id="prodEmpty" hidden>
++            <div class="prod-empty-icon">📦</div>
++            <h3 data-i18n="prod_empty_title">لا توجد منتجات</h3>
++            <p data-i18n="prod_empty_text">جرّب تغيير الفلتر أو البحث</p>
++          </div>
+         </div>
++
+       </div>
+ 
        <!-- Sidebar -->
        <aside class="prod-sidebar">
  
@@ -267,7 +330,7 @@
          <!-- Price filter -->
          <div class="prod-sidebar-section">
            <p class="prod-sidebar-label" data-i18n="prod_sidebar_price">السعر (ج.م)</p>
-@@ -996,10 +1034,15 @@
+@@ -996,10 +1042,15 @@
      }
  
      // ── State ──
@@ -287,7 +350,7 @@
      let priceMin = null;
      let priceMax = null;
  
-@@ -1051,13 +1094,23 @@
+@@ -1051,13 +1102,23 @@
      }
  
      // ── Render a single product card ──
@@ -313,7 +376,7 @@
  
        const ds = p.datasheet_url
          ? `<span class="prod-card-ds" onclick="event.preventDefault();event.stopPropagation();window.open('${escapeHtml(p.datasheet_url)}','_blank','noopener')"><i class="fa fa-file-pdf-o"></i> PDF</span>`
-@@ -1182,6 +1235,8 @@
+@@ -1182,6 +1243,8 @@
          : `<span class="prod-fallback-icon">${icon}</span>`;
  
        const anyInStock = group.some(r => r.in_stock !== false);
@@ -322,7 +385,7 @@
        const prices = group.map(r => r.price);
        const min = fmt(Math.min(...prices));
        const max = fmt(Math.max(...prices));
-@@ -1201,6 +1256,7 @@
+@@ -1201,6 +1264,7 @@
              <div class="prod-card-meta"><span>${variantsLine}</span></div>
              <div class="prod-card-bottom">
                <div>
@@ -330,7 +393,7 @@
                  <span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span></span>
                </div>
              </div>
-@@ -1208,7 +1264,34 @@
+@@ -1208,7 +1272,34 @@
          </a>`;
      }
  
@@ -366,7 +429,7 @@
      function renderGrid() {
        const grid = document.getElementById('prodGrid');
        const empty = document.getElementById('prodEmpty');
-@@ -1216,12 +1299,7 @@
+@@ -1216,12 +1307,7 @@
        if (!grid) return;
  
        let filtered = allProducts.filter(p => {
@@ -380,7 +443,7 @@
          if (priceMin !== null && p.price < priceMin) return false;
          if (priceMax !== null && p.price > priceMax) return false;
          return true;
-@@ -1245,124 +1323,254 @@
+@@ -1245,124 +1331,254 @@
          grid.hidden = true;
          grid.innerHTML = '';
          if (empty) empty.hidden = false;
@@ -723,7 +786,7 @@
  
      // ── Price filter apply / reset ──
      document.getElementById('btnApplyFilter')?.addEventListener('click', () => {
-@@ -1370,24 +1578,24 @@
+@@ -1370,24 +1586,24 @@
        const toVal = document.getElementById('priceTo')?.value;
        priceMin = fromVal !== '' && fromVal != null ? parseFloat(fromVal) : null;
        priceMax = toVal !== '' && toVal != null ? parseFloat(toVal) : null;
@@ -756,7 +819,7 @@
      });
  
      // Allow Enter key inside price fields to trigger apply
-@@ -1401,7 +1609,11 @@
+@@ -1401,7 +1617,11 @@
      document.addEventListener('DOMContentLoaded', () => {
        document.querySelectorAll('[data-lang]').forEach(btn => {
          btn.addEventListener('click', () => {
@@ -769,7 +832,7 @@
          });
        });
      });
-@@ -1444,10 +1656,10 @@
+@@ -1444,10 +1664,10 @@
        }
  
        try {
@@ -784,7 +847,7 @@
  
          loading.hidden = true;
  
-@@ -1459,7 +1671,18 @@
+@@ -1459,7 +1679,18 @@
            return;
          }
  
@@ -804,7 +867,7 @@
  
          // Brand-level logo fallback: a product's own image_url always wins;
          // if it has none, fall back to the brand's shared logo (set once in
-@@ -1476,7 +1699,8 @@
+@@ -1476,7 +1707,8 @@
            ...p,
            image_url: p.image_url || (p.brand && brandLogos[p.brand]) || null,
          }));

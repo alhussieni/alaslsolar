@@ -345,6 +345,7 @@
       align-items: start;
     }
     [dir="rtl"] .prod-shop { direction: rtl; }
+    .prod-content-col { grid-column: 2; min-width: 0; }
 
     /* Toolbar: count + sort */
     .prod-toolbar {
@@ -357,7 +358,6 @@
       border-radius: var(--radius-lg);
       padding: 10px 16px;
       margin-bottom: var(--space-3);
-      grid-column: 2;
     }
     .prod-count {
       font-size: 14px;
@@ -386,7 +386,6 @@
     /* Sidebar */
     .prod-sidebar {
       grid-column: 1;
-      grid-row: 1 / span 2;
       background: #fff;
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
@@ -616,7 +615,8 @@
     .prod-btn-reset:hover { border-color: var(--brand); color: var(--brand-dark); }
 
     /* Product grid */
-    .prod-grid-wrap { grid-column: 2; grid-row: 2; }
+    /* No grid-column/grid-row here anymore — .prod-grid-wrap is a normal
+       block child of .prod-content-col now, not a direct .prod-shop item. */
     .prod-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -771,8 +771,6 @@
 
     /* Loading / empty states */
     .prod-loading {
-      grid-column: 2;
-      grid-row: 2;
       text-align: center;
       padding: var(--space-5);
       color: var(--muted);
@@ -806,8 +804,7 @@
     @media (max-width: 900px) {
       .prod-shop { grid-template-columns: 1fr; }
       .prod-sidebar { grid-column: 1; grid-row: auto; position: static; order: -1; }
-      .prod-toolbar { grid-column: 1; }
-      .prod-grid-wrap { grid-column: 1; }
+      .prod-content-col { grid-column: 1; }
       .prod-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
     @media (max-width: 480px) {
@@ -868,40 +865,51 @@
     <!-- Shop layout: toolbar + grid + sidebar -->
     <div class="prod-shop">
 
-      <!-- Toolbar -->
-      <div class="prod-toolbar">
-        <div class="prod-view-toggle" role="group" aria-label="نمط العرض">
-          <button type="button" class="prod-view-btn active" id="viewGridBtn" aria-label="عرض شبكي">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-          </button>
-          <button type="button" class="prod-view-btn" id="viewListBtn" aria-label="عرض قائمة">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
-          </button>
+      <!-- Content column: toolbar + loading + grid, all stacked in normal
+           block flow inside ONE grid cell. This is deliberate — earlier this
+           column's pieces were separate direct grid items sharing rows with
+           the sidebar, so a tall sidebar (deep tree expansion) forced those
+           rows to stretch and left a blank gap above the cards. Grouping
+           them removes that coupling: this column's height is now only ever
+           its own content's height, never the sidebar's. -->
+      <div class="prod-content-col">
+
+        <!-- Toolbar -->
+        <div class="prod-toolbar">
+          <div class="prod-view-toggle" role="group" aria-label="نمط العرض">
+            <button type="button" class="prod-view-btn active" id="viewGridBtn" aria-label="عرض شبكي">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </button>
+            <button type="button" class="prod-view-btn" id="viewListBtn" aria-label="عرض قائمة">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            </button>
+          </div>
+          <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
+            <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
+          </select>
+          <span class="prod-count" id="prodCount"><strong>0</strong> <span data-i18n="prod_count_label">منتج</span></span>
         </div>
-        <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
-          <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
-        </select>
-        <span class="prod-count" id="prodCount"><strong>0</strong> <span data-i18n="prod_count_label">منتج</span></span>
-      </div>
 
-      <!-- Loading state -->
-      <div id="productsLoading" class="prod-loading">
-        <i class="fa fa-spinner fa-spin"></i>
-        <span data-i18n="prod_loading">جاري تحميل المنتجات…</span>
-      </div>
-
-      <!-- Product grid -->
-      <div class="prod-grid-wrap">
-        <div class="active-chips" id="activeChips" hidden></div>
-        <div class="prod-grid" id="prodGrid" hidden></div>
-        <div class="prod-pagination" id="prodPagination" hidden></div>
-
-        <!-- Empty state -->
-        <div class="prod-empty" id="prodEmpty" hidden>
-          <div class="prod-empty-icon">📦</div>
-          <h3 data-i18n="prod_empty_title">لا توجد منتجات</h3>
-          <p data-i18n="prod_empty_text">جرّب تغيير الفلتر أو البحث</p>
+        <!-- Loading state -->
+        <div id="productsLoading" class="prod-loading">
+          <i class="fa fa-spinner fa-spin"></i>
+          <span data-i18n="prod_loading">جاري تحميل المنتجات…</span>
         </div>
+
+        <!-- Product grid -->
+        <div class="prod-grid-wrap">
+          <div class="active-chips" id="activeChips" hidden></div>
+          <div class="prod-grid" id="prodGrid" hidden></div>
+          <div class="prod-pagination" id="prodPagination" hidden></div>
+
+          <!-- Empty state -->
+          <div class="prod-empty" id="prodEmpty" hidden>
+            <div class="prod-empty-icon">📦</div>
+            <h3 data-i18n="prod_empty_title">لا توجد منتجات</h3>
+            <p data-i18n="prod_empty_text">جرّب تغيير الفلتر أو البحث</p>
+          </div>
+        </div>
+
       </div>
 
       <!-- Sidebar -->
