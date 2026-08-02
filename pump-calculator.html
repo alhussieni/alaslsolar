@@ -825,33 +825,42 @@
         }
       }
 
-      /* ── طلمبة (pumps) — تفضيل المطابقة المؤكدة بالقطر، وإلا fallback بالحصان فقط، مع فلتر الماركة ── */
+      /* ── طلمبة (pumps) — مقارنة كل الماركات المتاحة مع بعض: نعرض لكل ماركة أقل قدرة
+         حصانية كافية عندها لتوفير كمية المياه المطلوبة (hp_c)، بدل ما نختار منتج واحد
+         بس من ماركة مفضّلة. الماركة المفضّلة (لو موجودة) بتتحط في أول الترتيب فقط،
+         من غير ما تستبعد باقي الماركات. */
       const pumpsAll = products.filter(r => r.category === 'pumps')
         .map(r => ({ row: r, parsed: parsePumpSpecs(r.specs_ar) }))
         .filter(x => x.parsed);
       const pumpsVerified = pumpsAll.filter(x => x.parsed.verified && x.parsed.motorDias.includes(wellDia));
-      let pumpsPool = pumpsVerified.length ? pumpsVerified : pumpsAll;
+      const pumpsPool = pumpsVerified.length ? pumpsVerified : pumpsAll;
+      const pumpsUnverified = !pumpsVerified.length;
 
-      if (prefPumpBrand) {
-        const byBrand = pumpsPool.filter(x => x.row.brand === prefPumpBrand);
-        if (!byBrand.length) {
-          cards.push(emptyRow(`ماركة الطلمبة المفضّلة "${prefPumpBrand}" مش متاحة بالمقاس ده حاليًا. ${brandDropdownHtml('pump_brand', brandsOf('pumps'), prefPumpBrand)}`));
-          pumpsPool = [];
-        } else pumpsPool = byBrand;
-      }
-      if (pumpsPool.length) {
-        const groups = {};
-        pumpsPool.forEach(x => { (groups[x.parsed.hp] = groups[x.parsed.hp] || []).push(x); });
-        const byHp = Object.keys(groups).map(Number);
-        const nearest = pickNearestGE(byHp.map(h=>({hp:h})), x=>x.hp, hp_c);
-        if (nearest && nearest.exceeds && prefPumpBrand) {
-          cards.push(emptyRow(`ماركة الطلمبة المفضّلة "${prefPumpBrand}" مفيهاش مقاس يناسب القدرة المطلوبة (${hp_c} حصان) — أعلى مقاس متاح منها ${nearest.item.hp} حصان بس. ${brandDropdownHtml('pump_brand', brandsOf('pumps'), prefPumpBrand)}`));
-        } else if (nearest) {
+      if (!pumpsPool.length) {
+        cards.push(emptyRow(`مفيش طلمبة بقطر ${wellDia}" متاحة في الكتالوج حاليًا.`));
+      } else {
+        const byBrand = {};
+        pumpsPool.forEach(x => { const b = x.row.brand || 'غير محدد'; (byBrand[b] = byBrand[b] || []).push(x); });
+        const brandNames = Object.keys(byBrand).sort((a, b) => {
+          if (a === prefPumpBrand) return -1;
+          if (b === prefPumpBrand) return 1;
+          return a.localeCompare(b, 'ar');
+        });
+
+        brandNames.forEach(brandName => {
+          const groups = {};
+          byBrand[brandName].forEach(x => { (groups[x.parsed.hp] = groups[x.parsed.hp] || []).push(x); });
+          const byHp = Object.keys(groups).map(Number);
+          const nearest = pickNearestGE(byHp.map(h => ({ hp: h })), x => x.hp, hp_c);
+          if (!nearest) return;
           const chosen = bestOf(groups[nearest.item.hp]);
-          const unverifiedBadge = !pumpsVerified.length ? 'راجع توافق القطر يدويًا' : (nearest.exceeds ? 'أعلى مقاس متاح' : null);
-          cards.push(prodRow(rowNum++, 'طلمبة', chosen.row, `${nearest.item.hp} حصان`, unverifiedBadge,
-            'pump_brand', brandsOf('pumps'), chosen.row.brand));
-        }
+          const badges = [];
+          if (pumpsUnverified) badges.push('راجع توافق القطر يدويًا');
+          if (nearest.exceeds) badges.push('أعلى مقاس متاح من هذه الماركة');
+          if (brandName === prefPumpBrand) badges.push('الماركة المفضّلة');
+          cards.push(prodRow(rowNum++, 'طلمبة — ' + brandName, chosen.row,
+            `${nearest.item.hp} حصان`, badges.join(' · ') || null, null, null, null));
+        });
       }
 
       /* ── إنفرتر (inverters) — أقرب كيلوواط متاح ≥ الهدف، مع فلتر الماركة ── */
