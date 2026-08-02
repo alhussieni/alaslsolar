@@ -728,7 +728,41 @@
       padding: 2px 6px;
       margin-bottom: 4px;
     }
+    .new-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--forest);
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-bottom: 4px;
+      margin-inline-end: 4px;
+    }
     .prod-card.out-of-stock .prod-card-media { filter: grayscale(60%); opacity: .75; }
+
+    /* Grid / List view toggle */
+    .prod-view-toggle { display: flex; gap: 4px; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 3px; background: #fff; }
+    .prod-view-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: none; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; }
+    .prod-view-btn.active { background: var(--brand-soft); color: var(--brand-dark); }
+    .prod-view-btn svg { width: 15px; height: 15px; }
+
+    .prod-grid.is-list { display: flex; flex-direction: column; gap: var(--space-2); }
+    .prod-grid.is-list .prod-card { flex-direction: row; align-items: stretch; }
+    .prod-grid.is-list .prod-card-media { width: 150px; flex: 0 0 150px; aspect-ratio: auto; }
+    .prod-grid.is-list .prod-card-body { flex: 1; }
+    @media (max-width: 560px) {
+      .prod-grid.is-list .prod-card { flex-direction: column; }
+      .prod-grid.is-list .prod-card-media { width: 100%; flex-basis: auto; }
+    }
+
+    /* Pagination */
+    .prod-pagination { grid-column: 1; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: var(--space-4); flex-wrap: wrap; }
+    .prod-page-btn { min-width: 34px; height: 34px; padding: 0 8px; border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .prod-page-btn:hover:not(:disabled) { border-color: var(--brand); color: var(--brand-dark); }
+    .prod-page-btn.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .prod-page-btn:disabled { opacity: .4; cursor: default; }
+    .prod-page-ellipsis { color: var(--muted); padding: 0 4px; }
 
     /* Loading / empty states */
     .prod-loading {
@@ -831,6 +865,14 @@
 
       <!-- Toolbar -->
       <div class="prod-toolbar">
+        <div class="prod-view-toggle" role="group" aria-label="نمط العرض">
+          <button type="button" class="prod-view-btn active" id="viewGridBtn" aria-label="عرض شبكي">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          </button>
+          <button type="button" class="prod-view-btn" id="viewListBtn" aria-label="عرض قائمة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          </button>
+        </div>
         <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
           <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
         </select>
@@ -847,6 +889,7 @@
       <div class="prod-grid-wrap">
         <div class="active-chips" id="activeChips" hidden></div>
         <div class="prod-grid" id="prodGrid" hidden></div>
+        <div class="prod-pagination" id="prodPagination" hidden></div>
 
         <!-- Empty state -->
         <div class="prod-empty" id="prodEmpty" hidden>
@@ -992,6 +1035,9 @@
     let nodeLabels = {};         // id -> human label, for the active-filter chips
     let openNodes = new Set();   // ids currently expanded in the tree UI
     let lastSectionOf = {};      // category -> main_section, cached so we can rebuild the tree on language change
+    let viewMode = 'grid';       // 'grid' | 'list'
+    let currentPage = 1;
+    const PAGE_SIZE = 24;
     let priceMin = null;
     let priceMax = null;
 
@@ -1043,13 +1089,23 @@
     }
 
     // ── Render a single product card ──
+    // A product counts as "new" for 30 days after it was added — driven by
+    // created_at, which already exists on every row, so no schema change needed.
+    function isNewProduct(createdAt) {
+      if (!createdAt) return false;
+      const days = (Date.now() - new Date(createdAt).getTime()) / 86400000;
+      return days >= 0 && days <= 30;
+    }
+    const NEW_BADGE_TEXT = { ar: 'جديد', en: 'New', es: 'Nuevo', zh: '新品' };
+
     function renderCard(p, cheapSet) {
       const icon = CAT_ICONS[p.category] || '📦';
       const isCheap = cheapSet && cheapSet.has(p.id || p);
       const outOfStock = p.in_stock === false;
-      const badge = outOfStock
+      const newBadge = isNewProduct(p.created_at) ? `<span class="new-badge">${NEW_BADGE_TEXT[getLang()] || NEW_BADGE_TEXT.ar}</span>` : '';
+      const badge = newBadge + (outOfStock
         ? `<span class="stock-badge">${u('outOfStock')}</span>`
-        : (isCheap ? `<span class="cheaper-badge">${u('cheaper')}</span>` : '');
+        : (isCheap ? `<span class="cheaper-badge">${u('cheaper')}</span>` : ''));
 
       const ds = p.datasheet_url
         ? `<span class="prod-card-ds" onclick="event.preventDefault();event.stopPropagation();window.open('${escapeHtml(p.datasheet_url)}','_blank','noopener')"><i class="fa fa-file-pdf-o"></i> PDF</span>`
@@ -1174,6 +1230,8 @@
         : `<span class="prod-fallback-icon">${icon}</span>`;
 
       const anyInStock = group.some(r => r.in_stock !== false);
+      const isNewFamily = group.some(r => isNewProduct(r.created_at));
+      const newBadge = isNewFamily ? `<span class="new-badge">${NEW_BADGE_TEXT[getLang()] || NEW_BADGE_TEXT.ar}</span>` : '';
       const prices = group.map(r => r.price);
       const min = fmt(Math.min(...prices));
       const max = fmt(Math.max(...prices));
@@ -1193,6 +1251,7 @@
             <div class="prod-card-meta"><span>${variantsLine}</span></div>
             <div class="prod-card-bottom">
               <div>
+                ${newBadge ? `<div>${newBadge}</div>` : ''}
                 <span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span></span>
               </div>
             </div>
@@ -1259,21 +1318,68 @@
         grid.hidden = true;
         grid.innerHTML = '';
         if (empty) empty.hidden = false;
+        const pagination = document.getElementById('prodPagination');
+        if (pagination) { pagination.hidden = true; pagination.innerHTML = ''; }
         return;
       }
 
       if (empty) empty.hidden = true;
       grid.hidden = false;
+      grid.classList.toggle('is-list', viewMode === 'list');
 
       // Group same-family variants (same category+brand+model) into ONE card
       // instead of one card per power/spec point — the family card links to
       // product-detail.html, which already has the power/variant picker.
       // Categories with mostly one-off products (single variant per family)
       // just render as before, one card per product.
-      grid.innerHTML = Array.from(groups.values())
+      const allCards = Array.from(groups.values());
+      const totalPages = Math.max(1, Math.ceil(allCards.length / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const pageCards = allCards.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+      grid.innerHTML = pageCards
         .map(group => group.length > 1 ? renderFamilyCard(group, cheapSet) : renderCard(group[0], cheapSet))
         .join('');
+
+      renderPagination(totalPages);
     }
+
+    function renderPagination(totalPages) {
+      const wrap = document.getElementById('prodPagination');
+      if (!wrap) return;
+      if (totalPages <= 1) { wrap.hidden = true; wrap.innerHTML = ''; return; }
+      wrap.hidden = false;
+
+      const pageBtn = (n, label, opts = {}) => `<button type="button" class="prod-page-btn${n === currentPage ? ' active' : ''}"
+        data-page="${n}" ${opts.disabled ? 'disabled' : ''} aria-label="صفحة ${label ?? n}">${label ?? n}</button>`;
+
+      let html = pageBtn(currentPage - 1, '‹', { disabled: currentPage === 1 });
+      const windowStart = Math.max(1, currentPage - 1);
+      const windowEnd = Math.min(totalPages, currentPage + 1);
+      if (windowStart > 1) { html += pageBtn(1); if (windowStart > 2) html += `<span class="prod-page-ellipsis">…</span>`; }
+      for (let n = windowStart; n <= windowEnd; n++) html += pageBtn(n);
+      if (windowEnd < totalPages) { if (windowEnd < totalPages - 1) html += `<span class="prod-page-ellipsis">…</span>`; html += pageBtn(totalPages); }
+      html += pageBtn(currentPage + 1, '›', { disabled: currentPage === totalPages });
+
+      wrap.innerHTML = html;
+    }
+
+    document.getElementById('prodPagination')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-page]');
+      if (!btn || btn.disabled) return;
+      currentPage = parseInt(btn.getAttribute('data-page'), 10);
+      renderGrid();
+      document.querySelector('.prod-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      document.getElementById('viewGridBtn')?.classList.toggle('active', mode === 'grid');
+      document.getElementById('viewListBtn')?.classList.toggle('active', mode === 'list');
+      renderGrid();
+    }
+    document.getElementById('viewGridBtn')?.addEventListener('click', () => setViewMode('grid'));
+    document.getElementById('viewListBtn')?.addEventListener('click', () => setViewMode('list'));
 
     // ── i18n lookup shared with the rest of the site (translations is defined in app.js) ──
     function tr(key) {
@@ -1438,6 +1544,7 @@
         openNodes.add(id); // reveal children immediately so the user can refine right away
       }
       renderTree();
+      currentPage = 1;
       renderGrid();
     }
 
@@ -1461,9 +1568,9 @@
       if (t.getAttribute('data-action') === 'toggle') toggleOpen(id); else toggleCheck(id);
     });
     document.getElementById('activeChips')?.addEventListener('click', (e) => {
-      if (e.target.id === 'clearAllChips') { selectedFilters.clear(); renderTree(); renderGrid(); return; }
+      if (e.target.id === 'clearAllChips') { selectedFilters.clear(); renderTree(); currentPage = 1; renderGrid(); return; }
       const removeId = e.target.closest('[data-remove]')?.getAttribute('data-remove');
-      if (removeId) { selectedFilters.delete(removeId); renderTree(); renderGrid(); }
+      if (removeId) { selectedFilters.delete(removeId); renderTree(); currentPage = 1; renderGrid(); }
     });
     document.getElementById('ftreeSearch')?.addEventListener('input', renderTree);
 
@@ -1473,6 +1580,7 @@
       const toVal = document.getElementById('priceTo')?.value;
       priceMin = fromVal !== '' && fromVal != null ? parseFloat(fromVal) : null;
       priceMax = toVal !== '' && toVal != null ? parseFloat(toVal) : null;
+      currentPage = 1;
       renderGrid();
     });
 
@@ -1488,6 +1596,7 @@
       const search = document.getElementById('ftreeSearch');
       if (search) search.value = '';
       renderTree();
+      currentPage = 1;
       renderGrid();
     });
 
