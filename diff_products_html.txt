@@ -1,6 +1,33 @@
 --- orig/alaslsolar-main/products.html	2026-08-02 02:42:53.000000000 +0000
-+++ project/alaslsolar-main/products.html	2026-08-02 19:10:44.412010116 +0000
-@@ -497,6 +497,62 @@
++++ project/alaslsolar-main/products.html	2026-08-02 19:23:05.863964798 +0000
+@@ -337,7 +337,7 @@
+     /* ── Shop layout: sidebar + content ── */
+     .prod-shop {
+       display: grid;
+-      grid-template-columns: 1fr 300px;
++      grid-template-columns: 300px 1fr;
+       gap: var(--space-4);
+       max-width: 1280px;
+       margin: 0 auto;
+@@ -357,7 +357,7 @@
+       border-radius: var(--radius-lg);
+       padding: 10px 16px;
+       margin-bottom: var(--space-3);
+-      grid-column: 1;
++      grid-column: 2;
+     }
+     .prod-count {
+       font-size: 14px;
+@@ -385,7 +385,7 @@
+ 
+     /* Sidebar */
+     .prod-sidebar {
+-      grid-column: 2;
++      grid-column: 1;
+       grid-row: 1 / span 2;
+       background: #fff;
+       border: 1px solid var(--line);
+@@ -497,6 +497,67 @@
        align-items: center;
        gap: 8px;
      }
@@ -25,6 +52,11 @@
 +      cursor:pointer;font-size:13.5px;color:var(--ink);user-select:none}
 +    .ftree-row:hover{background:var(--brand-soft)}
 +    .ftree-row.selected{background:var(--brand-soft);color:var(--brand-dark);font-weight:800}
++    .ftree-section-row{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.02em;
++      color:var(--brand-dark);margin-top:6px}
++    .ftree-node:first-child > .ftree-section-row{margin-top:0}
++    .ftree-section-row.selected{background:transparent;color:var(--brand-dark)}
++    .ftree-section-row .ftree-count{background:var(--brand-soft)}
 +
 +    .ftree-toggle{width:16px;height:16px;flex:0 0 16px;display:flex;align-items:center;justify-content:center;
 +      color:var(--muted);transition:transform .15s;cursor:pointer}
@@ -63,16 +95,16 @@
      .prod-price-field {
        flex: 1;
        display: flex;
-@@ -555,7 +611,7 @@
+@@ -555,7 +616,7 @@
      .prod-btn-reset:hover { border-color: var(--brand); color: var(--brand-dark); }
  
      /* Product grid */
 -    .prod-grid-wrap { grid-column: 1; }
-+    .prod-grid-wrap { grid-column: 1; grid-row: 2; }
++    .prod-grid-wrap { grid-column: 2; grid-row: 2; }
      .prod-grid {
        display: grid;
        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-@@ -672,11 +728,46 @@
+@@ -672,11 +733,46 @@
        padding: 2px 6px;
        margin-bottom: 4px;
      }
@@ -114,12 +146,13 @@
 +
      /* Loading / empty states */
      .prod-loading {
-       grid-column: 1;
+-      grid-column: 1;
++      grid-column: 2;
 +      grid-row: 2;
        text-align: center;
        padding: var(--space-5);
        color: var(--muted);
-@@ -774,6 +865,14 @@
+@@ -774,6 +870,14 @@
  
        <!-- Toolbar -->
        <div class="prod-toolbar">
@@ -134,7 +167,7 @@
          <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
            <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
          </select>
-@@ -788,7 +887,9 @@
+@@ -788,7 +892,9 @@
  
        <!-- Product grid -->
        <div class="prod-grid-wrap">
@@ -144,7 +177,7 @@
  
          <!-- Empty state -->
          <div class="prod-empty" id="prodEmpty" hidden>
-@@ -801,84 +902,16 @@
+@@ -801,84 +907,16 @@
        <!-- Sidebar -->
        <aside class="prod-sidebar">
  
@@ -234,7 +267,7 @@
          <!-- Price filter -->
          <div class="prod-sidebar-section">
            <p class="prod-sidebar-label" data-i18n="prod_sidebar_price">السعر (ج.م)</p>
-@@ -996,10 +1029,15 @@
+@@ -996,10 +1034,15 @@
      }
  
      // ── State ──
@@ -254,7 +287,7 @@
      let priceMin = null;
      let priceMax = null;
  
-@@ -1051,13 +1089,23 @@
+@@ -1051,13 +1094,23 @@
      }
  
      // ── Render a single product card ──
@@ -280,7 +313,7 @@
  
        const ds = p.datasheet_url
          ? `<span class="prod-card-ds" onclick="event.preventDefault();event.stopPropagation();window.open('${escapeHtml(p.datasheet_url)}','_blank','noopener')"><i class="fa fa-file-pdf-o"></i> PDF</span>`
-@@ -1182,6 +1230,8 @@
+@@ -1182,6 +1235,8 @@
          : `<span class="prod-fallback-icon">${icon}</span>`;
  
        const anyInStock = group.some(r => r.in_stock !== false);
@@ -289,7 +322,7 @@
        const prices = group.map(r => r.price);
        const min = fmt(Math.min(...prices));
        const max = fmt(Math.max(...prices));
-@@ -1201,6 +1251,7 @@
+@@ -1201,6 +1256,7 @@
              <div class="prod-card-meta"><span>${variantsLine}</span></div>
              <div class="prod-card-bottom">
                <div>
@@ -297,7 +330,7 @@
                  <span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span></span>
                </div>
              </div>
-@@ -1208,7 +1259,34 @@
+@@ -1208,7 +1264,34 @@
          </a>`;
      }
  
@@ -333,7 +366,7 @@
      function renderGrid() {
        const grid = document.getElementById('prodGrid');
        const empty = document.getElementById('prodEmpty');
-@@ -1216,12 +1294,7 @@
+@@ -1216,12 +1299,7 @@
        if (!grid) return;
  
        let filtered = allProducts.filter(p => {
@@ -347,7 +380,7 @@
          if (priceMin !== null && p.price < priceMin) return false;
          if (priceMax !== null && p.price > priceMax) return false;
          return true;
-@@ -1245,124 +1318,261 @@
+@@ -1245,124 +1323,254 @@
          grid.hidden = true;
          grid.innerHTML = '';
          if (empty) empty.hidden = false;
@@ -518,50 +551,22 @@
 -    function renderSubFilter() {
 -      const wrap = document.getElementById('dynamicSubFilter');
 -      if (!wrap) return;
-+          return { id: cat, label, count: catProducts.length, children };
-+        });
- 
+-
 -      // Only inverters and panels currently have a sub-filter
 -      if (currentCat !== 'inverters' && currentCat !== 'panels') {
 -        wrap.hidden = true;
 -        wrap.innerHTML = '';
 -        return;
+-      }
++          return { id: cat, label, count: catProducts.length, children };
++        });
+ 
+-      const inCat = allProducts.filter(p => p.category === currentCat);
+-      const brands = [...new Set(inCat.map(p => p.brand).filter(Boolean))].sort();
 +        return { id: section.id, label: tr(section.i18n), count: catProducts_total(catNodes), children: catNodes };
 +      }).filter(Boolean);
 +    }
 +    function catProducts_total(catNodes) { return catNodes.reduce((sum, n) => sum + n.count, 0); }
-+
-+    // ── Render the tree (re-run on every open/check/search change — cheap DOM diff via innerHTML) ──
-+    function nodeMatchesSearch(node, q) {
-+      if (!q) return true;
-+      if (node.label.toLowerCase().includes(q)) return true;
-+      return !!(node.children && node.children.some(c => nodeMatchesSearch(c, q)));
-+    }
-+    function findTreeNode(id, list) {
-+      for (const n of (list || filterTree)) {
-+        if (n.id === id) return n;
-+        if (n.children) { const f = findTreeNode(id, n.children); if (f) return f; }
-       }
-+      return null;
-+    }
-+    function renderTreeNode(node, level, q) {
-+      if (!nodeMatchesSearch(node, q)) return '';
-+      const hasChildren = node.children && node.children.length;
-+      const isOpen = openNodes.has(node.id) || (q && hasChildren);
-+      const isChecked = selectedFilters.has(node.id);
-+      const childIds = hasChildren ? node.children.map(c => c.id) : [];
-+      const childSelected = childIds.filter(id => selectedFilters.has(id)).length;
-+      const isIndeterminate = !isChecked && childSelected > 0 && childSelected < childIds.length;
-+
-+      const rowClasses = ['ftree-row'];
-+      if (isChecked) rowClasses.push('checked', 'selected');
-+      else if (isIndeterminate) rowClasses.push('indeterminate');
- 
--      const inCat = allProducts.filter(p => p.category === currentCat);
--      const brands = [...new Set(inCat.map(p => p.brand).filter(Boolean))].sort();
-+      const headingHtml = level === 1
-+        ? `<p class="ftree-heading">${node.label}</p>`
-+        : '';
  
 -      let html = `
 -        <div class="prod-subfilter-group">
@@ -579,15 +584,36 @@
 -              </label>`;
 -            }).join('')}
 -          </div>
-+      const rowHtml = level === 1 ? '' : `
++    // ── Render the tree (re-run on every open/check/search change — cheap DOM diff via innerHTML) ──
++    function nodeMatchesSearch(node, q) {
++      if (!q) return true;
++      if (node.label.toLowerCase().includes(q)) return true;
++      return !!(node.children && node.children.some(c => nodeMatchesSearch(c, q)));
++    }
++    function findTreeNode(id, list) {
++      for (const n of (list || filterTree)) {
++        if (n.id === id) return n;
++        if (n.children) { const f = findTreeNode(id, n.children); if (f) return f; }
++      }
++      return null;
++    }
++    function renderTreeNode(node, level, q) {
++      if (!nodeMatchesSearch(node, q)) return '';
++      const hasChildren = node.children && node.children.length;
++      const isOpen = openNodes.has(node.id) || (q && hasChildren);
++      const isSelected = selectedFilters.has(node.id);
++      const selectable = level > 1; // level 1 = section grouping only, not a real filter value
++
++      const rowClasses = ['ftree-row'];
++      if (isSelected) rowClasses.push('selected');
++      if (level === 1) rowClasses.push('ftree-section-row');
++
++      const rowHtml = `
 +        <div class="${rowClasses.join(' ')}">
 +          <span class="ftree-toggle ${hasChildren ? '' : 'no-children'}" data-action="toggle" data-id="${node.id}">
 +            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 6l6 6-6 6"/></svg>
 +          </span>
-+          <span class="ftree-box" data-action="check" data-id="${node.id}">
-+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M5 13l4 4L19 7"/></svg>
-+          </span>
-+          <span class="ftree-label" data-action="check" data-id="${node.id}">${escapeHtml(node.label)}</span>
++          <span class="ftree-label" data-action="${selectable ? 'select' : 'toggle'}" data-id="${node.id}">${escapeHtml(node.label)}</span>
 +          <span class="ftree-count">${node.count ?? ''}</span>
          </div>`;
  
@@ -610,10 +636,8 @@
 +        ? `<div class="ftree-children">${node.children.map(c => renderTreeNode(c, level + 1, q)).join('')}</div>`
 +        : '';
 +
-+      // Level 1 = section heading (not selectable, just a divider + label).
-+      // Level 2/3 = real filterable nodes (category / brand / power).
-+      const openClass = level === 1 ? 'open' : (isOpen ? 'open' : '');
-+      return `<div class="ftree-node ftree-lvl${level} ${openClass}" data-id="${node.id}">${headingHtml}${rowHtml}${childrenHtml}</div>`;
++      const openClass = isOpen ? 'open' : '';
++      return `<div class="ftree-node ftree-lvl${level} ${openClass}" data-id="${node.id}">${rowHtml}${childrenHtml}</div>`;
 +    }
 +    function renderTree() {
 +      const el = document.getElementById('filterTree');
@@ -628,10 +652,14 @@
 +      if (openNodes.has(id)) openNodes.delete(id); else openNodes.add(id);
 +      renderTree();
 +    }
-+    function toggleCheck(id) {
++    // Single-select: picking a node replaces whatever was selected before —
++    // simpler mental model than a checkbox tree, and still lets the user
++    // drill further since picking a node also opens it to reveal its children.
++    function selectNode(id) {
 +      if (selectedFilters.has(id)) {
-+        selectedFilters.delete(id);
++        selectedFilters.clear(); // clicking the active filter again clears it
 +      } else {
++        selectedFilters.clear();
 +        selectedFilters.add(id);
 +        openNodes.add(id); // reveal children immediately so the user can refine right away
        }
@@ -684,18 +712,18 @@
 +      const t = e.target.closest('[data-action]');
 +      if (!t) return;
 +      const id = t.getAttribute('data-id');
-+      if (t.getAttribute('data-action') === 'toggle') toggleOpen(id); else toggleCheck(id);
-+    });
++      if (t.getAttribute('data-action') === 'toggle') toggleOpen(id); else selectNode(id);
+     });
 +    document.getElementById('activeChips')?.addEventListener('click', (e) => {
 +      if (e.target.id === 'clearAllChips') { selectedFilters.clear(); renderTree(); currentPage = 1; renderGrid(); return; }
 +      const removeId = e.target.closest('[data-remove]')?.getAttribute('data-remove');
 +      if (removeId) { selectedFilters.delete(removeId); renderTree(); currentPage = 1; renderGrid(); }
-     });
++    });
 +    document.getElementById('ftreeSearch')?.addEventListener('input', renderTree);
  
      // ── Price filter apply / reset ──
      document.getElementById('btnApplyFilter')?.addEventListener('click', () => {
-@@ -1370,24 +1580,24 @@
+@@ -1370,24 +1578,24 @@
        const toVal = document.getElementById('priceTo')?.value;
        priceMin = fromVal !== '' && fromVal != null ? parseFloat(fromVal) : null;
        priceMax = toVal !== '' && toVal != null ? parseFloat(toVal) : null;
@@ -728,7 +756,7 @@
      });
  
      // Allow Enter key inside price fields to trigger apply
-@@ -1401,7 +1611,11 @@
+@@ -1401,7 +1609,11 @@
      document.addEventListener('DOMContentLoaded', () => {
        document.querySelectorAll('[data-lang]').forEach(btn => {
          btn.addEventListener('click', () => {
@@ -741,7 +769,7 @@
          });
        });
      });
-@@ -1444,10 +1658,10 @@
+@@ -1444,10 +1656,10 @@
        }
  
        try {
@@ -756,7 +784,7 @@
  
          loading.hidden = true;
  
-@@ -1459,7 +1673,18 @@
+@@ -1459,7 +1671,18 @@
            return;
          }
  
@@ -776,7 +804,7 @@
  
          // Brand-level logo fallback: a product's own image_url always wins;
          // if it has none, fall back to the brand's shared logo (set once in
-@@ -1476,7 +1701,8 @@
+@@ -1476,7 +1699,8 @@
            ...p,
            image_url: p.image_url || (p.brand && brandLogos[p.brand]) || null,
          }));
