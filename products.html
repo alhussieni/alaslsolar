@@ -809,69 +809,81 @@
               <span class="prod-radio-text"><span data-i18n="prod_cat_all">جميع المنتجات</span></span>
               <input type="radio" name="prodCat" value="all" checked>
             </label>
-            <label class="prod-radio-item" data-cat="inverters">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_inverters">⚡ إنفرترات</span></span>
-              <input type="radio" name="prodCat" value="inverters">
-            </label>
-            <label class="prod-radio-item" data-cat="panels">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_panels">☀️ ألواح شمسية</span></span>
-              <input type="radio" name="prodCat" value="panels">
-            </label>
-            <label class="prod-radio-item" data-cat="structures">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_structures">🏗️ هياكل</span></span>
-              <input type="radio" name="prodCat" value="structures">
-            </label>
-            <label class="prod-radio-item" data-cat="cables">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_cables">🔶 كابلات</span></span>
-              <input type="radio" name="prodCat" value="cables">
-            </label>
-            <label class="prod-radio-item" data-cat="accessories">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_accessories">🔌 إكسسوارات</span></span>
-              <input type="radio" name="prodCat" value="accessories">
-            </label>
-            <label class="prod-radio-item" data-cat="combiners">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_combiners">📦 صناديق تجميع</span></span>
-              <input type="radio" name="prodCat" value="combiners">
-            </label>
-            <label class="prod-radio-item" data-cat="batteries">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_batteries">🔋 بطاريات</span></span>
-              <input type="radio" name="prodCat" value="batteries">
-            </label>
-            <label class="prod-radio-item" data-cat="offgrid">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_offgrid">🔆 إنفرتر أوف جريد</span></span>
-              <input type="radio" name="prodCat" value="offgrid">
-            </label>
-            <label class="prod-radio-item" data-cat="well_motors">
+
+            <p class="prod-radio-group-label" data-section="irrigation_wells" data-i18n="prod_section_irrigation" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الري والآبار</p>
+            <label class="prod-radio-item" data-cat="well_motors" data-section="irrigation_wells">
               <span class="prod-radio-text"><span data-i18n="prod_cat_well_motors">🛠️ موتورات آبار</span></span>
               <input type="radio" name="prodCat" value="well_motors">
             </label>
-            <label class="prod-radio-item" data-cat="pumps">
+            <label class="prod-radio-item" data-cat="pumps" data-section="irrigation_wells">
               <span class="prod-radio-text"><span data-i18n="prod_cat_pumps">🌊 طلمبات ومضخات</span></span>
               <input type="radio" name="prodCat" value="pumps">
             </label>
-            <label class="prod-radio-item" data-cat="pipes">
+            <label class="prod-radio-item" data-cat="pipes" data-section="irrigation_wells">
               <span class="prod-radio-text"><span data-i18n="prod_cat_pipes">🧵 مواسير</span></span>
               <input type="radio" name="prodCat" value="pipes">
             </label>
-            <label class="prod-radio-item" data-cat="street_lights">
+
+            <p class="prod-radio-group-label" data-section="inverters" data-i18n="prod_section_inverters" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الإنفرتر</p>
+            <label class="prod-radio-item" data-cat="inverters" data-section="inverters">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_inverters">⚡ إنفرترات</span></span>
+              <input type="radio" name="prodCat" value="inverters">
+            </label>
+            <label class="prod-radio-item" data-cat="offgrid" data-section="inverters">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_offgrid">🔆 إنفرتر أوف جريد</span></span>
+              <input type="radio" name="prodCat" value="offgrid">
+            </label>
+
+            <p class="prod-radio-group-label" data-section="panels" data-i18n="prod_section_panels" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الألواح الشمسية</p>
+            <label class="prod-radio-item" data-cat="panels" data-section="panels">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_panels">☀️ ألواح شمسية</span></span>
+              <input type="radio" name="prodCat" value="panels">
+            </label>
+
+            <p class="prod-radio-group-label" data-section="install_components" data-i18n="prod_section_install" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">مكوّنات التركيب</p>
+            <label class="prod-radio-item" data-cat="structures" data-section="install_components">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_structures">🏗️ هياكل</span></span>
+              <input type="radio" name="prodCat" value="structures">
+            </label>
+            <label class="prod-radio-item" data-cat="cables" data-section="install_components">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_cables">🔶 كابلات</span></span>
+              <input type="radio" name="prodCat" value="cables">
+            </label>
+            <label class="prod-radio-item" data-cat="combiners" data-section="install_components">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_combiners">📦 صناديق تجميع</span></span>
+              <input type="radio" name="prodCat" value="combiners">
+            </label>
+            <label class="prod-radio-item" data-cat="accessories" data-section="install_components">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_accessories">🔌 إكسسوارات</span></span>
+              <input type="radio" name="prodCat" value="accessories">
+            </label>
+
+            <p class="prod-radio-group-label" data-section="standalone_lighting" data-i18n="prod_section_lighting" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">الإضاءة الشمسية المستقلة</p>
+            <label class="prod-radio-item" data-cat="street_lights" data-section="standalone_lighting">
               <span class="prod-radio-text"><span data-i18n="prod_cat_street_lights">💡 إنارة شوارع شمسية</span></span>
               <input type="radio" name="prodCat" value="street_lights">
             </label>
-            <label class="prod-radio-item" data-cat="flood_lights">
+            <label class="prod-radio-item" data-cat="flood_lights" data-section="standalone_lighting">
               <span class="prod-radio-text"><span data-i18n="prod_cat_flood_lights">🔦 كشافات شمسية</span></span>
               <input type="radio" name="prodCat" value="flood_lights">
             </label>
-            <label class="prod-radio-item" data-cat="garden_lights">
+            <label class="prod-radio-item" data-cat="garden_lights" data-section="standalone_lighting">
               <span class="prod-radio-text"><span data-i18n="prod_cat_garden_lights">🪴 إضاءة حدائق شمسية</span></span>
               <input type="radio" name="prodCat" value="garden_lights">
             </label>
-            <label class="prod-radio-item" data-cat="solar_kits">
+            <label class="prod-radio-item" data-cat="solar_safety" data-section="standalone_lighting">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_solar_safety">🚧 سلامة الطرق الشمسية</span></span>
+              <input type="radio" name="prodCat" value="solar_safety">
+            </label>
+            <label class="prod-radio-item" data-cat="solar_kits" data-section="standalone_lighting">
               <span class="prod-radio-text"><span data-i18n="prod_cat_solar_kits">🧰 أنظمة طاقة شمسية منزلية</span></span>
               <input type="radio" name="prodCat" value="solar_kits">
             </label>
-            <label class="prod-radio-item" data-cat="solar_safety">
-              <span class="prod-radio-text"><span data-i18n="prod_cat_solar_safety">🚧 سلامة الطرق الشمسية</span></span>
-              <input type="radio" name="prodCat" value="solar_safety">
+
+            <p class="prod-radio-group-label" data-section="batteries" data-i18n="prod_section_batteries" style="margin:14px 0 4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.02em">بطاريات وتخزين الطاقة</p>
+            <label class="prod-radio-item" data-cat="batteries" data-section="batteries">
+              <span class="prod-radio-text"><span data-i18n="prod_cat_batteries">🔋 بطاريات</span></span>
+              <input type="radio" name="prodCat" value="batteries">
             </label>
           </div>
         </div>
@@ -1474,6 +1486,16 @@
           }
         });
         if (currentCat !== 'all' && hiddenCats.has(currentCat)) setActiveCategory('all');
+
+        // Hide a section header too if every category under it is now hidden
+        const sectionsWithVisibleItem = new Set(
+          Array.from(document.querySelectorAll('#catRadioList label[data-cat][data-section]'))
+            .filter(label => !label.hidden)
+            .map(label => label.getAttribute('data-section'))
+        );
+        document.querySelectorAll('#catRadioList p[data-section]').forEach(header => {
+          header.hidden = !sectionsWithVisibleItem.has(header.getAttribute('data-section'));
+        });
 
         const rawProducts = data.filter(row => CATEGORIES.includes(row.category) && !hiddenCats.has(row.category));
 
