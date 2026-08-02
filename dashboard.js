@@ -973,8 +973,50 @@ async function loadLists() {
   loadProjects();
   loadArticles();
   loadProducts();
+  loadCategoryVisibility();
   loadBrandLogos();
   loadCalcSettings();
+}
+
+// ── Category visibility (show/hide an entire product category from the public site) ──
+const CATEGORY_ICONS = { inverters:'⚡', panels:'☀️', accessories:'🔌', combiners:'📦', structures:'🏗️', cables:'🔶', batteries:'🔋', offgrid:'🔆', ongrid:'🔌', hybrid:'🔋', well_motors:'🛠️', pumps:'🌊', pipes:'🧵', street_lights:'💡', flood_lights:'🔦', garden_lights:'🪴', solar_kits:'🧰', solar_safety:'🚧' };
+const CATEGORY_LABELS_AR = { inverters:'إنفرتر بامب/VFD', panels:'الألواح الشمسية', accessories:'إكسسوارات', combiners:'صناديق تجميع', structures:'هياكل', cables:'كابلات', batteries:'بطاريات وتخزين', offgrid:'إنفرتر أوف جريد', ongrid:'إنفرتر أون جريد', hybrid:'إنفرتر هايبرد', well_motors:'موتورات آبار', pumps:'طلمبات ومضخات', pipes:'مواسير', street_lights:'إنارة شوارع شمسية', flood_lights:'كشافات شمسية', garden_lights:'إضاءة حدائق شمسية', solar_kits:'كيت إضاءة منزلي', solar_safety:'سلامة الطرق الشمسية' };
+
+async function loadCategoryVisibility() {
+  const panel = document.getElementById('categoryVisibilityPanel');
+  if (!panel) return;
+  if (!client) { panel.innerHTML = '<p style="color:var(--muted);font-size:13px">تعذّر الاتصال بقاعدة البيانات.</p>'; return; }
+
+  const { data, error } = await client
+    .from('category_settings')
+    .select('*')
+    .order('main_section', { ascending: true })
+    .order('sort_order', { ascending: true });
+
+  if (error) { panel.innerHTML = '<p style="color:red;font-size:13px">خطأ: ' + error.message + '</p>'; return; }
+
+  panel.innerHTML = (data || []).map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:8px">
+      <span style="font-size:13px;display:flex;align-items:center;gap:6px">
+        <span>${CATEGORY_ICONS[c.category_key] || '📦'}</span>
+        <span>${CATEGORY_LABELS_AR[c.category_key] || c.category_key}</span>
+        ${!c.visible ? '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي من الموقع</span>' : ''}
+      </span>
+      <button type="button" onclick="toggleCategoryVisibility('${c.category_key}', ${c.visible})"
+        style="padding:4px 12px;border-radius:var(--radius);border:1px solid ${c.visible ? 'var(--line)' : '#fcc'};background:${c.visible ? '#fff' : '#fff3f3'};font-size:12px;cursor:pointer;color:${c.visible ? 'inherit' : '#c33'}">
+        ${c.visible ? '🙈 إخفاء' : '👁️ إظهار'}
+      </button>
+    </div>`).join('') || '<p style="color:var(--muted);font-size:13px">لا توجد تصنيفات معرّفة.</p>';
+}
+
+async function toggleCategoryVisibility(key, current) {
+  if (!client) return;
+  const { error } = await client
+    .from('category_settings')
+    .update({ visible: !current, updated_at: new Date().toISOString() })
+    .eq('category_key', key);
+  if (error) { alert('خطأ: ' + error.message); return; }
+  loadCategoryVisibility();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

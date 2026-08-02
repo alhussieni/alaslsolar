@@ -1,0 +1,17 @@
+--- orig/alaslsolar-main/dashboard.html	2026-08-02 02:42:53.000000000 +0000
++++ project/alaslsolar-main/dashboard.html	2026-08-02 06:05:21.911056058 +0000
+@@ -654,6 +654,14 @@
+             </nav>
+ 
+             <div style="flex:1;min-width:0">
++              <!-- Category visibility control -->
++              <div style="margin-bottom:var(--space-3)">
++                <p style="font-weight:700;font-size:13px;margin:0 0 6px">إظهار/إخفاء تصنيفات كاملة من الموقع</p>
++                <div id="categoryVisibilityPanel" style="display:grid;gap:6px">
++                  <p style="color:var(--muted);font-size:13px">جاري التحميل…</p>
++                </div>
++              </div>
++
+               <!-- Products list -->
+               <div id="productsList" style="display:grid;gap:var(--space-2)">
+                 <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
