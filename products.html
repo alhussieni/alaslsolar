@@ -345,7 +345,7 @@
       align-items: start;
     }
     [dir="rtl"] .prod-shop { direction: rtl; }
-    .prod-content-col { grid-column: 2; min-width: 0; }
+    .prod-content-col { grid-column: 2; grid-row: 1; min-width: 0; }
 
     /* Toolbar: count + sort */
     .prod-toolbar {
@@ -383,9 +383,23 @@
     }
     .prod-sort-select:hover, .prod-sort-select:focus { outline: none; border-color: var(--brand); }
 
-    /* Sidebar */
+    /* Sidebar
+       IMPORTANT: the grid item (.prod-sidebar) itself must STRETCH to span the
+       full height of its grid row (which is as tall as the — potentially very
+       long — product grid next to it). If it doesn't, its own box is only as
+       tall as its own content, `position: sticky` has nowhere to travel within,
+       and the sidebar ends up parked wherever the grid happened to place that
+       short box — visually landing near the BOTTOM of the page once the long
+       product grid has more rows than the sidebar has content, instead of
+       staying pinned near the top as the page scrolls. The actual sticky
+       visual box lives on the INNER wrapper (.prod-sidebar-inner) instead, so
+       stretching the outer item never affects its appearance. */
     .prod-sidebar {
       grid-column: 1;
+      grid-row: 1;
+      align-self: stretch;
+    }
+    .prod-sidebar-inner {
       background: #fff;
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
@@ -803,7 +817,8 @@
 
     @media (max-width: 900px) {
       .prod-shop { grid-template-columns: 1fr; }
-      .prod-sidebar { grid-column: 1; grid-row: auto; position: static; order: -1; }
+      .prod-sidebar { grid-column: 1; grid-row: auto; order: -1; }
+      .prod-sidebar-inner { position: static; }
       .prod-content-col { grid-column: 1; }
       .prod-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
@@ -914,36 +929,38 @@
 
       <!-- Sidebar -->
       <aside class="prod-sidebar">
+        <div class="prod-sidebar-inner">
 
-        <!-- Category filter tree (built dynamically in JS from live product + category data) -->
-        <div class="prod-sidebar-section">
-          <p class="prod-sidebar-label" data-i18n="prod_sidebar_category">الفئة</p>
-          <div class="ftree-search">
-            <input type="text" id="ftreeSearch" placeholder="ابحث في التصنيفات أو الماركات…">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-          </div>
-          <div class="ftree-scroll" id="filterTree"></div>
-        </div>
-
-        <!-- Price filter -->
-        <div class="prod-sidebar-section">
-          <p class="prod-sidebar-label" data-i18n="prod_sidebar_price">السعر (ج.م)</p>
-          <div class="prod-price-row">
-            <div class="prod-price-field">
-              <label for="priceFrom" data-i18n="prod_price_from">من</label>
-              <input type="number" id="priceFrom" min="0" placeholder="0">
+          <!-- Category filter tree (built dynamically in JS from live product + category data) -->
+          <div class="prod-sidebar-section">
+            <p class="prod-sidebar-label" data-i18n="prod_sidebar_category">الفئة</p>
+            <div class="ftree-search">
+              <input type="text" id="ftreeSearch" placeholder="ابحث في التصنيفات أو الماركات…">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
             </div>
-            <span class="prod-price-sep">–</span>
-            <div class="prod-price-field">
-              <label for="priceTo" data-i18n="prod_price_to">إلى</label>
-              <input type="number" id="priceTo" min="0" placeholder="∞">
+            <div class="ftree-scroll" id="filterTree"></div>
+          </div>
+
+          <!-- Price filter -->
+          <div class="prod-sidebar-section">
+            <p class="prod-sidebar-label" data-i18n="prod_sidebar_price">السعر (ج.م)</p>
+            <div class="prod-price-row">
+              <div class="prod-price-field">
+                <label for="priceFrom" data-i18n="prod_price_from">من</label>
+                <input type="number" id="priceFrom" min="0" placeholder="0">
+              </div>
+              <span class="prod-price-sep">–</span>
+              <div class="prod-price-field">
+                <label for="priceTo" data-i18n="prod_price_to">إلى</label>
+                <input type="number" id="priceTo" min="0" placeholder="∞">
+              </div>
             </div>
           </div>
+
+          <button type="button" class="prod-btn-apply" id="btnApplyFilter" data-i18n="prod_apply_filter">تطبيق الفلتر</button>
+          <button type="button" class="prod-btn-reset" id="btnResetFilter" data-i18n="prod_reset_filter">إعادة ضبط</button>
+
         </div>
-
-        <button type="button" class="prod-btn-apply" id="btnApplyFilter" data-i18n="prod_apply_filter">تطبيق الفلتر</button>
-        <button type="button" class="prod-btn-reset" id="btnResetFilter" data-i18n="prod_reset_filter">إعادة ضبط</button>
-
       </aside>
     </div>
 
