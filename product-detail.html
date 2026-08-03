@@ -78,6 +78,71 @@
     .pd-ds-btn:hover { border-color: var(--brand); }
 
     .pd-state { text-align: center; padding: 60px var(--space-3); color: var(--muted); }
+
+    /* Breadcrumb */
+    .pd-breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: var(--space-2); display: flex; gap: 6px; flex-wrap: wrap; }
+    .pd-breadcrumb a { color: var(--muted); text-decoration: none; }
+    .pd-breadcrumb a:hover { color: var(--brand-dark); }
+
+    /* Gallery zoom */
+    .pd-gallery-main { position: relative; }
+    .pd-zoom-btn { position: absolute; bottom: 10px; left: 10px; width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow); }
+
+    /* Rating */
+    .pd-rating { display: flex; align-items: center; gap: 6px; margin-bottom: var(--space-2); font-size: 14px; color: var(--muted); }
+    .pd-rating .stars { color: #f1a800; letter-spacing: 1px; }
+
+    /* Quick facts strip */
+    .pd-facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: var(--space-4) 0; }
+    @media (min-width: 640px) { .pd-facts { grid-template-columns: repeat(5, 1fr); } }
+    .pd-fact { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 16px 10px; text-align: center; }
+    .pd-fact i, .pd-fact .pd-fact-emoji { font-size: 20px; color: var(--brand); display: block; margin-bottom: 8px; }
+    .pd-fact-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .pd-fact-value { font-size: 15px; font-weight: 800; }
+
+    /* Actions row: quote (primary) + whatsapp */
+    .pd-actions-main { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .pd-actions-main .btn { flex: 1 1 180px; justify-content: center; }
+    .pd-wa-btn { flex: 1 1 180px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: var(--radius); background: var(--forest); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; }
+    .pd-wa-btn:hover { opacity: .92; }
+
+    .pd-meta-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; margin-top: var(--space-3); }
+
+    /* Tabs */
+    .pd-tabs-wrap { max-width: 1100px; margin: var(--space-5) auto 0; padding: 0 var(--space-4); }
+    .pd-tabs-nav { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+    .pd-tab-btn { background: none; border: none; padding: 12px 18px; font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .pd-tab-btn.active { color: var(--brand-dark); border-color: var(--brand); }
+    .pd-tab-panel { display: none; padding: var(--space-4) 0; }
+    .pd-tab-panel.active { display: block; }
+
+    .pd-features-list { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .pd-features-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; }
+    .pd-features-list li i { color: var(--brand); margin-top: 3px; }
+    .pd-description-text { font-size: 15px; line-height: 1.9; color: var(--ink); }
+
+    .pd-apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: var(--space-3); }
+    @media (min-width: 640px) { .pd-apps-grid { grid-template-columns: repeat(4, 1fr); } }
+    .pd-app-chip { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 8px; text-align: center; font-size: 13px; font-weight: 700; }
+    .pd-app-chip i { display: block; font-size: 20px; color: var(--brand); margin-bottom: 6px; }
+
+    .pd-warranty-box { background: var(--brand-soft); border-radius: var(--radius-lg); padding: var(--space-3); font-size: 14px; line-height: 1.8; }
+    .pd-files-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .pd-files-list a { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius); text-decoration: none; color: var(--ink); font-size: 14px; font-weight: 600; }
+    .pd-files-list a:hover { border-color: var(--brand); }
+
+    /* Similar products */
+    .pd-similar-wrap { max-width: 1100px; margin: var(--space-5) auto var(--space-6); padding: 0 var(--space-4); }
+    .pd-similar-title { font-size: 20px; font-weight: 800; margin-bottom: var(--space-3); }
+    .pd-similar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    @media (min-width: 720px) { .pd-similar-grid { grid-template-columns: repeat(4, 1fr); } }
+    .pd-similar-card { display: block; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: #fff; transition: .15s; }
+    .pd-similar-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+    .pd-similar-media { aspect-ratio: 1/1; background: var(--bg); display: grid; place-items: center; overflow: hidden; }
+    .pd-similar-media img { width: 100%; height: 100%; object-fit: cover; }
+    .pd-similar-body { padding: 12px; }
+    .pd-similar-name { font-size: 13px; font-weight: 700; margin: 0 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pd-similar-price { font-size: 14px; font-weight: 800; color: var(--brand-dark); }
   </style>
 </head>
 <body>
@@ -125,15 +190,20 @@
       <div id="pdContent" class="pd-grid" hidden>
         <!-- Gallery -->
         <div>
-          <div class="pd-gallery-main" id="pdGalleryMain"></div>
+          <div class="pd-gallery-main" id="pdGalleryMain">
+            <button type="button" class="pd-zoom-btn" id="pdZoomBtn" aria-label="تكبير الصورة"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+          </div>
           <div class="pd-thumbs" id="pdThumbs"></div>
         </div>
 
         <!-- Info -->
         <div>
+          <p class="pd-breadcrumb" id="pdBreadcrumb"></p>
           <span class="pd-cat-badge" id="pdCatBadge"></span>
           <h1 class="pd-title" id="pdTitle"></h1>
           <p class="pd-subtitle" id="pdSubtitle"></p>
+
+          <p class="pd-rating" id="pdRating" hidden><span class="stars" id="pdStars"></span> <span id="pdRatingText"></span></p>
 
           <div class="pd-price-box">
             <span class="stock-badge" id="pdStockBadge" hidden></span>
@@ -146,18 +216,40 @@
             <div class="pd-variants" id="pdVariants"></div>
           </div>
 
-          <table class="pd-specs-table" id="pdSpecsTable"></table>
-
-          <div class="pd-actions">
-            <a class="pd-ds-btn" id="pdDatasheetBtn" href="#" target="_blank" rel="noopener" hidden>
-              <i class="fa fa-file-pdf-o" aria-hidden="true"></i> <span id="pdDatasheetText">تحميل الداتا شيت</span>
-            </a>
+          <div class="pd-actions-main">
             <a class="btn btn-primary" href="contact.html" id="pdQuoteBtn">
               <i class="fa fa-paper-plane" aria-hidden="true"></i> <span id="pdQuoteText">اطلب عرض سعر</span>
             </a>
+            <a class="pd-wa-btn" id="pdWaBtn" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-whatsapp" aria-hidden="true"></i> <span id="pdWaText">تواصل واتساب</span>
+            </a>
+          </div>
+
+          <a class="pd-ds-btn" id="pdDatasheetBtn" href="#" target="_blank" rel="noopener" hidden style="width:100%; justify-content:center; margin-bottom: var(--space-3);">
+            <i class="fa fa-file-pdf-o" aria-hidden="true"></i> <span id="pdDatasheetText">تحميل الداتا شيت</span>
+          </a>
+
+          <div class="pd-meta-row">
+            <span><span id="pdCodeLabel">رقم المنتج:</span> <strong id="pdCode"></strong></span>
+            <span><span id="pdCatLabel">التصنيف:</span> <strong id="pdCatText"></strong></span>
           </div>
         </div>
       </div>
+
+      <!-- Quick facts strip -->
+      <div class="pd-facts" id="pdFacts" hidden></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="pd-tabs-wrap" id="pdTabsWrap" hidden>
+      <div class="pd-tabs-nav" id="pdTabsNav"></div>
+      <div id="pdTabPanels"></div>
+    </div>
+
+    <!-- Similar products -->
+    <div class="pd-similar-wrap" id="pdSimilarWrap" hidden>
+      <h2 class="pd-similar-title" id="pdSimilarTitle">منتجات مشابهة</h2>
+      <div class="pd-similar-grid" id="pdSimilarGrid"></div>
     </div>
   </main>
 
@@ -197,16 +289,42 @@
     const T = {
       ar: { back: 'الرجوع لكل المنتجات', loading: 'جاري تحميل بيانات المنتج…', error: 'تعذّر العثور على هذا المنتج — قد يكون غير منشور أو تم حذفه.',
             choosePower: 'اختر القدرة', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', outOfStock: 'غير متاح حاليًا', datasheet: 'تحميل الداتا شيت',
-            quote: 'اطلب عرض سعر', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specDetails: 'المواصفات', specChemistry: 'نوع الكيمياء', specNotes: 'ملاحظات' },
+            quote: 'اطلب عرض سعر', whatsapp: 'تواصل واتساب', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specDetails: 'المواصفات', specChemistry: 'نوع الكيمياء', specNotes: 'ملاحظات',
+            home: 'الرئيسية', products: 'المنتجات', productCode: 'رقم المنتج:', category: 'التصنيف:',
+            tabDesc: 'الوصف', tabSpecs: 'المواصفات', tabApps: 'التطبيقات', tabWarranty: 'الضمان', tabFiles: 'الملفات',
+            keyFeatures: 'المميزات الرئيسية', commonApps: 'التطبيقات الشائعة', similarProducts: 'منتجات مشابهة',
+            reviews: 'تقييم', noDescription: 'لا يوجد وصف تفصيلي لهذا المنتج بعد — تواصل معنا لمزيد من المعلومات.',
+            noWarrantyInfo: 'للاستفسار عن تفاصيل الضمان لهذا المنتج، تواصل معنا مباشرة.', noFiles: 'لا توجد ملفات متاحة لهذا المنتج حاليًا.' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
             choosePower: 'Choose Power', priceHint: 'Price is approximate and subject to change — contact us to confirm.', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
-            quote: 'Request a Quote', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specDetails: 'Specifications', specChemistry: 'Chemistry', specNotes: 'Notes' },
+            quote: 'Request a Quote', whatsapp: 'Chat on WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specDetails: 'Specifications', specChemistry: 'Chemistry', specNotes: 'Notes',
+            home: 'Home', products: 'Products', productCode: 'Product code:', category: 'Category:',
+            tabDesc: 'Description', tabSpecs: 'Specifications', tabApps: 'Applications', tabWarranty: 'Warranty', tabFiles: 'Files',
+            keyFeatures: 'Key Features', commonApps: 'Common Applications', similarProducts: 'Similar Products',
+            reviews: 'reviews', noDescription: 'No detailed description yet for this product — contact us for more information.',
+            noWarrantyInfo: 'Contact us directly for warranty details on this product.', noFiles: 'No files available for this product yet.' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
             choosePower: 'Elegir Potencia', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
-            quote: 'Solicitar Presupuesto', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specDetails: 'Especificaciones', specChemistry: 'Química', specNotes: 'Notas' },
+            quote: 'Solicitar Presupuesto', whatsapp: 'Chatear por WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specDetails: 'Especificaciones', specChemistry: 'Química', specNotes: 'Notas',
+            home: 'Inicio', products: 'Productos', productCode: 'Código de producto:', category: 'Categoría:',
+            tabDesc: 'Descripción', tabSpecs: 'Especificaciones', tabApps: 'Aplicaciones', tabWarranty: 'Garantía', tabFiles: 'Archivos',
+            keyFeatures: 'Características Clave', commonApps: 'Aplicaciones Comunes', similarProducts: 'Productos Similares',
+            reviews: 'reseñas', noDescription: 'Aún no hay descripción detallada — contáctenos para más información.',
+            noWarrantyInfo: 'Contáctenos directamente para conocer los detalles de la garantía.', noFiles: 'No hay archivos disponibles actualmente.' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
             choosePower: '选择功率', priceHint: '价格为参考价，可能变动——请联系我们确认。', outOfStock: '暂时缺货', datasheet: '下载规格书',
-            quote: '获取报价', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specDetails: '规格', specChemistry: '化学类型', specNotes: '备注' },
+            quote: '获取报价', whatsapp: 'WhatsApp 联系', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specDetails: '规格', specChemistry: '化学类型', specNotes: '备注',
+            home: '首页', products: '产品', productCode: '产品编号:', category: '分类:',
+            tabDesc: '描述', tabSpecs: '规格', tabApps: '应用', tabWarranty: '保修', tabFiles: '文件',
+            keyFeatures: '主要特点', commonApps: '常见应用', similarProducts: '相似产品',
+            reviews: '条评价', noDescription: '该产品暂无详细描述——请联系我们了解更多信息。',
+            noWarrantyInfo: '如需了解此产品的保修详情，请直接联系我们。', noFiles: '该产品暂无可用文件。' },
+    };
+
+    // Application icon map — matched by optional `applications` array field (tags)
+    const APP_ICONS = {
+      solar: 'ti ti-solar-panel', home: 'fa fa-home', farm: 'fa fa-tractor', ups: 'fa fa-bolt',
+      ev: 'fa fa-truck', camera: 'fa fa-video', industrial: 'fa fa-industry', irrigation: 'fa fa-tint',
     };
 
     function getLang() { return localStorage.getItem('alasl-lang') || 'ar'; }
@@ -257,6 +375,10 @@
       document.getElementById('pdPriceHint').textContent = t('priceHint');
       document.getElementById('pdDatasheetText').textContent = t('datasheet');
       document.getElementById('pdQuoteText').textContent = t('quote');
+      document.getElementById('pdWaText').textContent = t('whatsapp');
+      document.getElementById('pdCodeLabel').textContent = t('productCode');
+      document.getElementById('pdCatLabel').textContent = t('category');
+      document.getElementById('pdSimilarTitle').textContent = t('similarProducts');
     }
 
     function selectVariant(row) {
@@ -265,6 +387,7 @@
 
       document.getElementById('pdPrice').textContent = fmt(row.price);
       document.getElementById('pdPriceUnit').textContent = unitLabel(row);
+      document.getElementById('pdCode').textContent = row.sku || row.model_available || row.id;
 
       const stockBadge = document.getElementById('pdStockBadge');
       if (row.in_stock === false) { stockBadge.textContent = t('outOfStock'); stockBadge.hidden = false; }
@@ -310,17 +433,152 @@
       });
     }
 
-    function render() {
+    // Renders the quick-facts strip. Only shows a tile when the row actually
+    // has that value — never fills in placeholder numbers.
+    function renderFacts(row) {
+      const wrap = document.getElementById('pdFacts');
+      const facts = [];
+      if (row.temp_min != null && row.temp_max != null) facts.push(['fa fa-thermometer-half', 'مدى التشغيل', `${row.temp_min}°C – ${row.temp_max}°C`]);
+      if (row.weight_kg) facts.push(['fa fa-weight-hanging', 'الوزن', `${row.weight_kg} Kg`]);
+      if (row.ip_rating) facts.push(['fa fa-shield-alt', 'درجة الحماية', row.ip_rating]);
+      if (row.cycle_life) facts.push(['fa fa-sync-alt', 'عدد دورات الشحن', row.cycle_life]);
+      if (row.capacity_ah) facts.push(['fa fa-battery-full', 'السعة الاسمية', `${row.capacity_ah}Ah`]);
+      if (row.voltage_v) facts.push(['fa fa-bolt', 'الجهد الاسمي', `${row.voltage_v}V`]);
+
+      if (facts.length === 0) { wrap.hidden = true; wrap.innerHTML = ''; return; }
+      wrap.hidden = false;
+      wrap.innerHTML = facts.map(([icon, label, val]) => `
+        <div class="pd-fact"><i class="${icon}" aria-hidden="true"></i>
+          <div class="pd-fact-label">${escapeHtml(label)}</div>
+          <div class="pd-fact-value">${escapeHtml(val)}</div>
+        </div>`).join('');
+    }
+
+    function renderRating(row) {
+      const wrap = document.getElementById('pdRating');
+      if (row.rating == null || row.review_count == null) { wrap.hidden = true; return; }
+      wrap.hidden = false;
+      const full = Math.round(row.rating);
+      document.getElementById('pdStars').textContent = '★'.repeat(full) + '☆'.repeat(5 - full);
+      document.getElementById('pdRatingText').textContent = `(${row.review_count} ${t('reviews')})`;
+    }
+
+    function renderTabs(row) {
+      const wrap = document.getElementById('pdTabsWrap');
+      const nav = document.getElementById('pdTabsNav');
+      const panels = document.getElementById('pdTabPanels');
+
+      const tabs = [];
+
+      // Description
+      const descHtml = row.description
+        ? `<p class="pd-description-text">${escapeHtml(row.description).replace(/\n/g, '<br>')}</p>`
+        : `<p class="pd-description-text">${escapeHtml(t('noDescription'))}</p>`;
+      let featuresHtml = '';
+      if (Array.isArray(row.key_features) && row.key_features.length) {
+        featuresHtml = `<h3 class="pd-section-label">${t('keyFeatures')}</h3><ul class="pd-features-list">` +
+          row.key_features.map(f => `<li><i class="fa fa-check-circle" aria-hidden="true"></i> ${escapeHtml(f)}</li>`).join('') + `</ul>`;
+      }
+      tabs.push(['desc', t('tabDesc'), featuresHtml + descHtml]);
+
+      // Specifications (reuse the same table already built for the info column)
+      tabs.push(['specs', t('tabSpecs'), `<table class="pd-specs-table">${document.getElementById('pdSpecsTable').innerHTML}</table>`]);
+
+      // Applications
+      if (Array.isArray(row.applications) && row.applications.length) {
+        const chips = row.applications.map(tag => {
+          const icon = APP_ICONS[tag] || 'fa fa-check';
+          return `<div class="pd-app-chip"><i class="${icon}" aria-hidden="true"></i>${escapeHtml(tag)}</div>`;
+        }).join('');
+        tabs.push(['apps', t('tabApps'), `<div class="pd-apps-grid">${chips}</div>`]);
+      }
+
+      // Warranty
+      const warrantyHtml = row.warranty_years
+        ? `<div class="pd-warranty-box"><i class="fa fa-shield-alt" aria-hidden="true"></i> ${escapeHtml(String(row.warranty_years))} ${getLang() === 'ar' ? 'سنوات ضمان' : 'years warranty'}${row.warranty_notes ? '<br>' + escapeHtml(row.warranty_notes) : ''}</div>`
+        : `<div class="pd-warranty-box">${escapeHtml(t('noWarrantyInfo'))}</div>`;
+      tabs.push(['warranty', t('tabWarranty'), warrantyHtml]);
+
+      // Files
+      const ds = row.datasheet_url || familyRows.find(r => r.datasheet_url)?.datasheet_url;
+      const filesHtml = ds
+        ? `<ul class="pd-files-list"><li><a href="${escapeHtml(ds)}" target="_blank" rel="noopener"><i class="fa fa-file-pdf-o" aria-hidden="true"></i> ${t('datasheet')}</a></li></ul>`
+        : `<p class="pd-description-text">${escapeHtml(t('noFiles'))}</p>`;
+      tabs.push(['files', t('tabFiles'), filesHtml]);
+
+      nav.innerHTML = tabs.map((tab, i) => `<button type="button" class="pd-tab-btn${i === 0 ? ' active' : ''}" data-tab="${tab[0]}">${escapeHtml(tab[1])}</button>`).join('');
+      panels.innerHTML = tabs.map((tab, i) => `<div class="pd-tab-panel${i === 0 ? ' active' : ''}" id="pdPanel-${tab[0]}">${tab[2]}</div>`).join('');
+
+      nav.querySelectorAll('.pd-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          nav.querySelectorAll('.pd-tab-btn').forEach(b => b.classList.remove('active'));
+          panels.querySelectorAll('.pd-tab-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById('pdPanel-' + btn.dataset.tab).classList.add('active');
+        });
+      });
+
+      wrap.hidden = false;
+    }
+
+    async function renderSimilar(sb, row) {
+      const grid = document.getElementById('pdSimilarGrid');
+      const wrap = document.getElementById('pdSimilarWrap');
+      if (!sb) { wrap.hidden = true; return; }
+      try {
+        const { data, error } = await sb.from('products').select('*').eq('category', row.category).neq('brand', row.brand).limit(8);
+        let rows = (!error && data) ? data : [];
+        if (rows.length === 0) {
+          const retry = await sb.from('products').select('*').eq('category', row.category).limit(8);
+          rows = (retry.data || []).filter(r => r.model_available !== row.model_available);
+        }
+        // Collapse to one card per brand+model family
+        const seen = new Set();
+        const cards = [];
+        for (const r of rows) {
+          const key = `${r.brand}|${r.model_available}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          cards.push(r);
+          if (cards.length >= 4) break;
+        }
+        if (cards.length === 0) { wrap.hidden = true; return; }
+        wrap.hidden = false;
+        grid.innerHTML = cards.map(r => {
+          const catText = (CAT_LABEL[r.category] && CAT_LABEL[r.category][getLang()]) || r.category;
+          const href = `product-detail.html?cat=${encodeURIComponent(r.category)}&brand=${encodeURIComponent(r.brand || '')}&model=${encodeURIComponent(r.model_available || '')}`;
+          const media = r.image_url
+            ? `<img src="${escapeHtml(r.image_url)}" alt="">`
+            : `<span class="pd-fallback-icon" style="font-size:32px;">${CAT_ICONS[r.category] || '📦'}</span>`;
+          return `<a class="pd-similar-card" href="${href}">
+            <div class="pd-similar-media">${media}</div>
+            <div class="pd-similar-body">
+              <p class="pd-similar-name">${escapeHtml([catText, r.brand].filter(Boolean).join(' '))}</p>
+              <p class="pd-similar-price">${fmt(r.price)} ${escapeHtml(unitLabel(r))}</p>
+            </div>
+          </a>`;
+        }).join('');
+      } catch (e) {
+        console.error('similar products fetch error:', e);
+        wrap.hidden = true;
+      }
+    }
+
+    function render(sb) {
       renderStaticText();
 
       const first = familyRows[0];
       const catText = (CAT_LABEL[first.category] && CAT_LABEL[first.category][getLang()]) || first.category;
       document.getElementById('pdCatBadge').textContent = `${CAT_ICONS[first.category] || '📦'} ${catText}`;
+      document.getElementById('pdCatText').textContent = catText;
+      document.getElementById('pdBreadcrumb').innerHTML =
+        `<a href="index.html">${t('home')}</a> / <a href="products.html">${t('products')}</a> / ${escapeHtml(catText)}`;
 
       const title = [catText, first.brand].filter(Boolean).join(' ');
       document.getElementById('pdTitle').textContent = title;
       document.getElementById('pageTitle').textContent = title + ' | Al Asl Solar';
       document.getElementById('pdSubtitle').textContent = first.model_available || '';
+      renderRating(first);
 
       renderGallery();
 
@@ -342,15 +600,23 @@
         document.querySelectorAll('.pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const row = sorted.find(r => String(r.id) === btn.dataset.id);
-            if (row) selectVariant(row);
+            if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
           });
         });
       }
 
       selectVariant(sorted[0]);
+      renderFacts(sorted[0]);
+      renderTabs(sorted[0]);
+      renderSimilar(sb, sorted[0]);
 
       document.getElementById('pdLoading').hidden = true;
       document.getElementById('pdContent').hidden = false;
+
+      document.getElementById('pdZoomBtn').onclick = () => {
+        const img = document.querySelector('#pdGalleryMain img');
+        if (img) window.open(img.src, '_blank', 'noopener');
+      };
     }
 
     async function init() {
@@ -406,7 +672,7 @@
         }
 
         familyRows = rows;
-        render();
+        render(sb);
       } catch (e) {
         console.error('product-detail load error:', e);
         showError();
