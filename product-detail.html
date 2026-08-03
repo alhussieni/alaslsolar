@@ -91,7 +91,7 @@
     .pd-breadcrumb a:hover { color: var(--brand-dark); }
 
     /* Gallery zoom */
-    .pd-gallery-main { position: relative; }
+    .pd-gallery-wrap { position: relative; }
     .pd-zoom-btn { position: absolute; bottom: 10px; left: 10px; width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow); }
 
     /* Rating */
@@ -196,7 +196,8 @@
       <div id="pdContent" class="pd-grid" hidden>
         <!-- Gallery -->
         <div>
-          <div class="pd-gallery-main" id="pdGalleryMain">
+          <div class="pd-gallery-wrap">
+            <div class="pd-gallery-main" id="pdGalleryMain"></div>
             <button type="button" class="pd-zoom-btn" id="pdZoomBtn" aria-label="تكبير الصورة"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
           </div>
           <div class="pd-thumbs" id="pdThumbs"></div>
