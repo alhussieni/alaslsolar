@@ -366,6 +366,7 @@
 
     let familyRows = [];
     let selected = null;
+    let initStarted = false;
 
     function renderStaticText() {
       document.getElementById('pdBackText').textContent = t('back');
@@ -566,6 +567,7 @@
 
     function render(sb) {
       renderStaticText();
+      document.getElementById('pdError').hidden = true;
 
       const first = familyRows[0];
       const catText = (CAT_LABEL[first.category] && CAT_LABEL[first.category][getLang()]) || first.category;
@@ -620,6 +622,9 @@
     }
 
     async function init() {
+      if (initStarted) return;
+      initStarted = true;
+
       const params = new URLSearchParams(location.search);
       const cat = params.get('cat') || '';
       const brand = params.get('brand') || '';
@@ -640,6 +645,10 @@
       const showError = () => {
         document.getElementById('pdLoading').hidden = true;
         renderStaticText();
+        document.getElementById('pdContent').hidden = true;
+        document.getElementById('pdFacts').hidden = true;
+        document.getElementById('pdTabsWrap').hidden = true;
+        document.getElementById('pdSimilarWrap').hidden = true;
         document.getElementById('pdError').hidden = false;
       };
 
@@ -678,6 +687,10 @@
         showError();
       }
     }
+
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) location.reload();
+    });
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
