@@ -49,7 +49,13 @@ function computeOffgridMaterials(catalog, gp, inputs) {
 
   const panelOptions = catalog.panels.filter(p => p.brand === inputs.panelBrand);
   if (!panelOptions.length) { errors.push('لا توجد ألواح منشورة لهذه الماركة.'); return { errors }; }
-  const panel = panelOptions.slice().sort((a, b) => (a.pricePerWatt || 0) - (b.pricePerWatt || 0))[0];
+  const requestedWatt = inputs.panelWatt ? Number(inputs.panelWatt) : null;
+  const wattMatches = requestedWatt ? panelOptions.filter(p => Number(p.power) === requestedWatt) : [];
+  const panelPool = wattMatches.length ? wattMatches : panelOptions;
+  if (requestedWatt && !wattMatches.length) {
+    errors.push(`⚠ القدرة المختارة (${requestedWatt} وات) مش مسجلة لماركة "${inputs.panelBrand}" — تم استخدام أقرب قدرة متاحة بدلًا منها.`);
+  }
+  const panel = panelPool.slice().sort((a, b) => (a.pricePerWatt || 0) - (b.pricePerWatt || 0))[0];
   if (!inputs.invBrand) { errors.push('اختار ماركة الانفرتر.'); return { errors }; }
   if (!inputs.battBrand) { errors.push('اختار ماركة البطارية.'); return { errors }; }
 
@@ -167,7 +173,9 @@ function computeOffgridMaterials(catalog, gp, inputs) {
     // so the ${panelWatt}W used for the electrical string design is an engineering
     // assumption (typical panel spec), not a real product listing — say so explicitly
     // instead of implying "JA Solar 550W" is an actual purchasable model.
-    errors.push(`ℹ️ عدد الألواح محسوب على أساس لوح نموذجي ~${panelWatt} وات لماركة ${panel.brand} (لتصميم التوصيل الكهربائي فقط) — الألواح عندكم متسعّرة لكل وات بلا موديل ثابت، فالقدرة الفعلية للوح اللي هيتركب ممكن تختلف والعدد يتغيّر تبعًا لها.`);
+    if (!requestedWatt || !wattMatches.length) {
+      errors.push(`ℹ️ عدد الألواح محسوب على أساس لوح نموذجي ~${panelWatt} وات لماركة ${panel.brand} (لتصميم التوصيل الكهربائي فقط) — ده أقرب قدرة مسجلة فعليًا، فلو فيه قدرة تانية دقيقة أكتر لازم تتسجل في المنتجات.`);
+    }
   } else {
     rows.push({ name: 'الألواح', type: panel.brand, qty: O2, unitPrice: 0, total: 0 });
     errors.push('⚠ سعر الألواح لهذه الماركة غير مكتمل في الموقع — القيمة غير محسوبة بدقة في الإجمالي.');
