@@ -976,6 +976,8 @@ async function loadLists() {
   loadCategoryVisibility();
   loadBrandLogos();
   loadCalcSettings();
+  loadOffgridSettings();
+  loadOffgridPresets();
 }
 
 // ── Category visibility (show/hide an entire product category from the public site) ──
@@ -1823,6 +1825,175 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('calcSettingsForm');
   if (form) form.addEventListener('submit', saveCalcSettings);
 });
+
+// ══════════════════════════════════════════════════════════════
+// Off-Grid Calculator Settings — تفعيل/إيقاف الحاسبة، الماركات
+// المفضلة، وإدارة عروض المنظومات الجاهزة (offgrid_presets)
+// ══════════════════════════════════════════════════════════════
+
+// لازم الأسماء دي تتطابق حرفيًا مع DEFAULT_LOADS في offgrid-calculator.html
+const OFFGRID_LOAD_NAMES = [
+  'لمبة - LED Light', 'DVR / NVR', 'راوتر / شاحن', 'كاميرا مراقبة', 'لابتوب', 'مروحة',
+  'شفاط مطبخ', 'تلفاز LCD / كاميرات CCTV', 'تلفاز LCD', 'ثلاجة', 'كشاف إنارة', 'فريزر',
+  'موتور 1 حصان', 'ميكروويف', 'موتور 1.5 حصان / غاطس', 'تكييف 1.5 حصان', 'غسالة',
+  'تكييف 2.5 حصان', 'تكييف 3 حصان', 'هيتر مياه',
+];
+
+const OFFGRID_BRAND_SELECTS = [
+  { cat: 'offgrid',   selectId: 'offgridBrandInverter' },
+  { cat: 'batteries', selectId: 'offgridBrandBattery' },
+  { cat: 'panels',    selectId: 'offgridBrandPanel' },
+];
+
+async function loadOffgridSettings() {
+  if (!client) return;
+  const { data: settings, error } = await client.from('calc_settings').select('*').eq('id', 1).single();
+  if (error) { console.error('offgrid settings load error', error); return; }
+
+  document.getElementById('offgridEnabled').checked = !!settings.offgrid_enabled;
+
+  const colMap = { offgridBrandInverter: 'preferred_offgrid_inverter_brand', offgridBrandBattery: 'preferred_offgrid_battery_brand', offgridBrandPanel: 'preferred_offgrid_panel_brand' };
+  for (const c of OFFGRID_BRAND_SELECTS) {
+    const sel = document.getElementById(c.selectId);
+    if (!sel) continue;
+    const { data: rows } = await client.from('products').select('brand,price').eq('category', c.cat).eq('published', true);
+    const brands = [...new Set((rows || []).filter(r => r.price != null && Number(r.price) > 0).map(r => r.brand).filter(Boolean))].sort();
+    const current = settings[colMap[c.selectId]] || '';
+    sel.innerHTML = '<option value="">— بدون تفضيل (أي ماركة) —</option>' +
+      brands.map(b => `<option value="${escapeHtmlAttr(b)}" ${b === current ? 'selected' : ''}>${escapeHtmlAttr(b)}</option>`).join('');
+  }
+}
+
+async function saveOffgridSettings(event) {
+  event.preventDefault();
+  const msg = document.getElementById('offgridSettingsMessage');
+  const payload = {
+    offgrid_enabled: document.getElementById('offgridEnabled').checked,
+    preferred_offgrid_inverter_brand: document.getElementById('offgridBrandInverter').value || null,
+    preferred_offgrid_battery_brand: document.getElementById('offgridBrandBattery').value || null,
+    preferred_offgrid_panel_brand: document.getElementById('offgridBrandPanel').value || null,
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await client.from('calc_settings').update(payload).eq('id', 1);
+  msg.style.color = error ? '#c33' : '#2a7a2a';
+  msg.textContent = error ? ('خطأ: ' + error.message) : '✅ تم حفظ إعدادات الأوف جريد';
+  setTimeout(() => { msg.textContent = ''; }, 3500);
+}
+
+async function loadOffgridPresets() {
+  const list = document.getElementById('offgridPresetsList');
+  if (!list || !client) return;
+  const { data, error } = await client.from('offgrid_presets').select('*').order('sort_order');
+  if (error) { list.innerHTML = `<p style="color:#c33;font-size:13px">خطأ في تحميل المنظومات: ${error.message}</p>`; return; }
+  renderOffgridPresetsList(data || []);
+}
+
+function renderOffgridPresetsList(rows) {
+  const list = document.getElementById('offgridPresetsList');
+  if (!list) return;
+  if (!rows.length) { list.innerHTML = `<p style="color:var(--muted);font-size:14px">مفيش منظومات مضافة لسه.</p>`; return; }
+  list.innerHTML = rows.map(r => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;margin-bottom:8px">
+      <div style="flex:1;min-width:0">
+        <p style="margin:0;font-weight:700;font-size:14px">${escapeHtmlAttr(r.name)} ${r.is_active ? '' : '<span style="color:#c33;font-size:11px">(متوقفة)</span>'}</p>
+        <p style="margin:2px 0 0;font-size:12px;color:var(--muted)">${escapeHtmlAttr(r.description || '')} — ${(r.items || []).length} جهاز</p>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button type="button" onclick='editOffgridPreset(${JSON.stringify(r).replace(/'/g, "&#39;")})'
+          style="padding:4px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">✏️ تعديل</button>
+        <button type="button" onclick="deleteOffgridPreset('${r.id}')"
+          style="padding:4px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;font-size:12px;cursor:pointer;color:#c33">🗑️ حذف</button>
+      </div>
+    </div>`).join('');
+}
+
+function buildOffgridPresetItemsPicker(selectedItems) {
+  const picker = document.getElementById('offgridPresetItemsPicker');
+  const selMap = {};
+  (selectedItems || []).forEach(it => { selMap[it.load] = it.count; });
+  picker.innerHTML = OFFGRID_LOAD_NAMES.map((name, i) => `
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+      <input type="number" min="0" value="${selMap[name] || 0}" data-load="${escapeHtmlAttr(name)}" style="width:52px;height:28px;padding:0 4px;border:1px solid var(--line);border-radius:6px;font-size:12px">
+      <span>${name}</span>
+    </label>`).join('');
+}
+
+function readOffgridPresetItems() {
+  const inputs = document.querySelectorAll('#offgridPresetItemsPicker input[data-load]');
+  const items = [];
+  inputs.forEach(inp => {
+    const count = Number(inp.value) || 0;
+    if (count > 0) items.push({ load: inp.dataset.load, count });
+  });
+  return items;
+}
+
+function showOffgridPresetForm() {
+  document.getElementById('offgridPresetFormWrap').style.display = 'block';
+  document.getElementById('offgridPresetForm').reset();
+  document.getElementById('offgridPresetId').value = '';
+  document.getElementById('offgridPresetActive').checked = true;
+  buildOffgridPresetItemsPicker([]);
+  document.getElementById('offgridPresetFormWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelOffgridPresetForm() {
+  document.getElementById('offgridPresetFormWrap').style.display = 'none';
+  document.getElementById('offgridPresetForm').reset();
+}
+
+function editOffgridPreset(preset) {
+  document.getElementById('offgridPresetFormWrap').style.display = 'block';
+  document.getElementById('offgridPresetId').value = preset.id;
+  document.getElementById('offgridPresetName').value = preset.name || '';
+  document.getElementById('offgridPresetDesc').value = preset.description || '';
+  document.getElementById('offgridPresetActive').checked = !!preset.is_active;
+  buildOffgridPresetItemsPicker(preset.items || []);
+  document.getElementById('offgridPresetFormWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function deleteOffgridPreset(id) {
+  if (!confirm('هل أنت متأكد من حذف المنظومة دي؟')) return;
+  if (!client) return;
+  await client.from('offgrid_presets').delete().eq('id', id);
+  loadOffgridPresets();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const settingsForm = document.getElementById('offgridSettingsForm');
+  if (settingsForm) settingsForm.addEventListener('submit', saveOffgridSettings);
+
+  const presetForm = document.getElementById('offgridPresetForm');
+  if (presetForm) {
+    presetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('offgridPresetMessage');
+      const items = readOffgridPresetItems();
+      if (!items.length) { msg.textContent = 'اختار جهاز واحد على الأقل بعدد أكبر من صفر.'; msg.style.color = '#c33'; return; }
+      const id = document.getElementById('offgridPresetId').value;
+      const payload = {
+        name: document.getElementById('offgridPresetName').value.trim(),
+        description: document.getElementById('offgridPresetDesc').value.trim() || null,
+        items,
+        is_active: document.getElementById('offgridPresetActive').checked,
+        updated_at: new Date().toISOString(),
+      };
+      if (!payload.name) { msg.textContent = 'اسم المنظومة مطلوب.'; msg.style.color = '#c33'; return; }
+
+      msg.textContent = 'جاري الحفظ...'; msg.style.color = 'var(--muted)';
+      const { error } = id
+        ? await client.from('offgrid_presets').update(payload).eq('id', id)
+        : await client.from('offgrid_presets').insert(payload);
+      if (error) { msg.textContent = 'خطأ: ' + error.message; msg.style.color = '#c33'; return; }
+      msg.style.color = '#2a7a2a';
+      msg.textContent = '✅ تم الحفظ!';
+      setTimeout(() => { msg.textContent = ''; }, 2500);
+      cancelOffgridPresetForm();
+      loadOffgridPresets();
+    });
+  }
+});
+
 
 async function loadBrandLogos() {
   const list = document.getElementById('brandLogosList');

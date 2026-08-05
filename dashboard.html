@@ -762,6 +762,80 @@
             <p class="form-note" id="calcSettingsMessage" style="margin-top:6px"></p>
           </form>
         </article>
+
+        <article class="dashboard-card" id="offgridSettingsCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">🔋 إعدادات حاسبة الأوف جريد</h3>
+          </div>
+
+          <form class="admin-form" id="offgridSettingsForm">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-2);padding:10px;background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+              <input type="checkbox" id="offgridEnabled" style="width:18px;height:18px;">
+              <label for="offgridEnabled" style="margin:0;font-weight:700;cursor:pointer">تفعيل حاسبة الأوف جريد على الموقع (إلغاء التفعيل بيعرض "قيد التطوير" للزوار)</label>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-2)">
+              <div>
+                <label>الماركة المفضلة — الانفرتر</label>
+                <select id="offgridBrandInverter"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
+              </div>
+              <div>
+                <label>الماركة المفضلة — البطارية</label>
+                <select id="offgridBrandBattery"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
+              </div>
+              <div>
+                <label>الماركة المفضلة — الألواح</label>
+                <select id="offgridBrandPanel"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
+              </div>
+            </div>
+
+            <div style="margin-top:var(--space-2)">
+              <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ إعدادات الأوف جريد</button>
+            </div>
+            <p class="form-note" id="offgridSettingsMessage" style="margin-top:6px"></p>
+          </form>
+        </article>
+
+        <article class="dashboard-card" id="offgridPresetsCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">🏠 منظومات جاهزة (عروض سريعة للزائر)</h3>
+            <button type="button" class="btn btn-secondary" id="addOffgridPresetBtn" style="font-size:13px" onclick="showOffgridPresetForm()">+ إضافة منظومة</button>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+            دي الأزرار الجاهزة ("منزل مزرعة صغيرة"، "استراحة مهندس"، إلخ) اللي الزائر يضغط عليها فتتملى الأحمال تلقائيًا في حاسبة الأوف جريد.
+          </p>
+
+          <div id="offgridPresetsList"></div>
+
+          <div id="offgridPresetFormWrap" style="display:none;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--line)">
+            <form class="admin-form" id="offgridPresetForm">
+              <input type="hidden" id="offgridPresetId">
+              <div class="field-row">
+                <div style="flex:1">
+                  <label>اسم المنظومة</label>
+                  <input type="text" id="offgridPresetName" required placeholder="مثال: منزل مزرعة صغيرة - فردين">
+                </div>
+              </div>
+              <div>
+                <label>وصف مختصر (اختياري)</label>
+                <input type="text" id="offgridPresetDesc" placeholder="مثال: إضاءة أساسية + ثلاجة + راوتر + مروحة">
+              </div>
+              <div style="margin-top:var(--space-2)">
+                <label>الأجهزة وعددها</label>
+                <div id="offgridPresetItemsPicker" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px;max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:var(--radius);padding:10px;background:#fff"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:var(--space-2)">
+                <input type="checkbox" id="offgridPresetActive" checked style="width:16px;height:16px;">
+                <label for="offgridPresetActive" style="margin:0">مفعّلة (ظاهرة للزوار)</label>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:var(--space-3)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المنظومة</button>
+                <button class="btn btn-secondary" type="button" style="font-size:13px" onclick="cancelOffgridPresetForm()">إلغاء</button>
+              </div>
+              <p class="form-note" id="offgridPresetMessage" style="margin-top:6px"></p>
+            </form>
+          </div>
+        </article>
       </div>
 
       <!-- ── Articles Management ── -->
