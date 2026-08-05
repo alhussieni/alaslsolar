@@ -1605,7 +1605,21 @@ function toggleProductFieldsByCategory(cat) {
   const powerWrap = document.getElementById('powerFieldsWrap');
   const kwInput = document.getElementById('productPowerKw');
   const hpInput = document.getElementById('productPowerHp');
+  const offgridWrap = document.getElementById('offgridFieldsWrap');
+  const battWrap = document.getElementById('battFieldsWrap');
+  const panelWrap = document.getElementById('panelFieldsWrap');
   if (!nameWrap || !specsWrap || !powerWrap) return;
+
+  // reset all optional technical blocks first
+  powerWrap.style.display = 'none'; if (kwInput) kwInput.required = false; if (hpInput) hpInput.required = false;
+  if (offgridWrap) offgridWrap.style.display = 'none';
+  if (battWrap) battWrap.style.display = 'none';
+  if (panelWrap) panelWrap.style.display = 'none';
+  document.getElementById('ogPowerKw') && (document.getElementById('ogPowerKw').required = false);
+  document.getElementById('ogVoltage') && (document.getElementById('ogVoltage').required = false);
+  document.getElementById('battVoltage') && (document.getElementById('battVoltage').required = false);
+  document.getElementById('battAh') && (document.getElementById('battAh').required = false);
+  document.getElementById('panelWatt') && (document.getElementById('panelWatt').required = false);
 
   if (cat === 'inverters') {
     nameInput.required = false;
@@ -1618,9 +1632,18 @@ function toggleProductFieldsByCategory(cat) {
     nameInput.required = true;
     if (nameWrap) nameWrap.style.display = 'block';
     specsWrap.style.display = 'block';
-    powerWrap.style.display = 'none';
-    if (kwInput) kwInput.required = false;
-    if (hpInput) hpInput.required = false;
+    if (cat === 'offgrid' && offgridWrap) {
+      offgridWrap.style.display = 'grid';
+      document.getElementById('ogPowerKw').required = true;
+      document.getElementById('ogVoltage').required = true;
+    } else if (cat === 'batteries' && battWrap) {
+      battWrap.style.display = 'grid';
+      document.getElementById('battVoltage').required = true;
+      document.getElementById('battAh').required = true;
+    } else if (cat === 'panels' && panelWrap) {
+      panelWrap.style.display = 'grid';
+      document.getElementById('panelWatt').required = true;
+    }
   }
 }
 
@@ -1652,6 +1675,18 @@ function editProduct(id) {
     document.getElementById('productPowerHp').value = p.power_hp != null ? p.power_hp : '';
   }
   document.getElementById('productModel').value = p.model_available || '';
+  document.getElementById('ogPowerKw').value = p.power_kw != null ? p.power_kw : '';
+  document.getElementById('ogVoltage').value = p.voltage_v != null ? p.voltage_v : '';
+  document.getElementById('ogPvVocMax').value = p.pv_voc_max != null ? p.pv_voc_max : '';
+  document.getElementById('ogSurgePct').value = p.surge_capacity_pct != null ? p.surge_capacity_pct : '';
+  document.getElementById('ogMpptMin').value = p.pv_mppt_min != null ? p.pv_mppt_min : '';
+  document.getElementById('ogMpptMax').value = p.pv_mppt_max != null ? p.pv_mppt_max : '';
+  document.getElementById('battVoltage').value = p.voltage_v != null ? p.voltage_v : '';
+  document.getElementById('battAh').value = p.capacity_ah != null ? p.capacity_ah : '';
+  document.getElementById('battDod').value = p.dod != null ? p.dod : '';
+  document.getElementById('panelWatt').value = p.power_watt != null ? p.power_watt : '';
+  document.getElementById('panelVoc').value = p.voc != null ? p.voc : '';
+  document.getElementById('panelVimp').value = p.vimp != null ? p.vimp : '';
   document.getElementById('productDatasheet').value = p.datasheet_url || '';
   document.getElementById('productUnit').value = p.unit || 'قطعة';
   document.getElementById('productPrice').value = p.price;
@@ -1672,6 +1707,8 @@ function cancelProductForm() {
   document.getElementById('productImageUrl').value = '';
   document.getElementById('productPowerKw').value = '';
   document.getElementById('productPowerHp').value = '';
+  ['ogPowerKw','ogVoltage','ogPvVocMax','ogSurgePct','ogMpptMin','ogMpptMax','battVoltage','battAh','battDod','panelWatt','panelVoc','panelVimp']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   setProductImagePreview('');
   document.getElementById('productAddWrap').style.display = 'none';
   toggleProductFieldsByCategory(document.getElementById('productCategory').value);
@@ -1720,6 +1757,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const category = document.getElementById('productCategory').value;
     const isInverter = category === 'inverters';
+    const isOffgrid = category === 'offgrid';
+    const isBattery = category === 'batteries';
+    const isPanel = category === 'panels';
     const brandValue = document.getElementById('productBrand').value.trim();
     const powerKwValue = document.getElementById('productPowerKw').value;
     const powerHpValue = document.getElementById('productPowerHp').value;
@@ -1730,6 +1770,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (isInverter && !brandValue) {
       if (msg) msg.textContent = 'من فضلك اكتب الماركة — بيتولد منها اسم المنتج تلقائيًا للإنفرترات.';
+      return;
+    }
+    if (isOffgrid && (document.getElementById('ogPowerKw').value === '' || document.getElementById('ogVoltage').value === '')) {
+      if (msg) msg.textContent = 'من فضلك سجّل القدرة بالكيلووات وجهد التيار المستمر — الحاسبة محتاجاهم لاختيار الموديل تلقائيًا.';
+      return;
+    }
+    if (isBattery && (document.getElementById('battVoltage').value === '' || document.getElementById('battAh').value === '')) {
+      if (msg) msg.textContent = 'من فضلك سجّل فولت وسعة (Ah) البطارية — الحاسبة محتاجاهم.';
+      return;
+    }
+    if (isPanel && document.getElementById('panelWatt').value === '') {
+      if (msg) msg.textContent = 'من فضلك سجّل قدرة اللوح بالوات — بدونها مش هيظهر اختيار قدرة للزائر في الحاسبة.';
       return;
     }
 
@@ -1744,8 +1796,6 @@ document.addEventListener('DOMContentLoaded', () => {
       brand:      brandValue || null,
       name_ar:    nameValue,
       specs_ar:   specsValue,
-      power_kw:   isInverter && powerKwValue !== '' ? parseFloat(powerKwValue) : null,
-      power_hp:   isInverter && powerHpValue !== '' ? parseFloat(powerHpValue) : null,
       model_available: document.getElementById('productModel').value.trim() || null,
       datasheet_url:   document.getElementById('productDatasheet').value.trim() || null,
       unit:       document.getElementById('productUnit').value,
@@ -1757,6 +1807,36 @@ document.addEventListener('DOMContentLoaded', () => {
       in_stock:   document.getElementById('productInStock').checked,
       updated_at: new Date().toISOString(),
     };
+
+    // Technical fields: only ever included in the payload for the category
+    // that actually manages them — this way saving, say, a panel's price
+    // never silently wipes an unrelated inverter's power_kw, and vice versa.
+    if (isInverter) {
+      payload.power_kw = powerKwValue !== '' ? parseFloat(powerKwValue) : null;
+      payload.power_hp = powerHpValue !== '' ? parseFloat(powerHpValue) : null;
+    } else if (isOffgrid) {
+      const v = id => document.getElementById(id).value;
+      payload.power_kw           = v('ogPowerKw') !== '' ? parseFloat(v('ogPowerKw')) : null;
+      payload.voltage_v          = v('ogVoltage') !== '' ? parseFloat(v('ogVoltage')) : null;
+      payload.pv_voc_max         = v('ogPvVocMax') !== '' ? parseFloat(v('ogPvVocMax')) : null;
+      payload.surge_capacity_pct = v('ogSurgePct') !== '' ? parseFloat(v('ogSurgePct')) : null;
+      payload.pv_mppt_min        = v('ogMpptMin') !== '' ? parseFloat(v('ogMpptMin')) : null;
+      payload.pv_mppt_max        = v('ogMpptMax') !== '' ? parseFloat(v('ogMpptMax')) : null;
+    } else if (isBattery) {
+      const v = id => document.getElementById(id).value;
+      payload.voltage_v  = v('battVoltage') !== '' ? parseFloat(v('battVoltage')) : null;
+      payload.capacity_ah = v('battAh') !== '' ? parseFloat(v('battAh')) : null;
+      payload.dod         = v('battDod') !== '' ? parseFloat(v('battDod')) : null;
+    } else if (isPanel) {
+      const v = id => document.getElementById(id).value;
+      payload.power_watt = v('panelWatt') !== '' ? parseFloat(v('panelWatt')) : null;
+      payload.voc         = v('panelVoc') !== '' ? parseFloat(v('panelVoc')) : null;
+      payload.vimp         = v('panelVimp') !== '' ? parseFloat(v('panelVimp')) : null;
+    }
+    // NOTE: categories above never touch each other's technical columns —
+    // e.g. saving a 'panels' product leaves power_kw/voltage_v/dod (owned by
+    // 'offgrid'/'batteries') completely untouched in the database.
+
     if (!payload.name_ar) { if (msg) msg.textContent = 'اسم المنتج مطلوب.'; return; }
     if (msg) msg.textContent = 'جاري الحفظ...';
     let error;
