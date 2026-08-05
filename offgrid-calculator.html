@@ -90,6 +90,13 @@
     .presets-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-3); }
     .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
     .preset-btn:hover { border-color: var(--brand); color: var(--brand-dark); }
+    /* .btn-secondary from styles.css is designed for dark hero backgrounds
+       (white text on translucent white) — invisible on our white cards, so
+       calculator buttons on light panels use this instead. */
+    .btn-light { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      border: 1.5px solid var(--line); background: #fff; color: var(--brand-dark); font-weight: 700;
+      border-radius: var(--radius); padding: 0 16px; cursor: pointer; font-family: 'Cairo', sans-serif; }
+    .btn-light:hover { background: var(--brand-soft); border-color: var(--brand); }
     .toggle-row { display: flex; gap: var(--space-3); margin: var(--space-2) 0; }
     .toggle-chip { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
@@ -166,7 +173,7 @@
               <label for="ogLoadPicker">اختار جهاز تضيفه</label>
               <select id="ogLoadPicker"></select>
             </div>
-            <button type="button" class="btn btn-secondary" id="ogAddLoadBtn" style="height:42px;">
+            <button type="button" class="btn-light" id="ogAddLoadBtn" style="height:42px;">
               <i class="fa fa-plus" aria-hidden="true"></i> أضف الجهاز
             </button>
           </div>
@@ -534,7 +541,7 @@
       document.getElementById('ogRowsBody').innerHTML = result.rows.map(r => `
         <tr>
           <td>${esc(r.name)}</td><td>${esc(r.type)}</td><td>${r.qty}</td>
-          <td>${linkFor[r.name] ? `<a href="${linkFor[r.name]}" target="_blank" class="btn btn-secondary" style="padding:5px 12px;font-size:12px;">اعرف السعر</a>` : '<span style="color:var(--muted);font-size:12px;">تواصل معنا</span>'}</td>
+          <td>${linkFor[r.name] ? `<a href="${linkFor[r.name]}" target="_blank" class="btn-light" style="padding:5px 12px;font-size:12px;height:auto;">اعرف السعر</a>` : '<span style="color:var(--muted);font-size:12px;">تواصل معنا</span>'}</td>
         </tr>`).join('');
     }
 
