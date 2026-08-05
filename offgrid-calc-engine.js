@@ -162,7 +162,12 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const rows = [];
   if (panelWatt && panel.pricePerWatt) {
     const panelUnit = panel.pricePerWatt * panelWatt;
-    rows.push({ name: 'الألواح', type: `${panel.brand} ~${panelWatt}W`, qty: O2, unitPrice: panelUnit, total: O2 * panelUnit });
+    rows.push({ name: 'الألواح', type: panel.brand, qty: O2, unitPrice: panelUnit, total: O2 * panelUnit });
+    // panels are sold by this brand at a per-watt price with no fixed model/SKU,
+    // so the ${panelWatt}W used for the electrical string design is an engineering
+    // assumption (typical panel spec), not a real product listing — say so explicitly
+    // instead of implying "JA Solar 550W" is an actual purchasable model.
+    errors.push(`ℹ️ عدد الألواح محسوب على أساس لوح نموذجي ~${panelWatt} وات لماركة ${panel.brand} (لتصميم التوصيل الكهربائي فقط) — الألواح عندكم متسعّرة لكل وات بلا موديل ثابت، فالقدرة الفعلية للوح اللي هيتركب ممكن تختلف والعدد يتغيّر تبعًا لها.`);
   } else {
     rows.push({ name: 'الألواح', type: panel.brand, qty: O2, unitPrice: 0, total: 0 });
     errors.push('⚠ سعر الألواح لهذه الماركة غير مكتمل في الموقع — القيمة غير محسوبة بدقة في الإجمالي.');
