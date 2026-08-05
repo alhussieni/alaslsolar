@@ -83,6 +83,8 @@
     .loads-table th { text-align: right; padding: 6px 8px; font-size: 10px; font-weight: 800; color: var(--muted); border-bottom: 1.5px solid var(--line); }
     .loads-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); }
     .loads-table input[type="number"] { height: 32px; width: 100%; padding: 0 6px; border: 1.5px solid var(--line); border-radius: 6px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; text-align: center; }
+    .load-remove-btn { background: none; border: none; color: #c33; cursor: pointer; font-size: 15px; padding: 4px; }
+    .load-remove-btn:hover { color: #a11; }
     .loads-table .load-name { font-weight: 700; font-size: 12px; }
     .loads-scroll { max-height: 340px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); }
     .presets-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-3); }
@@ -145,6 +147,12 @@
         </p>
       </div>
 
+      <div class="calc-empty" id="ogDisabledState" hidden>
+        <i class="fa fa-screwdriver-wrench" aria-hidden="true"></i>
+        <p>حاسبة الأوف جريد قيد التطوير حاليًا وهترجع تشتغل قريبًا. تواصل معنا مباشرة في الوقت ده لحساب منظومتك.</p>
+      </div>
+
+      <div id="ogCalcWrapOuter">
       <div class="calc-wrap">
 
         <!-- Panel: Loads -->
@@ -153,15 +161,28 @@
 
           <div class="presets-row" id="ogPresets"></div>
 
-          <div class="loads-scroll">
+          <div class="field-group g2" style="align-items:flex-end;">
+            <div class="field">
+              <label for="ogLoadPicker">اختار جهاز تضيفه</label>
+              <select id="ogLoadPicker"></select>
+            </div>
+            <button type="button" class="btn btn-secondary" id="ogAddLoadBtn" style="height:42px;">
+              <i class="fa fa-plus" aria-hidden="true"></i> أضف الجهاز
+            </button>
+          </div>
+
+          <p class="field-hint" id="ogNoLoadsHint">لسه ماضفتش أي جهاز — اختار من القايمة فوق، أو دوس على إحدى المنظومات الجاهزة.</p>
+
+          <div class="loads-scroll" id="ogAddedLoadsWrap" hidden>
             <table class="loads-table">
               <thead>
                 <tr>
-                  <th style="width:34%;">الجهاز</th>
+                  <th style="width:30%;">الجهاز</th>
                   <th>القدرة (وات)</th>
                   <th>العدد</th>
                   <th>ساعات نهار</th>
                   <th>ساعات ليل</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="ogLoadsBody"></tbody>
@@ -239,18 +260,15 @@
 
           <table class="og-table">
             <thead>
-              <tr><th>البند</th><th>النوع</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>
+              <tr><th>البند</th><th>النوع</th><th>الكمية</th><th>السعر</th></tr>
             </thead>
             <tbody id="ogRowsBody"></tbody>
-            <tfoot>
-              <tr><td colspan="4">إجمالي تكلفة الخامات (بدون تركيب أو نقل)</td><td id="ogGrandTotal"></td></tr>
-            </tfoot>
           </table>
 
           <div class="footer-disclaimer">
             <i class="fa fa-circle-info" aria-hidden="true"></i>
-            <p>الأسعار مبنية على أسعار المنتجات المنشورة حاليًا على الموقع وممكن تتغيّر. الرقم ده بيغطي الخامات بس —
-              <strong>مش شامل تركيب ولا نقل ولا أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</p>
+            <p><strong>الأسعار مش ظاهرة هنا</strong> — دوس على "اعرف السعر" أمام كل بند عشان تشوف سعره بالتفصيل في صفحة المنتج.
+              الكميات دي بتغطي الخامات بس — <strong>مش شامل تركيب ولا نقل ولا أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</p>
           </div>
         </div>
 
@@ -259,6 +277,7 @@
           <p>اختار الأحمال والماركات واضغط "احسب النظام" لعرض النتيجة</p>
         </div>
 
+      </div>
       </div>
     </section>
   </main>
@@ -313,12 +332,6 @@
       { name: 'هيتر مياه', watt: 9000, runningFactor: 1, nightHours: 0, dayHours: 2, surgeFactor: 1 },
     ];
 
-    const PRESETS = [
-      { name: 'منزل مزرعة صغيرة - فردين', items: [{ load: 'لمبة - LED Light', count: 4 }, { load: 'ثلاجة', count: 1 }, { load: 'راوتر / شاحن', count: 1 }, { load: 'مروحة', count: 1 }] },
-      { name: 'منزل عمال مزرعة - 4 أفراد', items: [{ load: 'لمبة - LED Light', count: 5 }, { load: 'ثلاجة', count: 1 }, { load: 'مروحة', count: 2 }, { load: 'تلفاز LCD', count: 1 }, { load: 'راوتر / شاحن', count: 1 }] },
-      { name: 'استراحة مهندس و6 عمال - 7 أفراد', items: [{ load: 'لمبة - LED Light', count: 6 }, { load: 'ثلاجة', count: 1 }, { load: 'مروحة', count: 4 }, { load: 'تلفاز LCD', count: 1 }, { load: 'راوتر / شاحن', count: 2 }] },
-    ];
-
     /* Public unit prices for generic (non brand-specific) materials —
        these are retail/customer prices already, not cost or margin
        figures, so it's fine to keep them here. Update from admin if
@@ -334,85 +347,160 @@
     };
 
     let catalog = { inverters: [], batteries: [], panels: [] };
+    let addedLoadIdx = []; // indices into DEFAULT_LOADS currently shown in the "added" list
 
     function egp(n) { return Math.round(n).toLocaleString('ar-EG') + ' ج.م'; }
+    function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 
-    function buildLoadsTable() {
-      const body = document.getElementById('ogLoadsBody');
-      body.innerHTML = DEFAULT_LOADS.map((l, i) => `
-        <tr data-load="${l.name}">
-          <td class="load-name">${l.name}</td>
-          <td>${l.watt}</td>
-          <td><input type="number" min="0" value="0" data-field="count" data-idx="${i}"></td>
-          <td><input type="number" min="0" step="0.5" value="${l.dayHours}" data-field="dayHours" data-idx="${i}"></td>
-          <td><input type="number" min="0" step="0.5" value="${l.nightHours}" data-field="nightHours" data-idx="${i}"></td>
-        </tr>`).join('');
+    /* ---------- Loads: dropdown + "add" list, instead of a big table ---------- */
+
+    function buildLoadPicker() {
+      const sel = document.getElementById('ogLoadPicker');
+      const available = DEFAULT_LOADS.map((l, i) => i).filter(i => !addedLoadIdx.includes(i));
+      sel.innerHTML = available.length
+        ? available.map(i => `<option value="${i}">${DEFAULT_LOADS[i].name} (${DEFAULT_LOADS[i].watt} وات)</option>`).join('')
+        : `<option value="">كل الأجهزة اتضافت</option>`;
+      sel.disabled = available.length === 0;
     }
 
-    function buildPresets() {
+    function refreshLoadsVisibility() {
+      const hasAny = addedLoadIdx.length > 0;
+      document.getElementById('ogAddedLoadsWrap').hidden = !hasAny;
+      document.getElementById('ogNoLoadsHint').hidden = hasAny;
+    }
+
+    function addLoadRow(idx) {
+      if (addedLoadIdx.includes(idx)) return;
+      addedLoadIdx.push(idx);
+      const l = DEFAULT_LOADS[idx];
+      const body = document.getElementById('ogLoadsBody');
+      const tr = document.createElement('tr');
+      tr.dataset.idx = idx;
+      tr.innerHTML = `
+        <td class="load-name">${esc(l.name)}</td>
+        <td>${l.watt}</td>
+        <td><input type="number" min="1" value="1" data-field="count"></td>
+        <td><input type="number" min="0" step="0.5" value="${l.dayHours}" data-field="dayHours"></td>
+        <td><input type="number" min="0" step="0.5" value="${l.nightHours}" data-field="nightHours"></td>
+        <td><button type="button" class="load-remove-btn" aria-label="حذف" data-remove="${idx}"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
+      tr.querySelector('[data-remove]').addEventListener('click', () => removeLoadRow(idx));
+      body.appendChild(tr);
+      buildLoadPicker();
+      refreshLoadsVisibility();
+    }
+
+    function removeLoadRow(idx) {
+      addedLoadIdx = addedLoadIdx.filter(i => i !== idx);
+      const row = document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`);
+      if (row) row.remove();
+      buildLoadPicker();
+      refreshLoadsVisibility();
+    }
+
+    function clearAllLoadRows() {
+      addedLoadIdx = [];
+      document.getElementById('ogLoadsBody').innerHTML = '';
+      buildLoadPicker();
+      refreshLoadsVisibility();
+    }
+
+    function readLoads() {
+      return addedLoadIdx.map(idx => {
+        const row = document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`);
+        const l = DEFAULT_LOADS[idx];
+        const count = Number(row.querySelector('[data-field="count"]').value) || 0;
+        const dayHours = Number(row.querySelector('[data-field="dayHours"]').value) || 0;
+        const nightHours = Number(row.querySelector('[data-field="nightHours"]').value) || 0;
+        return { name: l.name, watt: l.watt, runningFactor: l.runningFactor, surgeFactor: l.surgeFactor, count, dayHours, nightHours };
+      }).filter(l => l.count > 0);
+    }
+
+    document.getElementById('ogAddLoadBtn').addEventListener('click', () => {
+      const sel = document.getElementById('ogLoadPicker');
+      if (sel.value === '') return;
+      addLoadRow(Number(sel.value));
+    });
+
+    /* ---------- Presets ("منظومات جاهزة") — admin-managed, loaded from Supabase ---------- */
+
+    async function buildPresets() {
       const wrap = document.getElementById('ogPresets');
-      wrap.innerHTML = PRESETS.map((p, i) => `<button type="button" class="preset-btn" data-preset="${i}">${p.name}</button>`).join('');
+      const client = (typeof getAlaslSupabase === 'function') ? getAlaslSupabase() : null;
+      if (!client) { wrap.innerHTML = ''; return; }
+      const { data, error } = await client.from('offgrid_presets').select('*').eq('is_active', true).order('sort_order');
+      if (error || !data || !data.length) { wrap.innerHTML = ''; return; }
+
+      wrap.innerHTML = data.map((p, i) => `<button type="button" class="preset-btn" data-preset="${i}" title="${esc(p.description || '')}">${esc(p.name)}</button>`).join('');
       wrap.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const preset = PRESETS[btn.dataset.preset];
-          document.querySelectorAll('#ogLoadsBody input[data-field="count"]').forEach(inp => inp.value = 0);
-          preset.items.forEach(item => {
+          const preset = data[btn.dataset.preset];
+          clearAllLoadRows();
+          (preset.items || []).forEach(item => {
             const idx = DEFAULT_LOADS.findIndex(l => l.name === item.load);
-            if (idx >= 0) {
-              const input = document.querySelector(`#ogLoadsBody input[data-field="count"][data-idx="${idx}"]`);
-              if (input) input.value = item.count;
-            }
+            if (idx < 0) return;
+            addLoadRow(idx);
+            const row = document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`);
+            if (row) row.querySelector('[data-field="count"]').value = item.count;
           });
         });
       });
     }
 
-    function readLoads() {
-      return DEFAULT_LOADS.map((l, i) => {
-        const count = Number(document.querySelector(`input[data-field="count"][data-idx="${i}"]`).value) || 0;
-        const dayHours = Number(document.querySelector(`input[data-field="dayHours"][data-idx="${i}"]`).value) || 0;
-        const nightHours = Number(document.querySelector(`input[data-field="nightHours"][data-idx="${i}"]`).value) || 0;
-        return { name: l.name, watt: l.watt, runningFactor: l.runningFactor, surgeFactor: l.surgeFactor, count, dayHours, nightHours };
-      }).filter(l => l.count > 0);
-    }
-
-    function fillBrandSelect(sel, brands, placeholder) {
+    function fillBrandSelect(sel, brands, placeholder, preferred) {
       sel.innerHTML = brands.length
-        ? brands.map(b => `<option value="${b}">${b}</option>`).join('')
+        ? brands.map(b => `<option value="${esc(b)}" ${b === preferred ? 'selected' : ''}>${esc(b)}</option>`).join('')
         : `<option value="">${placeholder}</option>`;
     }
+
+    /* ---------- Catalog: only products that actually have a price, per calc_settings ---------- */
 
     async function loadCatalog() {
       const client = (typeof getAlaslSupabase === 'function') ? getAlaslSupabase() : null;
       if (!client) return;
+
+      const { data: settings } = await client.from('calc_settings').select('*').eq('id', 1).single();
+      if (settings && settings.offgrid_enabled === false) {
+        document.getElementById('ogDisabledState').hidden = false;
+        document.getElementById('ogCalcWrapOuter').hidden = true;
+        return;
+      }
+
       const { data, error } = await client.from('products')
         .select('category,brand,model_available,price,voltage_v,power_kw,surge_capacity_pct,pv_voc_max,pv_mppt_min,pv_mppt_max,capacity_ah,dod,power_watt,vimp,voc,in_stock,published')
         .in('category', ['offgrid', 'batteries', 'panels']);
       if (error || !data) { console.error('offgrid catalog load error:', error); return; }
 
-      catalog.inverters = data.filter(r => r.category === 'offgrid' && r.in_stock !== false && r.published !== false)
+      const hasPrice = r => r.price != null && Number(r.price) > 0;
+
+      catalog.inverters = data.filter(r => r.category === 'offgrid' && r.in_stock !== false && r.published !== false && hasPrice(r))
         .map(r => ({ brand: r.brand, type: r.model_available || '', voltage: Number(r.voltage_v), powerKW: Number(r.power_kw),
           surgeCapacityPct: r.surge_capacity_pct ? Number(r.surge_capacity_pct) : null,
           pvVocMax: r.pv_voc_max ? Number(r.pv_voc_max) : null, pvMpptMin: r.pv_mppt_min ? Number(r.pv_mppt_min) : null,
           pvMpptMax: r.pv_mppt_max ? Number(r.pv_mppt_max) : null, unitPrice: Number(r.price) }))
         .filter(r => r.powerKW && r.voltage);
 
-      catalog.batteries = data.filter(r => r.category === 'batteries' && r.in_stock !== false && r.published !== false)
+      catalog.batteries = data.filter(r => r.category === 'batteries' && r.in_stock !== false && r.published !== false && hasPrice(r))
         .map(r => ({ brand: r.brand, voltage: Number(r.voltage_v), ah: Number(r.capacity_ah),
           dod: r.dod ? Number(r.dod) : null, unitPrice: Number(r.price) }))
         .filter(r => r.voltage && r.ah && r.dod);
 
       // panel price on this site is EGP per watt for every brand, hence pricePerWatt
-      catalog.panels = data.filter(r => r.category === 'panels' && r.in_stock !== false && r.published !== false)
+      catalog.panels = data.filter(r => r.category === 'panels' && r.in_stock !== false && r.published !== false && hasPrice(r))
         .map(r => ({ brand: r.brand, power: r.power_watt ? Number(r.power_watt) : null,
           voc: r.voc ? Number(r.voc) : null, vimp: r.vimp ? Number(r.vimp) : null, pricePerWatt: Number(r.price) }));
 
-      const invBrands = [...new Set(catalog.inverters.map(r => r.brand))];
-      const battBrands = [...new Set(catalog.batteries.map(r => r.brand))];
-      const panelBrands = [...new Set(catalog.panels.map(r => r.brand))];
-      fillBrandSelect(document.getElementById('ogInvBrand'), invBrands, 'لا توجد انفرترات منشورة');
-      fillBrandSelect(document.getElementById('ogBattBrand'), battBrands, 'لا توجد بطاريات منشورة');
-      fillBrandSelect(document.getElementById('ogPanelBrand'), panelBrands, 'لا توجد ألواح منشورة');
+      const invBrands = [...new Set(catalog.inverters.map(r => r.brand))].sort();
+      const battBrands = [...new Set(catalog.batteries.map(r => r.brand))].sort();
+      const panelBrands = [...new Set(catalog.panels.map(r => r.brand))].sort();
+      fillBrandSelect(document.getElementById('ogInvBrand'), invBrands, 'لا توجد انفرترات منشورة بسعر', settings && settings.preferred_offgrid_inverter_brand);
+      fillBrandSelect(document.getElementById('ogBattBrand'), battBrands, 'لا توجد بطاريات منشورة بسعر', settings && settings.preferred_offgrid_battery_brand);
+      fillBrandSelect(document.getElementById('ogPanelBrand'), panelBrands, 'لا توجد ألواح منشورة بسعر', settings && settings.preferred_offgrid_panel_brand);
+    }
+
+    /* ---------- Results: quantities only, price hidden behind a per-product link ---------- */
+
+    function productLink(category, brand, model) {
+      return `product-detail.html?cat=${encodeURIComponent(category)}&brand=${encodeURIComponent(brand || '')}&model=${encodeURIComponent(model || '')}`;
     }
 
     function renderResults(result) {
@@ -438,10 +526,16 @@
         `<div class="calc-note warn"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i><p>${e}</p></div>`).join('');
       document.getElementById('ogNotes').innerHTML = notesHtml;
 
+      const linkFor = {
+        'الألواح': productLink('panels', result.panel.brand, ''),
+        'انفرتر': productLink('offgrid', result.inv.brand, result.inv.type),
+        'بطاريات': productLink('batteries', result.batt.brand, ''),
+      };
       document.getElementById('ogRowsBody').innerHTML = result.rows.map(r => `
-        <tr><td>${r.name}</td><td>${r.type}</td><td>${r.qty}</td><td>${egp(r.unitPrice)}</td><td>${egp(r.total)}</td></tr>
-      `).join('');
-      document.getElementById('ogGrandTotal').textContent = egp(result.grandTotal);
+        <tr>
+          <td>${esc(r.name)}</td><td>${esc(r.type)}</td><td>${r.qty}</td>
+          <td>${linkFor[r.name] ? `<a href="${linkFor[r.name]}" target="_blank" class="btn btn-secondary" style="padding:5px 12px;font-size:12px;">اعرف السعر</a>` : '<span style="color:var(--muted);font-size:12px;">تواصل معنا</span>'}</td>
+        </tr>`).join('');
     }
 
     document.getElementById('ogCalcBtn').addEventListener('click', () => {
@@ -458,14 +552,15 @@
         panelBrand: document.getElementById('ogPanelBrand').value,
       };
       if (!inputs.loads.length) {
-        renderResults({ errors: ['اختار جهاز واحد على الأقل بعدد أكبر من صفر، أو اضغط على أحد النماذج الجاهزة فوق.'] });
+        renderResults({ errors: ['اختار جهاز واحد على الأقل وحدد عدده، أو اضغط على أحد النماذج الجاهزة فوق.'] });
         return;
       }
       const result = window.computeOffgridMaterials(catalog, GENERIC_PRICES, inputs);
       renderResults(result);
     });
 
-    buildLoadsTable();
+    buildLoadPicker();
+    refreshLoadsVisibility();
     buildPresets();
     loadCatalog();
   })();
