@@ -247,6 +247,10 @@
               <label for="ogPanelBrand">ماركة الألواح</label>
               <select id="ogPanelBrand"></select>
             </div>
+            <div class="field">
+              <label for="ogPanelWatt">قدرة اللوح</label>
+              <select id="ogPanelWatt"></select>
+            </div>
           </div>
           <button type="button" class="btn btn-primary" id="ogCalcBtn" style="width:100%;margin-top:var(--space-2);">
             <i class="fa fa-calculator" aria-hidden="true"></i> احسب النظام
@@ -459,6 +463,19 @@
         : `<option value="">${placeholder}</option>`;
     }
 
+    // Populate the "قدرة اللوح" dropdown with the real, distinct wattages
+    // actually registered for the currently-selected panel brand — only
+    // real product rows the admin entered, never a guessed default.
+    function updatePanelWattOptions() {
+      const brand = document.getElementById('ogPanelBrand').value;
+      const sel = document.getElementById('ogPanelWatt');
+      const options = catalog.panels.filter(p => p.brand === brand && p.power);
+      const distinctWatts = [...new Set(options.map(p => p.power))].sort((a, b) => a - b);
+      sel.innerHTML = distinctWatts.length
+        ? distinctWatts.map(w => `<option value="${w}">${w} وات</option>`).join('')
+        : `<option value="">لا توجد قدرة مسجلة لهذه الماركة</option>`;
+    }
+
     /* ---------- Catalog: only products that actually have a price, per calc_settings ---------- */
 
     async function loadCatalog() {
@@ -502,6 +519,8 @@
       fillBrandSelect(document.getElementById('ogInvBrand'), invBrands, 'لا توجد انفرترات منشورة بسعر', settings && settings.preferred_offgrid_inverter_brand);
       fillBrandSelect(document.getElementById('ogBattBrand'), battBrands, 'لا توجد بطاريات منشورة بسعر', settings && settings.preferred_offgrid_battery_brand);
       fillBrandSelect(document.getElementById('ogPanelBrand'), panelBrands, 'لا توجد ألواح منشورة بسعر', settings && settings.preferred_offgrid_panel_brand);
+      updatePanelWattOptions();
+      document.getElementById('ogPanelBrand').addEventListener('change', updatePanelWattOptions);
     }
 
     /* ---------- Results: quantities only, price hidden behind a per-product link ---------- */
@@ -557,6 +576,7 @@
         invBrand: document.getElementById('ogInvBrand').value,
         battBrand: document.getElementById('ogBattBrand').value,
         panelBrand: document.getElementById('ogPanelBrand').value,
+        panelWatt: document.getElementById('ogPanelWatt').value,
       };
       if (!inputs.loads.length) {
         renderResults({ errors: ['اختار جهاز واحد على الأقل وحدد عدده، أو اضغط على أحد النماذج الجاهزة فوق.'] });
