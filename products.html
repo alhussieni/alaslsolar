@@ -637,6 +637,21 @@
       gap: var(--space-3);
     }
 
+    .prod-cat-heading {
+      grid-column: 1 / -1;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: var(--space-4) 0 2px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--brand-soft);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prod-cat-heading:first-child { margin-top: 0; }
+    .prod-grid.is-list .prod-cat-heading { grid-column: 1; }
+
     /* Product card */
     .prod-card {
       background: #fff;
@@ -902,6 +917,12 @@
           <select class="prod-sort-select" id="prodSort" aria-label="ترتيب المنتجات">
             <option value="newest" data-i18n="prod_sort_newest">الأحدث</option>
           </select>
+          <select class="prod-sort-select" id="prodPageSize" aria-label="عدد المنتجات في الصفحة">
+            <option value="24">24 منتج / صفحة</option>
+            <option value="48">48 منتج / صفحة</option>
+            <option value="96">96 منتج / صفحة</option>
+            <option value="all">عرض الكل في صفحة واحدة</option>
+          </select>
           <span class="prod-count" id="prodCount"><strong>0</strong> <span data-i18n="prod_count_label">منتج</span></span>
         </div>
 
@@ -1006,6 +1027,20 @@
       batteries: '🔋', offgrid: '🔆', well_motors: '🛠️', pumps: '🌊', pipes: '🧵',
       street_lights: '💡', flood_lights: '🔦', garden_lights: '🪴', solar_kits: '🧰', solar_safety: '🚧',
     };
+    const CAT_SECTION_LABEL = {
+      ar: { inverters: 'إنفرترات', panels: 'ألواح شمسية', accessories: 'إكسسوارات', combiners: 'صناديق تجميع',
+        structures: 'شاسيهات وهياكل تثبيت', cables: 'كابلات', batteries: 'بطاريات', offgrid: 'إنفرتر أوف جريد',
+        well_motors: 'موتورات آبار', pumps: 'طلمبات ومضخات', pipes: 'مواسير', street_lights: 'إنارة شوارع شمسية',
+        flood_lights: 'كشافات شمسية', garden_lights: 'إضاءة حدائق شمسية', solar_kits: 'منظومات شمسية جاهزة', solar_safety: 'وسائل أمان طرق شمسية' },
+      en: { inverters: 'Inverters', panels: 'Solar Panels', accessories: 'Accessories', combiners: 'Combiner Boxes',
+        structures: 'Mounting Structures', cables: 'Cables', batteries: 'Batteries', offgrid: 'Off-Grid Inverters',
+        well_motors: 'Well Motors', pumps: 'Pumps', pipes: 'HDPE Pipes', street_lights: 'Solar Street Lights',
+        flood_lights: 'Solar Flood Lights', garden_lights: 'Solar Garden Lights', solar_kits: 'Solar Home Systems', solar_safety: 'Solar Road Safety' },
+    };
+    function categorySectionLabel(cat) {
+      const lang = getLang();
+      return (CAT_SECTION_LABEL[lang] && CAT_SECTION_LABEL[lang][cat]) || (CAT_SECTION_LABEL.ar[cat] || cat);
+    }
 
     // ── Language helper ──
     function getLang() {
@@ -1067,7 +1102,7 @@
     let lastSectionOf = {};      // category -> main_section, cached so we can rebuild the tree on language change
     let viewMode = 'grid';       // 'grid' | 'list'
     let currentPage = 1;
-    const PAGE_SIZE = 24;
+    let PAGE_SIZE = 24;
     let priceMin = null;
     let priceMax = null;
 
@@ -1293,7 +1328,7 @@
     function powerFieldFor(cat) {
       if (cat === 'well_motors' || cat === 'pumps') return 'power_hp';
       if (cat === 'inverters' || cat === 'offgrid') return 'power_kw';
-      if (cat === 'panels') return 'power_w';
+      if (cat === 'panels') return 'power_watt';
       return null;
     }
     function fmtPower(v) { return String(Number(v)); } // normalizes "5.50" / 5.5 / "5.5" to the same key
@@ -1362,14 +1397,30 @@
       // product-detail.html, which already has the power/variant picker.
       // Categories with mostly one-off products (single variant per family)
       // just render as before, one card per product.
-      const allCards = Array.from(groups.values());
-      const totalPages = Math.max(1, Math.ceil(allCards.length / PAGE_SIZE));
+      // Sort by category (following the site's canonical category order) so
+      // the grid is organized into clear per-category sections rather than a
+      // single mixed list — this holds even when several categories are
+      // selected in the sidebar tree at once, or when nothing is selected
+      // (i.e. "all").
+      const catOrder = (cat) => { const i = CATEGORIES.indexOf(cat); return i === -1 ? CATEGORIES.length : i; };
+      const allCards = Array.from(groups.values()).sort((a, b) => catOrder(a[0].category) - catOrder(b[0].category));
+      const effectivePageSize = Number.isFinite(PAGE_SIZE) ? PAGE_SIZE : allCards.length;
+      const totalPages = Math.max(1, Math.ceil(allCards.length / effectivePageSize));
       if (currentPage > totalPages) currentPage = totalPages;
-      const pageCards = allCards.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+      const pageCards = allCards.slice((currentPage - 1) * effectivePageSize, currentPage * effectivePageSize);
 
-      grid.innerHTML = pageCards
-        .map(group => group.length > 1 ? renderFamilyCard(group, cheapSet) : renderCard(group[0], cheapSet))
-        .join('');
+      // Insert a section header whenever the category changes within this page
+      let html = '';
+      let lastCat = null;
+      pageCards.forEach(group => {
+        const cat = group[0].category;
+        if (cat !== lastCat) {
+          html += `<h3 class="prod-cat-heading">${CAT_ICONS[cat] || '📦'} ${categorySectionLabel(cat)}</h3>`;
+          lastCat = cat;
+        }
+        html += group.length > 1 ? renderFamilyCard(group, cheapSet) : renderCard(group[0], cheapSet);
+      });
+      grid.innerHTML = html;
 
       renderPagination(totalPages);
     }
@@ -1408,6 +1459,13 @@
       document.getElementById('viewListBtn')?.classList.toggle('active', mode === 'list');
       renderGrid();
     }
+    document.getElementById('prodPageSize')?.addEventListener('change', (e) => {
+      const v = e.target.value;
+      PAGE_SIZE = v === 'all' ? Infinity : parseInt(v, 10);
+      currentPage = 1;
+      renderGrid();
+    });
+
     document.getElementById('viewGridBtn')?.addEventListener('click', () => setViewMode('grid'));
     document.getElementById('viewListBtn')?.addEventListener('click', () => setViewMode('list'));
 
@@ -1440,7 +1498,7 @@
     // Categories deep enough (brand + power variants) to get a 3-level branch;
     // everything else in the tree is a flat, childless leaf.
     const BRAND_POWER_CATS = new Set(['well_motors', 'pumps', 'inverters', 'offgrid', 'panels']);
-    const POWER_UNIT_LABEL = { power_hp: 'HP', power_kw: 'KW', power_w: 'W' };
+    const POWER_UNIT_LABEL = { power_hp: 'HP', power_kw: 'KW', power_watt: 'W' };
 
     // ── Build the tree structure from the live product list + category_settings ──
     // Runs once per data load (not per render) — cheap even at 1000+ products
