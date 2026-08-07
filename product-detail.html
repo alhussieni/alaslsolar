@@ -72,6 +72,9 @@
     .pd-variant-btn { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; transition: .15s; color: var(--ink); }
     .pd-variant-btn:hover { border-color: var(--brand); }
     .pd-variant-btn.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .pd-variant-select { width: 100%; height: 46px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink); font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: var(--space-3); }
+    .pd-variant-select:focus { outline: none; border-color: var(--brand); }
+    .pd-variant-count-hint { font-size: 12px; color: var(--muted); margin: -8px 0 var(--space-2); }
 
     .pd-specs-table { width: 100%; border-collapse: collapse; margin-bottom: var(--space-3); font-size: 14px; }
     .pd-specs-table tr { border-bottom: 1px solid var(--line); }
@@ -220,6 +223,7 @@
 
           <div id="pdVariantsWrap">
             <p class="pd-section-label" id="pdVariantsLabel">اختر القدرة</p>
+            <select class="pd-variant-select" id="pdVariantSelect" hidden></select>
             <div class="pd-variants" id="pdVariants"></div>
           </div>
 
@@ -600,11 +604,48 @@
       });
 
       const variantsWrap = document.getElementById('pdVariantsWrap');
+      const btnRow = document.getElementById('pdVariants');
+      const select = document.getElementById('pdVariantSelect');
+
       if (sorted.length <= 1) {
         variantsWrap.hidden = true;
-      } else {
+      } else if (sorted.length > 8) {
+        // Too many power options for a button wall to stay readable — group
+        // them into a dropdown with HP-range sections instead.
+        btnRow.hidden = true; btnRow.innerHTML = '';
+        select.hidden = false;
         variantsWrap.hidden = false;
-        document.getElementById('pdVariants').innerHTML = sorted.map(r =>
+
+        const tiers = [
+          { max: 5, label: 'حتى 5 حصان' },
+          { max: 20, label: '5 – 20 حصان' },
+          { max: 50, label: '20 – 50 حصان' },
+          { max: 100, label: '50 – 100 حصان' },
+          { max: Infinity, label: 'أكتر من 100 حصان' },
+        ];
+        const groups = new Map();
+        sorted.forEach(r => {
+          const hp = parseInvPower(r).hp;
+          const tier = hp != null ? tiers.find(t => hp <= t.max) : tiers[tiers.length - 1];
+          const key = tier.label;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(r);
+        });
+
+        select.innerHTML = [...groups.entries()].map(([label, rows]) => `
+          <optgroup label="${escapeHtml(label)}">
+            ${rows.map(r => `<option value="${r.id}"${r.in_stock === false ? ' disabled' : ''}>${escapeHtml(variantLabel(r))} — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}${r.in_stock === false ? ' (غير متاح)' : ''}</option>`).join('')}
+          </optgroup>`).join('');
+
+        select.addEventListener('change', () => {
+          const row = sorted.find(r => String(r.id) === select.value);
+          if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
+        });
+      } else {
+        select.hidden = true;
+        btnRow.hidden = false;
+        variantsWrap.hidden = false;
+        btnRow.innerHTML = sorted.map(r =>
           `<button type="button" class="pd-variant-btn${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${escapeHtml(variantLabel(r))}</button>`
         ).join('');
         document.querySelectorAll('.pd-variant-btn').forEach(btn => {
@@ -616,6 +657,7 @@
       }
 
       selectVariant(sorted[0]);
+      if (!select.hidden) select.value = String(sorted[0].id);
       renderFacts(sorted[0]);
       renderTabs(sorted[0]);
       renderSimilar(sb, sorted[0]);
