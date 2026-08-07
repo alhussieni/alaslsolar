@@ -521,6 +521,25 @@
                     <label>القدرة بالحصان (HP) *</label>
                     <input id="productPowerHp" name="power_hp" type="number" min="0" step="0.1" placeholder="مثال: 5.5">
                   </div>
+                  <p style="grid-column:1/-1;margin:8px 0 2px;font-size:11px;color:var(--muted)">
+                    🔆 لو الموديل ده بيشتغل AC/DC (بيقبل دخول مباشر من الألواح الشمسية وعنده MPPT)، سجّل بياناته هنا — سيبها فاضية لو AC بس:
+                  </p>
+                  <div>
+                    <label>جهد التيار المستمر DC (V)</label>
+                    <input id="invVoltageV" type="number" min="0" step="1" placeholder="مثال: 48">
+                  </div>
+                  <div>
+                    <label>أقصى فولت دخول ألواح Voc</label>
+                    <input id="invPvVocMax" type="number" min="0" step="1" placeholder="مثال: 450">
+                  </div>
+                  <div>
+                    <label>أقل فولت MPPT</label>
+                    <input id="invMpptMin" type="number" min="0" step="1" placeholder="مثال: 120">
+                  </div>
+                  <div>
+                    <label>أقصى فولت MPPT</label>
+                    <input id="invMpptMax" type="number" min="0" step="1" placeholder="مثال: 430">
+                  </div>
                 </div>
                 <div id="offgridFieldsWrap" style="display:none;grid-column:1/-1;grid-template-columns:1fr 1fr;gap:var(--space-2)">
                   <p style="grid-column:1/-1;margin:0 0 2px;font-size:11px;color:var(--muted)">
