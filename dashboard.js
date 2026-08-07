@@ -1675,6 +1675,10 @@ function editProduct(id) {
     document.getElementById('productPowerHp').value = p.power_hp != null ? p.power_hp : '';
   }
   document.getElementById('productModel').value = p.model_available || '';
+  document.getElementById('invVoltageV').value = p.voltage_v != null ? p.voltage_v : '';
+  document.getElementById('invPvVocMax').value = p.pv_voc_max != null ? p.pv_voc_max : '';
+  document.getElementById('invMpptMin').value = p.pv_mppt_min != null ? p.pv_mppt_min : '';
+  document.getElementById('invMpptMax').value = p.pv_mppt_max != null ? p.pv_mppt_max : '';
   document.getElementById('ogPowerKw').value = p.power_kw != null ? p.power_kw : '';
   document.getElementById('ogVoltage').value = p.voltage_v != null ? p.voltage_v : '';
   document.getElementById('ogPvVocMax').value = p.pv_voc_max != null ? p.pv_voc_max : '';
@@ -1707,7 +1711,7 @@ function cancelProductForm() {
   document.getElementById('productImageUrl').value = '';
   document.getElementById('productPowerKw').value = '';
   document.getElementById('productPowerHp').value = '';
-  ['ogPowerKw','ogVoltage','ogPvVocMax','ogSurgePct','ogMpptMin','ogMpptMax','battVoltage','battAh','battDod','panelWatt','panelVoc','panelVimp']
+  ['ogPowerKw','ogVoltage','ogPvVocMax','ogSurgePct','ogMpptMin','ogMpptMax','battVoltage','battAh','battDod','panelWatt','panelVoc','panelVimp','invVoltageV','invPvVocMax','invMpptMin','invMpptMax']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   setProductImagePreview('');
   document.getElementById('productAddWrap').style.display = 'none';
@@ -1814,6 +1818,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isInverter) {
       payload.power_kw = powerKwValue !== '' ? parseFloat(powerKwValue) : null;
       payload.power_hp = powerHpValue !== '' ? parseFloat(powerHpValue) : null;
+      // Optional: some inverter models are AC/DC hybrid (accept direct PV
+      // input with a single MPPT channel) — only saved if the admin actually
+      // filled them in; left untouched (not nulled) for pure-AC models.
+      const iv = id => document.getElementById(id).value;
+      if (iv('invVoltageV') !== '') payload.voltage_v = parseFloat(iv('invVoltageV'));
+      if (iv('invPvVocMax') !== '') payload.pv_voc_max = parseFloat(iv('invPvVocMax'));
+      if (iv('invMpptMin') !== '') payload.pv_mppt_min = parseFloat(iv('invMpptMin'));
+      if (iv('invMpptMax') !== '') payload.pv_mppt_max = parseFloat(iv('invMpptMax'));
     } else if (isOffgrid) {
       const v = id => document.getElementById(id).value;
       payload.power_kw           = v('ogPowerKw') !== '' ? parseFloat(v('ogPowerKw')) : null;
