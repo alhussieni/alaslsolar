@@ -221,6 +221,11 @@
             <p class="pd-price-hint" id="pdPriceHint">السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.</p>
           </div>
 
+          <div id="pdModelWrap" hidden>
+            <p class="pd-section-label">اختر الموديل</p>
+            <div class="pd-variants" id="pdModels"></div>
+          </div>
+
           <div id="pdVariantsWrap">
             <p class="pd-section-label" id="pdVariantsLabel">اختر القدرة</p>
             <select class="pd-variant-select" id="pdVariantSelect" hidden></select>
@@ -596,8 +601,48 @@
 
       renderGallery();
 
-      // Sort variants by kw/power then price for a sensible left-to-right order
-      const sorted = [...familyRows].sort((a, b) => {
+      // Multi-model brands (e.g. Delixi C2/S2/SS2/T5, VEICHI SI23) get a
+      // model picker first; selecting a model narrows the power picker
+      // below to that model's rows. Single-model families (or ones with no
+      // model recorded yet) skip straight to the power picker as before.
+      const distinctModels = [...new Set(familyRows.map(r => r.model_available).filter(Boolean))].sort();
+      const modelWrap = document.getElementById('pdModelWrap');
+
+      if (distinctModels.length > 1) {
+        modelWrap.hidden = false;
+        document.getElementById('pdModels').innerHTML = distinctModels.map((m, i) =>
+          `<button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}" data-model="${escapeHtml(m)}">${escapeHtml(m)}</button>`
+        ).join('');
+        document.querySelectorAll('#pdModels .pd-variant-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('#pdModels .pd-variant-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('pdSubtitle').textContent = btn.dataset.model;
+            buildPowerPicker(sb, familyRows.filter(r => r.model_available === btn.dataset.model));
+          });
+        });
+        document.getElementById('pdSubtitle').textContent = distinctModels[0];
+        buildPowerPicker(sb, familyRows.filter(r => r.model_available === distinctModels[0]));
+      } else {
+        modelWrap.hidden = true;
+        document.getElementById('pdSubtitle').textContent = first.model_available || '';
+        buildPowerPicker(sb, familyRows);
+      }
+
+      document.getElementById('pdLoading').hidden = true;
+      document.getElementById('pdContent').hidden = false;
+
+      document.getElementById('pdZoomBtn').onclick = () => {
+        const img = document.querySelector('#pdGalleryMain img');
+        if (img) window.open(img.src, '_blank', 'noopener');
+      };
+    }
+
+    // Builds the power/spec picker (buttons or grouped dropdown) for a given
+    // set of rows — either the whole family (single-model case) or just the
+    // rows belonging to the currently-selected model.
+    function buildPowerPicker(sb, rowsForModel) {
+      const sorted = [...rowsForModel].sort((a, b) => {
         const pa = parseInvPower(a).kw, pb = parseInvPower(b).kw;
         if (pa != null && pb != null && pa !== pb) return pa - pb;
         return a.price - b.price;
@@ -637,10 +682,10 @@
             ${rows.map(r => `<option value="${r.id}"${r.in_stock === false ? ' disabled' : ''}>${escapeHtml(variantLabel(r))} — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}${r.in_stock === false ? ' (غير متاح)' : ''}</option>`).join('')}
           </optgroup>`).join('');
 
-        select.addEventListener('change', () => {
+        select.onchange = () => {
           const row = sorted.find(r => String(r.id) === select.value);
           if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
-        });
+        };
       } else {
         select.hidden = true;
         btnRow.hidden = false;
@@ -648,7 +693,7 @@
         btnRow.innerHTML = sorted.map(r =>
           `<button type="button" class="pd-variant-btn${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${escapeHtml(variantLabel(r))}</button>`
         ).join('');
-        document.querySelectorAll('.pd-variant-btn').forEach(btn => {
+        document.querySelectorAll('#pdVariants .pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const row = sorted.find(r => String(r.id) === btn.dataset.id);
             if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
@@ -661,14 +706,6 @@
       renderFacts(sorted[0]);
       renderTabs(sorted[0]);
       renderSimilar(sb, sorted[0]);
-
-      document.getElementById('pdLoading').hidden = true;
-      document.getElementById('pdContent').hidden = false;
-
-      document.getElementById('pdZoomBtn').onclick = () => {
-        const img = document.querySelector('#pdGalleryMain img');
-        if (img) window.open(img.src, '_blank', 'noopener');
-      };
     }
 
     async function init() {
@@ -706,14 +743,23 @@
 
       try {
         let rows;
-        const { data, error } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('model_available', model);
-        if (error || !data || data.length === 0) {
-          // model_available may be stored as null instead of '' — retry without that filter
-          const retry = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
-          rows = (retry.data || []).filter(r => (r.model_available || '') === model);
-          if (rows.length === 0) { showError(); return; }
+        if (cat === 'inverters') {
+          // Inverters can have several model lines under one brand — always
+          // fetch the whole brand, then let the in-page model/power pickers
+          // do the filtering (see renderModelPicker below).
+          const { data: invData, error: invErr } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
+          rows = invData || [];
+          if (invErr || rows.length === 0) { showError(); return; }
         } else {
-          rows = data;
+          const { data, error } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('model_available', model);
+          if (error || !data || data.length === 0) {
+            // model_available may be stored as null instead of '' — retry without that filter
+            const retry = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
+            rows = (retry.data || []).filter(r => (r.model_available || '') === model);
+            if (rows.length === 0) { showError(); return; }
+          } else {
+            rows = data;
+          }
         }
 
         // Brand-level logo fallback, same rule as products.html: a
