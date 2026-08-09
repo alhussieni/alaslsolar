@@ -232,6 +232,11 @@
             <div class="pd-variants" id="pdVariants"></div>
           </div>
 
+          <div id="pdSubVariantWrap" hidden>
+            <p class="pd-section-label">اختر التفاصيل الفنية</p>
+            <div class="pd-variants" id="pdSubVariants"></div>
+          </div>
+
           <div class="pd-actions-main">
             <a class="btn btn-primary" href="contact.html" id="pdQuoteBtn">
               <i class="fa fa-paper-plane" aria-hidden="true"></i> <span id="pdQuoteText">اطلب عرض سعر</span>
@@ -649,11 +654,39 @@
     // set of rows — either the whole family (single-model case) or just the
     // rows belonging to the currently-selected model.
     function buildPowerPicker(sb, rowsForModel) {
-      const sorted = [...rowsForModel].sort((a, b) => {
-        const pa = parseInvPower(a).kw, pb = parseInvPower(b).kw;
-        if (pa != null && pb != null && pa !== pb) return pa - pb;
-        return a.price - b.price;
+      // Group rows by power first — if a power tier has more than one row
+      // (e.g. same HP but different voltage/phase/pipe-diameter, or
+      // different flow/head curve), picking that power alone isn't enough
+      // to know which exact product it is; a 3rd-level picker handles that.
+      const powerKeyOf = r => {
+        const { kw, hp } = parseInvPower(r);
+        return kw != null ? 'kw:' + kw : (hp != null ? 'hp:' + hp : 'id:' + r.id);
+      };
+      const byPower = new Map();
+      rowsForModel.forEach(r => {
+        const k = powerKeyOf(r);
+        if (!byPower.has(k)) byPower.set(k, []);
+        byPower.get(k).push(r);
       });
+      const powerGroups = [...byPower.values()].sort((a, b) => {
+        const pa = parseInvPower(a[0]).kw, pb = parseInvPower(b[0]).kw;
+        if (pa != null && pb != null && pa !== pb) return pa - pb;
+        return a[0].price - b[0].price;
+      });
+      // One representative (cheapest) row per power tier, used to render
+      // the power-level picker itself
+      const sorted = powerGroups.map(group => group.slice().sort((a, b) => a.price - b.price)[0]);
+      const groupOfRow = (row) => powerGroups.find(g => g.some(r => r.id === row.id)) || [row];
+
+      const onPowerPicked = (row) => {
+        const group = groupOfRow(row);
+        if (group.length <= 1) {
+          document.getElementById('pdSubVariantWrap').hidden = true;
+          selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row);
+        } else {
+          buildVariantPicker(group);
+        }
+      };
 
       const variantsWrap = document.getElementById('pdVariantsWrap');
       const btnRow = document.getElementById('pdVariants');
@@ -675,23 +708,23 @@
           { max: 100, label: '50 – 100 حصان' },
           { max: Infinity, label: 'أكتر من 100 حصان' },
         ];
-        const groups = new Map();
+        const tierGroups = new Map();
         sorted.forEach(r => {
           const hp = parseInvPower(r).hp;
           const tier = hp != null ? tiers.find(t => hp <= t.max) : tiers[tiers.length - 1];
           const key = tier.label;
-          if (!groups.has(key)) groups.set(key, []);
-          groups.get(key).push(r);
+          if (!tierGroups.has(key)) tierGroups.set(key, []);
+          tierGroups.get(key).push(r);
         });
 
-        select.innerHTML = [...groups.entries()].map(([label, rows]) => `
+        select.innerHTML = [...tierGroups.entries()].map(([label, rows]) => `
           <optgroup label="${escapeHtml(label)}">
-            ${rows.map(r => `<option value="${r.id}"${r.in_stock === false ? ' disabled' : ''}>${escapeHtml(variantLabel(r))} — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}${r.in_stock === false ? ' (غير متاح)' : ''}</option>`).join('')}
+            ${rows.map(r => `<option value="${r.id}"${r.in_stock === false ? ' disabled' : ''}>${escapeHtml(variantLabel(r))}${groupOfRow(r).length > 1 ? ' …' : ` — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}`}${r.in_stock === false ? ' (غير متاح)' : ''}</option>`).join('')}
           </optgroup>`).join('');
 
         select.onchange = () => {
           const row = sorted.find(r => String(r.id) === select.value);
-          if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
+          if (row) onPowerPicked(row);
         };
       } else {
         select.hidden = true;
@@ -702,17 +735,49 @@
         ).join('');
         document.querySelectorAll('#pdVariants .pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {
+            document.querySelectorAll('#pdVariants .pd-variant-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             const row = sorted.find(r => String(r.id) === btn.dataset.id);
-            if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
+            if (row) onPowerPicked(row);
           });
         });
       }
 
-      selectVariant(sorted[0]);
+      document.querySelector('#pdVariants .pd-variant-btn')?.classList.add('active');
+      onPowerPicked(sorted[0]);
       if (!select.hidden) select.value = String(sorted[0].id);
-      renderFacts(sorted[0]);
-      renderTabs(sorted[0]);
       renderSimilar(sb, sorted[0]);
+    }
+
+    // Strips the already-known power segment off specs_ar so the 3rd-level
+    // buttons show just the differentiating detail (voltage/phase/pipe
+    // diameter, or flow/head curve) instead of repeating "3 حصان" again.
+    function subVariantLabel(row) {
+      if (!row.specs_ar) return variantLabel(row);
+      const parts = row.specs_ar.split(' - ');
+      if (parts.length > 1 && /حصان|HP|KW|كيلوواط/i.test(parts[0])) parts.shift();
+      return parts.join(' - ') || row.specs_ar;
+    }
+
+    // 3rd-level picker: shown when a chosen power tier maps to more than
+    // one real product (different voltage/phase/pipe-diameter for motors,
+    // different flow/head curve for pumps, etc).
+    function buildVariantPicker(group) {
+      const wrap = document.getElementById('pdSubVariantWrap');
+      const row_s = group.slice().sort((a, b) => a.price - b.price);
+      wrap.hidden = false;
+      document.getElementById('pdSubVariants').innerHTML = row_s.map((r, i) => `
+        <button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${escapeHtml(subVariantLabel(r))}</button>
+      `).join('');
+      document.querySelectorAll('#pdSubVariants .pd-variant-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#pdSubVariants .pd-variant-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const row = row_s.find(r => String(r.id) === btn.dataset.id);
+          if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
+        });
+      });
+      selectVariant(row_s[0]); renderFacts(row_s[0]); renderTabs(row_s[0]); renderRating(row_s[0]);
     }
 
     async function init() {
@@ -750,7 +815,7 @@
 
       try {
         let rows;
-        const multiModelCat = cat === 'inverters' || cat === 'offgrid';
+        const multiModelCat = cat === 'inverters' || cat === 'offgrid' || cat === 'pumps' || cat === 'well_motors';
         if (multiModelCat) {
           // Inverters/off-grid inverters can have several model lines under
           // one brand — always fetch the whole brand, then let the in-page
