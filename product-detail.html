@@ -605,7 +605,14 @@
       // model picker first; selecting a model narrows the power picker
       // below to that model's rows. Single-model families (or ones with no
       // model recorded yet) skip straight to the power picker as before.
-      const distinctModels = [...new Set(familyRows.map(r => r.model_available).filter(Boolean))].sort();
+      // Off-grid model names currently have the power baked into the text
+      // ("SIS V - 6.2KW"), which would make every row look like its own
+      // unique "model" — strip that suffix to recover the real series name.
+      const seriesOf = (m) => {
+        if (!m) return m;
+        return first.category === 'offgrid' ? m.split(' - ')[0].trim() : m;
+      };
+      const distinctModels = [...new Set(familyRows.map(r => seriesOf(r.model_available)).filter(Boolean))].sort();
       const modelWrap = document.getElementById('pdModelWrap');
 
       if (distinctModels.length > 1) {
@@ -618,11 +625,11 @@
             document.querySelectorAll('#pdModels .pd-variant-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('pdSubtitle').textContent = btn.dataset.model;
-            buildPowerPicker(sb, familyRows.filter(r => r.model_available === btn.dataset.model));
+            buildPowerPicker(sb, familyRows.filter(r => seriesOf(r.model_available) === btn.dataset.model));
           });
         });
         document.getElementById('pdSubtitle').textContent = distinctModels[0];
-        buildPowerPicker(sb, familyRows.filter(r => r.model_available === distinctModels[0]));
+        buildPowerPicker(sb, familyRows.filter(r => seriesOf(r.model_available) === distinctModels[0]));
       } else {
         modelWrap.hidden = true;
         document.getElementById('pdSubtitle').textContent = first.model_available || '';
@@ -743,10 +750,11 @@
 
       try {
         let rows;
-        if (cat === 'inverters') {
-          // Inverters can have several model lines under one brand — always
-          // fetch the whole brand, then let the in-page model/power pickers
-          // do the filtering (see renderModelPicker below).
+        const multiModelCat = cat === 'inverters' || cat === 'offgrid';
+        if (multiModelCat) {
+          // Inverters/off-grid inverters can have several model lines under
+          // one brand — always fetch the whole brand, then let the in-page
+          // model/power pickers do the filtering (see buildPowerPicker below).
           const { data: invData, error: invErr } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
           rows = invData || [];
           if (invErr || rows.length === 0) { showError(); return; }
