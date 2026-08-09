@@ -1248,13 +1248,13 @@
       // H/VLT...) — they all live on ONE product-detail page with a model
       // selector inside it, so the model is deliberately left out of the
       // family-grouping link here.
-      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid';
+      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid' || p.category === 'pumps' || p.category === 'well_motors';
       params.set('model', multiModelCat ? '' : (p.model_available || ''));
       return params.toString();
     }
 
     function familyKeyOf(p) {
-      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid';
+      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid' || p.category === 'pumps' || p.category === 'well_motors';
       const modelPart = multiModelCat ? '' : (p.model_available || '');
       return (p.category || '') + '|' + (p.brand || '') + '|' + modelPart;
     }
