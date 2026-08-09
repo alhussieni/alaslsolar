@@ -222,7 +222,7 @@
           </div>
 
           <div id="pdModelWrap" hidden>
-            <p class="pd-section-label">اختر الموديل</p>
+            <p class="pd-section-label" id="pdModelLabel">اختر الموديل</p>
             <div class="pd-variants" id="pdModels"></div>
           </div>
 
@@ -607,17 +607,24 @@
       renderGallery();
 
       // Multi-model brands (e.g. Delixi C2/S2/SS2/T5, VEICHI SI23) get a
-      // model picker first; selecting a model narrows the power picker
-      // below to that model's rows. Single-model families (or ones with no
-      // model recorded yet) skip straight to the power picker as before.
+      // top-level picker first; picking a value narrows the power picker
+      // below to that group's rows. Single-group families (or ones with no
+      // grouping recorded yet) skip straight to the power picker as before.
       // Off-grid model names currently have the power baked into the text
       // ("SIS V - 6.2KW"), which would make every row look like its own
       // unique "model" — strip that suffix to recover the real series name.
-      const seriesOf = (m) => {
+      // Pumps are grouped by *function* (submersible/fertigation/drainage)
+      // rather than by opaque model codes — visitors don't know what
+      // "S.P 30" means, but they do know what a drainage pump is for.
+      const isPumps = first.category === 'pumps';
+      document.getElementById('pdModelLabel').textContent = isPumps ? 'اختر نوع الطلمبة' : 'اختر الموديل';
+      const seriesOf = (r) => {
+        if (isPumps) return r.pump_type || null;
+        const m = r.model_available;
         if (!m) return m;
         return first.category === 'offgrid' ? m.split(' - ')[0].trim() : m;
       };
-      const distinctModels = [...new Set(familyRows.map(r => seriesOf(r.model_available)).filter(Boolean))].sort();
+      const distinctModels = [...new Set(familyRows.map(r => seriesOf(r)).filter(Boolean))].sort();
       const modelWrap = document.getElementById('pdModelWrap');
 
       if (distinctModels.length > 1) {
@@ -629,12 +636,12 @@
           btn.addEventListener('click', () => {
             document.querySelectorAll('#pdModels .pd-variant-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById('pdSubtitle').textContent = btn.dataset.model;
-            buildPowerPicker(sb, familyRows.filter(r => seriesOf(r.model_available) === btn.dataset.model));
+            document.getElementById('pdSubtitle').textContent = isPumps ? '' : btn.dataset.model;
+            buildPowerPicker(sb, familyRows.filter(r => seriesOf(r) === btn.dataset.model));
           });
         });
-        document.getElementById('pdSubtitle').textContent = distinctModels[0];
-        buildPowerPicker(sb, familyRows.filter(r => seriesOf(r.model_available) === distinctModels[0]));
+        document.getElementById('pdSubtitle').textContent = isPumps ? '' : distinctModels[0];
+        buildPowerPicker(sb, familyRows.filter(r => seriesOf(r) === distinctModels[0]));
       } else {
         modelWrap.hidden = true;
         document.getElementById('pdSubtitle').textContent = first.model_available || '';
@@ -756,7 +763,12 @@
       if (!row.specs_ar) return variantLabel(row);
       const parts = row.specs_ar.split(' - ');
       if (parts.length > 1 && /حصان|HP|KW|كيلوواط/i.test(parts[0])) parts.shift();
-      return parts.join(' - ') || row.specs_ar;
+      const rest = parts.join(' - ') || row.specs_ar;
+      // For pumps, several model codes (S.P 30, S.P 60...) can share the
+      // same HP and even the same outlet-diameter text — prefix the model
+      // code so the option stays unambiguous.
+      if (row.category === 'pumps' && row.model_available) return `${row.model_available} — ${rest}`;
+      return rest;
     }
 
     // 3rd-level picker: shown when a chosen power tier maps to more than
