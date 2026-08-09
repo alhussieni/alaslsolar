@@ -1243,16 +1243,19 @@
       const params = new URLSearchParams();
       params.set('cat', p.category || '');
       params.set('brand', p.brand || '');
-      // Inverters (VFDs) can have several model lines under one brand
-      // (Delixi C2/S2/SS2/T5, VEICHI SI23...) — they all live on ONE
-      // product-detail page with a model selector inside it, so the model
-      // is deliberately left out of the family-grouping link here.
-      params.set('model', p.category === 'inverters' ? '' : (p.model_available || ''));
+      // Inverters (VFDs) and off-grid inverters can have several model
+      // lines under one brand (Delixi C2/S2/SS2/T5, VEICHI SIS4/SIS V/SIS
+      // H/VLT...) — they all live on ONE product-detail page with a model
+      // selector inside it, so the model is deliberately left out of the
+      // family-grouping link here.
+      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid';
+      params.set('model', multiModelCat ? '' : (p.model_available || ''));
       return params.toString();
     }
 
     function familyKeyOf(p) {
-      const modelPart = p.category === 'inverters' ? '' : (p.model_available || '');
+      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid';
+      const modelPart = multiModelCat ? '' : (p.model_available || '');
       return (p.category || '') + '|' + (p.brand || '') + '|' + modelPart;
     }
 
