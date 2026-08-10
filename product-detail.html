@@ -368,6 +368,15 @@
       return 'en';
     }
     function t(key) { return (T[getLang()] || T.ar)[key]; }
+
+    // Returns localised description/key_features/applications/notes: tries
+    // the '<field>_<lang>' column, then '<field>_ar', then the legacy
+    // single-language column (kept for backward compatibility with rows
+    // that predate the per-language columns).
+    function localDescription(r) { const l = getLang(); return r['description_' + l] || r['description_ar'] || r['description'] || ''; }
+    function localKeyFeatures(r) { const l = getLang(); return r['key_features_' + l] || r['key_features_ar'] || r['key_features'] || null; }
+    function localApplications(r) { const l = getLang(); return r['applications_' + l] || r['applications_ar'] || r['applications'] || null; }
+    function localNotes(r) { const l = getLang(); return r['notes_' + l] || r['notes_ar'] || r['notes'] || ''; }
     function fmt(n) { return Number(n).toLocaleString('ar-EG'); }
     function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
     function localName(r) { const l = getLang(); return r['name_' + l] || r['name_ar'] || r['name_en'] || r['name'] || ''; }
@@ -441,7 +450,8 @@
       if (specs) rowsSpec.push([t('specDetails'), escapeHtml(specs)]);
       if (row.model_available) rowsSpec.push([t('specModel'), escapeHtml(row.model_available)]);
       if (row.unit) rowsSpec.push([t('specUnit'), escapeHtml(row.unit)]);
-      if (row.notes) rowsSpec.push([t('specChemistry'), escapeHtml(row.notes)]);
+      const notesLocalized = localNotes(row);
+      if (notesLocalized) rowsSpec.push([t('specChemistry'), escapeHtml(notesLocalized)]);
       currentSpecRows = rowsSpec;
 
       const dsBtn = document.getElementById('pdDatasheetBtn');
@@ -513,13 +523,15 @@
       const tabs = [];
 
       // Description
-      const descHtml = row.description
-        ? `<p class="pd-description-text">${escapeHtml(row.description).replace(/\n/g, '<br>')}</p>`
+      const localizedDescription = localDescription(row);
+      const descHtml = localizedDescription
+        ? `<p class="pd-description-text">${escapeHtml(localizedDescription).replace(/\n/g, '<br>')}</p>`
         : `<p class="pd-description-text">${escapeHtml(t('noDescription'))}</p>`;
       let featuresHtml = '';
-      if (Array.isArray(row.key_features) && row.key_features.length) {
+      const localizedFeatures = localKeyFeatures(row);
+      if (Array.isArray(localizedFeatures) && localizedFeatures.length) {
         featuresHtml = `<h3 class="pd-section-label">${t('keyFeatures')}</h3><ul class="pd-features-list">` +
-          row.key_features.map(f => `<li><i class="fa fa-check-circle" aria-hidden="true"></i> ${escapeHtml(f)}</li>`).join('') + `</ul>`;
+          localizedFeatures.map(f => `<li><i class="fa fa-check-circle" aria-hidden="true"></i> ${escapeHtml(f)}</li>`).join('') + `</ul>`;
       }
       tabs.push(['desc', t('tabDesc'), featuresHtml + descHtml]);
 
@@ -527,8 +539,9 @@
       tabs.push(['specs', t('tabSpecs'), `<table class="pd-specs-table">${currentSpecRows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>`]);
 
       // Applications
-      if (Array.isArray(row.applications) && row.applications.length) {
-        const chips = row.applications.map(tag => {
+      const localizedApplications = localApplications(row);
+      if (Array.isArray(localizedApplications) && localizedApplications.length) {
+        const chips = localizedApplications.map(tag => {
           const icon = APP_ICONS[tag] || 'fa fa-check';
           return `<div class="pd-app-chip"><i class="${icon}" aria-hidden="true"></i>${escapeHtml(tag)}</div>`;
         }).join('');
@@ -537,7 +550,7 @@
 
       // Warranty
       const warrantyHtml = row.warranty_years
-        ? `<div class="pd-warranty-box"><i class="fa fa-shield-alt" aria-hidden="true"></i> ${escapeHtml(String(row.warranty_years))} ${getLang() === 'ar' ? 'سنوات ضمان' : 'years warranty'}${row.warranty_notes ? '<br>' + escapeHtml(row.warranty_notes) : ''}</div>`
+        ? `<div class="pd-warranty-box"><i class="fa fa-shield-alt" aria-hidden="true"></i> ${escapeHtml(String(row.warranty_years))} ${({ ar: 'سنوات ضمان', en: 'years warranty', es: 'años de garantía', zh: '年保修' })[getLang()] || 'years warranty'}${row.warranty_notes ? '<br>' + escapeHtml(row.warranty_notes) : ''}</div>`
         : `<div class="pd-warranty-box">${escapeHtml(t('noWarrantyInfo'))}</div>`;
       tabs.push(['warranty', t('tabWarranty'), warrantyHtml]);
 
