@@ -1043,8 +1043,24 @@
     }
 
     // ── Language helper ──
+    // Mirrors app.js's detectVisitorLanguage(): if the visitor's language
+    // preference hasn't been saved to localStorage yet (e.g. this is the
+    // first page they land on), fall back to detecting it from the browser
+    // instead of hardcoding Arabic. This avoids a race with app.js's own
+    // DOMContentLoaded handler, which may run AFTER this page's product
+    // loader on first visit.
     function getLang() {
-      return localStorage.getItem('alasl-lang') || 'ar';
+      const stored = localStorage.getItem('alasl-lang');
+      if (stored) return stored;
+      const supported = ['ar', 'en', 'es', 'zh'];
+      const browserLangs = (navigator.languages && navigator.languages.length)
+        ? navigator.languages
+        : [navigator.language || 'en'];
+      for (const raw of browserLangs) {
+        const code = raw.toLowerCase().split('-')[0];
+        if (supported.includes(code)) return code;
+      }
+      return 'en';
     }
 
     // Returns localised name: tries name_<lang>, then name_ar, then name_en, then name
