@@ -1095,6 +1095,7 @@
 
     // ── State ──
     let allProducts = [];        // flat list of every product across categories, each tagged with .category
+    let brandLogos = {};         // brand -> logo_url, from the admin "Brand Logos" panel
     let filterTree = [];         // built once per load from allProducts + category_settings
     let selectedFilters = new Set(); // node ids the user checked, e.g. "panels" / "panels::Longi" / "pumps::Ferat::5"
     let nodeLabels = {};         // id -> human label, for the active-filter chips
@@ -1298,8 +1299,14 @@
       const nameParts = [catText, p.brand || '', p.model_available || ''].filter(Boolean);
       const name = escapeHtml(nameParts.join(' — '));
 
-      const img = p.image_url
-        ? `<img src="${escapeHtml(p.image_url)}" alt="${name}" loading="lazy">`
+      // Family cards represent a whole brand/model line, not one specific
+      // product photo — so the brand's official logo (set in the admin
+      // "Brand Logos" panel) takes priority over whatever happens to be
+      // stored in an individual row's image_url (often a stale/placeholder
+      // image from bulk imports).
+      const familyImg = (p.brand && brandLogos[p.brand]) || p.image_url;
+      const img = familyImg
+        ? `<img src="${escapeHtml(familyImg)}" alt="${name}" loading="lazy">`
         : `<span class="prod-fallback-icon">${icon}</span>`;
 
       const anyInStock = group.some(r => r.in_stock !== false);
@@ -1779,7 +1786,7 @@
         // if it has none, fall back to the brand's shared logo (set once in
         // the admin "Brand Logos" panel and shared by every product with
         // that brand).
-        let brandLogos = {};
+        brandLogos = {};
         try {
           const { data: logos } = await sb.from('brand_logos').select('brand, logo_url');
           (logos || []).forEach(l => { brandLogos[l.brand] = l.logo_url; });
