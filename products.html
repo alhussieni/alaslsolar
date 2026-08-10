@@ -1299,12 +1299,14 @@
       const nameParts = [catText, p.brand || '', p.model_available || ''].filter(Boolean);
       const name = escapeHtml(nameParts.join(' — '));
 
-      // Family cards represent a whole brand/model line, not one specific
-      // product photo — so the brand's official logo (set in the admin
-      // "Brand Logos" panel) takes priority over whatever happens to be
-      // stored in an individual row's image_url (often a stale/placeholder
-      // image from bulk imports).
-      const familyImg = (p.brand && brandLogos[p.brand]) || p.image_url;
+      // Ferat/Shakti pump & well-motor rows currently all share one stale
+      // placeholder image_url (an old logo file baked in at bulk-import
+      // time) instead of a real product photo — for THIS pair only, prefer
+      // the brand's official logo (from the admin "Brand Logos" panel).
+      // Every other brand/category keeps using its own product image_url
+      // as before.
+      const useOfficialLogo = ['Ferat', 'Shakti'].includes(p.brand) && (p.category === 'pumps' || p.category === 'well_motors');
+      const familyImg = (useOfficialLogo && brandLogos[p.brand]) || p.image_url;
       const img = familyImg
         ? `<img src="${escapeHtml(familyImg)}" alt="${name}" loading="lazy">`
         : `<span class="prod-fallback-icon">${icon}</span>`;
