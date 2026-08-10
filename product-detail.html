@@ -378,6 +378,7 @@
       if (p.category === 'inverters' || p.category === 'offgrid') {
         const { kw, hp } = parseInvPower(p);
         const parts = [kw ? kw + ' KW' : '', hp ? hp + ' HP' : ''].filter(Boolean);
+        if (p.category === 'offgrid' && p.voltage_v) parts.push(p.voltage_v + 'V');
         if (parts.length) return parts.join(' / ');
       }
       const specs = localSpecs(p);
@@ -606,23 +607,25 @@
 
       renderGallery();
 
-      // Multi-model brands (e.g. Delixi C2/S2/SS2/T5, VEICHI SI23) get a
-      // top-level picker first; picking a value narrows the power picker
-      // below to that group's rows. Single-group families (or ones with no
-      // grouping recorded yet) skip straight to the power picker as before.
-      // Off-grid model names currently have the power baked into the text
-      // ("SIS V - 6.2KW"), which would make every row look like its own
-      // unique "model" — strip that suffix to recover the real series name.
+      // Multi-model brands (e.g. Delixi C2/S2/SS2/T5) get a top-level model
+      // picker first; picking a value narrows the power picker below to
+      // that group's rows. Single-group families (or ones with no grouping
+      // recorded/needed) skip straight to the power picker.
+      // Off-grid inverters: the customer cares about power (kW) and the
+      // required battery voltage — the model name only matters at the very
+      // end, at purchase — so we skip the model-picker step entirely and
+      // go straight to power selection (each power tier here is already
+      // unique, so there's no ambiguity to resolve with a model filter).
       // Pumps are grouped by *function* (submersible/fertigation/drainage)
       // rather than by opaque model codes — visitors don't know what
       // "S.P 30" means, but they do know what a drainage pump is for.
       const isPumps = first.category === 'pumps';
+      const isOffgridInv = first.category === 'offgrid';
       document.getElementById('pdModelLabel').textContent = isPumps ? 'اختر نوع الطلمبة' : 'اختر الموديل';
       const seriesOf = (r) => {
         if (isPumps) return r.pump_type || null;
-        const m = r.model_available;
-        if (!m) return m;
-        return first.category === 'offgrid' ? m.split(' - ')[0].trim() : m;
+        if (isOffgridInv) return null; // skip model-level grouping entirely
+        return r.model_available || null;
       };
       const distinctModels = [...new Set(familyRows.map(r => seriesOf(r)).filter(Boolean))].sort();
       const modelWrap = document.getElementById('pdModelWrap');
@@ -644,7 +647,7 @@
         buildPowerPicker(sb, familyRows.filter(r => seriesOf(r) === distinctModels[0]));
       } else {
         modelWrap.hidden = true;
-        document.getElementById('pdSubtitle').textContent = first.model_available || '';
+        document.getElementById('pdSubtitle').textContent = (isPumps || isOffgridInv) ? '' : (first.model_available || '');
         buildPowerPicker(sb, familyRows);
       }
 
