@@ -655,6 +655,22 @@
           if (cards.length >= 4) break;
         }
         if (cards.length === 0) { wrap.hidden = true; return; }
+
+        // Same brand-logo fallback as the main product image: if a
+        // suggested card has no product photo, show that brand's logo
+        // instead of jumping straight to a generic category icon.
+        const brandsNeedingLogo = [...new Set(cards.filter(r => !r.image_url && r.brand).map(r => r.brand))];
+        if (brandsNeedingLogo.length) {
+          try {
+            const { data: logos } = await sb.from('brand_logos').select('brand, logo_url').in('brand', brandsNeedingLogo);
+            const logoByBrand = {};
+            (logos || []).forEach(l => { logoByBrand[l.brand] = l.logo_url; });
+            cards.forEach(r => { if (!r.image_url && logoByBrand[r.brand]) r.image_url = logoByBrand[r.brand]; });
+          } catch (e) {
+            console.error('brand_logos fetch error:', e);
+          }
+        }
+
         wrap.hidden = false;
         grid.innerHTML = cards.map(r => {
           const catText = (CAT_LABEL[r.category] && CAT_LABEL[r.category][getLang()]) || r.category;
