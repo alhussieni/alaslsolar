@@ -1343,10 +1343,17 @@
       const isNewFamily = group.some(r => isNewProduct(r.created_at));
       const newBadge = isNewFamily ? `<span class="new-badge">${NEW_BADGE_TEXT[getLang()] || NEW_BADGE_TEXT.ar}</span>` : '';
       const prices = group.map(r => r.price);
-      const min = fmt(Math.min(...prices));
-      const max = fmt(Math.max(...prices));
-      const priceLine = min === max ? `${min}` : (RANGE_TEXT[getLang()] || RANGE_TEXT.ar)(min, max);
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
       const variantsLine = (VARIANTS_TEXT[getLang()] || VARIANTS_TEXT.ar)(group.length);
+      // A family spanning many power/spec tiers under one brand (well
+      // motors, pumps, inverters...) can have a price range so wide it's
+      // not useful for deciding anything — e.g. "2,600 to 139,450 EGP".
+      // Past a 3x spread, drop the price and just show how many
+      // variants are available instead; the actual price only becomes
+      // meaningful once a specific variant is picked on the detail page.
+      const wideSpread = group.length > 1 && min > 0 && (max / min) > 3;
+      const priceLine = min === max ? `${fmt(min)}` : (RANGE_TEXT[getLang()] || RANGE_TEXT.ar)(fmt(min), fmt(max));
 
       const detailHref = 'product-detail.html?' + familyQuery(p);
 
@@ -1362,7 +1369,7 @@
             <div class="prod-card-bottom">
               <div>
                 ${newBadge ? `<div>${newBadge}</div>` : ''}
-                <span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span></span>
+                ${wideSpread ? '' : `<span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span></span>`}
               </div>
             </div>
           </div>
