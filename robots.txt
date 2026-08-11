@@ -2,6 +2,7 @@ User-agent: *
 Disallow: /dashboard.html
 Disallow: /admin/
 Disallow: /article.html
+Disallow: /rep-quotes.html
 
 Allow: /
 
