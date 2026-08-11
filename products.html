@@ -1021,6 +1021,12 @@
   (function () {
 
     const CATEGORIES = ['inverters', 'panels', 'structures', 'cables', 'accessories', 'combiners', 'batteries', 'offgrid', 'well_motors', 'pumps', 'pipes', 'street_lights', 'flood_lights', 'garden_lights', 'solar_kits', 'solar_safety'];
+    // Panels' stored Arabic name leads with the category word ("الواح
+    // Longi 575 وات") — English/Spanish/Chinese names already start with
+    // the brand. Used to drop the redundant prefix in single-product cards
+    // (grouped family cards already build their title from brand+model
+    // directly, so they never had this prefix to begin with).
+    const PANEL_NAME_PREFIX = { ar: 'الواح' };
     const CAT_ICONS = {
       inverters: '⚡', panels: '☀️', accessories: '🔌',
       combiners: '📦', structures: '🏗️', cables: '🔶',
@@ -1219,10 +1225,16 @@
       let name;
       if (p.category === 'inverters') {
         const { kw, hp } = parseInvPower(p);
-        const parts = [catText, p.brand || ''].filter(Boolean);
+        const parts = [p.brand || ''];
         const power = [kw ? `${kw} KW` : '', hp ? `${hp} HP` : ''].filter(Boolean).join(' - ');
         if (power) parts.push(power);
         name = escapeHtml(parts.join(' '));
+      } else if (p.category === 'panels' && PANEL_NAME_PREFIX[getLang()] && localName(p).startsWith(PANEL_NAME_PREFIX[getLang()])) {
+        // Panels' stored name text still leads with the category word
+        // ("الواح Longi 575 وات") since it isn't built from structured
+        // parts like inverters — strip that one known prefix, but only
+        // when it actually matches, so nothing else gets corrupted.
+        name = escapeHtml(localName(p).slice(PANEL_NAME_PREFIX[getLang()].length).trim());
       } else {
         name = escapeHtml(localName(p));
       }
@@ -1312,7 +1324,7 @@
       }[p.category];
       const catText = (catLabel && catLabel[getLang()]) || '';
 
-      const nameParts = [catText, p.brand || '', p.model_available || ''].filter(Boolean);
+      const nameParts = [p.brand || '', p.model_available || ''].filter(Boolean);
       const name = escapeHtml(nameParts.join(' — '));
 
       // Ferat/Shakti pump & well-motor rows currently all share one stale
