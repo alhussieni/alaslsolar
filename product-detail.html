@@ -839,12 +839,23 @@
     // so the 3rd-level buttons show just the differentiating detail
     // (voltage/phase/pipe diameter, or flow/head curve) instead of
     // repeating "3 HP" / "3 حصان" again.
-    function subVariantLabel(row) {
+    function subVariantLabel(row, siblings) {
       // Well motors: once power (and material, if applicable) are chosen,
-      // the only thing left to pick is the mounting diameter — show it as
-      // a clean '6"' instead of the raw "قطر التنصيب 6"" spec text.
+      // the customer only cares about the mounting diameter — show it as a
+      // clean '6"' instead of the raw "قطر التنصيب 6"" spec text. A few
+      // brands still have two real products at the same power+material+
+      // diameter (Shakti: D.O.L vs Star-Delta starter; SP Sterapump:
+      // different voltage/phase) — append that as a minimal suffix only
+      // when it's actually needed to tell two buttons apart, since the
+      // customer said diameter is the last thing they care about.
       if (row.category === 'well_motors' && row.diameter_inch != null) {
-        return `${Number(row.diameter_inch)}"`;
+        let label = `${Number(row.diameter_inch)}"`;
+        const dupes = (siblings || []).filter(r => r.diameter_inch === row.diameter_inch);
+        if (dupes.length > 1) {
+          const extra = row.motor_starter_type || row.motor_voltage_phase;
+          if (extra) label += ` — ${extra}`;
+        }
+        return label;
       }
       const specs = localSpecs(row);
       if (!specs) return variantLabel(row);
@@ -918,7 +929,7 @@
       const row_s = group.slice().sort((a, b) => a.price - b.price);
       wrap.hidden = false;
       document.getElementById('pdSubVariants').innerHTML = row_s.map((r, i) => `
-        <button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${bidiLabel(subVariantLabel(r))}</button>
+        <button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${bidiLabel(subVariantLabel(r, row_s))}</button>
       `).join('');
       document.querySelectorAll('#pdSubVariants .pd-variant-btn').forEach(btn => {
         btn.addEventListener('click', () => {
