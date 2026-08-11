@@ -856,7 +856,7 @@
 
         select.innerHTML = [...tierGroups.entries()].map(([label, rows]) => `
           <optgroup label="${escapeHtml(label)}">
-            ${rows.map(r => `<option dir="${ltrLabel ? 'ltr' : 'rtl'}" value="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}"${r.in_stock === false ? ' disabled' : ''}>${bidiLabel(variantLabel(r))}${groupOfRow(r).length > 1 ? ' …' : ` — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}`}${r.in_stock === false ? ` (${t('outOfStock')})` : ''}</option>`).join('')}
+            ${rows.map(r => `<option dir="${ltrLabel ? 'ltr' : 'rtl'}" value="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}"${r.in_stock === false ? ' disabled' : ''}>${bidiLabel(variantLabel(r))}${groupOfRow(r).length > 1 ? ' …' : ''}${r.in_stock === false ? ` (${t('outOfStock')})` : ''}</option>`).join('')}
           </optgroup>`).join('');
 
         select.onchange = () => {
