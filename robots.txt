@@ -3,6 +3,7 @@ Disallow: /dashboard.html
 Disallow: /admin/
 Disallow: /article.html
 Disallow: /rep-quotes.html
+Disallow: /rep-offgrid-quote.html
 
 Allow: /
 
