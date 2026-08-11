@@ -400,6 +400,11 @@
     function localNotes(r) { const l = getLang(); return r['notes_' + l] || r['notes_ar'] || r['notes'] || ''; }
     function fmt(n) { return Number(n).toLocaleString('ar-EG'); }
     function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    // Mixed Arabic/Latin labels ("15 حصان - 380V - قطر التنصيب 6"") get
+    // visually reordered by the browser's bidi algorithm inside an RTL page.
+    // Wrapping each " - "-separated segment in <bdi> keeps each part's
+    // internal reading order correct without disturbing the others.
+    function bidiLabel(text) { return (text || '').split(' - ').map(seg => `<bdi>${escapeHtml(seg)}</bdi>`).join(' - '); }
     function localName(r) { const l = getLang(); return r['name_' + l] || r['name_ar'] || r['name_en'] || r['name'] || ''; }
     function localSpecs(r) { const l = getLang(); return r['specs_' + l] || r['specs_ar'] || r['specs_en'] || r['specs'] || ''; }
 
@@ -763,6 +768,14 @@
       const variantsWrap = document.getElementById('pdVariantsWrap');
       const btnRow = document.getElementById('pdVariants');
       const select = document.getElementById('pdVariantSelect');
+      // Power labels for inverters/off-grid ("6.2 KW / 48V") are pure
+      // Latin/numeric text — inside an RTL page the browser's bidi
+      // algorithm reorders them unless we pin the direction explicitly.
+      // Everything else (well motors, pumps) mixes Arabic words with
+      // Latin/numeric fragments ("15 حصان - 380V - قطر التنصيب 6""); wrapping
+      // each " - "-separated segment in <bdi> keeps each part's internal
+      // reading order correct without disturbing the others.
+      const ltrLabel = ['inverters', 'offgrid'].includes(rowsForModel[0]?.category);
 
       if (sorted.length <= 1) {
         variantsWrap.hidden = true;
@@ -772,7 +785,7 @@
         btnRow.hidden = true; btnRow.innerHTML = '';
         select.hidden = false;
         variantsWrap.hidden = false;
-        select.setAttribute('dir', ['inverters', 'offgrid'].includes(rowsForModel[0]?.category) ? 'ltr' : 'rtl');
+        select.setAttribute('dir', ltrLabel ? 'ltr' : 'rtl');
 
         const tiers = [
           { max: 5, label: t('tierUpTo5') },
@@ -792,7 +805,7 @@
 
         select.innerHTML = [...tierGroups.entries()].map(([label, rows]) => `
           <optgroup label="${escapeHtml(label)}">
-            ${rows.map(r => `<option dir="ltr" value="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}"${r.in_stock === false ? ' disabled' : ''}>${escapeHtml(variantLabel(r))}${groupOfRow(r).length > 1 ? ' …' : ` — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}`}${r.in_stock === false ? ` (${t('outOfStock')})` : ''}</option>`).join('')}
+            ${rows.map(r => `<option dir="${ltrLabel ? 'ltr' : 'rtl'}" value="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}"${r.in_stock === false ? ' disabled' : ''}>${bidiLabel(variantLabel(r))}${groupOfRow(r).length > 1 ? ' …' : ` — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}`}${r.in_stock === false ? ` (${t('outOfStock')})` : ''}</option>`).join('')}
           </optgroup>`).join('');
 
         select.onchange = () => {
@@ -803,12 +816,8 @@
         select.hidden = true;
         btnRow.hidden = false;
         variantsWrap.hidden = false;
-        // Power labels for inverters/off-grid ("6.2 KW / 48V") are pure
-        // Latin/numeric text — inside an RTL page the browser's bidi
-        // algorithm reorders them unless we pin the direction explicitly.
-        const ltrLabel = ['inverters', 'offgrid'].includes(rowsForModel[0]?.category);
         btnRow.innerHTML = sorted.map(r =>
-          `<button type="button" class="pd-variant-btn${r.in_stock === false ? ' out-of-stock' : ''}"${ltrLabel ? ' dir="ltr"' : ''} data-id="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}">${escapeHtml(variantLabel(r))}</button>`
+          `<button type="button" class="pd-variant-btn${r.in_stock === false ? ' out-of-stock' : ''}"${ltrLabel ? ' dir="ltr"' : ''} data-id="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}">${bidiLabel(variantLabel(r))}</button>`
         ).join('');
         document.querySelectorAll('#pdVariants .pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -909,7 +918,7 @@
       const row_s = group.slice().sort((a, b) => a.price - b.price);
       wrap.hidden = false;
       document.getElementById('pdSubVariants').innerHTML = row_s.map((r, i) => `
-        <button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${escapeHtml(subVariantLabel(r))}</button>
+        <button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}${r.in_stock === false ? ' out-of-stock' : ''}" data-id="${r.id}">${bidiLabel(subVariantLabel(r))}</button>
       `).join('');
       document.querySelectorAll('#pdSubVariants .pd-variant-btn').forEach(btn => {
         btn.addEventListener('click', () => {
