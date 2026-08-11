@@ -232,6 +232,11 @@
             <div class="pd-variants" id="pdVariants"></div>
           </div>
 
+          <div id="pdMaterialWrap" hidden>
+            <p class="pd-section-label" id="pdMaterialLabel">اختر الخامة</p>
+            <div class="pd-variants" id="pdMaterials"></div>
+          </div>
+
           <div id="pdSubVariantWrap" hidden>
             <p class="pd-section-label" id="pdSubVariantLabel">اختر التفاصيل الفنية</p>
             <div class="pd-variants" id="pdSubVariants"></div>
@@ -318,6 +323,7 @@
             noWarrantyInfo: 'للاستفسار عن تفاصيل الضمان لهذا المنتج، تواصل معنا مباشرة.', noFiles: 'لا توجد ملفات متاحة لهذا المنتج حاليًا.',
             factTempRange: 'مدى التشغيل', factWeight: 'الوزن', factIpRating: 'درجة الحماية', factCycleLife: 'عدد دورات الشحن', factCapacity: 'السعة الاسمية', factVoltage: 'الجهد الاسمي',
             chooseModel: 'اختر الموديل', choosePumpType: 'اختر نوع الطلمبة', chooseTechDetails: 'اختر التفاصيل الفنية',
+            chooseMaterial: 'اختر الخامة', chooseDiameter: 'اختر المقاس', materialStainless: 'ستانلس', materialCastIron: 'حديد زهر', materialStainlessCastIronCap: 'ستانلس بكاب حديد زهر', materialWaterCooled: 'تبريد مياة', materialOther: 'أخرى', inch: 'بوصة',
             tierUpTo5: 'حتى 5 حصان', tier5to20: '5 – 20 حصان', tier20to50: '20 – 50 حصان', tier50to100: '50 – 100 حصان', tierOver100: 'أكتر من 100 حصان' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
             choosePower: 'Choose Power', priceHint: 'Price is approximate and subject to change — contact us to confirm.', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
@@ -329,6 +335,7 @@
             noWarrantyInfo: 'Contact us directly for warranty details on this product.', noFiles: 'No files available for this product yet.',
             factTempRange: 'Operating Range', factWeight: 'Weight', factIpRating: 'Protection Rating', factCycleLife: 'Cycle Life', factCapacity: 'Rated Capacity', factVoltage: 'Rated Voltage',
             chooseModel: 'Choose Model', choosePumpType: 'Choose Pump Type', chooseTechDetails: 'Choose Technical Details',
+            chooseMaterial: 'Choose Material', chooseDiameter: 'Choose Size', materialStainless: 'Stainless Steel', materialCastIron: 'Cast Iron', materialStainlessCastIronCap: 'Stainless with Cast Iron Cap', materialWaterCooled: 'Water-Cooled', materialOther: 'Other', inch: 'in',
             tierUpTo5: 'Up to 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Over 100 HP' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
             choosePower: 'Elegir Potencia', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
@@ -340,6 +347,7 @@
             noWarrantyInfo: 'Contáctenos directamente para conocer los detalles de la garantía.', noFiles: 'No hay archivos disponibles actualmente.',
             factTempRange: 'Rango de Funcionamiento', factWeight: 'Peso', factIpRating: 'Índice de Protección', factCycleLife: 'Ciclos de Vida', factCapacity: 'Capacidad Nominal', factVoltage: 'Voltaje Nominal',
             chooseModel: 'Elegir Modelo', choosePumpType: 'Elegir Tipo de Bomba', chooseTechDetails: 'Elegir Detalles Técnicos',
+            chooseMaterial: 'Elegir Material', chooseDiameter: 'Elegir Tamaño', materialStainless: 'Acero Inoxidable', materialCastIron: 'Hierro Fundido', materialStainlessCastIronCap: 'Inoxidable con Tapa de Hierro Fundido', materialWaterCooled: 'Refrigerado por Agua', materialOther: 'Otro', inch: 'pulg',
             tierUpTo5: 'Hasta 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Más de 100 HP' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
             choosePower: '选择功率', priceHint: '价格为参考价，可能变动——请联系我们确认。', outOfStock: '暂时缺货', datasheet: '下载规格书',
@@ -351,6 +359,7 @@
             noWarrantyInfo: '如需了解此产品的保修详情，请直接联系我们。', noFiles: '该产品暂无可用文件。',
             factTempRange: '工作温度范围', factWeight: '重量', factIpRating: '防护等级', factCycleLife: '循环寿命', factCapacity: '额定容量', factVoltage: '额定电压',
             chooseModel: '选择型号', choosePumpType: '选择水泵类型', chooseTechDetails: '选择技术细节',
+            chooseMaterial: '选择材质', chooseDiameter: '选择尺寸', materialStainless: '不锈钢', materialCastIron: '铸铁', materialStainlessCastIronCap: '不锈钢(铸铁端盖)', materialWaterCooled: '水冷式', materialOther: '其他', inch: '英寸',
             tierUpTo5: '5马力以下', tier5to20: '5 – 20马力', tier20to50: '20 – 50马力', tier50to100: '50 – 100马力', tierOver100: '100马力以上' },
     };
 
@@ -435,6 +444,7 @@
       document.getElementById('pdLoadingText').textContent = t('loading');
       document.getElementById('pdErrorText').textContent = t('error');
       document.getElementById('pdVariantsLabel').textContent = t('choosePower');
+      document.getElementById('pdMaterialLabel').textContent = t('chooseMaterial');
       document.getElementById('pdSubVariantLabel').textContent = t('chooseTechDetails');
       document.getElementById('pdPriceHint').textContent = t('priceHint');
       document.getElementById('pdDatasheetText').textContent = t('datasheet');
@@ -734,10 +744,18 @@
 
       const onPowerPicked = (row) => {
         const group = groupOfRow(row);
+        const materialWrap = document.getElementById('pdMaterialWrap');
         if (group.length <= 1) {
+          materialWrap.hidden = true;
           document.getElementById('pdSubVariantWrap').hidden = true;
           selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row);
+          return;
+        }
+        const distinctMaterials = [...new Set(group.map(r => r.motor_material).filter(Boolean))];
+        if (distinctMaterials.length >= 2) {
+          buildMaterialPicker(group);
         } else {
+          materialWrap.hidden = true;
           buildVariantPicker(group);
         }
       };
@@ -774,7 +792,7 @@
 
         select.innerHTML = [...tierGroups.entries()].map(([label, rows]) => `
           <optgroup label="${escapeHtml(label)}">
-            ${rows.map(r => `<option dir="ltr" value="${r.id}"${r.in_stock === false ? ' disabled' : ''}>${escapeHtml(variantLabel(r))}${groupOfRow(r).length > 1 ? ' …' : ` — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}`}${r.in_stock === false ? ` (${t('outOfStock')})` : ''}</option>`).join('')}
+            ${rows.map(r => `<option dir="ltr" value="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}"${r.in_stock === false ? ' disabled' : ''}>${escapeHtml(variantLabel(r))}${groupOfRow(r).length > 1 ? ' …' : ` — ${fmt(r.price)} ${escapeHtml(unitLabel(r))}`}${r.in_stock === false ? ` (${t('outOfStock')})` : ''}</option>`).join('')}
           </optgroup>`).join('');
 
         select.onchange = () => {
@@ -790,7 +808,7 @@
         // algorithm reorders them unless we pin the direction explicitly.
         const ltrLabel = ['inverters', 'offgrid'].includes(rowsForModel[0]?.category);
         btnRow.innerHTML = sorted.map(r =>
-          `<button type="button" class="pd-variant-btn${r.in_stock === false ? ' out-of-stock' : ''}"${ltrLabel ? ' dir="ltr"' : ''} data-id="${r.id}">${escapeHtml(variantLabel(r))}</button>`
+          `<button type="button" class="pd-variant-btn${r.in_stock === false ? ' out-of-stock' : ''}"${ltrLabel ? ' dir="ltr"' : ''} data-id="${r.id}" data-power-key="${escapeHtml(powerKeyOf(r))}">${escapeHtml(variantLabel(r))}</button>`
         ).join('');
         document.querySelectorAll('#pdVariants .pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -813,6 +831,12 @@
     // (voltage/phase/pipe diameter, or flow/head curve) instead of
     // repeating "3 HP" / "3 حصان" again.
     function subVariantLabel(row) {
+      // Well motors: once power (and material, if applicable) are chosen,
+      // the only thing left to pick is the mounting diameter — show it as
+      // a clean '6"' instead of the raw "قطر التنصيب 6"" spec text.
+      if (row.category === 'well_motors' && row.diameter_inch != null) {
+        return `${Number(row.diameter_inch)}"`;
+      }
       const specs = localSpecs(row);
       if (!specs) return variantLabel(row);
       const parts = specs.split(' - ');
@@ -825,11 +849,63 @@
       return rest;
     }
 
-    // 3rd-level picker: shown when a chosen power tier maps to more than
-    // one real product (different voltage/phase/pipe-diameter for motors,
-    // different flow/head curve for pumps, etc).
+    // Material picker: shown between the power step and the diameter step
+    // when a chosen power tier is available in more than one motor material
+    // (stainless steel / cast iron / stainless with cast-iron cap). Brands
+    // that don't record material (MAX, PUNA, and SP Sterapump's unlabeled
+    // "water-cooled" line) simply never reach this — onPowerPicked only
+    // calls it when 2+ distinct materials exist in the group.
+    const MATERIAL_KEYS = { stainless: 'materialStainless', cast_iron: 'materialCastIron', stainless_cast_iron_cap: 'materialStainlessCastIronCap' };
+    function materialLabel(material, sampleRow) {
+      const key = MATERIAL_KEYS[material];
+      if (key) return t(key);
+      if (sampleRow && /تبريد مياة/.test(sampleRow.name_ar || '')) return t('materialWaterCooled');
+      return t('materialOther');
+    }
+
+    function buildMaterialPicker(group) {
+      const wrap = document.getElementById('pdMaterialWrap');
+      document.getElementById('pdMaterialLabel').textContent = t('chooseMaterial');
+      const byMaterial = new Map();
+      group.forEach(r => {
+        const key = r.motor_material || '';
+        if (!byMaterial.has(key)) byMaterial.set(key, []);
+        byMaterial.get(key).push(r);
+      });
+      const entries = [...byMaterial.entries()];
+      wrap.hidden = false;
+      document.getElementById('pdMaterials').innerHTML = entries.map(([material, rows], i) => {
+        const allOut = rows.every(r => r.in_stock === false);
+        return `<button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}${allOut ? ' out-of-stock' : ''}" data-material="${escapeHtml(material)}">${escapeHtml(materialLabel(material, rows[0]))}</button>`;
+      }).join('');
+
+      const onMaterialPicked = (material) => {
+        const rows = byMaterial.get(material) || [];
+        if (rows.length <= 1) {
+          document.getElementById('pdSubVariantWrap').hidden = true;
+          const row = rows[0];
+          if (row) { selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row); }
+        } else {
+          buildVariantPicker(rows);
+        }
+      };
+      document.querySelectorAll('#pdMaterials .pd-variant-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#pdMaterials .pd-variant-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          onMaterialPicked(btn.dataset.material);
+        });
+      });
+      onMaterialPicked(entries[0][0]);
+    }
+
+    // 3rd-level picker: shown when a chosen power tier (and material, for
+    // well motors that have one) maps to more than one real product —
+    // different voltage/phase/pipe-diameter for motors and pumps, or
+    // different flow/head curve for pumps.
     function buildVariantPicker(group) {
       const wrap = document.getElementById('pdSubVariantWrap');
+      document.getElementById('pdSubVariantLabel').textContent = group[0]?.category === 'well_motors' ? t('chooseDiameter') : t('chooseTechDetails');
       const row_s = group.slice().sort((a, b) => a.price - b.price);
       wrap.hidden = false;
       document.getElementById('pdSubVariants').innerHTML = row_s.map((r, i) => `
@@ -945,16 +1021,33 @@
         const modelBtn = document.querySelector(`#pdModels .pd-variant-btn[data-model="${CSS.escape(series)}"]`);
         if (modelBtn && !modelBtn.classList.contains('active')) modelBtn.click();
       }
-      const variantBtn = document.querySelector(`#pdVariants .pd-variant-btn[data-id="${row.id}"]`);
-      if (variantBtn) { variantBtn.click(); return; }
-      const select = document.getElementById('pdVariantSelect');
-      if (select && !select.hidden && [...select.options].some(o => o.value === String(row.id))) {
-        select.value = String(row.id);
-        select.dispatchEvent(new Event('change'));
-        return;
+
+      // Match the power tier by its power value (kw/hp), not by button id —
+      // power buttons/options are keyed to a representative row per tier,
+      // which usually isn't `row` itself once a material/diameter step
+      // narrows things further.
+      const { kw, hp } = parseInvPower(row);
+      const powerKey = kw != null ? 'kw:' + kw : (hp != null ? 'hp:' + hp : 'id:' + row.id);
+      const powerBtn = document.querySelector(`#pdVariants .pd-variant-btn[data-power-key="${CSS.escape(powerKey)}"]`);
+      if (powerBtn) {
+        if (!powerBtn.classList.contains('active')) powerBtn.click();
+      } else {
+        const select = document.getElementById('pdVariantSelect');
+        if (select && !select.hidden) {
+          const opt = [...select.options].find(o => o.dataset.powerKey === powerKey);
+          if (opt) { select.value = opt.value; select.dispatchEvent(new Event('change')); }
+        }
       }
+
+      const materialBtn = document.querySelector(`#pdMaterials .pd-variant-btn[data-material="${CSS.escape(row.motor_material || '')}"]`);
+      if (materialBtn && !materialBtn.classList.contains('active')) materialBtn.click();
+
       const subBtn = document.querySelector(`#pdSubVariants .pd-variant-btn[data-id="${row.id}"]`);
       if (subBtn) { subBtn.click(); return; }
+
+      const variantBtn = document.querySelector(`#pdVariants .pd-variant-btn[data-id="${row.id}"]`);
+      if (variantBtn && !variantBtn.classList.contains('active')) { variantBtn.click(); return; }
+
       // Picker structure didn't expose this exact row (e.g. it was the
       // default already) — still make sure facts/tabs/rating reflect it.
       selectVariant(row); renderFacts(row); renderTabs(row); renderRating(row);
