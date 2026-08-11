@@ -218,6 +218,9 @@
           <button class="dash-nav-item" data-target="section-articles" onclick="showDashSection('section-articles', this)">
             <span>📝 المقالات</span>
           </button>
+          <button class="dash-nav-item" data-target="section-supplier-discounts" onclick="showDashSection('section-supplier-discounts', this)">
+            <span>💸 خصومات الموردين</span>
+          </button>
         </nav>
 
         <div class="dash-main">
@@ -974,6 +977,40 @@
           <div id="articlesList" style="display:grid;gap:var(--space-2)">
             <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
           </div>
+        </article>
+      </div>
+
+      <!-- Supplier discounts section -->
+      <div class="dashboard-grid" id="section-supplier-discounts" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+        <article class="dash-card">
+          <h2 style="margin-top:0">💸 خصومات الموردين على المنتجات</h2>
+          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+            النسبة هنا بتتحسب على سعر البيع المعروض على الموقع (products.price)، وبتُستخدم بس داخليًا
+            لحساب هامش الربح في عروض أسعار المناديب — مش ظاهرة للعميل ولا للمندوب أبدًا.
+          </p>
+          <div style="display:flex;gap:var(--space-2);margin:var(--space-2) 0;flex-wrap:wrap">
+            <input type="text" id="sdSearch" placeholder="ابحث باسم المنتج..." style="flex:1;min-width:200px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            <select id="sdCategory" style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <option value="">كل الفئات</option>
+              <option value="offgrid">أوف جريد (انفرترات)</option>
+              <option value="batteries">بطاريات</option>
+              <option value="panels">ألواح</option>
+              <option value="inverters">إنفرترات (ري)</option>
+              <option value="pumps">مضخات</option>
+              <option value="chassis">شاسيهات</option>
+            </select>
+            <button type="button" class="btn btn-primary" id="sdSearchBtn" style="font-size:13px">بحث</button>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="text-align:right;color:var(--muted);font-size:12px">
+                <th style="padding:8px">المنتج</th><th style="padding:8px">الماركة</th>
+                <th style="padding:8px">سعر البيع</th><th style="padding:8px">خصم المورد %</th><th style="padding:8px"></th>
+              </tr>
+            </thead>
+            <tbody id="sdTableBody"><tr><td colspan="5" style="padding:12px;color:var(--muted)">ابحث عن منتج أو اختر فئة.</td></tr></tbody>
+          </table>
+          <p class="form-note" data-sd-message></p>
         </article>
       </div>
 
