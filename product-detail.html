@@ -612,8 +612,14 @@
         : `<p class="pd-description-text">${escapeHtml(t('noFiles'))}</p>`;
       tabs.push(['files', t('tabFiles'), filesHtml]);
 
-      nav.innerHTML = tabs.map((tab, i) => `<button type="button" class="pd-tab-btn${i === 0 ? ' active' : ''}" data-tab="${tab[0]}">${escapeHtml(tab[1])}</button>`).join('');
-      panels.innerHTML = tabs.map((tab, i) => `<div class="pd-tab-panel${i === 0 ? ' active' : ''}" id="pdPanel-${tab[0]}">${tab[2]}</div>`).join('');
+      // If this product has no description content, open on Specs by
+      // default instead of an empty "no description" panel — the customer
+      // shouldn't have to click through to find the one tab that actually
+      // has something useful.
+      const defaultTab = localizedDescription ? 'desc' : 'specs';
+
+      nav.innerHTML = tabs.map((tab) => `<button type="button" class="pd-tab-btn${tab[0] === defaultTab ? ' active' : ''}" data-tab="${tab[0]}">${escapeHtml(tab[1])}</button>`).join('');
+      panels.innerHTML = tabs.map((tab) => `<div class="pd-tab-panel${tab[0] === defaultTab ? ' active' : ''}" id="pdPanel-${tab[0]}">${tab[2]}</div>`).join('');
 
       nav.querySelectorAll('.pd-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
