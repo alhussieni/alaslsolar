@@ -169,7 +169,7 @@ function footer() {
 }
 
 // ── Build one family page for one language ──────────────────────────────
-function buildFamilyPage(category, brand, rows, lang, allFamilies) {
+function buildFamilyPage(category, brand, rows, lang, allFamilies, brandLogos) {
   const { dir, hreflang, suffix } = LANGS[lang];
   const slug = `${category}-${slugify(brand)}`;
   const catLabel = (CAT_LABEL[category] && CAT_LABEL[category][lang]) || category;
@@ -183,6 +183,13 @@ function buildFamilyPage(category, brand, rows, lang, allFamilies) {
   const priceRange = minPrice === maxPrice ? `${fmtPrice(minPrice)} EGP` : `${fmtPrice(minPrice)}–${fmtPrice(maxPrice)} EGP`;
 
   const description = `${title} — ${INTRO_TEXT[lang] ? INTRO_TEXT[lang](rows.length) : INTRO_TEXT.en(rows.length)} ${priceRange}.`;
+
+  // Real product photo when available; fall back to the brand's logo
+  // (same fallback rule already used on the main site's gallery and
+  // "similar products" cards), then a generic site image as last resort.
+  const brandLogo = brandLogos[brand] || null;
+  const imageOf = (row) => row.image_url || brandLogo || `${SITE_URL}/solar.jpg`;
+  const heroImage = imageOf(sorted.find((r) => r.image_url) || sorted[0]);
 
   const pageUrl = `${SITE_URL}/products/${slug}${suffix}.html`;
   const detailHref = (row) => {
@@ -203,14 +210,16 @@ function buildFamilyPage(category, brand, rows, lang, allFamilies) {
     })
     .join(" | ");
 
-  // Real, crawlable table of every variant — name, specs, price. This is
-  // the actual indexable content search engines and AI crawlers read.
+  // Real, crawlable table of every variant — thumbnail, name, specs,
+  // price. This is the actual indexable content search engines and AI
+  // crawlers read; the <img alt> text also feeds image search.
   const rowsHtml = sorted.map((r) => {
     const name = esc(getField(r, "name", lang) || `${catLabel} ${brand}`);
     const specs = esc(getField(r, "specs", lang));
     const price = `${fmtPrice(r.price)} EGP`;
     const stock = r.in_stock === false ? ui.outOfStock : ui.inStock;
     return `        <tr>
+          <td><img class="pd-static-thumb" src="${esc(imageOf(r))}" alt="${name}" loading="lazy" width="56" height="56"></td>
           <td>${name}</td>
           <td>${specs}</td>
           <td>${price}</td>
@@ -242,6 +251,7 @@ ${siblings.map((f) => `        <li><a href="${category}-${slugify(f.brand)}${suf
       item: {
         "@type": "Product",
         name: getField(r, "name", lang) || `${catLabel} ${brand}`,
+        image: imageOf(r),
         brand: { "@type": "Brand", name: brand },
         description: getField(r, "specs", lang) || undefined,
         offers: {
@@ -280,14 +290,16 @@ ${siblings.map((f) => `        <li><a href="${category}-${slugify(f.brand)}${suf
   <meta property="og:description" content="${esc(description)}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="${pageUrl}">
-  <meta property="og:image" content="${SITE_URL}/solar.jpg">
+  <meta property="og:image" content="${esc(heroImage)}">
   <link rel="canonical" href="${pageUrl}">
 ${hreflangLinks}
   <script type="application/ld+json">${jsonLd}</script>
   <style>
     .pd-static-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    .pd-static-table th, .pd-static-table td { padding: 10px 12px; border-bottom: 1px solid var(--line, #e5e2dd); text-align: start; font-size: 0.92rem; }
+    .pd-static-table th, .pd-static-table td { padding: 10px 12px; border-bottom: 1px solid var(--line, #e5e2dd); text-align: start; font-size: 0.92rem; vertical-align: middle; }
     .pd-static-table th { font-weight: 700; background: var(--bg-alt, #f7f5f2); }
+    .pd-static-thumb { width: 56px; height: 56px; object-fit: contain; border-radius: 6px; background: #fff; border: 1px solid var(--line, #e5e2dd); }
+    .pd-hero-image { width: 100%; max-width: 420px; border-radius: 12px; margin-top: 1rem; object-fit: contain; background: #fff; border: 1px solid var(--line, #e5e2dd); }
     .pd-related-list { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; }
     .pd-related-list a { display: inline-block; padding: 6px 14px; border: 1px solid var(--line, #e5e2dd); border-radius: 999px; text-decoration: none; color: inherit; font-size: 0.88rem; }
     .pd-cta-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 1.25rem; padding: 12px 24px; background: var(--brand, #b5842a); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 700; }
@@ -302,13 +314,15 @@ ${nav(lang)}
       <h1>${esc(title)}</h1>
       <p>${esc(description)}</p>
       <p style="margin-top:0.5rem;font-size:0.9rem;opacity:0.75;">${langLinks}</p>
+      <img class="pd-hero-image" src="${esc(heroImage)}" alt="${esc(title)}" loading="eager" width="420" height="420">
+      <br>
       <a class="pd-cta-btn" href="${familyDetailHref}">${esc(ui.cta)} <i class="fa fa-arrow-${dir === 'rtl' ? 'left' : 'right'}" aria-hidden="true"></i></a>
     </section>
 
     <section class="section">
       <table class="pd-static-table">
         <thead>
-          <tr><th>${esc(ui.nameCol)}</th><th>${esc(ui.specsCol)}</th><th>${esc(ui.priceCol)}</th><th></th></tr>
+          <tr><th></th><th>${esc(ui.nameCol)}</th><th>${esc(ui.specsCol)}</th><th>${esc(ui.priceCol)}</th><th></th></tr>
         </thead>
         <tbody>
 ${rowsHtml}
@@ -353,6 +367,12 @@ async function main() {
   }
   console.log(`✅  Fetched ${products.length} product(s).`);
 
+  const { data: logos, error: logoError } = await client.from("brand_logos").select("brand, logo_url");
+  if (logoError) console.error("⚠️   brand_logos fetch error (continuing without logo fallback):", logoError.message);
+  const brandLogos = {};
+  (logos || []).forEach((l) => { brandLogos[l.brand] = l.logo_url; });
+  console.log(`✅  Fetched ${Object.keys(brandLogos).length} brand logo(s).`);
+
   // Group into (category, brand) families
   const groups = new Map();
   for (const p of products) {
@@ -370,7 +390,7 @@ async function main() {
   for (const family of families) {
     for (const lang of Object.keys(LANGS)) {
       const { suffix } = LANGS[lang];
-      const html = buildFamilyPage(family.category, family.brand, family.rows, lang, families);
+      const html = buildFamilyPage(family.category, family.brand, family.rows, lang, families, brandLogos);
       const filename = `${family.category}-${slugify(family.brand)}${suffix}.html`;
       fs.writeFileSync(path.join(productsDir, filename), html, "utf8");
     }
