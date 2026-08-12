@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run content generator (articles + projects + products)
+      - name: Run content generator (articles + projects)
         run: npm run generate
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -34,5 +34,5 @@ jobs:
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: regenerate articles, projects, and products [skip ci]"
-          file_pattern: "articles/ articles.html projects/ projects.html products/ sitemap.xml"
+          commit_message: "chore: regenerate articles and projects [skip ci]"
+          file_pattern: "articles/ articles.html projects/ projects.html sitemap.xml"
