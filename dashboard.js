@@ -2211,75 +2211,82 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ============================================================
-   قسم خصومات الموردين — إضافة مستقلة، بتقرأ/تكتب في product_costs
+   قسم خصومات الموردين — إضافة مستقلة، بتقرأ/تكتب في supplier_discounts
    بس (محمي بـ RLS للأدمن فقط)، من غير ما تلمس أي دالة تانية موجودة.
+   الخصم على مستوى (فئة + ماركة) مش لكل منتج لوحده.
    ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
-  const searchInput = document.getElementById("sdSearch");
   const categorySelect = document.getElementById("sdCategory");
-  const searchBtn = document.getElementById("sdSearchBtn");
-  const tbody = document.getElementById("sdTableBody");
+  const brandSelect = document.getElementById("sdBrand");
+  const pctInput = document.getElementById("sdPct");
+  const saveBtn = document.getElementById("sdSaveBtn");
+  const listBody = document.getElementById("sdListBody");
   const msg = document.querySelector("[data-sd-message]");
-  if (!searchBtn || !tbody) return;
+  if (!categorySelect || !saveBtn) return;
 
-  async function runSearch() {
-    tbody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:var(--muted)">جاري البحث...</td></tr>`;
-    let query = client.from("products")
-      .select("id,name_ar,brand,category,price,product_costs(supplier_discount_pct)")
-      .eq("published", true)
-      .order("name_ar", { ascending: true })
-      .limit(50);
+  async function loadBrandsForCategory() {
+    brandSelect.innerHTML = `<option value="">جاري التحميل...</option>`;
+    const { data, error } = await client.from("products")
+      .select("brand")
+      .eq("category", categorySelect.value)
+      .eq("published", true);
+    if (error || !data) { brandSelect.innerHTML = `<option value="">تعذر التحميل</option>`; return; }
+    const brands = [...new Set(data.map((r) => r.brand).filter(Boolean))].sort();
+    brandSelect.innerHTML = brands.length
+      ? brands.map((b) => `<option value="${b}">${b}</option>`).join("")
+      : `<option value="">لا توجد ماركات</option>`;
+    if (brands.length) loadExistingDiscountForSelection();
+  }
 
-    const term = searchInput.value.trim();
-    const cat = categorySelect.value;
-    if (term) query = query.ilike("name_ar", `%${term}%`);
-    if (cat) query = query.eq("category", cat);
+  async function loadExistingDiscountForSelection() {
+    const { data } = await client.from("supplier_discounts")
+      .select("supplier_discount_pct")
+      .eq("category", categorySelect.value)
+      .eq("brand", brandSelect.value)
+      .maybeSingle();
+    pctInput.value = data?.supplier_discount_pct ?? 0;
+  }
 
-    const { data, error } = await query;
-    if (error) {
-      tbody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:#b23">تعذر تحميل النتائج: ${error.message}</td></tr>`;
-      return;
-    }
-    if (!data || !data.length) {
-      tbody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:var(--muted)">مفيش نتائج.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = data.map((p) => {
-      const current = Array.isArray(p.product_costs) ? p.product_costs[0]?.supplier_discount_pct : p.product_costs?.supplier_discount_pct;
-      return `
-      <tr data-product-id="${p.id}" style="border-bottom:1px solid var(--line)">
-        <td style="padding:8px">${p.name_ar || "—"}</td>
-        <td style="padding:8px">${p.brand || "—"}</td>
-        <td style="padding:8px">${Number(p.price || 0).toLocaleString("ar-EG")}</td>
-        <td style="padding:8px"><input type="number" min="0" max="100" step="0.5" value="${current ?? 0}" class="sd-discount-input" style="width:70px;padding:6px;border:1px solid var(--line);border-radius:6px"></td>
-        <td style="padding:8px"><button type="button" class="sd-save-btn" style="padding:6px 14px;border-radius:8px;border:0;background:var(--brand);color:#fff;font-size:12px;cursor:pointer">حفظ</button></td>
-      </tr>`;
-    }).join("");
-
-    tbody.querySelectorAll(".sd-save-btn").forEach((btn) => {
+  async function loadDiscountsList() {
+    listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr>`;
+    const { data, error } = await client.from("supplier_discounts")
+      .select("category,brand,supplier_discount_pct")
+      .order("category", { ascending: true });
+    if (error) { listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:#b23">تعذر التحميل: ${error.message}</td></tr>`; return; }
+    if (!data || !data.length) { listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:var(--muted)">مفيش خصومات مسجّلة لسه.</td></tr>`; return; }
+    listBody.innerHTML = data.map((r) => `
+      <tr data-cat="${r.category}" data-brand="${r.brand}" style="border-bottom:1px solid var(--line)">
+        <td style="padding:8px">${r.category}</td>
+        <td style="padding:8px">${r.brand}</td>
+        <td style="padding:8px">${r.supplier_discount_pct}%</td>
+        <td style="padding:8px"><button type="button" class="sd-delete-btn" style="padding:5px 12px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:12px;cursor:pointer">حذف</button></td>
+      </tr>`).join("");
+    listBody.querySelectorAll(".sd-delete-btn").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
         const row = e.target.closest("tr");
-        const productId = row.dataset.productId;
-        const val = Math.max(0, Math.min(100, parseFloat(row.querySelector(".sd-discount-input").value) || 0));
-        btn.disabled = true;
-        btn.textContent = "...";
-        const { error: upsertError } = await client.from("product_costs")
-          .upsert({ product_id: productId, supplier_discount_pct: val, updated_at: new Date().toISOString() }, { onConflict: "product_id" });
-        btn.disabled = false;
-        if (upsertError) {
-          btn.textContent = "خطأ";
-          if (msg) { msg.style.color = "#b23"; msg.textContent = "تعذر الحفظ: " + upsertError.message; }
-        } else {
-          btn.textContent = "✅";
-          if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم الحفظ."; }
-          setTimeout(() => { btn.textContent = "حفظ"; if (msg) msg.textContent = ""; }, 2000);
-        }
+        await client.from("supplier_discounts").delete().eq("category", row.dataset.cat).eq("brand", row.dataset.brand);
+        loadDiscountsList();
       });
     });
   }
 
-  searchBtn.addEventListener("click", runSearch);
-  categorySelect.addEventListener("change", runSearch);
-  searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); runSearch(); } });
+  saveBtn.addEventListener("click", async () => {
+    const category = categorySelect.value;
+    const brand = brandSelect.value;
+    const pct = Math.max(0, Math.min(100, parseFloat(pctInput.value) || 0));
+    if (!category || !brand) { if (msg) { msg.style.color = "#b23"; msg.textContent = "اختار الفئة والماركة الأول."; } return; }
+    saveBtn.disabled = true;
+    const { error } = await client.from("supplier_discounts")
+      .upsert({ category, brand, supplier_discount_pct: pct, updated_at: new Date().toISOString() }, { onConflict: "category,brand" });
+    saveBtn.disabled = false;
+    if (error) { if (msg) { msg.style.color = "#b23"; msg.textContent = "تعذر الحفظ: " + error.message; } return; }
+    if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم الحفظ."; setTimeout(() => { if (msg) msg.textContent = ""; }, 2500); }
+    loadDiscountsList();
+  });
+
+  categorySelect.addEventListener("change", loadBrandsForCategory);
+  brandSelect.addEventListener("change", loadExistingDiscountForSelection);
+
+  loadBrandsForCategory();
+  loadDiscountsList();
 });
