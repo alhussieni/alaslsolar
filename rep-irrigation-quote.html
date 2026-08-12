@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0D3452">
+  <title>عرض سعر منظومة ري | مناديب الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="rep-theme.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="supabase-config.js"></script>
+  <script defer src="rep-irrigation-quote.js"></script>
+  <style>
+    #printArea { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 24px; direction: rtl; }
+      .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0D3452; padding-bottom: 12px; margin-bottom: 16px; }
+      .print-header img { height: 55px; }
+      .print-title { font-size: 20px; font-weight: 800; color: #0D3452; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .print-table th, .print-table td { border: 1px solid #DEE7E4; padding: 6px 8px; text-align: center; }
+      .print-table th { background: #F6F8F7; }
+      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
+      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
+      .print-totals .grand { font-weight: 800; font-size: 17px; border-top: 2px solid #0D3452; margin-top: 6px; padding-top: 8px; color: #0D3452; }
+      .print-footer { margin-top: 30px; font-size: 12px; color: #777; }
+    }
+    input[data-discount-idx]{width:64px;padding:6px;text-align:center;}
+  </style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brandrow">
+    <div class="brand">
+      <div class="mark"><img src="logo.png" alt="الأصل للطاقة الشمسية"></div>
+      <div>
+        <div class="name">الأصل للطاقة الشمسية</div>
+        <div class="sub">بوابة المناديب — عروض أسعار الري الزراعي</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <a href="pump-calculator.html" class="btn ghost small" style="text-decoration:none">حاسبة الري ←</a>
+      <a href="rep-quotes.html" class="btn ghost small" style="text-decoration:none">عروض عامة ←</a>
+      <span data-user-name style="font-weight:700;font-size:13px;color:var(--muted)"></span>
+    </div>
+  </div>
+</header>
+
+<main class="rep-main" style="max-width:900px">
+
+  <div class="login-shell card" data-auth-panel>
+    <h3>لازم تسجّل دخولك كمندوب الأول</h3>
+    <div class="note">سجّل دخولك من <a href="rep-quotes.html">صفحة عروض الأسعار</a> ثم ارجع هنا.</div>
+  </div>
+
+  <div data-rep-panel hidden>
+
+    <div class="card" data-empty-cart hidden>
+      <div class="note">مفيش نتيجة حاسبة جاهزة. روح <a href="pump-calculator.html">حاسبة الري</a> واحسب منظومة الأول، وبعدين دوس "أضف للعرض" في نهاية الصفحة.</div>
+    </div>
+
+    <div data-quote-content hidden>
+      <div class="card quote-banner" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;align-items:center">
+        <div style="display:flex;align-items:center;gap:10px">
+          <img src="logo.png" alt="الأصل للطاقة الشمسية" style="width:46px;height:46px;object-fit:contain">
+          <div>
+            <div style="font-family:'Cairo';font-weight:800;font-size:16px">الأصل للطاقة الشمسية</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">alaslsolar.com</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted)">عرض سعر مُقدَّم إلى</div>
+          <div id="bannerName" style="font-family:'Cairo';font-weight:800;font-size:18px">—</div>
+          <div id="bannerPhone" class="num" style="font-size:12.5px;color:var(--muted)">—</div>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:11px;color:var(--muted)">تاريخ العرض</div>
+          <div class="num" style="font-size:14px;font-weight:700" id="bannerDate">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>بيانات العميل</h3>
+        <div class="row2">
+          <div><label>اسم العميل *</label><input type="text" id="custName" required></div>
+          <div><label>رقم الهاتف / واتساب *</label><input type="tel" id="custPhone" required></div>
+        </div>
+        <label>المدينة / المنطقة</label>
+        <input type="text" id="custCity">
+      </div>
+
+      <div class="card">
+        <h3>نوع العرض</h3>
+        <div class="seg">
+          <button type="button" class="active" data-quote-type="supply_only">توريد فقط</button>
+          <button type="button" data-quote-type="supply_install">توريد وتركيب</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>تفصيل عرض السعر <span class="tag">قابل للتعديل والخصم</span></h3>
+        <table class="bom">
+          <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم %</th><th>الإجمالي</th></tr></thead>
+          <tbody id="quoteItemsBody"></tbody>
+        </table>
+        <div class="totalbar" style="justify-content:center;margin-top:14px">
+          <div class="line">
+            <div class="lbl">الإجمالي بعد الخصم</div>
+            <div class="big num"><span id="grandTotalDisplay">0</span> ج.م</div>
+          </div>
+        </div>
+        <button class="btn full" id="saveQuoteBtn" style="margin-top:16px">🖨️ حفظ العرض وطباعته</button>
+        <p class="note" data-quote-message style="margin-top:10px;display:none"></p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="printArea"></div>
+
+</body>
+</html>

@@ -2,9 +2,9 @@ User-agent: *
 Disallow: /dashboard.html
 Disallow: /admin/
 Disallow: /article.html
-Disallow: /product-detail.html
 Disallow: /rep-quotes.html
 Disallow: /rep-offgrid-quote.html
+Disallow: /rep-irrigation-quote.html
 
 Allow: /
 
