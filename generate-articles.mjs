@@ -502,15 +502,20 @@ async function main() {
   fs.writeFileSync(path.join(__dir, "articles.html"), articlesListHtml, "utf8");
   console.log("   📄  articles.html  (updated)");
 
-  // 3. Update sitemap.xml — preserve whatever generate-projects.mjs last
-  //    wrote inside the PROJECTS marker block, since these two generators
-  //    run independently and each only owns its own section.
+  // 3. Update sitemap.xml — preserve whatever generate-projects.mjs and
+  //    generate-products.mjs last wrote inside their own marker blocks,
+  //    since these generators run independently and each only owns its
+  //    own section.
   const sitemapPath = path.join(__dir, "sitemap.xml");
   const previousSitemap = fs.existsSync(sitemapPath) ? fs.readFileSync(sitemapPath, "utf8") : "";
   const preservedProjectsBlock = readMarkerBlock(previousSitemap, "PROJECTS");
+  const preservedProductsBlock = readMarkerBlock(previousSitemap, "PRODUCTS");
   let sitemapXml = buildSitemap(articles);
   if (preservedProjectsBlock) {
     sitemapXml = upsertMarkerBlock(sitemapXml, "PROJECTS", preservedProjectsBlock);
+  }
+  if (preservedProductsBlock) {
+    sitemapXml = upsertMarkerBlock(sitemapXml, "PRODUCTS", preservedProductsBlock);
   }
   fs.writeFileSync(sitemapPath, sitemapXml, "utf8");
   console.log("   🗺️   sitemap.xml  (updated)");
