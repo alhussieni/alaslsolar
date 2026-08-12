@@ -51,6 +51,14 @@ async function checkRepStatus(userId) {
   return data;
 }
 
+function showMsg(el, text, kind) {
+  if (!el) return;
+  if (!text) { el.style.display = "none"; el.textContent = ""; return; }
+  el.textContent = text;
+  el.className = "note" + (kind ? " " + kind : "");
+  el.style.display = "";
+}
+
 async function updateAuthState(session) {
   const authPanel = $("[data-auth-panel]");
   const repPanel = $("[data-rep-panel]");
@@ -152,9 +160,9 @@ function readLoads() {
 /* ---------------- الحساب ---------------- */
 
 function runCalc() {
-  const msg = $("[data-calc-message]");
+  const msgEl = $("[data-calc-message]");
   const loads = readLoads();
-  if (!loads.length) { msg.textContent = "أضف جهاز واحد على الأقل."; msg.className = "rq-msg error"; return; }
+  if (!loads.length) { showMsg(msgEl, "أضف جهاز واحد على الأقل.", "error"); return; }
 
   const inputs = {
     loads,
@@ -181,16 +189,25 @@ function runCalc() {
   const result = window.computeOffgridMaterials(catalog, gp, inputs);
   lastResult = result;
 
+  updateBanner();
+
   if (result.errors && result.errors.length && !result.offer) {
-    msg.textContent = result.errors.join(" | ");
-    msg.className = "rq-msg error";
+    showMsg(msgEl, result.errors.join(" | "), "error");
     $("[data-quote-section]").hidden = true;
+    $("[data-quote-empty]").hidden = false;
     return;
   }
-  msg.textContent = result.errors && result.errors.length ? "تنبيه: " + result.errors.join(" | ") : "";
-  msg.className = result.errors && result.errors.length ? "rq-msg error" : "rq-msg ok";
+  showMsg(msgEl, result.errors && result.errors.length ? "تنبيه: " + result.errors.join(" | ") : "", result.errors && result.errors.length ? "error" : "ok");
 
   buildQuoteRows(result);
+}
+
+function updateBanner() {
+  const name = $("#custName").value.trim();
+  const phone = $("#custPhone").value.trim();
+  $("#bannerName").textContent = name || "—";
+  $("#bannerPhone").textContent = phone || "—";
+  $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG");
 }
 
 function buildQuoteRows(result) {
@@ -223,6 +240,7 @@ function buildQuoteRows(result) {
 
   renderQuoteTable();
   $("[data-quote-section]").hidden = false;
+  $("[data-quote-empty]").hidden = true;
 }
 
 function renderQuoteTable() {
@@ -248,17 +266,22 @@ function renderQuoteTable() {
   });
   const grand = quoteRows.reduce((s, r) => s + r.qty * r.unitPrice * (1 - r.discountPct / 100), 0);
   $("#grandTotalDisplay").textContent = fmt(grand);
+  const stickyBar = $("[data-sticky-bar]");
+  if (stickyBar) {
+    $("#stickyTotalDisplay").textContent = fmt(grand);
+    stickyBar.hidden = false;
+  }
 }
 
 /* ---------------- الحفظ ---------------- */
 
 async function saveQuote() {
-  const msg = $("[data-quote-message]");
+  const msgEl = $("[data-quote-message]");
   const name = $("#custName").value.trim();
   const phone = $("#custPhone").value.trim();
   const city = $("#custCity").value.trim();
-  if (!name || !phone) { msg.textContent = "اسم العميل ورقم التليفون مطلوبين."; msg.className = "rq-msg error"; return; }
-  if (!quoteRows.length) { msg.textContent = "احسب النظام الأول."; msg.className = "rq-msg error"; return; }
+  if (!name || !phone) { showMsg(msgEl, "اسم العميل ورقم التليفون مطلوبين.", "error"); return; }
+  if (!quoteRows.length) { showMsg(msgEl, "احسب النظام الأول.", "error"); return; }
 
   const items = quoteRows.map((r) => {
     if (r.type === "panel") return { type: "panel", product_id: r.product_id, watt: r.watt, qty: r.qty, discount_pct: r.discountPct, label: r.label };
@@ -266,19 +289,17 @@ async function saveQuote() {
     return { type: "bom_fixed", key: r.bomKey, qty: r.qty, discount_pct: r.discountPct, label: r.label };
   });
 
-  msg.textContent = "جاري الحفظ...";
-  msg.className = "rq-msg";
+  showMsg(msgEl, "جاري الحفظ...", "");
 
   const { data: quoteId, error } = await client.rpc("rep_create_offgrid_quote", {
     p_customer_name: name, p_customer_phone: phone, p_customer_city: city || null,
     p_quote_type: quoteType, p_items: items, p_notes: null,
   });
 
-  if (error) { msg.textContent = "خطأ أثناء الحفظ: " + error.message; msg.className = "rq-msg error"; return; }
+  if (error) { showMsg(msgEl, "خطأ أثناء الحفظ: " + error.message, "error"); return; }
 
   const { data: saved } = await client.from("quotes").select("id, items, total, created_at").eq("id", quoteId).maybeSingle();
-  msg.textContent = "تم حفظ العرض بنجاح.";
-  msg.className = "rq-msg ok";
+  showMsg(msgEl, "تم حفظ العرض بنجاح.", "ok");
 
   printQuote({ id: quoteId, customer: { name, phone, city }, quoteType, items: saved?.items || items, total: saved?.total || 0, createdAt: saved?.created_at || new Date() });
 }
@@ -321,6 +342,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   $("#ogCalcBtn").addEventListener("click", runCalc);
   $("#saveQuoteBtn").addEventListener("click", saveQuote);
+  $("#custName").addEventListener("input", updateBanner);
+  $("#custPhone").addEventListener("input", updateBanner);
   document.querySelectorAll(".rq-type-btn").forEach((b) => b.addEventListener("click", () => {
     quoteType = b.dataset.quoteType;
     document.querySelectorAll(".rq-type-btn").forEach((x) => x.classList.toggle("active", x === b));
