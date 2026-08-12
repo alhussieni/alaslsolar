@@ -324,6 +324,7 @@
             factTempRange: 'مدى التشغيل', factWeight: 'الوزن', factIpRating: 'درجة الحماية', factCycleLife: 'عدد دورات الشحن', factCapacity: 'السعة الاسمية', factVoltage: 'الجهد الاسمي',
             chooseModel: 'اختر الموديل', choosePumpType: 'اختر نوع الطلمبة', chooseTechDetails: 'اختر التفاصيل الفنية',
             chooseMaterial: 'اختر الخامة', chooseDiameter: 'اختر المقاس', materialStainless: 'ستانلس', materialCastIron: 'حديد زهر', materialStainlessCastIronCap: 'ستانلس بكاب حديد زهر', materialWaterCooled: 'تبريد مياة', materialOther: 'أخرى', inch: 'بوصة',
+            phase3_380v: '3 فاز 380 فولت', phase3_220v: '3 فاز 220 فولت', phase1_220v: 'سينجل فاز 220 فولت',
             tierUpTo5: 'حتى 5 حصان', tier5to20: '5 – 20 حصان', tier20to50: '20 – 50 حصان', tier50to100: '50 – 100 حصان', tierOver100: 'أكتر من 100 حصان' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
             choosePower: 'Choose Power', choosePressure: 'Choose Pressure Rating', priceHint: 'Price is approximate and subject to change — contact us to confirm.', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
@@ -336,6 +337,7 @@
             factTempRange: 'Operating Range', factWeight: 'Weight', factIpRating: 'Protection Rating', factCycleLife: 'Cycle Life', factCapacity: 'Rated Capacity', factVoltage: 'Rated Voltage',
             chooseModel: 'Choose Model', choosePumpType: 'Choose Pump Type', chooseTechDetails: 'Choose Technical Details',
             chooseMaterial: 'Choose Material', chooseDiameter: 'Choose Size', materialStainless: 'Stainless Steel', materialCastIron: 'Cast Iron', materialStainlessCastIronCap: 'Stainless with Cast Iron Cap', materialWaterCooled: 'Water-Cooled', materialOther: 'Other', inch: 'in',
+            phase3_380v: '3-Phase 380V', phase3_220v: '3-Phase 220V', phase1_220v: 'Single-Phase 220V',
             tierUpTo5: 'Up to 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Over 100 HP' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
             choosePower: 'Elegir Potencia', choosePressure: 'Elegir Presión', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
@@ -348,6 +350,7 @@
             factTempRange: 'Rango de Funcionamiento', factWeight: 'Peso', factIpRating: 'Índice de Protección', factCycleLife: 'Ciclos de Vida', factCapacity: 'Capacidad Nominal', factVoltage: 'Voltaje Nominal',
             chooseModel: 'Elegir Modelo', choosePumpType: 'Elegir Tipo de Bomba', chooseTechDetails: 'Elegir Detalles Técnicos',
             chooseMaterial: 'Elegir Material', chooseDiameter: 'Elegir Tamaño', materialStainless: 'Acero Inoxidable', materialCastIron: 'Hierro Fundido', materialStainlessCastIronCap: 'Inoxidable con Tapa de Hierro Fundido', materialWaterCooled: 'Refrigerado por Agua', materialOther: 'Otro', inch: 'pulg',
+            phase3_380v: 'Trifásico 380V', phase3_220v: 'Trifásico 220V', phase1_220v: 'Monofásico 220V',
             tierUpTo5: 'Hasta 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Más de 100 HP' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
             choosePower: '选择功率', choosePressure: '选择压力等级', priceHint: '价格为参考价，可能变动——请联系我们确认。', outOfStock: '暂时缺货', datasheet: '下载规格书',
@@ -360,6 +363,7 @@
             factTempRange: '工作温度范围', factWeight: '重量', factIpRating: '防护等级', factCycleLife: '循环寿命', factCapacity: '额定容量', factVoltage: '额定电压',
             chooseModel: '选择型号', choosePumpType: '选择水泵类型', chooseTechDetails: '选择技术细节',
             chooseMaterial: '选择材质', chooseDiameter: '选择尺寸', materialStainless: '不锈钢', materialCastIron: '铸铁', materialStainlessCastIronCap: '不锈钢(铸铁端盖)', materialWaterCooled: '水冷式', materialOther: '其他', inch: '英寸',
+            phase3_380v: '三相380V', phase3_220v: '三相220V', phase1_220v: '单相220V',
             tierUpTo5: '5马力以下', tier5to20: '5 – 20马力', tier20to50: '20 – 50马力', tier50to100: '50 – 100马力', tierOver100: '100马力以上' },
     };
 
@@ -734,20 +738,35 @@
       const distinctModels = [...new Set(familyRows.map(r => seriesOf(r)).filter(Boolean))].sort();
       const modelWrap = document.getElementById('pdModelWrap');
 
+      // Model codes like "T4"/"C1"/"S2" mean nothing to a customer on their
+      // own — what actually matters to them is the voltage/phase count the
+      // model is built for. When that's known (inverter_voltage_phase),
+      // show it instead of the bare code; keep the code alongside only if
+      // two different models share the same voltage/phase (so they're
+      // still told apart).
+      const VOLTAGE_PHASE_KEYS = { '3phase_380v': 'phase3_380v', '3phase_220v': 'phase3_220v', 'single_220v': 'phase1_220v' };
+      const modelButtonLabel = (modelCode) => {
+        const sample = familyRows.find(r => seriesOf(r) === modelCode);
+        const vpKey = sample && VOLTAGE_PHASE_KEYS[sample.inverter_voltage_phase];
+        if (!vpKey) return modelCode;
+        const sameGroupCodes = new Set(familyRows.filter(r => VOLTAGE_PHASE_KEYS[r.inverter_voltage_phase] === vpKey).map(r => seriesOf(r)));
+        return sameGroupCodes.size > 1 ? `${t(vpKey)} — ${modelCode}` : t(vpKey);
+      };
+
       if (distinctModels.length > 1) {
         modelWrap.hidden = false;
         document.getElementById('pdModels').innerHTML = distinctModels.map((m, i) =>
-          `<button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}" data-model="${escapeHtml(m)}">${escapeHtml(m)}</button>`
+          `<button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}" data-model="${escapeHtml(m)}">${bidiLabel(modelButtonLabel(m))}</button>`
         ).join('');
         document.querySelectorAll('#pdModels .pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             document.querySelectorAll('#pdModels .pd-variant-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById('pdSubtitle').textContent = isPumps ? '' : btn.dataset.model;
+            document.getElementById('pdSubtitle').textContent = isPumps ? '' : modelButtonLabel(btn.dataset.model);
             buildPowerPicker(sb, familyRows.filter(r => seriesOf(r) === btn.dataset.model));
           });
         });
-        document.getElementById('pdSubtitle').textContent = isPumps ? '' : distinctModels[0];
+        document.getElementById('pdSubtitle').textContent = isPumps ? '' : modelButtonLabel(distinctModels[0]);
         buildPowerPicker(sb, familyRows.filter(r => seriesOf(r) === distinctModels[0]));
       } else {
         modelWrap.hidden = true;
