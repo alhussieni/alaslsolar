@@ -1,20 +1,24 @@
 /* ============================================================
    rep-irrigation-quote.js
-   حاسبة أسعار منظومة ري بالطاقة الشمسية (مدخل HP بس).
-   يعتمد على تسجيل الدخول اللي تم من index.html (نفس الجلسة).
-   المحرك الحسابي بالكامل شغال سيرفر-سايد داخل
-   rep_create_irrigation_solar_quote (Supabase) — الصفحة دي واجهة عرض فقط.
+   حاسبة أسعار منظومة ري بالطاقة الشمسية — واجهة بنفس تخطيط Holoul.
+   المحرك الحسابي بالكامل سيرفر-سايد داخل rep_create_irrigation_solar_quote.
    ============================================================ */
 
 let client = null;
-let currentSession = null;
 let currentRep = null;
 let lastResult = null;
+let lastInputs = null;
 
 function $(sel) { return document.querySelector(sel); }
 
 function fmt(n) {
   return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 });
+}
+function fmt1(n) {
+  return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 1 });
+}
+function fmt2(n) {
+  return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 2 });
 }
 
 async function initClient() {
@@ -36,7 +40,6 @@ async function checkRepStatus(userId) {
 }
 
 async function updateAuthState(session) {
-  currentSession = session;
   const authPanel = $("[data-auth-panel]");
   const repPanel = $("[data-rep-panel]");
   const userName = $("[data-user-name]");
@@ -82,7 +85,6 @@ async function loadPanels() {
     sel.innerHTML = '<option value="">مفيش ألواح بمواصفات كهربائية كاملة — راجع الأدمن</option>';
     return;
   }
-
   sel.innerHTML = data
     .map((p) => `<option value="${p.id}">${p.brand || ""} ${p.name_ar} — ${p.power_watt}W</option>`)
     .join("");
@@ -96,37 +98,46 @@ function collectToggles() {
   return out;
 }
 
-const BOM_LABEL_FALLBACK = {
-  panel: "ألواح الطاقة الشمسية",
-  inverter: "الانفرتر",
+let selectedQuoteType = "supply_install";
+
+function attachPresetButtons() {
+  document.querySelectorAll("[data-preset]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedQuoteType = btn.dataset.preset;
+    });
+  });
+}
+
+const BOM_LABEL_FALLBACK = { panel: "ألواح الطاقة الشمسية", inverter: "الانفرتر" };
+const BOM_WARRANTY = {
+  panel: "12 سنة ضد عيوب الصناعة / 30 سنة ضد التناقص الإنتاجي عن %80",
+  inverter: "سنة واحدة",
+  combiner: "سنة واحدة",
+  cables: "سنة واحدة",
 };
+
+function buildQLCode(hp, invKw, panelText, structureType) {
+  const d = new Date();
+  const dateStr = d.toLocaleDateString("en-GB").replace(/\//g, "");
+  return `QL-${dateStr}-P-${hp} HP-VEICHI ${invKw} KW-${panelText}-${structureType}-`;
+}
 
 async function runCalc() {
   const msg = $("#calcMsg");
   const hp = parseFloat($("#hpInput").value);
   const panelId = $("#panelSelect").value;
+  const panelText = $("#panelSelect").selectedOptions[0]?.textContent.trim() || "";
   const structureType = $("#structureType").value;
-  const quoteType = $("#quoteType").value;
   const discountPct = parseFloat($("#discountPct").value) || 0;
   const custName = $("#custName").value.trim();
   const custPhone = $("#custPhone").value.trim();
   const custCity = $("#custCity").value.trim();
 
-  if (!hp || hp <= 0) {
-    msg.textContent = "أدخل القدرة المطلوبة بالحصان.";
-    msg.className = "rq-msg error";
-    return;
-  }
-  if (!panelId) {
-    msg.textContent = "اختار لوح شمسي.";
-    msg.className = "rq-msg error";
-    return;
-  }
-  if (!custName || custPhone.length < 8) {
-    msg.textContent = "أدخل اسم العميل ورقم هاتف صحيح الأول.";
-    msg.className = "rq-msg error";
-    return;
-  }
+  if (!hp || hp <= 0) { msg.textContent = "أدخل القدرة المطلوبة بالحصان."; msg.className = "rq-msg error"; return; }
+  if (!panelId) { msg.textContent = "اختار لوح شمسي."; msg.className = "rq-msg error"; return; }
+  if (!custName || custPhone.length < 8) { msg.textContent = "أدخل اسم العميل ورقم هاتف صحيح الأول."; msg.className = "rq-msg error"; return; }
 
   msg.textContent = "جاري الحساب...";
   msg.className = "rq-msg";
@@ -140,108 +151,103 @@ async function runCalc() {
     p_structure_type: structureType,
     p_toggles: collectToggles(),
     p_discount_pct: discountPct,
-    p_quote_type: quoteType,
+    p_quote_type: selectedQuoteType,
     p_notes: null,
   });
 
-  if (error) {
-    msg.textContent = "حصل خطأ: " + error.message;
-    msg.className = "rq-msg error";
-    return;
-  }
+  if (error) { msg.textContent = "حصل خطأ: " + error.message; msg.className = "rq-msg error"; return; }
 
   msg.textContent = "تم الحساب والحفظ بنجاح.";
   msg.className = "rq-msg ok";
   lastResult = data;
-  lastResult._customer = { name: custName, phone: custPhone, city: custCity };
-  lastResult._quoteType = quoteType;
-  renderResults(data, quoteType);
+  lastInputs = { hp, panelText, structureType, custName, custPhone, custCity };
+  renderResults(data);
 }
 
-function renderResults(r, quoteType) {
-  $("#resultsCard").hidden = false;
+function renderResults(r) {
+  $("#resultsWrap").hidden = false;
 
-  const warnBox = $("#oversizeWarning");
+  // بانر العميل والتاريخ
+  $("#bannerName").textContent = lastInputs.custName || "—";
+  $("#bannerPhone").textContent = lastInputs.custPhone || "—";
+  const todayStr = new Date().toLocaleDateString("en-GB");
+  $("#bannerDate").textContent = todayStr;
+  $("#legalDate").textContent = todayStr;
+
+  // تحذير تجاوز الإنفرتر
+  const warnBox = $("#oversizeWarningBox");
   warnBox.innerHTML = r.inverter_oversize_warning
-    ? `<div class="warn-box">⚠️ ${r.inverter_oversize_warning}</div>`
+    ? `<div class="warn-banner no-print"><span style="font-size:22px">⚠️</span><div style="font-weight:700;font-size:13px;color:#8A2E1D;line-height:1.6">${r.inverter_oversize_warning}</div></div>`
     : "";
 
-  $("#mKw").textContent = fmt(r.calc_kw);
+  // ملخص المنظومة
+  $("#sumInvTag").textContent = `${r.inverter_brand || "VEICHI"} ${r.inverter_kw} KW`;
+  $("#sumKw").textContent = fmt1(r.calc_kw);
+  $("#sumPanels").textContent = fmt(r.total_panels);
+  $("#sumSarPerKw").textContent = fmt(r.sar_per_kw);
+
+  const items = (r.items || []).filter((it) => it.on);
+  const installKeys = ["install_mech", "install_elec"];
+  const installTotal = items.filter((it) => installKeys.includes(it.key)).reduce((s, it) => s + Number(it.net || 0), 0);
+  const supplyOnly = lastResult._quoteType === "supply_install" ? r.final_total - installTotal : r.final_total;
+  const supplyInstall = lastResult._quoteType === "supply_install" ? r.final_total : r.final_total + installTotal;
+  $("#pSupplyOnly").textContent = fmt(supplyOnly) + " ﷼";
+  $("#pSupplyInstall").textContent = fmt(supplyInstall) + " ﷼";
+
+  // المواصفات الفنية
+  $("#mKw").textContent = fmt1(r.calc_kw);
   $("#mPanels").textContent = fmt(r.total_panels);
   $("#mArrays").textContent = fmt(r.arrays);
   $("#mPerString").textContent = fmt(r.panels_per_string);
-  $("#mVimp").textContent = fmt(r.vimp) + "V";
-  $("#mVoc").textContent = fmt(r.voc) + "V";
-  $("#mIimp").textContent = fmt(r.iimp) + "A";
-  $("#mIsc").textContent = fmt(r.isc_calc) + "A";
-  $("#mInv").textContent = `${r.inverter_brand} ${fmt(r.inverter_kw)} KW`;
+  $("#mVimp").textContent = fmt1(r.vimp) + "V";
+  $("#mVoc").textContent = fmt1(r.voc) + "V";
+  $("#mIimp").textContent = fmt1(r.iimp) + "A";
+  $("#mIsc").textContent = fmt1(r.isc_calc) + "A";
+  $("#mInv").textContent = `${r.inverter_kw} KW`;
   $("#mReactor").textContent = r.reactor_model + "A";
   $("#mCb").textContent = r.cb_size + "A";
-  $("#mRatio").textContent = "×" + Number(r.efficiency_ratio).toFixed(2);
+  $("#mRatio").textContent = "×" + fmt2(r.efficiency_ratio);
 
-  const items = (r.items || []).filter((it) => it.on);
+  // العرض المالي / كود العرض
+  $("#offerIntro").textContent = `نتشرف بتقديم عرض سعر منظومة توليد الكهرباء من خلال الطاقة الشمسية للتشغيل راس كهرباء /محرك غطاس ${lastInputs.hp} حصان`;
+  $("#submittedByLine").textContent = currentRep ? `📋 قدّم هذا العرض: ${currentRep.display_name}` : "";
+  $("#qlCode").textContent = buildQLCode(lastInputs.hp, r.inverter_kw, lastInputs.panelText.replace(/\s+/g, ""), lastInputs.structureType);
+
+  // جدول البنود
   $("#bomBody").innerHTML = items
-    .map(
-      (it) => `<tr>
-        <td>${it.label || BOM_LABEL_FALLBACK[it.key] || it.key}</td>
-        <td>${it.type || "-"}</td>
-        <td>${fmt(it.qty)}</td>
-        <td>${fmt(it.net)} ﷼</td>
-      </tr>`
-    )
-    .join("");
-
-  $("#grandTotal").textContent = fmt(r.final_total);
-
-  const installKeys = ["install_mech", "install_elec"];
-  const installTotal = items
-    .filter((it) => installKeys.includes(it.key))
-    .reduce((s, it) => s + Number(it.net || 0), 0);
-
-  if (quoteType === "supply_install") {
-    $("#pSupplyInstall").textContent = fmt(r.final_total) + " ﷼";
-    $("#pSupplyOnly").textContent = fmt(r.final_total - installTotal) + " ﷼ (تقريبي)";
-  } else {
-    $("#pSupplyOnly").textContent = fmt(r.final_total) + " ﷼";
-    $("#pSupplyInstall").textContent = fmt(r.final_total + installTotal) + " ﷼ (تقريبي)";
-  }
-
-  document.querySelectorAll(".price-card").forEach((c) => c.classList.remove("active"));
-  const activeIdx = quoteType === "supply_install" ? 1 : 0;
-  document.querySelectorAll(".price-card")[activeIdx].classList.add("active");
-
-  buildPrintArea(r, items);
-}
-
-function buildPrintArea(r, items) {
-  $("#printDate").textContent = new Date().toLocaleDateString("ar-SA");
-  $("#printCustomer").innerHTML = `
-    <div><strong>عرض سعر مُقدَّم إلى:</strong> ${r._customer.name} — ${r._customer.phone} ${r._customer.city ? "— " + r._customer.city : ""}</div>
-    <div><strong>مقدّم من:</strong> ${currentRep ? currentRep.display_name : ""}</div>
-  `;
-  $("#printBomBody").innerHTML = items
     .map(
       (it, i) => `<tr>
         <td>${i + 1}</td>
-        <td>${it.label || BOM_LABEL_FALLBACK[it.key] || it.key}</td>
-        <td>${it.type || "-"}</td>
-        <td>${fmt(it.qty)}</td>
+        <td class="bom-label">${it.label || BOM_LABEL_FALLBACK[it.key] || it.key}</td>
+        <td style="font-size:11.5px;color:var(--muted)">${it.type || "-"}</td>
+        <td style="font-size:11.5px">${fmt(it.qty)}</td>
+        <td style="font-size:11.5px">${BOM_WARRANTY[it.key] || "لا يوجد"}</td>
       </tr>`
     )
     .join("");
-  $("#printGrandTotal").textContent = fmt(r.final_total) + " ﷼";
+
+  $("#grandTotal").textContent = fmt(r.final_total) + " ﷼";
+
+  lastResult._quoteType = lastResult._quoteType || selectedQuoteType;
 }
 
-function printQuote() {
-  window.print();
+function sendWhatsapp() {
+  if (!lastResult || !lastInputs) return;
+  const phone = lastInputs.custPhone.replace(/\D/g, "").replace(/^0/, "966");
+  const msg = `الأصل للطاقة الشمسية\n\nعرض سعر منظومة ري بالطاقة الشمسية\nالعميل: ${lastInputs.custName}\nالقدرة: ${lastInputs.hp} حصان\nالسعر النهائي شامل ضريبة القيمة المضافة: ${fmt(lastResult.final_total)} ﷼\n\nللتواصل: 966561274344+`;
+  window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(msg), "_blank");
 }
 
 function attachEvents() {
   $("#calcBtn").addEventListener("click", runCalc);
   $("#saveBtn").addEventListener("click", () => {
     if (!lastResult) return;
-    printQuote();
+    $("#calcMsg").textContent = "العرض محفوظ بالفعل (رقم " + lastResult.quote_id + ").";
+    $("#calcMsg").className = "rq-msg ok";
   });
+  $("#printBtn").addEventListener("click", () => window.print());
+  $("#waBtn").addEventListener("click", sendWhatsapp);
+  attachPresetButtons();
 }
 
 async function boot() {
