@@ -728,13 +728,6 @@
     }
 
     function prodRow(num, catLabel, row, powerLabel, badge, catKey, brands, currentBrand) {
-      window.__lastPumpRecs = window.__lastPumpRecs || [];
-      window.__lastPumpRecs.push({
-        id: row.id, category: row.category, brand: row.brand,
-        name: `${catLabel} — ${row.brand ? row.brand + ' — ' : ''}${row.name_ar || ''}`,
-        price: parseFloat(row.price) || 0,
-        qty: 1,
-      });
       return `<tr>
         <td class="prodrec-num">${num}</td>
         <td>
@@ -757,7 +750,6 @@
     }
 
     async function renderProductRecs(hp_c, kw_c, D_near, TDH, wellDia) {
-      window.__lastPumpRecs = []; // يُعاد تصفيرها في كل حساب — تُستخدم بواسطة زر "أضف لعرض سعر" للمناديب فقط
       const box = document.getElementById('productRecs');
       const recsSection = document.getElementById('prodRecsSection');
       const dividerTop = document.getElementById('prodRecsDividerTop');
@@ -934,22 +926,7 @@
         <tbody>${cards.join('')}</tbody>
       </table>`;
 
-      const addBtn = document.getElementById('repAddQuoteBtn');
-      if (addBtn) {
-        const hasPriced = (window.__lastPumpRecs || []).some(i => i.price > 0);
-        addBtn.style.display = hasPriced ? '' : 'none';
-      }
     }
-
-    // زر مستقل للمناديب فقط — لا يمس منطق الحاسبة، بيقرا بس النتيجة الجاهزة
-    // ويودّي المندوب لصفحة عروض الأسعار (اللي بتتطلب تسجيل دخول حقيقي أصلًا).
-    document.getElementById('repAddQuoteBtn')?.addEventListener('click', () => {
-      const items = (window.__lastPumpRecs || []).filter(i => i.price > 0);
-      if (!items.length) return;
-      sessionStorage.setItem('alasl_rep_irrigation_cart', JSON.stringify(items));
-      location.href = 'rep-irrigation-quote.html';
-    });
-
 
     function nearestPipe(d)  { return stdPipes.find(s => s >= d)  || stdPipes[stdPipes.length-1]; }
     function nearestMotor(k) { return stdMotors.find(m => m >= k) || stdMotors[stdMotors.length-1]; }
@@ -1147,9 +1124,6 @@
           <div id="productRecs" class="product-recs">
             <div class="prodrec-loading">جارٍ البحث في الكتالوج…</div>
           </div>
-          <button type="button" id="repAddQuoteBtn" class="btn btn-light" style="display:none; margin-top:10px; font-size:13px; padding:8px 16px; height:auto;">
-            للمناديب: أضف نتيجة الحاسبة لعرض سعر ←
-          </button>
         </div>
 
         <div class="calc-divider"></div>
