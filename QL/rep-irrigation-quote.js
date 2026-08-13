@@ -1,205 +1,261 @@
 /* ============================================================
    rep-irrigation-quote.js
-   بيستقبل نتيجة حاسبة الري (pump-calculator.html) من sessionStorage،
-   يسمح للمندوب يعدّل الكميات ويحط خصم % لكل بند، ويحفظ العرض عبر
-   rep_create_irrigation_quote() اللي بتحسب التكلفة/الربح على السيرفر.
+   حاسبة أسعار منظومة ري بالطاقة الشمسية (مدخل HP بس).
+   يعتمد على تسجيل الدخول اللي تم من index.html (نفس الجلسة).
+   المحرك الحسابي بالكامل شغال سيرفر-سايد داخل
+   rep_create_irrigation_solar_quote (Supabase) — الصفحة دي واجهة عرض فقط.
    ============================================================ */
 
 let client = null;
-let quoteType = "supply_only";
-let quoteRows = []; // { label, productId, category, brand, qty, unitPrice, discountPct }
+let currentSession = null;
+let currentRep = null;
+let lastResult = null;
 
 function $(sel) { return document.querySelector(sel); }
-function fmt(n) { return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 }); }
 
-function showMsg(el, text, kind) {
-  if (!el) return;
-  if (!text) { el.style.display = "none"; el.textContent = ""; return; }
-  el.textContent = text;
-  el.className = "note" + (kind ? " " + kind : "");
-  el.style.display = "";
+function fmt(n) {
+  return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 });
 }
 
 async function initClient() {
-  for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) await new Promise((r) => setTimeout(r, 50));
+  for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) {
+    await new Promise((r) => setTimeout(r, 50));
+  }
   client = window.getAlaslSupabase ? window.getAlaslSupabase() : null;
   return client;
 }
 
 async function checkRepStatus(userId) {
-  const { data, error } = await client.from("reps").select("id, display_name, active").eq("id", userId).maybeSingle();
+  const { data, error } = await client
+    .from("reps")
+    .select("id, display_name, active")
+    .eq("id", userId)
+    .maybeSingle();
   if (error || !data || !data.active) return null;
   return data;
 }
 
 async function updateAuthState(session) {
+  currentSession = session;
   const authPanel = $("[data-auth-panel]");
   const repPanel = $("[data-rep-panel]");
   const userName = $("[data-user-name]");
-  if (!session) { authPanel.hidden = false; repPanel.hidden = true; return; }
+
+  if (!session) {
+    authPanel.hidden = false;
+    repPanel.hidden = true;
+    userName.textContent = "";
+    return;
+  }
+
   const rep = await checkRepStatus(session.user.id);
-  if (!rep) { authPanel.hidden = false; repPanel.hidden = true; return; }
+  if (!rep) {
+    authPanel.hidden = false;
+    repPanel.hidden = true;
+    userName.textContent = "";
+    return;
+  }
+
+  currentRep = rep;
   authPanel.hidden = true;
   repPanel.hidden = false;
   userName.textContent = rep.display_name;
-  loadIncomingCart();
+
+  await loadPanels();
 }
 
-/* ---------------- استقبال نتيجة الحاسبة ---------------- */
+async function loadPanels() {
+  const sel = $("#panelSelect");
+  const { data, error } = await client
+    .from("products")
+    .select("id, name_ar, brand, power_watt, vimp, voc, iimp, isc, price")
+    .eq("category", "panels")
+    .eq("published", true)
+    .not("power_watt", "is", null)
+    .not("vimp", "is", null)
+    .not("voc", "is", null)
+    .not("iimp", "is", null)
+    .not("isc", "is", null)
+    .order("power_watt", { ascending: false });
 
-function loadIncomingCart() {
-  let items = [];
-  try {
-    const raw = sessionStorage.getItem("alasl_rep_irrigation_cart");
-    if (raw) items = JSON.parse(raw) || [];
-  } catch (e) { items = []; }
-
-  if (!items.length) {
-    $("[data-empty-cart]").hidden = false;
-    $("[data-quote-content]").hidden = true;
+  if (error || !data || data.length === 0) {
+    sel.innerHTML = '<option value="">مفيش ألواح بمواصفات كهربائية كاملة — راجع الأدمن</option>';
     return;
   }
 
-  quoteRows = items.map((it) => ({
-    label: it.name, productId: it.id || null, category: it.category || null, brand: it.brand || null,
-    qty: it.qty || 1, unitPrice: it.price || 0, discountPct: 0,
-  }));
-
-  $("[data-empty-cart]").hidden = true;
-  $("[data-quote-content]").hidden = false;
-  renderQuoteTable();
-  updateBanner();
+  sel.innerHTML = data
+    .map((p) => `<option value="${p.id}">${p.brand || ""} ${p.name_ar} — ${p.power_watt}W</option>`)
+    .join("");
 }
 
-function updateBanner() {
-  $("#bannerName").textContent = $("#custName").value.trim() || "—";
-  $("#bannerPhone").textContent = $("#custPhone").value.trim() || "—";
-  $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG");
+function collectToggles() {
+  const out = {};
+  document.querySelectorAll("[data-toggle]").forEach((el) => {
+    out[el.dataset.toggle] = el.checked;
+  });
+  return out;
 }
 
-/* ---------------- جدول العرض ---------------- */
+const BOM_LABEL_FALLBACK = {
+  panel: "ألواح الطاقة الشمسية",
+  inverter: "الانفرتر",
+};
 
-function renderQuoteTable() {
-  const body = $("#quoteItemsBody");
-  body.innerHTML = "";
+async function runCalc() {
+  const msg = $("#calcMsg");
+  const hp = parseFloat($("#hpInput").value);
+  const panelId = $("#panelSelect").value;
+  const structureType = $("#structureType").value;
+  const quoteType = $("#quoteType").value;
+  const discountPct = parseFloat($("#discountPct").value) || 0;
+  const custName = $("#custName").value.trim();
+  const custPhone = $("#custPhone").value.trim();
+  const custCity = $("#custCity").value.trim();
 
-  const rows = [...quoteRows];
-  if (quoteType === "supply_install" && !rows.some((r) => r.bomKey === "transport")) {
-    rows.push({ label: "النقل", bomKey: "transport", qty: 1, unitPrice: 0, discountPct: 0, isBom: true });
-    rows.push({ label: "التركيب", bomKey: "install", qty: 1, unitPrice: 0, discountPct: 0, isBom: true });
+  if (!hp || hp <= 0) {
+    msg.textContent = "أدخل القدرة المطلوبة بالحصان.";
+    msg.className = "rq-msg error";
+    return;
   }
-
-  rows.forEach((r, idx) => {
-    const lineTotal = r.qty * r.unitPrice * (1 - r.discountPct / 100);
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="bom-label">${r.label}</td>
-      <td><input type="number" min="0" step="1" value="${r.qty}" data-qty-idx="${idx}" style="width:56px;padding:5px;text-align:center"></td>
-      <td>${fmt(r.unitPrice)}</td>
-      <td><input type="number" min="0" max="100" value="${r.discountPct}" data-discount-idx="${idx}"></td>
-      <td>${fmt(lineTotal)}</td>`;
-    body.appendChild(tr);
-  });
-
-  quoteRows = rows;
-
-  document.querySelectorAll("[data-qty-idx]").forEach((inp) => {
-    inp.addEventListener("input", (e) => {
-      const idx = parseInt(e.target.dataset.qtyIdx, 10);
-      quoteRows[idx].qty = Math.max(0, parseFloat(e.target.value) || 0);
-      renderQuoteTable();
-    });
-  });
-  document.querySelectorAll("[data-discount-idx]").forEach((inp) => {
-    inp.addEventListener("input", (e) => {
-      const idx = parseInt(e.target.dataset.discountIdx, 10);
-      quoteRows[idx].discountPct = Math.max(0, Math.min(100, parseFloat(e.target.value) || 0));
-      renderQuoteTable();
-    });
-  });
-
-  const grand = quoteRows.reduce((s, r) => s + r.qty * r.unitPrice * (1 - r.discountPct / 100), 0);
-  $("#grandTotalDisplay").textContent = fmt(grand);
-}
-
-/* ---------------- الحفظ ---------------- */
-
-async function saveQuote() {
-  const msgEl = $("[data-quote-message]");
-  const name = $("#custName").value.trim();
-  const phone = $("#custPhone").value.trim();
-  const city = $("#custCity").value.trim();
-  if (!name || !phone) { showMsg(msgEl, "اسم العميل ورقم التليفون مطلوبين.", "error"); return; }
-  if (!quoteRows.length) { showMsg(msgEl, "مفيش أصناف في العرض.", "error"); return; }
-
-  const items = quoteRows.filter((r) => r.qty > 0).map((r) => {
-    if (r.isBom) return { type: "bom_fixed", key: r.bomKey, qty: r.qty, discount_pct: r.discountPct, label: r.label };
-    return { type: "product", product_id: r.productId, qty: r.qty, discount_pct: r.discountPct, label: r.label };
-  });
-
-  if (items.some((it) => it.type === "product" && !it.product_id)) {
-    showMsg(msgEl, "في صنف من غير معرّف منتج صالح — احسب من صفحة حاسبة الري تاني.", "error");
+  if (!panelId) {
+    msg.textContent = "اختار لوح شمسي.";
+    msg.className = "rq-msg error";
+    return;
+  }
+  if (!custName || custPhone.length < 8) {
+    msg.textContent = "أدخل اسم العميل ورقم هاتف صحيح الأول.";
+    msg.className = "rq-msg error";
     return;
   }
 
-  showMsg(msgEl, "جاري الحفظ...", "");
+  msg.textContent = "جاري الحساب...";
+  msg.className = "rq-msg";
 
-  const { data: quoteId, error } = await client.rpc("rep_create_irrigation_quote", {
-    p_customer_name: name, p_customer_phone: phone, p_customer_city: city || null,
-    p_quote_type: quoteType, p_items: items, p_notes: null,
+  const { data, error } = await client.rpc("rep_create_irrigation_solar_quote", {
+    p_customer_name: custName,
+    p_customer_phone: custPhone,
+    p_customer_city: custCity || null,
+    p_hp: hp,
+    p_panel_product_id: panelId,
+    p_structure_type: structureType,
+    p_toggles: collectToggles(),
+    p_discount_pct: discountPct,
+    p_quote_type: quoteType,
+    p_notes: null,
   });
 
-  if (error) { showMsg(msgEl, "خطأ أثناء الحفظ: " + error.message, "error"); return; }
+  if (error) {
+    msg.textContent = "حصل خطأ: " + error.message;
+    msg.className = "rq-msg error";
+    return;
+  }
 
-  const { data: saved } = await client.from("quotes").select("id, items, total, created_at").eq("id", quoteId).maybeSingle();
-  showMsg(msgEl, "تم حفظ العرض بنجاح.", "ok");
-  sessionStorage.removeItem("alasl_rep_irrigation_cart");
-
-  printQuote({ id: quoteId, customer: { name, phone, city }, quoteType, items: saved?.items || items, total: saved?.total || 0, createdAt: saved?.created_at || new Date() });
+  msg.textContent = "تم الحساب والحفظ بنجاح.";
+  msg.className = "rq-msg ok";
+  lastResult = data;
+  lastResult._customer = { name: custName, phone: custPhone, city: custCity };
+  lastResult._quoteType = quoteType;
+  renderResults(data, quoteType);
 }
 
-function printQuote(q) {
-  const area = document.getElementById("printArea");
-  const dateStr = new Date(q.createdAt).toLocaleDateString("ar-EG");
-  const typeLabel = q.quoteType === "supply_install" ? "توريد وتركيب" : "توريد فقط";
-  const rows = (q.items || []).map((it) => `
-    <tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>
-  `).join("");
-  area.innerHTML = `
-    <div class="print-header">
-      <img src="logo.png" alt="الأصل للطاقة الشمسية">
-      <div style="text-align:left;"><div class="print-title">عرض سعر — منظومة ري زراعي</div><div>#${q.id} — ${dateStr}</div></div>
-    </div>
-    <div style="margin-bottom:16px; font-size:13px;">
-      <div><strong>العميل:</strong> ${q.customer.name} — ${q.customer.phone}${q.customer.city ? " — " + q.customer.city : ""}</div>
-      <div><strong>نوع العرض:</strong> ${typeLabel}</div>
-    </div>
-    <table class="print-table">
-      <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div class="print-totals"><div class="row grand"><span>الإجمالي الكلي</span><span>${fmt(q.total)} ج.م</span></div></div>
-    <div class="print-footer">الأصل للطاقة الشمسية — alaslsolar.com — هذا العرض قابل للتغيير حسب الأسعار وقت التعاقد.</div>
+function renderResults(r, quoteType) {
+  $("#resultsCard").hidden = false;
+
+  const warnBox = $("#oversizeWarning");
+  warnBox.innerHTML = r.inverter_oversize_warning
+    ? `<div class="warn-box">⚠️ ${r.inverter_oversize_warning}</div>`
+    : "";
+
+  $("#mKw").textContent = fmt(r.calc_kw);
+  $("#mPanels").textContent = fmt(r.total_panels);
+  $("#mArrays").textContent = fmt(r.arrays);
+  $("#mPerString").textContent = fmt(r.panels_per_string);
+  $("#mVimp").textContent = fmt(r.vimp) + "V";
+  $("#mVoc").textContent = fmt(r.voc) + "V";
+  $("#mIimp").textContent = fmt(r.iimp) + "A";
+  $("#mIsc").textContent = fmt(r.isc_calc) + "A";
+  $("#mInv").textContent = `${r.inverter_brand} ${fmt(r.inverter_kw)} KW`;
+  $("#mReactor").textContent = r.reactor_model + "A";
+  $("#mCb").textContent = r.cb_size + "A";
+  $("#mRatio").textContent = "×" + Number(r.efficiency_ratio).toFixed(2);
+
+  const items = (r.items || []).filter((it) => it.on);
+  $("#bomBody").innerHTML = items
+    .map(
+      (it) => `<tr>
+        <td>${it.label || BOM_LABEL_FALLBACK[it.key] || it.key}</td>
+        <td>${it.type || "-"}</td>
+        <td>${fmt(it.qty)}</td>
+        <td>${fmt(it.net)} ﷼</td>
+      </tr>`
+    )
+    .join("");
+
+  $("#grandTotal").textContent = fmt(r.final_total);
+
+  const installKeys = ["install_mech", "install_elec"];
+  const installTotal = items
+    .filter((it) => installKeys.includes(it.key))
+    .reduce((s, it) => s + Number(it.net || 0), 0);
+
+  if (quoteType === "supply_install") {
+    $("#pSupplyInstall").textContent = fmt(r.final_total) + " ﷼";
+    $("#pSupplyOnly").textContent = fmt(r.final_total - installTotal) + " ﷼ (تقريبي)";
+  } else {
+    $("#pSupplyOnly").textContent = fmt(r.final_total) + " ﷼";
+    $("#pSupplyInstall").textContent = fmt(r.final_total + installTotal) + " ﷼ (تقريبي)";
+  }
+
+  document.querySelectorAll(".price-card").forEach((c) => c.classList.remove("active"));
+  const activeIdx = quoteType === "supply_install" ? 1 : 0;
+  document.querySelectorAll(".price-card")[activeIdx].classList.add("active");
+
+  buildPrintArea(r, items);
+}
+
+function buildPrintArea(r, items) {
+  $("#printDate").textContent = new Date().toLocaleDateString("ar-SA");
+  $("#printCustomer").innerHTML = `
+    <div><strong>عرض سعر مُقدَّم إلى:</strong> ${r._customer.name} — ${r._customer.phone} ${r._customer.city ? "— " + r._customer.city : ""}</div>
+    <div><strong>مقدّم من:</strong> ${currentRep ? currentRep.display_name : ""}</div>
   `;
-  setTimeout(() => window.print(), 100);
+  $("#printBomBody").innerHTML = items
+    .map(
+      (it, i) => `<tr>
+        <td>${i + 1}</td>
+        <td>${it.label || BOM_LABEL_FALLBACK[it.key] || it.key}</td>
+        <td>${it.type || "-"}</td>
+        <td>${fmt(it.qty)}</td>
+      </tr>`
+    )
+    .join("");
+  $("#printGrandTotal").textContent = fmt(r.final_total) + " ﷼";
 }
 
-/* ---------------- ربط الأحداث ---------------- */
+function printQuote() {
+  window.print();
+}
 
-document.addEventListener("DOMContentLoaded", async () => {
+function attachEvents() {
+  $("#calcBtn").addEventListener("click", runCalc);
+  $("#saveBtn").addEventListener("click", () => {
+    if (!lastResult) return;
+    printQuote();
+  });
+}
+
+async function boot() {
   await initClient();
   if (!client) return;
 
-  $("#saveQuoteBtn")?.addEventListener("click", saveQuote);
-  $("#custName")?.addEventListener("input", updateBanner);
-  $("#custPhone")?.addEventListener("input", updateBanner);
-  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
-    quoteType = b.dataset.quoteType;
-    document.querySelectorAll(".seg button").forEach((x) => x.classList.toggle("active", x === b));
-    renderQuoteTable();
-  }));
+  const { data: sessionData } = await client.auth.getSession();
+  await updateAuthState(sessionData.session);
 
-  client.auth.onAuthStateChange((_e, session) => updateAuthState(session));
-  const { data } = await client.auth.getSession();
-  await updateAuthState(data.session);
-});
+  client.auth.onAuthStateChange((_event, session) => {
+    updateAuthState(session);
+  });
+
+  attachEvents();
+}
+
+document.addEventListener("DOMContentLoaded", boot);
