@@ -245,20 +245,20 @@ async function saveQuote() {
     return;
   }
 
-  const { subtotal, installCost, grand } = updateTotals();
+  const { installCost } = updateTotals();
 
   msg.textContent = "جاري الحفظ...";
   msg.className = "rq-msg";
 
-  const { data, error } = await client.rpc("rep_create_quote", {
+  // نبعت product_id و qty بس — السعر والخصم بيتحسبوا سيرفر-سايد
+  // من products + supplier_discounts داخل الدالة نفسها، مش من المتصفح.
+  const { data: quoteId, error } = await client.rpc("rep_create_quote", {
     p_customer_name: name,
     p_customer_phone: phone,
     p_customer_city: city || null,
     p_quote_type: quoteType,
-    p_items: cart.map((c) => ({ name: c.name, unit_price: c.unitPrice, qty: c.qty, line_total: c.unitPrice * c.qty })),
-    p_subtotal: subtotal,
+    p_items: cart.map((c) => ({ product_id: c.productId, qty: c.qty })),
     p_installation_cost: installCost,
-    p_total: grand,
     p_notes: null,
   });
 
@@ -271,17 +271,28 @@ async function saveQuote() {
   msg.textContent = "تم حفظ العرض بنجاح.";
   msg.className = "rq-msg ok";
 
-  printQuote({
-    id: data,
-    customer: { name, phone, city },
-    quoteType,
-    items: cart,
-    subtotal,
-    installCost,
-    grand,
-    createdAt: new Date(),
-  });
+  // نجيب العرض المحفوظ بأسعاره الرسمية (المحسوبة سيرفر-سايد) عشان الطباعة
+  const { data: savedQuote } = await client
+    .from("quotes")
+    .select("id, created_at, quote_type, items, subtotal, installation_cost, total")
+    .eq("id", quoteId)
+    .maybeSingle();
 
+  if (savedQuote) {
+    printQuote({
+      id: savedQuote.id,
+      customer: { name, phone, city },
+      quoteType: savedQuote.quote_type,
+      items: savedQuote.items,
+      subtotal: savedQuote.subtotal,
+      installCost: savedQuote.installation_cost,
+      grand: savedQuote.total,
+      createdAt: savedQuote.created_at,
+    });
+  }
+
+  cart = [];
+  renderCart();
   await loadMyQuotes();
 }
 
