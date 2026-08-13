@@ -1790,7 +1790,7 @@
 
       try {
         const [{ data, error }, { data: catSettings }] = await Promise.all([
-          sb.from('products').select('*').order('sort_order', { ascending: true }),
+          sb.from('products').select('id, category, brand, model_available, price, image_url, in_stock, created_at, datasheet_url, sort_order, power_kw, power_hp, power_watt, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh').order('sort_order', { ascending: true }),
           sb.from('category_settings').select('category_key, visible, main_section, sort_order'),
         ]);
 
