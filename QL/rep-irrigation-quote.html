@@ -24,8 +24,12 @@
       .pq-content{position:relative;padding:70mm 14mm 28mm 14mm;box-sizing:border-box;}
       .no-print{display:none !important;}
       .dash-card{box-shadow:none;border:0;padding:0 0 10px;margin-bottom:10px;page-break-inside:avoid;}
+      .bom-card{page-break-inside:auto;}
+      .bom-card h3{page-break-after:avoid;}
       table.bom{page-break-inside:auto;}
+      table.bom thead{display:table-header-group;}
       table.bom tr{page-break-inside:avoid;}
+      .totalbar,.legal-note,.support-note{page-break-inside:avoid;}
     }
   </style>
 </head>
@@ -194,7 +198,7 @@
             <div class="note" style="margin-top:8px" id="submittedByLine"></div>
           </div>
 
-          <div class="dash-card">
+          <div class="dash-card bom-card">
             <h3>تفصيل عرض السعر</h3>
             <table class="bom">
               <thead><tr><th>#</th><th>المكونات</th><th>النوع</th><th>العدد</th><th>الضمان</th></tr></thead>
