@@ -14,10 +14,15 @@
   <script defer src="supabase-config.js"></script>
   <script defer src="rep-irrigation-quote.js"></script>
   <style>
+    @page{ size: A4; margin: 70mm 15mm 28mm 15mm; }
     @media print{
       body *{visibility:hidden;}
       #quotePrintArea, #quotePrintArea *{visibility:visible;}
-      #quotePrintArea{position:absolute;top:0;right:0;left:0;padding:24px;}
+      #quotePrintArea{position:absolute;top:0;right:0;left:0;padding:0;}
+      .no-print{display:none !important;}
+      .dash-card{box-shadow:none;border:0;padding:0 0 10px;margin-bottom:10px;page-break-inside:avoid;}
+      table.bom{page-break-inside:auto;}
+      table.bom tr{page-break-inside:avoid;}
     }
   </style>
 </head>
@@ -124,7 +129,7 @@
         <div id="oversizeWarningBox"></div>
 
         <div class="dash-card" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;align-items:center;padding-top:16px;padding-bottom:16px">
-          <div style="display:flex;align-items:center;gap:10px">
+          <div class="no-print" style="display:flex;align-items:center;gap:10px">
             <img src="../logo.png" alt="الأصل للطاقة الشمسية" style="width:46px;height:46px;object-fit:contain">
             <div>
               <div style="font-family:'Cairo',sans-serif;font-weight:800;font-size:16px">الأصل للطاقة الشمسية</div>
@@ -203,7 +208,7 @@
               يقع على عاتق العميل تجهيز الموقع (أعمال الحفر والصب اللازمة) قبل موعد التوريد.
             </div>
             <div class="support-note">نلتزم بتوفير الدعم الفني وقطع الغيار للمنظومة حتى 10 سنوات من تاريخ التشغيل.</div>
-            <div class="contact-note">
+            <div class="contact-note no-print">
               <b style="color:var(--ink)">للتواصل</b><br>INFO@ALASLSOLAR.COM · SALES@ALASLSOLAR.COM<br>
               <span class="num">201200074344+</span>
             </div>
