@@ -14,11 +14,14 @@
   <script defer src="supabase-config.js"></script>
   <script defer src="rep-irrigation-quote.js"></script>
   <style>
-    @page{ size: A4; margin: 70mm 15mm 28mm 15mm; }
+    .pq-letterhead-bg{display:none;}
+    @page{ size: A4; margin: 0; }
     @media print{
       body *{visibility:hidden;}
       #quotePrintArea, #quotePrintArea *{visibility:visible;}
-      #quotePrintArea{position:absolute;top:0;right:0;left:0;padding:0;}
+      #quotePrintArea{position:relative;width:210mm;}
+      .pq-letterhead-bg{display:block;position:fixed;top:0;right:0;width:210mm;height:297mm;object-fit:cover;visibility:visible;z-index:-1;}
+      .pq-content{position:relative;padding:70mm 14mm 28mm 14mm;box-sizing:border-box;}
       .no-print{display:none !important;}
       .dash-card{box-shadow:none;border:0;padding:0 0 10px;margin-bottom:10px;page-break-inside:avoid;}
       table.bom{page-break-inside:auto;}
@@ -125,6 +128,8 @@
 
       <!-- عمود النتيجة -->
       <div id="quotePrintArea" class="quote-shell">
+        <img class="pq-letterhead-bg no-screen" src="letterhead.jpg" alt="">
+        <div class="pq-content">
 
         <div id="oversizeWarningBox"></div>
 
@@ -221,6 +226,7 @@
           </div>
         </div>
 
+      </div>
       </div>
     </div>
   </div>
