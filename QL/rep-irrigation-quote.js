@@ -121,12 +121,26 @@ function collectToggles() {
 
 let selectedQuoteType = "supply_install";
 
+// البنود اللي بتتفعّل تلقائيًا حسب نوع العرض المختار
+const PRESET_TOGGLES = {
+  supply_only: ["panel", "inverter", "combiner", "mc4", "cables"],
+  supply_install: ["panel", "inverter", "ip65", "combiner", "cables", "mc4", "structure", "concrete", "install_mech", "install_elec", "transport"],
+};
+
+function applyPresetToggles(preset) {
+  const onKeys = PRESET_TOGGLES[preset] || [];
+  document.querySelectorAll("[data-toggle]").forEach((el) => {
+    el.checked = onKeys.includes(el.dataset.toggle);
+  });
+}
+
 function attachPresetButtons() {
   document.querySelectorAll("[data-preset]").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       selectedQuoteType = btn.dataset.preset;
+      applyPresetToggles(selectedQuoteType);
       scheduleCalc();
     });
   });
@@ -346,6 +360,7 @@ function attachEvents() {
 }
 
 async function boot() {
+  applyPresetToggles(selectedQuoteType);
   await initClient();
   if (!client) return;
 
