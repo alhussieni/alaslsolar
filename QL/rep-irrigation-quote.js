@@ -70,7 +70,7 @@ function populatePanelPowers(brand) {
   const powerSel = $("#panelSelect");
   const options = panelCatalog.filter((p) => p.brand === brand);
   if (options.length === 0) { powerSel.innerHTML = '<option value="">مفيش قدرات متاحة</option>'; return; }
-  powerSel.innerHTML = options.map((p) => `<option value="${p.id}">${p.power_watt}W — ${p.name_ar}</option>`).join("");
+  powerSel.innerHTML = options.map((p) => `<option value="${p.id}">${p.power_watt} وات</option>`).join("");
 }
 
 const PRESET_TOGGLES = {
@@ -125,9 +125,9 @@ async function runPreview() {
   if (data && data.error) { msg.textContent = "تعذّر الحساب: " + data.error; msg.className = "rq-msg error"; $("#resultsWrap").hidden = true; return; }
 
   msg.textContent = "";
-  const panelOpt = $("#panelSelect").selectedOptions[0];
   const panelBrand = $("#panelBrandSelect").value;
-  const panelPower = panelOpt ? panelOpt.textContent.split("W")[0].trim() : "";
+  const panelObj = panelCatalog.find((p) => p.id === panelId);
+  const panelPower = panelObj ? String(panelObj.power_watt) : "";
   lastResult = data;
   lastInputs = { hp, panelBrand, panelPower, structureType, custName: "", custPhone: "" };
   renderScreen(data);
@@ -161,9 +161,9 @@ async function saveQuote() {
 
   msg.textContent = "تم حفظ العرض بنجاح (رقم " + data.quote_id + ").";
   msg.className = "rq-msg ok";
-  const panelOpt = $("#panelSelect").selectedOptions[0];
   const panelBrand = $("#panelBrandSelect").value;
-  const panelPower = panelOpt ? panelOpt.textContent.split("W")[0].trim() : "";
+  const panelObj = panelCatalog.find((p) => p.id === panelId);
+  const panelPower = panelObj ? String(panelObj.power_watt) : "";
   lastResult = data;
   lastInputs = { hp, panelBrand, panelPower, structureType, custName, custPhone };
   renderScreen(data);
@@ -190,14 +190,37 @@ function renderScreen(r) {
   $("#mRatio").textContent = "×" + Number(r.efficiency_ratio).toFixed(2);
 
   $("#rowsBody").innerHTML = (r.rows || [])
-    .map((row) => `<tr>
-      <td style="padding:6px;border-bottom:1px solid #EFEBE0">${row.n}</td>
-      <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-weight:600">${row.name}</td>
-      <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px;color:var(--muted)">${row.type}</td>
-      <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px">${row.qty}</td>
-      <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px">${row.origin}</td>
-      <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px">${row.warranty}</td>
-    </tr>`).join("");
+    .map((row) => {
+      const main = `<tr>
+        <td style="padding:6px;border-bottom:1px solid #EFEBE0">${row.n}</td>
+        <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-weight:600">${row.name}</td>
+        <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px;color:var(--muted)">${row.type}</td>
+        <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px">${row.qty}</td>
+        <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px">${row.origin}</td>
+        <td style="padding:6px;border-bottom:1px solid #EFEBE0;font-size:12px">${row.warranty}</td>
+      </tr>`;
+      // تفصيل داخلي للبند السابع (المدموج) — يوضح مكوناته وسعر كل واحد، شاشة بس مش طباعة
+      const bd = row.cost_note && row.cost_note.breakdown;
+      if (!bd) return main;
+      const breakdownRow = `<tr>
+        <td colspan="6" style="padding:0 6px 10px;border-bottom:1px solid #EFEBE0">
+          <details style="font-size:11.5px;color:var(--muted)">
+            <summary style="cursor:pointer">تفصيل داخلي لسعر البند (${fmt(row.net)} ج.م) — لا يظهر في الطباعة</summary>
+            <div style="margin-top:6px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+              <div>Combiner: ${fmt(bd.combiner)} ج.م</div>
+              <div>MC4: ${fmt(bd.mc4)} ج.م</div>
+              <div>لوحة IP65: ${fmt(bd.ip65)} ج.م</div>
+              <div>تركيب ميكانيكي: ${fmt(bd.install_mech)} ج.م</div>
+              <div>تركيب كهربائي: ${fmt(bd.install_elec)} ج.م</div>
+              <div>النقل: ${fmt(bd.transport)} ج.م</div>
+              <div>الخرسانة: ${fmt(bd.concrete)} ج.م</div>
+            </div>
+          </details>
+        </td>
+      </tr>`;
+      return main + breakdownRow;
+    })
+    .join("");
 
   $("#grandTotal").textContent = fmt(r.final_total) + " ج.م";
 
