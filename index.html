@@ -1,160 +1,431 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-N97W09ZNSP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-N97W09ZNSP');
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Al Asl Solar designs and installs solar energy, battery storage, and PV-diesel hybrid systems for farms, homes, and businesses in Egypt and Saudi Arabia. Get a free quote today.">
   <meta name="theme-color" content="#0d0b0a">
-  <title>عروض الأسعار | مناديب الأصل للطاقة الشمسية</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="facebook-domain-verification" content="7egq1u7yj1p0izsfzbshpa4ol5jila">
+  <meta property="og:title" content="Al Asl Solar | Solar Energy Solutions – Egypt & Saudi Arabia">
+  <meta property="og:description" content="Clean solar systems, battery storage, and hybrid energy solutions for farms, homes, and industrial projects in Egypt and Saudi Arabia.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alaslsolar.com/">
+  <meta property="og:image" content="https://alaslsolar.com/solar.jpg">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ar_EG">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Al Asl Solar | Solar Energy Solutions">
+  <meta name="twitter:description" content="Clean solar systems, battery storage, and hybrid energy solutions for farms, homes, and industrial projects.">
+  <meta name="twitter:image" content="https://alaslsolar.com/solar.jpg">
+  <title>Al Asl Solar | Solar Energy Solutions – Egypt & Saudi Arabia</title>
+  <link rel="canonical" href="https://alaslsolar.com/">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="rep-theme.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="supabase-config.js"></script>
-  <script defer src="rep-quotes.js"></script>
-  <style>
-    .rq-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 13px; box-shadow: var(--shadow-soft); }
-    .rq-card h2 { margin: 0 0 14px; font-size: 16px; }
-    .rq-field { margin-bottom: 12px; }
-    .rq-type-btn { flex: 1; padding: 9px; border: 0; background: #fff; cursor: pointer; font-family: 'Cairo'; font-weight: 600; font-size: 13px; color: var(--muted); }
-    .rq-type-btn.active { background: var(--night); color: #fff; }
-    .rq-totals { margin-top: 12px; font-size: 15px; }
-    .rq-totals .total { font-size: 20px; font-weight: 800; color: var(--night); }
-    .rq-msg { font-size: 13px; margin-top: 8px; padding: 8px 10px; border-radius: 8px; }
-    .rq-msg.error { color: var(--bad); background: #FBEDEA; }
-    .rq-msg.ok { color: var(--teal-dark); background: var(--teal-tint); }
-    .rq-cart-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .rq-cart-table th, .rq-cart-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; }
-    .rq-cart-table th { color: var(--muted); font-size: 12px; }
-    .rq-shell { max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; }
-    .rq-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
-    .rq-header img { height: 40px; }
-    .rq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 640px) { .rq-row { grid-template-columns: 1fr; } }
-    .rq-type-toggle.seg { margin-top: 4px; }
-    .rq-product-picker { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .rq-product-picker select, .rq-product-picker input { flex: 1; min-width: 160px; }
-    .rq-cart-table input[type="number"] { width: 64px; padding: 4px 6px; }
-    .rq-remove { background: none; border: none; color: var(--bad); cursor: pointer; font-size: 13px; }
-    .rq-quote-list { font-size: 14px; }
-    .rq-quote-list .rq-quote-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 8px; }
-    .rq-quote-item button { font-size: 12px; padding: 6px 12px; }
-
-    /* ---- طباعة العرض ---- */
-    #printArea { display: none; }
-    @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 24px; direction: rtl; }
-      .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0D3452; padding-bottom: 12px; margin-bottom: 16px; }
-      .print-header img { height: 55px; }
-      .print-title { font-size: 20px; font-weight: 800; color: #0D3452; }
-      .print-meta { font-size: 13px; color: #555; margin-bottom: 16px; }
-      .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-      .print-table th, .print-table td { border: 1px solid #DEE7E4; padding: 6px 8px; text-align: center; }
-      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
-      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
-      .print-totals .grand { font-weight: 800; font-size: 17px; border-top: 2px solid #0D3452; margin-top: 6px; padding-top: 8px; color:#0D3452; }
-      .print-footer { margin-top: 30px; font-size: 12px; color: #777; }
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap"></noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Al Asl Solar Energy",
+    "url": "https://alaslsolar.com/",
+    "logo": "https://alaslsolar.com/logo.png",
+    "image": "https://alaslsolar.com/solar.jpg",
+    "description": "Professional solar energy solutions for farms, homes, and industrial projects in Egypt and Saudi Arabia.",
+    "email": "sales@alaslsolar.com",
+    "telephone": ["+201200074344", "+201208787702", "+966561274344"],
+    "address": [
+      { "@type": "PostalAddress", "addressCountry": "EG" },
+      { "@type": "PostalAddress", "addressCountry": "SA" }
+    ],
+    "areaServed": ["EG", "SA"],
+    "priceRange": "$$",
+    "sameAs": [
+      "https://linkedin.com/company/alaslsolar",
+      "https://youtube.com/@alaslsolar",
+      "https://facebook.com/alaslsolar",
+      "https://instagram.com/alaslsolar",
+      "https://tiktok.com/@alaslsolar"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Solar Energy Services",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Solar system design and installation" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Battery energy storage" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "PV-Diesel hybrid systems" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Solar maintenance and monitoring" } }
+      ]
     }
-  </style>
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can solar reduce diesel consumption for irrigation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. A properly sized solar or PV-diesel hybrid system can reduce generator runtime and fuel use while keeping pumps operational."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you provide batteries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Battery storage can be added for backup, load shifting, or improved operating reliability depending on the project needs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What information is needed for a quotation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Location, load details, working hours, current energy source, and available installation area help prepare a more accurate proposal."
+        }
+      }
+    ]
+  }
+  </script>
+  <link rel="alternate" hreflang="en" href="https://alaslsolar.com/">
+  <link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/">
+  <script defer src="app.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#main" data-i18n="skip_link">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Al Asl Solar home">
+      <img src="logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
+    </a>
+    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
+      <i class="fa fa-bars" aria-hidden="true"></i>
+      <span class="sr-only" data-i18n="menu_open">Open menu</span>
+    </button>
+    <nav class="site-menu" id="siteMenu" aria-label="Main navigation">
+      <a href="index.html" data-i18n="nav_home">Home</a>
+      <a href="about.html" data-i18n="nav_about">About Us</a>
+      <a href="services.html" data-i18n="nav_services">Services</a>
+      <a href="products.html" data-i18n="nav_products">Products</a>
+      <a href="projects.html" data-i18n="nav_projects">Projects</a>
+      <a href="articles.html" data-i18n="nav_articles">Articles</a>
+      <a href="calculators.html" data-i18n="nav_calculators">Calculators</a>
+      <a href="contact.html" data-i18n="nav_contact">Contact</a>      <div class="lang-switcher" role="group" aria-label="Language">
+        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
+          <i class="ti ti-world" aria-hidden="true"></i>
+          <span id="langLabel" data-i18n="language">Language</span>
+          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
+        </button>
+        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
+          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
+          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
+          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
+          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
 
-<div class="rq-shell">
-  <div class="rq-header">
-    <img src="../logo.png" alt="الأصل للطاقة الشمسية">
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero__content">
+        <p class="eyebrow" data-i18n="home_eyebrow">Solar energy engineering</p>
+        <h1>AL ASL SOLAR</h1>
+        <p class="hero__lead" data-i18n="home_lead">Clean energy, smart control, and long-term value for farms, homes, and industrial facilities.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="contact.html" data-i18n="cta_quote">
+            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+            Request a Quote
+          </a>
+          <a class="btn btn-secondary" href="services.html" data-i18n="cta_services">View Services</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats — loaded dynamically from Supabase, fallback to static -->
+    <section class="section stats-band reveal" aria-label="Company highlights">
+      <div class="stats-grid" id="statsGrid">
+        <article>
+          <strong id="stat1Value">2026</strong>
+          <span id="stat1Label" data-i18n="stat_ready">Ready for new projects</span>
+        </article>
+        <article>
+          <strong id="stat2Value">4</strong>
+          <span id="stat2Label" data-i18n="stat_sectors">Main service sectors</span>
+        </article>
+        <article>
+          <strong id="stat3Value">24/7</strong>
+          <span id="stat3Label" data-i18n="stat_support">Support-oriented operation</span>
+        </article>
+      </div>
+    </section>
+
+    <!-- Solutions -->
+    <section class="section reveal">
+      <div class="section-heading">
+        <p class="eyebrow" data-i18n="home_solutions_kicker">What we build</p>
+        <h2 data-i18n="home_solutions_title">Reliable solar solutions from survey to operation</h2>
+      </div>
+      <div class="cards three">
+        <article class="card">
+          <i class="fa fa-solar-panel" aria-hidden="true"></i>
+          <h3 data-i18n="service_solar">Solar Systems</h3>
+          <p data-i18n="service_solar_text">Complete photovoltaic systems sized for irrigation, homes, commercial sites, and factories.</p>
+        </article>
+        <article class="card">
+          <i class="fa fa-battery-full" aria-hidden="true"></i>
+          <h3 data-i18n="service_storage">Energy Storage</h3>
+          <p data-i18n="service_storage_text">Battery storage designs that improve uptime and reduce generator dependency.</p>
+        </article>
+        <article class="card">
+          <i class="fa fa-gears" aria-hidden="true"></i>
+          <h3 data-i18n="service_hybrid">PV-Diesel Hybrid</h3>
+          <p data-i18n="service_hybrid_text">Hybrid control solutions that cut fuel use while keeping operations stable.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Process -->
+    <section class="section reveal">
+      <div class="section-heading">
+        <p class="eyebrow" data-i18n="process_kicker">How we work</p>
+        <h2 data-i18n="process_title">A clear engineering path from idea to operation</h2>
+      </div>
+      <div class="process-grid">
+        <article>
+          <span>01</span>
+          <h3 data-i18n="process_1_title">Survey</h3>
+          <p data-i18n="process_1_text">We inspect the site, loads, operating hours, and current energy cost.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3 data-i18n="process_2_title">Design</h3>
+          <p data-i18n="process_2_text">We size the system and select components for reliability and serviceability.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3 data-i18n="process_3_title">Install</h3>
+          <p data-i18n="process_3_text">We install, test, commission, and hand over the system with training.</p>
+        </article>
+        <article>
+          <span>04</span>
+          <h3 data-i18n="process_4_title">Maintain</h3>
+          <p data-i18n="process_4_text">We support operation with maintenance and performance reviews.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Why us -->
+    <section class="section muted reveal">
+      <div class="split">
+        <div>
+          <p class="eyebrow" data-i18n="home_why_kicker">Why Al Asl Solar</p>
+          <h2 data-i18n="home_why_title">Designed for practical savings, not just panels on a roof</h2>
+          <a class="btn btn-dark" href="about.html" style="margin-top:var(--space-4)" data-i18n="nav_about">About Us</a>
+        </div>
+        <ul class="check-list">
+          <li data-i18n="why_1">Site survey, load study, and right-sized design.</li>
+          <li data-i18n="why_2">Equipment selection focused on durability and serviceability.</li>
+          <li data-i18n="why_3">Installation, testing, handover, and user training.</li>
+          <li data-i18n="why_4">Maintenance support for long-term performance.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ — loaded dynamically from Supabase -->
+    <section class="section reveal">
+      <div class="section-heading">
+        <p class="eyebrow" data-i18n="faq_kicker">FAQ</p>
+        <h2 data-i18n="faq_title">Common questions before starting a solar project</h2>
+      </div>
+      <div class="faq-list" id="faqContainer">
+        <!-- Static fallback — replaced by live data if Supabase available -->
+        <details>
+          <summary data-i18n="faq_1_q">Can solar reduce diesel consumption for irrigation?</summary>
+          <p data-i18n="faq_1_a">Yes. A properly sized solar or PV-diesel hybrid system can reduce generator runtime and fuel use while keeping pumps operational.</p>
+        </details>
+        <details>
+          <summary data-i18n="faq_2_q">Do you provide batteries?</summary>
+          <p data-i18n="faq_2_a">Yes. Battery storage can be added for backup, load shifting, or improved operating reliability depending on the project needs.</p>
+        </details>
+        <details>
+          <summary data-i18n="faq_3_q">What information is needed for a quotation?</summary>
+          <p data-i18n="faq_3_a">Location, load details, working hours, current energy source, and available installation area help us prepare a more accurate proposal.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- CTA band -->
+    <section class="section cta-band reveal">
+      <h2 data-i18n="cta_band_title">Ready to reduce your energy costs?</h2>
+      <p data-i18n="cta_band_text">Send us your project details and we'll prepare a tailored solar proposal for you.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="contact.html" data-i18n="cta_quote">
+          <i class="fa fa-paper-plane" aria-hidden="true"></i>
+          Request a Quote
+        </a>
+        <a class="btn btn-secondary" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          WhatsApp
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
     <div>
-      <a href="rep-offgrid-quote.html" class="btn" style="min-height:36px;font-size:13px;">حاسبة أوف جريد كاملة ←</a>
-      <span data-user-name style="font-weight:700; margin-inline-start:10px;"></span>
-      <button class="btn" data-logout hidden style="margin-inline-start:10px;">تسجيل خروج</button>
+      <strong>Al Asl Solar Energy</strong>
+      <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
     </div>
-  </div>
-
-  <!-- شاشة تسجيل الدخول -->
-  <div class="rq-card login-shell" data-auth-panel>
-    <h2>تسجيل دخول المندوب</h2>
-    <form data-login-form>
-      <div class="rq-field">
-        <label>البريد الإلكتروني</label>
-        <input type="email" id="loginEmail" required autocomplete="username">
-      </div>
-      <div class="rq-field">
-        <label>كلمة المرور</label>
-        <input type="password" id="loginPassword" required autocomplete="current-password">
-      </div>
-      <button type="submit" class="btn btn-primary">دخول</button>
-      <p class="rq-msg" data-auth-message></p>
-    </form>
-  </div>
-
-  <!-- لوحة إنشاء عرض السعر -->
-  <div data-rep-panel hidden>
-
-    <div class="rq-card">
-      <h2>بيانات العميل</h2>
-      <div class="rq-row">
-        <div class="rq-field">
-          <label>اسم العميل</label>
-          <input type="text" id="custName" required>
-        </div>
-        <div class="rq-field">
-          <label>رقم التليفون</label>
-          <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
-        </div>
-      </div>
-      <div class="rq-field">
-        <label>المدينة / المنطقة</label>
-        <input type="text" id="custCity">
-      </div>
+    <div class="social-links" aria-label="Social links">
+      <a href="https://linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+      <a href="https://youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+      <a href="https://facebook.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+      <a href="https://instagram.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+      <a href="https://tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
     </div>
+  </footer>
 
-    <div class="rq-card">
-      <h2>نوع العرض</h2>
-      <div class="rq-type-toggle">
-        <button type="button" class="rq-type-btn active" data-quote-type="supply_only">توريد فقط</button>
-        <button type="button" class="rq-type-btn" data-quote-type="supply_install">توريد وتركيب</button>
-      </div>
-      <div class="rq-field" data-install-cost-wrap hidden style="margin-top:var(--space-2);">
-        <label>تكلفة التركيب (تُضاف للإجمالي)</label>
-        <input type="number" id="installCost" min="0" step="1" value="0">
-      </div>
-    </div>
+  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+  </a>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    (async function loadLiveStats() {
+      try {
+        const client = getAlaslSupabase();
+        if (!client) return;
+        const { data } = await client
+          .from("site_stats")
+          .select("id, value, label_en, label_ar, label_es, label_zh")
+          .order("sort_order");
+        if (!data || data.length < 3) return;
 
-    <div class="rq-card">
-      <h2>إضافة منتجات للعرض</h2>
-      <div class="rq-product-picker">
-        <select id="categorySelect"></select>
-        <select id="productSelect"></select>
-        <input type="number" id="qtyInput" min="1" value="1" style="max-width:80px;">
-        <button type="button" class="btn btn-primary" id="addProductBtn">إضافة</button>
-      </div>
-      <table class="rq-cart-table">
-        <thead>
-          <tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th></th></tr>
-        </thead>
-        <tbody id="cartBody"></tbody>
-      </table>
-      <div class="rq-totals">
-        <div>الإجمالي قبل التركيب: <strong id="subtotalDisplay">0</strong> ج.م</div>
-        <div data-install-total-row hidden>تكلفة التركيب: <strong id="installTotalDisplay">0</strong> ج.م</div>
-        <div class="total">الإجمالي الكلي: <span id="grandTotalDisplay">0</span> ج.م</div>
-      </div>
-      <button type="button" class="btn btn-primary" id="saveQuoteBtn" style="margin-top:var(--space-2);">حفظ العرض وطباعته</button>
-      <p class="rq-msg" data-quote-message></p>
-    </div>
+        const lang = localStorage.getItem("alasl-lang") || "en";
+        const labelKey = { en: "label_en", ar: "label_ar", es: "label_es", zh: "label_zh" }[lang] || "label_en";
 
-    <div class="rq-card">
-      <h2>عروضي السابقة</h2>
-      <div class="rq-quote-list" id="myQuotesList"></div>
-    </div>
+        const ids = ["stat1", "stat2", "stat3"];
+        data.slice(0, 3).forEach((stat, i) => {
+          const valEl   = document.getElementById(ids[i] + "Value");
+          const lblEl   = document.getElementById(ids[i] + "Label");
+          if (valEl) valEl.textContent = stat.value;
+          if (lblEl) { lblEl.textContent = stat[labelKey] || stat.label_en; lblEl.removeAttribute("data-i18n"); }
+        });
 
-  </div>
-</div>
+        // Re-apply on language change
+        document.querySelectorAll("[data-lang]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const l = btn.dataset.lang;
+            const lk = { en: "label_en", ar: "label_ar", es: "label_es", zh: "label_zh" }[l] || "label_en";
+            data.slice(0, 3).forEach((stat, i) => {
+              const lblEl = document.getElementById(ids[i] + "Label");
+              if (lblEl) { lblEl.textContent = stat[lk] || stat.label_en; lblEl.removeAttribute("data-i18n"); }
+            });
+          });
+        });
+      } catch(e) {
+        // Fallback to static values already in HTML — no action needed
+      }
+    })();
 
-<!-- منطقة الطباعة -->
-<div id="printArea"></div>
+    // Load live FAQs from Supabase
+    (async function loadLiveFaqs() {
+      try {
+        const client = getAlaslSupabase();
+        if (!client) return;
+        const { data } = await client
+          .from("faqs")
+          .select("question_en,answer_en,question_ar,answer_ar,question_es,answer_es,question_zh,answer_zh")
+          .eq("published", true)
+          .order("sort_order");
+        if (!data || data.length === 0) return;
 
+        const lang = localStorage.getItem("alasl-lang") || "en";
+        const qKey = { en:"question_en", ar:"question_ar", es:"question_es", zh:"question_zh" };
+        const aKey = { en:"answer_en",   ar:"answer_ar",   es:"answer_es",   zh:"answer_zh" };
+
+        function renderFaqs(l) {
+          const qk = qKey[l] || "question_en";
+          const ak = aKey[l] || "answer_en";
+          const container = document.getElementById("faqContainer");
+          if (!container) return;
+          container.innerHTML = data.map(faq => `
+            <details>
+              <summary>${faq[qk] || faq.question_en}</summary>
+              <p>${faq[ak] || faq.answer_en}</p>
+            </details>
+          `).join("");
+        }
+
+        renderFaqs(lang);
+
+        // Re-render on language change
+        document.querySelectorAll("[data-lang]").forEach(btn => {
+          btn.addEventListener("click", () => renderFaqs(btn.dataset.lang));
+        });
+      } catch(e) {
+        // Keep static fallback
+      }
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    (async function loadPageFaqs() {
+      try {
+        const client = getAlaslSupabase();
+        if (!client) return;
+        const { data } = await client
+          .from('faqs')
+          .select('question_en,answer_en,question_ar,answer_ar,question_es,answer_es,question_zh,answer_zh')
+          .eq('published', true)
+          .eq('page', 'home')
+          .order('sort_order');
+        if (!data || data.length === 0) return;
+
+        const lang = localStorage.getItem('alasl-lang') || 'en';
+        const qKey = {en:'question_en',ar:'question_ar',es:'question_es',zh:'question_zh'};
+        const aKey = {en:'answer_en',  ar:'answer_ar',  es:'answer_es',  zh:'answer_zh'};
+
+        function renderFaqs(l) {
+          const qk = qKey[l] || 'question_en';
+          const ak = aKey[l] || 'answer_en';
+          const container = document.getElementById('faqContainer');
+          if (!container) return;
+          container.innerHTML = data.map(faq => `
+            <details>
+              <summary>${faq[qk] || faq.question_en}</summary>
+              <p>${faq[ak] || faq.answer_en}</p>
+            </details>
+          `).join('');
+        }
+        renderFaqs(lang);
+        document.querySelectorAll('[data-lang]').forEach(btn => {
+          btn.addEventListener('click', () => renderFaqs(btn.dataset.lang));
+        });
+      } catch(e) { /* keep static fallback */ }
+    })();
+  </script>
 </body>
 </html>
