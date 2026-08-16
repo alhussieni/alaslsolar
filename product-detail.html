@@ -527,7 +527,15 @@
     }
 
     function renderGallery() {
-      const images = [...new Set(familyRows.map(r => r.image_url).filter(Boolean))];
+      // Prefer a curated multi-photo gallery (row.images) when the family
+      // has one — several real product photos are more useful than the
+      // per-row image_url set, especially for families where every power
+      // variant is visually identical (e.g. VEICHI SI23 shares one
+      // enclosure design across its whole power range). Falls back to the
+      // per-row image_url set for families that don't have a curated
+      // gallery yet.
+      const curated = [...new Set(familyRows.flatMap(r => Array.isArray(r.images) ? r.images : []).filter(Boolean))];
+      const images = curated.length ? curated : [...new Set(familyRows.map(r => r.image_url).filter(Boolean))];
       const thumbs = document.getElementById('pdThumbs');
 
       if (images.length === 0) {
