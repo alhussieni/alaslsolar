@@ -2248,34 +2248,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadDiscountsList() {
-    listBody.innerHTML = `<div style="padding:12px;color:var(--muted)">جاري التحميل...</div>`;
+    listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr>`;
     const { data, error } = await client.from("supplier_discounts")
       .select("category,brand,supplier_discount_pct")
       .order("category", { ascending: true });
-    if (error) { listBody.innerHTML = `<div style="padding:12px;color:#b23">تعذر التحميل: ${error.message}</div>`; return; }
-    if (!data || !data.length) { listBody.innerHTML = `<div style="padding:12px;color:var(--muted)">مفيش خصومات مسجّلة لسه.</div>`; return; }
-
-    const CATEGORY_LABELS = {
-      offgrid: "أوف جريد (انفرترات)", batteries: "بطاريات", panels: "ألواح",
-      inverters: "إنفرترات (ري)", pumps: "مضخات", well_motors: "موتورات آبار", chassis: "شاسيهات",
-    };
-
-    listBody.innerHTML = `<div class="sd-grid">` + data.map((r) => {
-      const pct = parseFloat(r.supplier_discount_pct);
-      const tier = pct >= 15 ? "high" : pct >= 5 ? "mid" : "low";
-      return `
-      <div class="sd-chip" data-cat="${r.category}" data-brand="${r.brand}">
-        <button type="button" class="sd-delete-btn" title="حذف">✕</button>
-        <div class="cat">${CATEGORY_LABELS[r.category] || r.category}</div>
-        <div class="brand">${r.brand}</div>
-        <span class="pct ${tier}">${pct}%</span>
-      </div>`;
-    }).join("") + `</div>`;
-
+    if (error) { listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:#b23">تعذر التحميل: ${error.message}</td></tr>`; return; }
+    if (!data || !data.length) { listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:var(--muted)">مفيش خصومات مسجّلة لسه.</td></tr>`; return; }
+    listBody.innerHTML = data.map((r) => `
+      <tr data-cat="${r.category}" data-brand="${r.brand}" style="border-bottom:1px solid var(--line)">
+        <td style="padding:8px">${r.category}</td>
+        <td style="padding:8px">${r.brand}</td>
+        <td style="padding:8px">${r.supplier_discount_pct}%</td>
+        <td style="padding:8px"><button type="button" class="sd-delete-btn" style="padding:5px 12px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:12px;cursor:pointer">حذف</button></td>
+      </tr>`).join("");
     listBody.querySelectorAll(".sd-delete-btn").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
-        const chip = e.target.closest(".sd-chip");
-        await client.from("supplier_discounts").delete().eq("category", chip.dataset.cat).eq("brand", chip.dataset.brand);
+        const row = e.target.closest("tr");
+        await client.from("supplier_discounts").delete().eq("category", row.dataset.cat).eq("brand", row.dataset.brand);
         loadDiscountsList();
       });
     });
@@ -2300,172 +2289,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadBrandsForCategory();
   loadDiscountsList();
-});
-
-/* ============================================================
-   قسم بنود حاسبة الري — قراءة/كتابة irrigation_bom_settings
-   (صف واحد بس id=1)، محمي بـ RLS للأدمن فقط.
-   ============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  const grid = document.getElementById("bomFieldsGrid");
-  const saveBtn = document.getElementById("bomSaveBtn");
-  const msg = document.querySelector("[data-bom-message]");
-  if (!grid || !saveBtn) return;
-
-  // كل مجموعة: [مفتاح، أيقونة، عنوان، لون مميز soft، حقولها]
-  const FIELD_GROUPS = [
-    {
-      icon: "⚙️", title: "إعدادات عامة", accent: "var(--brand)", accentSoft: "var(--brand-soft)",
-      sub: "تؤثر على كل حساب — الضريبة ونسبة تصميم الألواح",
-      fields: [
-        ["vat", "ضريبة القيمة المضافة", "نسبة (0.15 = 15%)"],
-        ["hp_capacity_ratio", "نسبة سعة الألواح للحصان", "معامل"],
-        ["max_string_voltage", "أقصى فولت للسلسلة", "فولت"],
-        ["inverter_power_increase", "زيادة قدرة الإنفرتر المحسوبة", "كيلوواط"],
-      ],
-    },
-    {
-      icon: "🔌", title: "الكابلات", accent: "var(--steel)", accentSoft: "#EAEDED",
-      sub: "طول الكابل بيتحسب تلقائي من عدد السلاسل",
-      fields: [
-        ["cable_low_multiplier", "معامل الطول (أقل من 100 ك.و)", "معامل"],
-        ["cable_high_multiplier", "معامل الطول (100 ك.و فأكثر)", "معامل"],
-        ["cable_per_meter", "تكلفة المتر الواحد", "ج.م"],
-        ["cable_markup", "معامل ربح الكابلات", "معامل"],
-      ],
-    },
-    {
-      icon: "🏗️", title: "الشاسيه والخرسانة والتأريض", accent: "var(--forest)", accentSoft: "#E3ECE7",
-      fields: [
-        ["structure_price_fixed", "تكلفة الشاسيه الثابت", "ج.م / وحدة"],
-        ["structure_price_rotational", "تكلفة الشاسيه المتحرك", "ج.م / وحدة"],
-        ["structure_markup_pct", "هامش ربح الشاسيه", "%"],
-        ["concrete_per_unit", "تكلفة وحدة الخرسانة", "ج.م"],
-        ["concrete_markup_pct", "هامش ربح الخرسانة", "%"],
-        ["earthing_per_unit", "تكلفة وحدة التأريض", "ج.م"],
-      ],
-    },
-    {
-      icon: "⚡", title: "الريأكتور وصندوق التجميع", accent: "var(--brand-dark)", accentSoft: "var(--brand-soft)",
-      fields: [
-        ["reactor_markup_pct", "هامش ربح الريأكتور", "%"],
-        ["combiner_headroom", "معامل أمان صندوق التجميع", "معامل"],
-        ["combiner_markup_pct", "هامش ربح صندوق التجميع", "%"],
-        ["mc4_per_unit", "تكلفة وصلة MC4", "ج.م"],
-        ["mc4_markup_pct", "هامش ربح MC4", "%"],
-      ],
-    },
-    {
-      icon: "🚚", title: "التركيب والنقل", accent: "var(--charcoal)", accentSoft: "#EFEDEC",
-      fields: [
-        ["mech_install_per_panel", "التركيب الميكانيكي للوح", "ج.م / لوح"],
-        ["elec_install_per_panel", "التركيب الكهربائي للوح", "ج.م / لوح"],
-        ["transport_per_trip", "تكلفة رحلة النقل", "ج.م"],
-        ["transport_minimum", "الحد الأدنى للنقل", "ج.م"],
-      ],
-    },
-    {
-      icon: "☀️", title: "الألواح ولوحة الحماية IP65", accent: "var(--brand)", accentSoft: "var(--brand-soft)",
-      sub: "سعر اللوح الأساسي بيتسحب من المنتجات — دي هوامش إضافية بس",
-      fields: [
-        ["steel_panel_per_hp", "تكلفة لوحة IP65 لكل حصان", "ج.م / حصان"],
-        ["ip65_markup_pct", "هامش ربح لوحة IP65", "%"],
-        ["panel_margin_per_watt", "هامش ربح الألواح لكل وات", "ج.م / وات"],
-      ],
-    },
-  ];
-
-  // الحقول المعقدة (سلالم/جداول أسعار) — بتتعدل كـ JSON خام لأصحاب الخبرة، اختيارية
-  const JSON_FIELDS = [
-    ["reactor_prices", "أسعار الريأكتورات (حسب المقاس بالأمبير)"],
-    ["combiner_boxes", "أسعار صناديق التجميع (السعة، السعر)"],
-    ["reactor_ladder", "مقاسات الريأكتور المتاحة (أمبير)"],
-    ["cb_ladder", "مقاسات القاطع المتاحة (أمبير)"],
-  ];
-
-  let currentRow = null;
-
-  async function loadBomSettings() {
-    grid.innerHTML = "جاري التحميل...";
-    const { data, error } = await client.from("irrigation_bom_settings").select("*").eq("id", 1).maybeSingle();
-    if (error || !data) {
-      grid.innerHTML = `<span style="color:#b23">تعذر التحميل${error ? ": " + error.message : ""}</span>`;
-      return;
-    }
-    currentRow = data;
-
-    const groupsHtml = FIELD_GROUPS.map((g) => `
-      <div class="bom-group" style="--bom-accent:${g.accent};--bom-accent-soft:${g.accentSoft}">
-        <div class="bom-group-head">
-          <span class="bom-group-icon">${g.icon}</span>
-          <div>
-            <div class="bom-group-title">${g.title}</div>
-            ${g.sub ? `<div class="bom-group-sub">${g.sub}</div>` : ""}
-          </div>
-        </div>
-        <div class="bom-fields">
-          ${g.fields.map(([key, label, unit]) => `
-            <div class="bom-field">
-              <label>${label}</label>
-              <div class="input-wrap">
-                <input type="number" step="any" data-bom-field="${key}" value="${data[key]}">
-                <span class="unit">${unit}</span>
-              </div>
-            </div>`).join("")}
-        </div>
-      </div>`).join("");
-
-    const jsonHtml = `
-      <details class="bom-advanced">
-        <summary>⚙️ إعدادات متقدمة (سلالم الأسعار — للاطلاع وأصحاب الخبرة فقط)</summary>
-        <div style="display:grid;gap:10px;margin-top:8px">
-          ${JSON_FIELDS.map(([key, label]) => `
-            <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">${label}</label>
-              <textarea data-bom-field="${key}" data-bom-json="true" rows="2">${JSON.stringify(data[key])}</textarea>
-            </div>`).join("")}
-        </div>
-      </details>`;
-
-    grid.innerHTML = groupsHtml + jsonHtml;
-  }
-
-  saveBtn.addEventListener("click", async () => {
-    if (!currentRow) return;
-    const updates = {};
-    let jsonError = null;
-
-    grid.querySelectorAll("[data-bom-field]").forEach((el) => {
-      const key = el.dataset.bomField;
-      if (el.dataset.bomJson === "true") {
-        try { updates[key] = JSON.parse(el.value); }
-        catch (e) { jsonError = key; }
-      } else {
-        updates[key] = parseFloat(el.value);
-      }
-    });
-
-    if (jsonError) {
-      msg.style.color = "#b23";
-      msg.textContent = `صياغة JSON غلط في حقل "${jsonError}" — راجعه قبل الحفظ.`;
-      return;
-    }
-
-    saveBtn.disabled = true;
-    updates.updated_at = new Date().toISOString();
-    const { error } = await client.from("irrigation_bom_settings").update(updates).eq("id", 1);
-    saveBtn.disabled = false;
-
-    if (error) {
-      msg.style.color = "#b23";
-      msg.textContent = "تعذر الحفظ: " + error.message;
-      return;
-    }
-    msg.style.color = "var(--forest)";
-    msg.textContent = "تم الحفظ. التعديلات هتتطبق على كل حساب جديد فورًا.";
-    setTimeout(() => { if (msg) msg.textContent = ""; }, 3000);
-    loadBomSettings();
-  });
-
-  loadBomSettings();
 });

@@ -562,6 +562,8 @@
           <td>${esc(r.name)}</td><td>${esc(r.type)}</td><td>${r.qty}</td>
           <td>${linkFor[r.name] ? `<a href="${linkFor[r.name]}" target="_blank" class="btn-light" style="padding:5px 12px;font-size:12px;height:auto;">اعرف السعر</a>` : '<span style="color:var(--muted);font-size:12px;">تواصل معنا</span>'}</td>
         </tr>`).join('');
+
+      window.__lastOffgridResult = result;
     }
 
     document.getElementById('ogCalcBtn').addEventListener('click', () => {
