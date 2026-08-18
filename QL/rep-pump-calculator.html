@@ -11,6 +11,7 @@
   </script>
 
   <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="حاسبة نظام الضخ الزراعي — احسب احتياجك من المياه وقدرة الموتور وقطر الماسورة بسهولة">
   <meta name="theme-color" content="#0d0b0a">
@@ -24,8 +25,8 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap"></noscript>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="app.js"></script>
+  <link rel="stylesheet" href="../styles.css">
+  <script defer src="../app.js"></script>
 
   <style>
     /* ── Calculator-specific overrides (uses site CSS variables) ── */
@@ -297,22 +298,22 @@
   <a class="skip-link" href="#main" data-i18n="skip_link">تخطي إلى المحتوى</a>
 
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="الأصل للطاقة الشمسية">
-      <img src="logo-white.png" alt="شعار الأصل للطاقة الشمسية" width="120" height="70" loading="eager">
+    <a class="brand" href="../index.html" aria-label="الأصل للطاقة الشمسية">
+      <img src="../logo-white.png" alt="شعار الأصل للطاقة الشمسية" width="120" height="70" loading="eager">
     </a>
     <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
       <i class="fa fa-bars" aria-hidden="true"></i>
       <span class="sr-only" data-i18n="menu_open">فتح القائمة</span>
     </button>
     <nav class="site-menu" id="siteMenu" aria-label="التنقل الرئيسي">
-      <a href="index.html" data-i18n="nav_home">الرئيسية</a>
-      <a href="about.html" data-i18n="nav_about">من نحن</a>
-      <a href="services.html" data-i18n="nav_services">الخدمات</a>
-      <a href="products.html" data-i18n="nav_products">المنتجات</a>
-      <a href="projects.html" data-i18n="nav_projects">المشاريع</a>
-      <a href="articles.html" data-i18n="nav_articles">المقالات</a>
-      <a href="calculators.html" aria-current="page" style="color:#e8954a;">الحاسبات</a>
-      <a href="contact.html" data-i18n="nav_contact">تواصل معنا</a>      <!-- Language switcher hidden: only ~10% of this page's content is translatable (data-i18n coverage is partial), so showing language buttons here was misleading. Re-enable once the calculator UI is fully translated. -->
+      <a href="../index.html" data-i18n="nav_home">الرئيسية</a>
+      <a href="../about.html" data-i18n="nav_about">من نحن</a>
+      <a href="../services.html" data-i18n="nav_services">الخدمات</a>
+      <a href="../products.html" data-i18n="nav_products">المنتجات</a>
+      <a href="../projects.html" data-i18n="nav_projects">المشاريع</a>
+      <a href="../articles.html" data-i18n="nav_articles">المقالات</a>
+      <a href="../calculators.html" aria-current="page" style="color:#e8954a;">الحاسبات</a>
+      <a href="../contact.html" data-i18n="nav_contact">تواصل معنا</a>      <!-- Language switcher hidden: only ~10% of this page's content is translatable (data-i18n coverage is partial), so showing language buttons here was misleading. Re-enable once the calculator UI is fully translated. -->
       <div class="lang-switcher" role="group" aria-label="اللغة" hidden>
         <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
           <i class="ti ti-world" aria-hidden="true"></i>
@@ -334,7 +335,7 @@
     <!-- Page Hero -->
     <section class="page-hero">
       <p class="eyebrow">
-        <a href="calculators.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-weight:700;">الحاسبات</a>
+        <a href="../calculators.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-weight:700;">الحاسبات</a>
         <i class="ti ti-chevron-left" style="font-size:11px;margin:0 4px;color:rgba(255,255,255,.4);"></i>
         <span style="color:#e8954a;">ضخ زراعي</span>
         <i class="ti ti-chevron-left" style="font-size:11px;margin:0 4px;color:rgba(255,255,255,.4);"></i>
@@ -713,7 +714,7 @@
       params.set('cat', row.category || '');
       params.set('brand', row.brand || '');
       params.set('model', row.model_available || '');
-      return 'product-detail.html?' + params.toString();
+      return '../product-detail.html?' + params.toString();
     }
 
     function brandDropdownHtml(catKey, brands, current) {
@@ -777,7 +778,7 @@
 
       const products = await fetchAllProducts();
       if (!products) {
-        box.innerHTML = `<div class="prodrec-empty">تعذّر تحميل الكتالوج الآن — جرّب تحديث الصفحة، أو تصفّح <a href="products.html" class="prodrec-link">صفحة المنتجات</a> يدويًا.</div>`;
+        box.innerHTML = `<div class="prodrec-empty">تعذّر تحميل الكتالوج الآن — جرّب تحديث الصفحة، أو تصفّح <a href="../products.html" class="prodrec-link">صفحة المنتجات</a> يدويًا.</div>`;
         return;
       }
 
@@ -933,7 +934,34 @@
         <thead><tr><th>#</th><th>الصنف / الموديل</th><th>القدرة</th><th>عرض المنتج والسعر</th></tr></thead>
         <tbody>${cards.join('')}</tbody>
       </table>`;
+
+      const addBtn = document.getElementById('repAddQuoteBtn');
+      if (addBtn) {
+        const hasPriced = (window.__lastPumpRecs || []).some(i => i.price > 0);
+        addBtn.style.display = hasPriced ? '' : 'none';
+      }
     }
+
+    // صفحة خاصة بالمناديب بس — بتتأكد إن فيه جلسة مندوب فعّالة قبل ما تسمح
+    // بالانتقال لصفحة عرض السعر (RLS برضه بيمنع أي حفظ فعلي من غير مندوب حقيقي).
+    (async function guardRepAccessAndBindQuoteButton() {
+      const addBtn = document.getElementById('repAddQuoteBtn');
+      if (!addBtn) return;
+      let supa = null;
+      for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) await new Promise(r => setTimeout(r, 50));
+      supa = window.getAlaslSupabase ? window.getAlaslSupabase() : null;
+
+      addBtn.addEventListener('click', async () => {
+        const items = (window.__lastPumpRecs || []).filter(i => i.price > 0);
+        if (!items.length) return;
+        if (supa) {
+          const { data: { session } } = await supa.auth.getSession();
+          if (!session) { location.href = 'rep-quotes.html'; return; }
+        }
+        sessionStorage.setItem('alasl_rep_irrigation_cart', JSON.stringify(items));
+        location.href = 'rep-irrigation-quote.html';
+      });
+    })();
 
 
     function nearestPipe(d)  { return stdPipes.find(s => s >= d)  || stdPipes[stdPipes.length-1]; }
@@ -1132,6 +1160,9 @@
           <div id="productRecs" class="product-recs">
             <div class="prodrec-loading">جارٍ البحث في الكتالوج…</div>
           </div>
+          <button type="button" id="repAddQuoteBtn" class="btn btn-light" style="display:none; margin-top:10px; font-size:13px; padding:8px 16px; height:auto;">
+            أضف نتيجة الحاسبة لعرض سعر ←
+          </button>
         </div>
 
         <div class="calc-divider"></div>
@@ -1277,7 +1308,7 @@
 ▸ قطر الماسورة: ${D_near}" (${D_mm.toFixed(0)} مم)`;
 
       sessionStorage.setItem('pump_calc_note', note);
-      window.location.href = 'contact.html';
+      window.location.href = '../contact.html';
     }
 
     /* ── Init ── */
@@ -1288,6 +1319,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
+  <script src="../supabase-config.js"></script>
 </body>
 </html>

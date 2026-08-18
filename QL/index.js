@@ -35,7 +35,6 @@ async function updateAuthState(session) {
   const rep = await checkRepStatus(session.user.id);
   if (!rep) {
     authMsg.textContent = "هذا الحساب غير مفعّل كمندوب. تواصل مع الأدمن.";
-    authMsg.style.display = "";
     await client.auth.signOut();
     authPanel.hidden = false;
     repPanel.hidden = true;
@@ -52,14 +51,14 @@ async function handleLogin(e) {
   const email = $("#loginEmail").value.trim();
   const password = $("#loginPassword").value;
   const authMsg = $("[data-auth-message]");
-  authMsg.style.display = "none";
+  authMsg.textContent = "جاري الدخول...";
 
   const { data, error } = await client.auth.signInWithPassword({ email, password });
   if (error) {
     authMsg.textContent = "بيانات الدخول غير صحيحة.";
-    authMsg.style.display = "";
     return;
   }
+  authMsg.textContent = "";
   await updateAuthState(data.session);
 }
 
@@ -72,7 +71,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initClient();
   if (!client) {
     $("[data-auth-message]").textContent = "تعذر الاتصال بالخادم.";
-    $("[data-auth-message]").style.display = "";
     return;
   }
 

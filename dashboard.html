@@ -221,9 +221,6 @@
           <button class="dash-nav-item" data-target="section-supplier-discounts" onclick="showDashSection('section-supplier-discounts', this)">
             <span>💸 خصومات الموردين</span>
           </button>
-          <button class="dash-nav-item" data-target="section-irrigation-bom" onclick="showDashSection('section-irrigation-bom', this)">
-            <span>🚜 بنود حاسبة الري (نقل/تركيب)</span>
-          </button>
         </nav>
 
         <div class="dash-main">
@@ -985,17 +982,14 @@
 
       <!-- Supplier discounts section -->
       <div class="dashboard-grid" id="section-supplier-discounts" style="grid-template-columns:1fr;margin-bottom:0;display:none">
-        <article class="dash-card" style="border-inline-start:4px solid var(--brand)">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <span style="width:38px;height:38px;border-radius:10px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:19px">💸</span>
-            <h2 style="margin:0">خصومات الموردين</h2>
-          </div>
-          <p style="color:var(--muted);font-size:13px">
+        <article class="dash-card">
+          <h2 style="margin-top:0">💸 خصومات الموردين</h2>
+          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
             الخصم مسجّل على مستوى (الفئة + الماركة) — يعني بيغطي كل موديلات نفس الماركة تلقائيًا،
             من غير ما تحتاج تسجّل كل موديل لوحده. بيتحسب على سعر البيع المعروض على الموقع، وبيُستخدم بس داخليًا
             لحساب هامش الربح في عروض أسعار المناديب — مش ظاهر للعميل ولا للمندوب أبدًا.
           </p>
-          <div style="display:flex;gap:var(--space-2);margin:var(--space-2) 0;flex-wrap:wrap;align-items:flex-end;background:var(--bg);padding:var(--space-2);border-radius:var(--radius)">
+          <div style="display:flex;gap:var(--space-2);margin:var(--space-2) 0;flex-wrap:wrap;align-items:flex-end">
             <div>
               <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">الفئة</label>
               <select id="sdCategory" style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
@@ -1023,26 +1017,14 @@
           <p class="form-note" data-sd-message></p>
 
           <h3 style="margin-top:var(--space-3);font-size:15px">الخصومات المسجّلة حاليًا</h3>
-          <div id="sdListBody"><div style="padding:12px;color:var(--muted)">جاري التحميل...</div></div>
-        </article>
-      </div>
-
-      <!-- Irrigation BOM settings section -->
-      <div class="dashboard-grid" id="section-irrigation-bom" style="grid-template-columns:1fr;margin-bottom:0;display:none">
-        <article class="dash-card" style="border-inline-start:4px solid var(--forest)">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <span style="width:38px;height:38px;border-radius:10px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:19px">🚜</span>
-            <h2 style="margin:0">بنود حاسبة الري (نقل، تركيب، فرعيات)</h2>
-          </div>
-          <p style="color:var(--muted);font-size:13px">
-            الأرقام دي بتتحسب بيها بنود مش موجودة كمنتجات في الكتالوج (كابلات، خرسانة، تركيب، نقل، ريأكتور، شاسيه، Combiner، MC4).
-            الألواح والإنفرتر بيتسحبوا من المنتجات نفسها مع خصم الموردين — مش من هنا.
-          </p>
-          <p class="form-note" data-bom-message></p>
-
-          <div id="bomFieldsGrid">جاري التحميل...</div>
-
-          <button type="button" class="btn btn-primary" id="bomSaveBtn" style="margin-top:var(--space-3);font-size:13px">حفظ كل التعديلات</button>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="text-align:right;color:var(--muted);font-size:12px">
+                <th style="padding:8px">الفئة</th><th style="padding:8px">الماركة</th><th style="padding:8px">الخصم %</th><th style="padding:8px"></th>
+              </tr>
+            </thead>
+            <tbody id="sdListBody"><tr><td colspan="4" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+          </table>
         </article>
       </div>
 
