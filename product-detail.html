@@ -226,6 +226,11 @@
             <div class="pd-variants" id="pdModels"></div>
           </div>
 
+          <div id="pdTechWrap" hidden>
+            <p class="pd-section-label">اختر النوع</p>
+            <div class="pd-variants" id="pdTechs"></div>
+          </div>
+
           <div id="pdVariantsWrap">
             <p class="pd-section-label" id="pdVariantsLabel">اختر القدرة</p>
             <select class="pd-variant-select" id="pdVariantSelect" hidden></select>
@@ -314,7 +319,7 @@
     };
     const T = {
       ar: { back: 'الرجوع لكل المنتجات', loading: 'جاري تحميل بيانات المنتج…', error: 'تعذّر العثور على هذا المنتج — قد يكون غير منشور أو تم حذفه.',
-            choosePower: 'اختر القدرة', choosePressure: 'اختر الضغط', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', outOfStock: 'غير متاح حاليًا', datasheet: 'تحميل الداتا شيت',
+            choosePower: 'اختر القدرة', choosePressure: 'اختر الضغط', chooseVoltage: 'اختر الفولت', chooseAmp: 'اختر الأمبير', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', outOfStock: 'غير متاح حاليًا', datasheet: 'تحميل الداتا شيت',
             quote: 'اطلب عرض سعر', whatsapp: 'تواصل واتساب', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specDetails: 'المواصفات', specChemistry: 'نوع الكيمياء', specNotes: 'ملاحظات', specDiameter: 'المقاس',
             home: 'الرئيسية', products: 'المنتجات', productCode: 'رقم المنتج:', category: 'التصنيف:',
             tabDesc: 'الوصف', tabSpecs: 'المواصفات', tabApps: 'التطبيقات', tabWarranty: 'الضمان', tabFiles: 'الملفات',
@@ -327,7 +332,7 @@
             phase3_380v: '3 فاز 380 فولت', phase3_220v: '3 فاز 220 فولت', phase1_220v: 'سينجل فاز 220 فولت',
             tierUpTo5: 'حتى 5 حصان', tier5to20: '5 – 20 حصان', tier20to50: '20 – 50 حصان', tier50to100: '50 – 100 حصان', tierOver100: 'أكتر من 100 حصان' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
-            choosePower: 'Choose Power', choosePressure: 'Choose Pressure Rating', priceHint: 'Price is approximate and subject to change — contact us to confirm.', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
+            choosePower: 'Choose Power', choosePressure: 'Choose Pressure Rating', chooseVoltage: 'Choose Voltage', chooseAmp: 'Choose Amp-Hour', priceHint: 'Price is approximate and subject to change — contact us to confirm.', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
             quote: 'Request a Quote', whatsapp: 'Chat on WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specDetails: 'Specifications', specChemistry: 'Chemistry', specNotes: 'Notes', specDiameter: 'Diameter',
             home: 'Home', products: 'Products', productCode: 'Product code:', category: 'Category:',
             tabDesc: 'Description', tabSpecs: 'Specifications', tabApps: 'Applications', tabWarranty: 'Warranty', tabFiles: 'Files',
@@ -340,7 +345,7 @@
             phase3_380v: '3-Phase 380V', phase3_220v: '3-Phase 220V', phase1_220v: 'Single-Phase 220V',
             tierUpTo5: 'Up to 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Over 100 HP' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
-            choosePower: 'Elegir Potencia', choosePressure: 'Elegir Presión', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
+            choosePower: 'Elegir Potencia', choosePressure: 'Elegir Presión', chooseVoltage: 'Elegir Voltaje', chooseAmp: 'Elegir Amperios', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
             quote: 'Solicitar Presupuesto', whatsapp: 'Chatear por WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specDetails: 'Especificaciones', specChemistry: 'Química', specNotes: 'Notas', specDiameter: 'Diámetro',
             home: 'Inicio', products: 'Productos', productCode: 'Código de producto:', category: 'Categoría:',
             tabDesc: 'Descripción', tabSpecs: 'Especificaciones', tabApps: 'Aplicaciones', tabWarranty: 'Garantía', tabFiles: 'Archivos',
@@ -353,7 +358,7 @@
             phase3_380v: 'Trifásico 380V', phase3_220v: 'Trifásico 220V', phase1_220v: 'Monofásico 220V',
             tierUpTo5: 'Hasta 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Más de 100 HP' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
-            choosePower: '选择功率', choosePressure: '选择压力等级', priceHint: '价格为参考价，可能变动——请联系我们确认。', outOfStock: '暂时缺货', datasheet: '下载规格书',
+            choosePower: '选择功率', choosePressure: '选择压力等级', chooseVoltage: '选择电压', chooseAmp: '选择安时', priceHint: '价格为参考价，可能变动——请联系我们确认。', outOfStock: '暂时缺货', datasheet: '下载规格书',
             quote: '获取报价', whatsapp: 'WhatsApp 联系', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specDetails: '规格', specChemistry: '化学类型', specNotes: '备注', specDiameter: '尺寸',
             home: '首页', products: '产品', productCode: '产品编号:', category: '分类:',
             tabDesc: '描述', tabSpecs: '规格', tabApps: '应用', tabWarranty: '保修', tabFiles: '文件',
@@ -435,7 +440,51 @@
     // are chosen by pressure rating first (customers said pressure matters
     // more than anything else, including diameter), everything else by
     // power (kW/HP).
+    // تصنيف الإكسسوارات لأربعة أنواع رئيسية بس (مانع صواعق/قاطع/فيوز وحامل/MC4)
+    // بدل ما كل اسم منتج (C.B أو MCCB مثلاً) يبقى نوع منفصل — القاطع نوع واحد
+    // بغض النظر عن التقنية، وتقسيمه الحقيقي بيبقى بعدد الأقطاب في الخطوة اللي بعدها.
+    // C.B مقابل MCCB — تقنية القاطع، بتتحدد قبل عدد الأقطاب دلوقتي
+    function accessoryTechOf(r) {
+      const n = r.name_ar || '';
+      if (/MCCB/i.test(n)) return 'MCCB';
+      if (/C\.B/i.test(n)) return 'C.B';
+      return null;
+    }
+
+    function accessoryMainType(r) {
+      const n = r.name_ar || '';
+      if (/صاعق/.test(n)) return 'مانع صواعق';
+      if (/فيوز/.test(n)) return 'فيوز مع حامل';
+      if (/MC4/i.test(n)) return 'MC4';
+      if (/قاطع/.test(n)) return 'قاطع';
+      return n;
+    }
+
+    // عدد الأقطاب (للقواطع: 2P/3P/4P) أو عدد المخارج (لـMC4: أحادي/مزدوج/ثلاثي/رباعي)
+    // مستخرج من اسم المنتج نفسه — بيرجع null للأنواع اللي مالهاش تقسيم فرعي
+    // (فيوز، صاعق)، فيفضلوا شغالين زي ما هما (مقاس/أمبير مباشرة).
+    const POLE_LABELS = { '2': 'ثنائي (2P)', '3': 'ثلاثي (3P)', '4': 'رباعي (4P)' };
+    function accessorySubType(r) {
+      const n = r.name_ar || '';
+      const poleMatch = n.match(/([234])P\b/);
+      if (poleMatch) return POLE_LABELS[poleMatch[1]] || poleMatch[0];
+      const mc4Match = n.match(/MC4\s+(\S+)/i);
+      if (mc4Match) return mc4Match[1];
+      return null;
+    }
+
+    // ده هو المستوى اللي بيحدد "المقاس" بعد اختيار النوع الرئيسي — للقواطع
+    // بيبقى تجميع بعدد الأقطاب (2P/3P/4P) على مستوى العائلة كلها (C.B + MCCB
+    // مع بعض)، ولو تحت نفس عدد الأقطاب أكتر من أمبير متاح، الخطوة اللي بعدها
+    // (buildVariantPicker الموجودة أصلًا) بتوضحهم.
     function primaryKeyOf(r) {
+      if (r.category === 'accessories') {
+        const sub = accessorySubType(r);
+        return sub != null ? 'sub:' + sub : 'id:' + r.id;
+      }
+      if (r.category === 'batteries') {
+        return r.voltage_v != null ? 'v:' + r.voltage_v : 'id:' + r.id;
+      }
       if (r.category === 'pipes') {
         return r.pipe_pressure_bar != null ? 'bar:' + r.pipe_pressure_bar : 'id:' + r.id;
       }
@@ -444,6 +493,11 @@
     }
 
     function variantLabel(p) {
+      if (p.category === 'accessories') {
+        const sub = accessorySubType(p);
+        if (sub != null) return sub;
+      }
+      if (p.category === 'batteries' && p.voltage_v != null) return p.voltage_v + 'V';
       if (p.category === 'inverters' || p.category === 'offgrid') {
         const { kw, hp } = parseInvPower(p);
         const parts = [kw ? kw + ' KW' : '', hp ? hp + ' HP' : ''].filter(Boolean);
@@ -527,15 +581,7 @@
     }
 
     function renderGallery() {
-      // Prefer a curated multi-photo gallery (row.images) when the family
-      // has one — several real product photos are more useful than the
-      // per-row image_url set, especially for families where every power
-      // variant is visually identical (e.g. VEICHI SI23 shares one
-      // enclosure design across its whole power range). Falls back to the
-      // per-row image_url set for families that don't have a curated
-      // gallery yet.
-      const curated = [...new Set(familyRows.flatMap(r => Array.isArray(r.images) ? r.images : []).filter(Boolean))];
-      const images = curated.length ? curated : [...new Set(familyRows.map(r => r.image_url).filter(Boolean))];
+      const images = [...new Set(familyRows.map(r => r.image_url).filter(Boolean))];
       const thumbs = document.getElementById('pdThumbs');
 
       if (images.length === 0) {
@@ -740,7 +786,8 @@
       const isPumps = first.category === 'pumps';
       const isOffgridInv = first.category === 'offgrid';
       const isAccessories = first.category === 'accessories';
-      document.getElementById('pdModelLabel').textContent = isPumps ? t('choosePumpType') : (isAccessories ? t('chooseAccessoryType') : t('chooseModel'));
+      const isBatteries = first.category === 'batteries';
+      document.getElementById('pdModelLabel').textContent = isPumps ? t('choosePumpType') : (isAccessories ? t('chooseAccessoryType') : (isBatteries ? t('chooseAmp') : t('chooseModel')));
       const seriesOf = (r) => {
         if (isPumps) return r.pump_type || null;
         if (isOffgridInv) return null; // skip model-level grouping entirely
@@ -748,7 +795,9 @@
         // فبنستخدم اسم المنتج نفسه كنوع — كل اسم مختلف (قاطع C.B / قاطع MCCB /
         // فيوز مع حامل / كونيكتور MC4 / صاعق صواعق) بيبقى "نوع" مستقل يُختار أولًا،
         // وبعدين المقاس/القدرة (specs_ar) بيبقى الاختيار التاني جوّاه.
-        if (r.category === 'accessories') return r.name_ar || null;
+        if (r.category === 'accessories') return accessoryMainType(r);
+        // البطاريات: الأمبير الأول (100/200/314 Ah)، والفولت هيبقى الخطوة التانية
+        if (r.category === 'batteries') return r.capacity_ah != null ? String(r.capacity_ah) + 'Ah' : null;
         return r.model_available || null;
       };
       const distinctModels = [...new Set(familyRows.map(r => seriesOf(r)).filter(Boolean))].sort();
@@ -769,6 +818,31 @@
         return sameGroupCodes.size > 1 ? `${t(vpKey)} — ${modelCode}` : t(vpKey);
       };
 
+      // للقواطع بس: لو المجموعة فيها أكتر من تقنية (C.B و MCCB مع بعض)،
+      // نعرض اختيار "النوع" ده الأول قبل عدد الأقطاب — تدرّج: النوع الرئيسي
+      // ← C.B/MCCB ← عدد الأقطاب ← الأمبير (لو فيه أكتر من خيار).
+      const techWrap = document.getElementById('pdTechWrap');
+      function routeToPowerPicker(rows) {
+        const techs = [...new Set(rows.map(accessoryTechOf).filter(Boolean))];
+        if (techs.length < 2) {
+          techWrap.hidden = true;
+          buildPowerPicker(sb, rows);
+          return;
+        }
+        techWrap.hidden = false;
+        document.getElementById('pdTechs').innerHTML = techs.map((tech, i) =>
+          `<button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}" data-tech="${escapeHtml(tech)}">${escapeHtml(tech)}</button>`
+        ).join('');
+        document.querySelectorAll('#pdTechs .pd-variant-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('#pdTechs .pd-variant-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            buildPowerPicker(sb, rows.filter(r => accessoryTechOf(r) === btn.dataset.tech));
+          });
+        });
+        buildPowerPicker(sb, rows.filter(r => accessoryTechOf(r) === techs[0]));
+      }
+
       if (distinctModels.length > 1) {
         modelWrap.hidden = false;
         document.getElementById('pdModels').innerHTML = distinctModels.map((m, i) =>
@@ -779,15 +853,15 @@
             document.querySelectorAll('#pdModels .pd-variant-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('pdSubtitle').textContent = isPumps ? '' : modelButtonLabel(btn.dataset.model);
-            buildPowerPicker(sb, familyRows.filter(r => seriesOf(r) === btn.dataset.model));
+            routeToPowerPicker(familyRows.filter(r => seriesOf(r) === btn.dataset.model));
           });
         });
         document.getElementById('pdSubtitle').textContent = isPumps ? '' : modelButtonLabel(distinctModels[0]);
-        buildPowerPicker(sb, familyRows.filter(r => seriesOf(r) === distinctModels[0]));
+        routeToPowerPicker(familyRows.filter(r => seriesOf(r) === distinctModels[0]));
       } else {
         modelWrap.hidden = true;
         document.getElementById('pdSubtitle').textContent = (isPumps || isOffgridInv) ? '' : (first.model_available || '');
-        buildPowerPicker(sb, familyRows);
+        routeToPowerPicker(familyRows);
       }
 
       document.getElementById('pdLoading').hidden = true;
@@ -810,6 +884,7 @@
       // isn't enough to know which exact product it is; a 3rd-level picker
       // (and, for well motors, a material step in between) handles that.
       const isPipes = rowsForModel[0]?.category === 'pipes';
+      const isBatteriesLocal = rowsForModel[0]?.category === 'batteries';
       const powerKeyOf = primaryKeyOf;
       const byPower = new Map();
       rowsForModel.forEach(r => {
@@ -831,7 +906,7 @@
       // the power-level picker itself
       const sorted = powerGroups.map(group => group.slice().sort((a, b) => a.price - b.price)[0]);
       const groupOfRow = (row) => powerGroups.find(g => g.some(r => r.id === row.id)) || [row];
-      document.getElementById('pdVariantsLabel').textContent = isPipes ? t('choosePressure') : t('choosePower');
+      document.getElementById('pdVariantsLabel').textContent = isPipes ? t('choosePressure') : (isBatteriesLocal ? t('chooseVoltage') : t('choosePower'));
 
       const onPowerPicked = (row) => {
         const group = groupOfRow(row);
