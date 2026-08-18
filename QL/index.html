@@ -4,87 +4,74 @@
   <meta charset="UTF-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0D3452">
+  <meta name="theme-color" content="#0d0b0a">
   <title>بوابة المناديب | الأصل للطاقة الشمسية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../rep-theme.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="../supabase-config.js"></script>
   <script defer src="index.js"></script>
   <style>
-    .ql-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 6px; }
-    .ql-card {
-      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-      padding: 24px 20px; text-align: center; text-decoration: none; color: var(--ink);
-      box-shadow: var(--shadow-soft); transition: transform .15s, box-shadow .15s;
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-    }
-    .ql-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-    .ql-card .icon { font-size: 34px; }
-    .ql-card .title { font-family: 'Cairo'; font-weight: 800; font-size: 16px; color: var(--night); }
-    .ql-card .desc { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
-    .ql-welcome { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
+    .ql-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--space-3); }
+    .ql-card { text-align: center; text-decoration: none; color: inherit; display: block; }
+    .ql-card i { font-size: 30px; }
   </style>
 </head>
 <body>
-
-<header class="top">
-  <div class="brandrow">
-    <div class="brand">
-      <div class="mark"><img src="../logo.png" alt="الأصل للطاقة الشمسية"></div>
-      <div>
-        <div class="name">الأصل للطاقة الشمسية</div>
-        <div class="sub">بوابة المناديب</div>
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <a class="dashboard-logo" href="../index.html">
+        <img src="../logo-white.png" alt="الأصل للطاقة الشمسية">
+      </a>
+      <div class="dashboard-hero-text">
+        <p class="eyebrow" style="margin-bottom:2px">بوابة المناديب</p>
+        <h1>عروض الأسعار</h1>
+        <p>سجّل دخولك وابدأ إصدار عرض السعر مباشرة من كتالوج المنتجات الحقيقي</p>
       </div>
-    </div>
-  </div>
-</header>
+    </section>
 
-<main class="rep-main" style="max-width:900px">
+    <section class="dashboard-card" data-auth-panel>
+      <h2>تسجيل دخول المندوب</h2>
+      <form class="admin-form" data-login-form>
+        <label for="loginEmail">البريد الإلكتروني</label>
+        <input id="loginEmail" type="email" autocomplete="username" required>
+        <label for="loginPassword">كلمة المرور</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">دخول</button>
+        <p class="form-note" data-auth-message></p>
+      </form>
+    </section>
 
-  <div class="login-shell card" data-auth-panel>
-    <h3>تسجيل دخول المندوب</h3>
-    <form data-login-form>
-      <label>البريد الإلكتروني</label>
-      <input type="email" id="loginEmail" required autocomplete="username">
-      <label>كلمة المرور</label>
-      <input type="password" id="loginPassword" required autocomplete="current-password">
-      <button type="submit" class="btn full" style="margin-top:16px">دخول</button>
-      <p class="note error" data-auth-message style="margin-top:12px;display:none"></p>
-    </form>
-  </div>
-
-  <div data-rep-panel hidden>
-    <div class="ql-welcome">
-      <div>
-        <div style="font-size:13px;color:var(--muted)">أهلًا بيك،</div>
-        <div style="font-family:'Cairo';font-weight:800;font-size:20px" data-user-name>—</div>
+    <section class="dashboard-content" data-rep-panel hidden>
+      <div class="dashboard-toolbar">
+        <div>
+          <h2>أهلًا بيك، <span data-user-name></span></h2>
+          <p>اختار الأداة اللي محتاجها</p>
+        </div>
+        <button class="btn btn-secondary dark" type="button" data-logout>تسجيل خروج</button>
       </div>
-      <button class="btn ghost small" data-logout>تسجيل خروج</button>
-    </div>
 
-    <div class="ql-cards">
-      <a class="ql-card" href="../rep-pump-calculator.html">
-        <div class="icon">🚜</div>
-        <div class="title">حاسبة منظومة ري بالطاقة الشمسية</div>
-        <div class="desc">احسب موتور الغاطس والطلمبة والإنفرتر والماسورة المناسبة، وقدّم عرض سعر مباشر</div>
-      </a>
-      <a class="ql-card" href="../rep-offgrid-quote.html">
-        <div class="icon">🔋</div>
-        <div class="title">حاسبة أوف جريد</div>
-        <div class="desc">صمّم منظومة أوف جريد كاملة (ألواح، إنفرتر، بطاريات) وقدّم عرض سعر بالخصم</div>
-      </a>
-      <a class="ql-card" href="../rep-quotes.html">
-        <div class="icon">🧾</div>
-        <div class="title">تقديم عروض أسعار منتجات</div>
-        <div class="desc">اختار من كتالوج المنتجات مباشرة وجهّز عرض سعر توريد فقط أو توريد وتركيب</div>
-      </a>
-    </div>
-  </div>
-
-</main>
-
+      <div class="ql-cards">
+        <a class="card ql-card" href="../rep-pump-calculator.html">
+          <i class="fa-solid fa-tractor" aria-hidden="true"></i>
+          <h3>حاسبة منظومة ري بالطاقة الشمسية</h3>
+          <p>احسب الموتور والطلمبة والإنفرتر والماسورة المناسبة، وقدّم عرض سعر مباشر</p>
+        </a>
+        <a class="card ql-card" href="../rep-offgrid-quote.html">
+          <i class="fa-solid fa-car-battery" aria-hidden="true"></i>
+          <h3>حاسبة أوف جريد</h3>
+          <p>صمّم منظومة أوف جريد كاملة (ألواح، إنفرتر، بطاريات) وقدّم عرض سعر بالخصم</p>
+        </a>
+        <a class="card ql-card" href="../rep-quotes.html">
+          <i class="fa-solid fa-file-invoice" aria-hidden="true"></i>
+          <h3>تقديم عروض أسعار منتجات</h3>
+          <p>اختار من كتالوج المنتجات مباشرة وجهّز عرض سعر توريد فقط أو توريد وتركيب</p>
+        </a>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

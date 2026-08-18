@@ -4,256 +4,123 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#0D3452">
-  <title>حاسبة أسعار منظومة ري بالطاقة الشمسية | مناديب الأصل للطاقة الشمسية</title>
+  <meta name="theme-color" content="#0d0b0a">
+  <title>عرض سعر منظومة ري | مناديب الأصل للطاقة الشمسية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="rep-theme.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="rep-widgets.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="supabase-config.js"></script>
   <script defer src="rep-irrigation-quote.js"></script>
   <style>
-    /* ============================================================
-       قالب الطباعة — منقول حرفيًا (classes وقيم) من المشروع المُثبت
-       AlaslSolarEgypt-QL، مربوط بمحرك الحساب بتاعنا في Supabase.
-       ============================================================ */
-    #printQuote{ display:none; }
-    @media print{
-      @page{ size:A4; margin:0; }
-      html, body{ background:#fff !important; margin:0; padding:0; }
-      body > *:not(#printQuote){ display:none !important; }
-      #printQuote.pq-active{
-        display:block !important;
-        position:relative;
-        width:210mm;
-        font-family:'Cairo','Tahoma',sans-serif;
-        color:#1c1a16;
-        direction:rtl;
-      }
-      .pq-letterhead-bg{ position:fixed; top:0; right:0; width:210mm; height:297mm; object-fit:cover; }
-      .pq-content{ position:relative; padding:70mm 14mm 28mm 14mm; box-sizing:border-box; }
-      .pq-doc{ position:absolute; top:16mm; right:14mm; left:14mm; text-align:right; font-size:11px; color:#5a5346; }
-      .pq-doc b{ font-size:16px; color:#1c1a16; display:block; margin-bottom:4px; }
-      .pq-meta{ display:flex; justify-content:space-between; gap:14px; margin-bottom:10px; font-size:11px; }
-      .pq-meta .box{ flex:1; background:#faf7f0; border:1px solid #ece5d3; border-radius:6px; padding:7px 10px; }
-      .pq-meta .box .k{ color:#8a7f68; font-size:10px; margin-bottom:2px; }
-      .pq-meta .box .v{ font-weight:700; }
-      .pq-specs{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:10px; }
-      .pq-specs .cell{ border:1px solid #ece5d3; border-radius:6px; padding:5px 6px; text-align:center; }
-      .pq-specs .cell .k{ font-size:9px; color:#8a7f68; }
-      .pq-specs .cell .v{ font-size:12px; font-weight:800; }
-      table.pq-table{ width:100%; border-collapse:collapse; font-size:10.5px; margin-bottom:10px; }
-      table.pq-table th{ background:#e8811a; color:#fff; text-align:right; font-weight:700; font-size:10.5px; padding:7px 6px; border:1px solid #e8811a; }
-      table.pq-table td{ padding:4px 6px; border:1px solid #ece5d3; vertical-align:top; }
-      table.pq-table tr:nth-child(even) td{ background:#faf7f0; }
-      table.pq-table td.num{ font-family:'Courier New', monospace; white-space:nowrap; }
-      .pq-grandtotal{ background:#e8811a; color:#fff; border-radius:8px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-      .pq-grandtotal .k{ font-size:12px; font-weight:600; }
-      .pq-grandtotal .v{ font-size:20px; font-weight:800; font-family:'Courier New', monospace; }
-      .pq-payment{ margin-bottom:8px; }
-      .pq-payment .title{ font-size:12px; font-weight:800; margin-bottom:6px; }
-      .pq-payment .row{ display:flex; justify-content:space-between; font-size:10.5px; padding:3px 0; border-bottom:1px dashed #ece5d3; }
-      .pq-footer{ margin-top:10px; padding-top:8px; border-top:1px solid #ece5d3; font-size:9px; color:#8a7f68; text-align:center; }
+    #printArea { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 24px; direction: rtl; }
+      .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #c8752d; padding-bottom: 12px; margin-bottom: 16px; }
+      .print-header img { height: 55px; }
+      .print-title { font-size: 20px; font-weight: 800; color: #17120f; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
+      .print-table th { background: #f3e4d4; }
+      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
+      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
+      .print-totals .grand { font-weight: 800; font-size: 17px; border-top: 2px solid #17120f; margin-top: 6px; padding-top: 8px; }
+      .print-footer { margin-top: 30px; font-size: 12px; color: #777; }
     }
-
-    .grid2{display:grid;grid-template-columns:minmax(340px,38.2%) minmax(0,61.8%);gap:21px;align-items:start;}
-    @media (max-width:900px){ .grid2{grid-template-columns:1fr;} }
-    label.field{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px;}
-    input.inp, select.inp{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:'Cairo',sans-serif;font-size:14px;background:#fff;}
-    .toggles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
-    .tgl{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12.5px;cursor:pointer;}
-    .tgl:has(input:checked){background:var(--teal-tint);border-color:var(--teal);}
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;}
-    .stat{background:#fff;border:1px solid var(--line);border-inline-end:3px solid var(--teal);border-radius:10px;padding:11px 13px;}
-    .stat .v{font-family:'Cairo';font-size:17px;font-weight:700;color:var(--night);}
-    .stat .l{font-size:11px;color:var(--muted);margin-top:3px;}
-    .warn-banner{background:#FEECEA;border:1px solid #F3B0A3;padding:12px 14px;border-radius:10px;margin-bottom:12px;font-size:13px;color:#8A2E1D;}
-    .seg-list button{width:100%;text-align:right;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;font-family:'Cairo';font-weight:600;font-size:13px;cursor:pointer;margin-bottom:6px;}
-    .seg-list button.active{background:var(--night);color:#fff;border-color:var(--night);}
   </style>
 </head>
 <body>
 
-<header class="top">
-  <div class="brandrow">
-    <div class="brand">
-      <div class="mark"><img src="../logo.png" alt="الأصل للطاقة الشمسية"></div>
-      <div>
-        <div class="name">الأصل للطاقة الشمسية</div>
-        <div class="sub">بوابة المناديب — حاسبة منظومة ري بالطاقة الشمسية</div>
-      </div>
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <a class="dashboard-logo" href="QL/index.html">
+      <img src="logo-white.png" alt="الأصل للطاقة الشمسية">
+    </a>
+    <div class="dashboard-hero-text">
+      <a href="QL/index.html" class="dashboard-home-btn" aria-label="بوابة المناديب">
+        <i class="fa fa-house" aria-hidden="true"></i>
+        <span>بوابة المناديب</span>
+      </a>
+      <p class="eyebrow" style="margin-bottom:2px">حاسبة الري الزراعي</p>
+      <h1>إصدار عرض سعر</h1>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <a href="index.html" class="btn ghost small" style="text-decoration:none">عروض عامة ←</a>
-      <span data-user-name style="font-weight:700;font-size:13px;color:var(--muted)"></span>
+  </section>
+
+  <section class="dashboard-card" data-auth-panel style="max-width:420px;text-align:center">
+    <h2>لازم تسجّل دخولك كمندوب الأول</h2>
+    <p class="form-note">سجّل دخولك من <a href="QL/index.html">بوابة المناديب</a> ثم ارجع هنا.</p>
+  </section>
+
+  <div class="rep-main" data-rep-panel hidden style="max-width:820px;padding-top:0">
+
+    <div class="card" data-empty-cart hidden>
+      <p class="form-note" style="min-height:auto">مفيش نتيجة حاسبة جاهزة. روح <a href="rep-pump-calculator.html">حاسبة الري</a> واحسب منظومة الأول، وبعدين دوس "أضف للعرض" في نهاية الصفحة.</p>
     </div>
-  </div>
-</header>
 
-<main class="rep-main" style="max-width:1180px;margin:24px auto;padding:0 16px">
-
-  <div class="login-shell card" data-auth-panel>
-    <h3>لازم تسجّل دخولك كمندوب الأول</h3>
-    <div class="note">سجّل دخولك من <a href="index.html">صفحة عروض الأسعار</a> ثم ارجع هنا.</div>
-  </div>
-
-  <div data-rep-panel hidden>
-    <div class="grid2">
-
-      <div>
-        <div class="card">
-          <h3>بيانات العميل</h3>
-          <label class="field">اسم العميل / المشروع *</label>
-          <input class="inp" type="text" id="custName" placeholder="اسم العميل">
-          <label class="field" style="margin-top:10px">رقم الهاتف / واتساب *</label>
-          <input class="inp" type="text" id="custPhone" placeholder="01xxxxxxxxx">
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <h3>بيانات المشروع</h3>
-          <label class="field">القدرة المطلوبة (حصان HP)</label>
-          <input class="inp" type="number" id="hpInput" min="1" step="1" placeholder="مثال: 100">
-
-          <label class="field" style="margin-top:10px">براند اللوح الشمسي</label>
-          <select class="inp" id="panelBrandSelect"><option value="">جاري تحميل الألواح...</option></select>
-
-          <label class="field" style="margin-top:10px">قدرة اللوح (وات)</label>
-          <select class="inp" id="panelSelect"><option value="">اختار البراند الأول</option></select>
-
-          <label class="field" style="margin-top:10px">نوع التركيب</label>
-          <select class="inp" id="structureType">
-            <option value="FIXED">ثابت</option>
-            <option value="ROTATIONAL">متحرك</option>
-          </select>
-
-          <details style="margin-top:10px">
-            <summary style="cursor:pointer;font-size:13px;color:var(--muted)">إعدادات متقدمة</summary>
-            <label class="field" style="margin-top:8px">خصم إضافي على هامش الربح (0% - 4%)</label>
-            <input class="inp" type="number" id="discountPct" min="0" max="4" step="0.5" value="0">
-          </details>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <h3>نوع العرض</h3>
-          <div class="seg-list">
-            <button type="button" data-preset="supply_only">توريد خامات فقط (ألواح + انفرتر + لوحة تجميع + MC4 + كابلات)</button>
-            <button type="button" data-preset="supply_install" class="active">توريد وتركيب شامل الضمان (كل البنود عدا التأريض والريأكتور)</button>
+    <div data-quote-content hidden>
+      <div class="card" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;align-items:center">
+        <div style="display:flex;align-items:center;gap:10px">
+          <img src="logo.png" alt="الأصل للطاقة الشمسية" style="width:46px;height:46px;object-fit:contain">
+          <div>
+            <div style="font-family:'Cairo';font-weight:800;font-size:16px">الأصل للطاقة الشمسية</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">alaslsolar.com</div>
           </div>
         </div>
-
-        <div class="card" style="margin-top:14px">
-          <h3>البنود المُفعّلة</h3>
-          <div class="toggles" id="togglesBox">
-            <label class="tgl"><input type="checkbox" data-toggle="panel" checked> ألواح</label>
-            <label class="tgl"><input type="checkbox" data-toggle="inverter" checked> إنفرتر</label>
-            <label class="tgl"><input type="checkbox" data-toggle="ip65" checked> لوحة IP65</label>
-            <label class="tgl"><input type="checkbox" data-toggle="combiner" checked> Combiner</label>
-            <label class="tgl"><input type="checkbox" data-toggle="cables" checked> كابلات</label>
-            <label class="tgl"><input type="checkbox" data-toggle="mc4" checked> MC4</label>
-            <label class="tgl"><input type="checkbox" data-toggle="structure" checked> شاسيه</label>
-            <label class="tgl"><input type="checkbox" data-toggle="concrete" checked> خرسانة</label>
-            <label class="tgl"><input type="checkbox" data-toggle="earth" checked> تأريض</label>
-            <label class="tgl"><input type="checkbox" data-toggle="reactor" checked> ريأكتور</label>
-            <label class="tgl"><input type="checkbox" data-toggle="install_mech" checked> تركيب ميكانيكي</label>
-            <label class="tgl"><input type="checkbox" data-toggle="install_elec" checked> تركيب كهربائي</label>
-            <label class="tgl"><input type="checkbox" data-toggle="transport" checked> نقل</label>
-          </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted)">عرض سعر مُقدَّم إلى</div>
+          <div id="bannerName" style="font-family:'Cairo';font-weight:800;font-size:18px">—</div>
+          <div id="bannerPhone" class="num" style="font-size:12.5px;color:var(--muted)">—</div>
         </div>
-
-        <div id="calcMsg" class="rq-msg" style="margin-top:10px"></div>
-      </div>
-
-      <div>
-        <div id="oversizeWarningBox"></div>
-
-        <div id="resultsWrap" hidden>
-          <div class="card">
-            <h3>ملخص المنظومة <span class="tag" id="sumInvTag"></span></h3>
-            <div class="stats" style="margin-top:10px">
-              <div class="stat"><div class="v" id="mKw">-</div><div class="l">القدرة الفعلية KW</div></div>
-              <div class="stat"><div class="v" id="mPanels">-</div><div class="l">عدد الألواح</div></div>
-              <div class="stat"><div class="v" id="mArrays">-</div><div class="l">عدد السلاسل</div></div>
-              <div class="stat"><div class="v" id="mPerString">-</div><div class="l">ألواح/سلسلة</div></div>
-              <div class="stat"><div class="v" id="mVimp">-</div><div class="l">Vimp الكلي</div></div>
-              <div class="stat"><div class="v" id="mVoc">-</div><div class="l">Voc الكلي</div></div>
-              <div class="stat"><div class="v" id="mIimp">-</div><div class="l">Iimp الكلي</div></div>
-              <div class="stat"><div class="v" id="mIsc">-</div><div class="l">Isc (مع أمان 25%)</div></div>
-              <div class="stat"><div class="v" id="mInv">-</div><div class="l">موديل الانفرتر</div></div>
-              <div class="stat"><div class="v" id="mReactor">-</div><div class="l">الريأكتور</div></div>
-              <div class="stat"><div class="v" id="mCb">-</div><div class="l">قاطع الحماية C.B</div></div>
-              <div class="stat"><div class="v" id="mRatio">-</div><div class="l">نسبة السعة للحصان</div></div>
-            </div>
-          </div>
-
-          <div class="card" style="margin-top:14px">
-            <h3>تفصيل عرض السعر</h3>
-            <table style="width:100%;border-collapse:collapse;font-size:13px">
-              <thead><tr style="text-align:right;color:var(--muted);font-size:12px">
-                <th style="padding:6px">#</th><th style="padding:6px">البند</th><th style="padding:6px">النوع</th>
-                <th style="padding:6px">الكمية</th><th style="padding:6px">المنشأ</th><th style="padding:6px">الضمان</th>
-              </tr></thead>
-              <tbody id="rowsBody"></tbody>
-            </table>
-
-            <div style="margin-top:14px;background:var(--night);color:#fff;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:13px">السعر الإجمالي للعرض (غير شامل ض.ق.م)</span>
-              <span class="num" id="grandTotal" style="font-size:20px;font-weight:800">-</span>
-            </div>
-
-            <h3 style="margin-top:16px">شروط السداد</h3>
-            <div id="paymentBody"></div>
-
-            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn primary" id="saveBtn">حفظ العرض</button>
-              <button class="btn" id="printBtn">🖨️ طباعة / حفظ PDF</button>
-              <button class="dbtn" style="background:#25D366;color:#fff" id="waBtn">📤 إرسال العرض للعميل (واتساب)</button>
-            </div>
-          </div>
+        <div style="text-align:left">
+          <div style="font-size:11px;color:var(--muted)">تاريخ العرض</div>
+          <div class="num" style="font-size:14px;font-weight:700" id="bannerDate">—</div>
         </div>
       </div>
 
+      <div class="card">
+        <h3>بيانات العميل</h3>
+        <div class="row2">
+          <div><label>اسم العميل *</label><input type="text" id="custName" required></div>
+          <div><label>رقم الهاتف / واتساب *</label><input type="tel" id="custPhone" required></div>
+        </div>
+        <label>المدينة / المنطقة</label>
+        <input type="text" id="custCity">
+      </div>
+
+      <div class="card">
+        <h3>نوع العرض</h3>
+        <div class="seg">
+          <button type="button" class="active" data-quote-type="supply_only">توريد فقط</button>
+          <button type="button" data-quote-type="supply_install">توريد وتركيب</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>تفصيل عرض السعر <span class="tag">قابل للتعديل والخصم</span></h3>
+        <table class="bom">
+          <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم %</th><th>الإجمالي</th></tr></thead>
+          <tbody id="quoteItemsBody"></tbody>
+        </table>
+        <div class="totalbar">
+          <div class="lbl">الإجمالي بعد الخصم</div>
+          <div class="big num"><span id="grandTotalDisplay">0</span> ج.م</div>
+        </div>
+        <button class="btn btn-primary" id="saveQuoteBtn" style="width:100%;margin-top:16px">
+          <i class="fa-solid fa-print"></i> حفظ العرض وطباعته
+        </button>
+        <p class="form-note" data-quote-message></p>
+      </div>
     </div>
+
   </div>
 </main>
 
-<!-- ======================= قالب الطباعة (مطابق لـ AlaslSolarEgypt-QL) ======================= -->
-<div id="printQuote">
-  <img class="pq-letterhead-bg" src="letterhead.jpg" alt="">
-  <div class="pq-content">
-    <div class="pq-doc">
-      <b>عرض سعر</b>
-      <div>رقم العرض: <span id="pqQuoteNo"></span></div>
-      <div>التاريخ: <span id="pqDate"></span></div>
-    </div>
-
-    <div class="pq-meta">
-      <div class="box"><div class="k">العميل / المشروع</div><div class="v" id="pqClient">-</div></div>
-      <div class="box"><div class="k">رقم الهاتف / واتساب</div><div class="v" id="pqPhone">-</div></div>
-      <div class="box"><div class="k">القدرة المطلوبة</div><div class="v" id="pqRequestedKW">-</div></div>
-      <div class="box"><div class="k">نوع الشاسية</div><div class="v" id="pqStructureType">-</div></div>
-    </div>
-
-    <div class="pq-specs" id="pqSpecs"></div>
-
-    <table class="pq-table">
-      <thead><tr><th>#</th><th>البند</th><th>النوع</th><th>الكمية</th><th>المنشأ</th><th>الضمان</th></tr></thead>
-      <tbody id="pqOfferBody"></tbody>
-    </table>
-
-    <div class="pq-grandtotal">
-      <div class="k">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
-      <div class="v" id="pqGrandTotalValue">-</div>
-    </div>
-
-    <div class="pq-payment">
-      <div class="title">شروط السداد</div>
-      <div id="pqPayment"></div>
-    </div>
-
-    <div class="pq-footer">هذا العرض ساري لمدة 15 يوم من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
-  </div>
-</div>
+<div id="printArea"></div>
 
 </body>
 </html>
