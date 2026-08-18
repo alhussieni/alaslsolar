@@ -2,159 +2,89 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#0d0b0a">
-  <title>عروض الأسعار | مناديب الأصل للطاقة الشمسية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0D3452">
+  <title>بوابة المناديب | الأصل للطاقة الشمسية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="rep-theme.css">
+  <link rel="stylesheet" href="../rep-theme.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="supabase-config.js"></script>
-  <script defer src="rep-quotes.js"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="index.js"></script>
   <style>
-    .rq-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 13px; box-shadow: var(--shadow-soft); }
-    .rq-card h2 { margin: 0 0 14px; font-size: 16px; }
-    .rq-field { margin-bottom: 12px; }
-    .rq-type-btn { flex: 1; padding: 9px; border: 0; background: #fff; cursor: pointer; font-family: 'Cairo'; font-weight: 600; font-size: 13px; color: var(--muted); }
-    .rq-type-btn.active { background: var(--night); color: #fff; }
-    .rq-totals { margin-top: 12px; font-size: 15px; }
-    .rq-totals .total { font-size: 20px; font-weight: 800; color: var(--night); }
-    .rq-msg { font-size: 13px; margin-top: 8px; padding: 8px 10px; border-radius: 8px; }
-    .rq-msg.error { color: var(--bad); background: #FBEDEA; }
-    .rq-msg.ok { color: var(--teal-dark); background: var(--teal-tint); }
-    .rq-cart-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .rq-cart-table th, .rq-cart-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; }
-    .rq-cart-table th { color: var(--muted); font-size: 12px; }
-    .rq-shell { max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; }
-    .rq-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
-    .rq-header img { height: 40px; }
-    .rq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 640px) { .rq-row { grid-template-columns: 1fr; } }
-    .rq-type-toggle.seg { margin-top: 4px; }
-    .rq-product-picker { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .rq-product-picker select, .rq-product-picker input { flex: 1; min-width: 160px; }
-    .rq-cart-table input[type="number"] { width: 64px; padding: 4px 6px; }
-    .rq-remove { background: none; border: none; color: var(--bad); cursor: pointer; font-size: 13px; }
-    .rq-quote-list { font-size: 14px; }
-    .rq-quote-list .rq-quote-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 8px; }
-    .rq-quote-item button { font-size: 12px; padding: 6px 12px; }
-
-    /* ---- طباعة العرض ---- */
-    #printArea { display: none; }
-    @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 24px; direction: rtl; }
-      .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0D3452; padding-bottom: 12px; margin-bottom: 16px; }
-      .print-header img { height: 55px; }
-      .print-title { font-size: 20px; font-weight: 800; color: #0D3452; }
-      .print-meta { font-size: 13px; color: #555; margin-bottom: 16px; }
-      .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-      .print-table th, .print-table td { border: 1px solid #DEE7E4; padding: 6px 8px; text-align: center; }
-      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
-      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
-      .print-totals .grand { font-weight: 800; font-size: 17px; border-top: 2px solid #0D3452; margin-top: 6px; padding-top: 8px; color:#0D3452; }
-      .print-footer { margin-top: 30px; font-size: 12px; color: #777; }
+    .ql-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 6px; }
+    .ql-card {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 24px 20px; text-align: center; text-decoration: none; color: var(--ink);
+      box-shadow: var(--shadow-soft); transition: transform .15s, box-shadow .15s;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
+    .ql-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .ql-card .icon { font-size: 34px; }
+    .ql-card .title { font-family: 'Cairo'; font-weight: 800; font-size: 16px; color: var(--night); }
+    .ql-card .desc { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+    .ql-welcome { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
   </style>
 </head>
 <body>
 
-<div class="rq-shell">
-  <div class="rq-header">
-    <img src="../logo.png" alt="الأصل للطاقة الشمسية">
-    <div>
-      <a href="rep-offgrid-quote.html" class="btn" style="min-height:36px;font-size:13px;">حاسبة أوف جريد كاملة ←</a>
-      <span data-user-name style="font-weight:700; margin-inline-start:10px;"></span>
-      <button class="btn" data-logout hidden style="margin-inline-start:10px;">تسجيل خروج</button>
+<header class="top">
+  <div class="brandrow">
+    <div class="brand">
+      <div class="mark"><img src="../logo.png" alt="الأصل للطاقة الشمسية"></div>
+      <div>
+        <div class="name">الأصل للطاقة الشمسية</div>
+        <div class="sub">بوابة المناديب</div>
+      </div>
     </div>
   </div>
+</header>
 
-  <!-- شاشة تسجيل الدخول -->
-  <div class="rq-card login-shell" data-auth-panel>
-    <h2>تسجيل دخول المندوب</h2>
+<main class="rep-main" style="max-width:900px">
+
+  <div class="login-shell card" data-auth-panel>
+    <h3>تسجيل دخول المندوب</h3>
     <form data-login-form>
-      <div class="rq-field">
-        <label>البريد الإلكتروني</label>
-        <input type="email" id="loginEmail" required autocomplete="username">
-      </div>
-      <div class="rq-field">
-        <label>كلمة المرور</label>
-        <input type="password" id="loginPassword" required autocomplete="current-password">
-      </div>
-      <button type="submit" class="btn btn-primary">دخول</button>
-      <p class="rq-msg" data-auth-message></p>
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" required autocomplete="username">
+      <label>كلمة المرور</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password">
+      <button type="submit" class="btn full" style="margin-top:16px">دخول</button>
+      <p class="note error" data-auth-message style="margin-top:12px;display:none"></p>
     </form>
   </div>
 
-  <!-- لوحة إنشاء عرض السعر -->
   <div data-rep-panel hidden>
-
-    <div class="rq-card">
-      <h2>بيانات العميل</h2>
-      <div class="rq-row">
-        <div class="rq-field">
-          <label>اسم العميل</label>
-          <input type="text" id="custName" required>
-        </div>
-        <div class="rq-field">
-          <label>رقم التليفون</label>
-          <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
-        </div>
+    <div class="ql-welcome">
+      <div>
+        <div style="font-size:13px;color:var(--muted)">أهلًا بيك،</div>
+        <div style="font-family:'Cairo';font-weight:800;font-size:20px" data-user-name>—</div>
       </div>
-      <div class="rq-field">
-        <label>المدينة / المنطقة</label>
-        <input type="text" id="custCity">
-      </div>
+      <button class="btn ghost small" data-logout>تسجيل خروج</button>
     </div>
 
-    <div class="rq-card">
-      <h2>نوع العرض</h2>
-      <div class="rq-type-toggle">
-        <button type="button" class="rq-type-btn active" data-quote-type="supply_only">توريد فقط</button>
-        <button type="button" class="rq-type-btn" data-quote-type="supply_install">توريد وتركيب</button>
-      </div>
-      <div class="rq-field" data-install-cost-wrap hidden style="margin-top:var(--space-2);">
-        <label>تكلفة التركيب (تُضاف للإجمالي)</label>
-        <input type="number" id="installCost" min="0" step="1" value="0">
-      </div>
+    <div class="ql-cards">
+      <a class="ql-card" href="../rep-pump-calculator.html">
+        <div class="icon">🚜</div>
+        <div class="title">حاسبة منظومة ري بالطاقة الشمسية</div>
+        <div class="desc">احسب موتور الغاطس والطلمبة والإنفرتر والماسورة المناسبة، وقدّم عرض سعر مباشر</div>
+      </a>
+      <a class="ql-card" href="../rep-offgrid-quote.html">
+        <div class="icon">🔋</div>
+        <div class="title">حاسبة أوف جريد</div>
+        <div class="desc">صمّم منظومة أوف جريد كاملة (ألواح، إنفرتر، بطاريات) وقدّم عرض سعر بالخصم</div>
+      </a>
+      <a class="ql-card" href="../rep-quotes.html">
+        <div class="icon">🧾</div>
+        <div class="title">تقديم عروض أسعار منتجات</div>
+        <div class="desc">اختار من كتالوج المنتجات مباشرة وجهّز عرض سعر توريد فقط أو توريد وتركيب</div>
+      </a>
     </div>
-
-    <div class="rq-card">
-      <h2>إضافة منتجات للعرض</h2>
-      <div class="rq-product-picker">
-        <select id="categorySelect"></select>
-        <select id="productSelect"></select>
-        <input type="number" id="qtyInput" min="1" value="1" style="max-width:80px;">
-        <button type="button" class="btn btn-primary" id="addProductBtn">إضافة</button>
-      </div>
-      <table class="rq-cart-table">
-        <thead>
-          <tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th></th></tr>
-        </thead>
-        <tbody id="cartBody"></tbody>
-      </table>
-      <div class="rq-totals">
-        <div>الإجمالي قبل التركيب: <strong id="subtotalDisplay">0</strong> ج.م</div>
-        <div data-install-total-row hidden>تكلفة التركيب: <strong id="installTotalDisplay">0</strong> ج.م</div>
-        <div class="total">الإجمالي الكلي: <span id="grandTotalDisplay">0</span> ج.م</div>
-      </div>
-      <button type="button" class="btn btn-primary" id="saveQuoteBtn" style="margin-top:var(--space-2);">حفظ العرض وطباعته</button>
-      <p class="rq-msg" data-quote-message></p>
-    </div>
-
-    <div class="rq-card">
-      <h2>عروضي السابقة</h2>
-      <div class="rq-quote-list" id="myQuotesList"></div>
-    </div>
-
   </div>
-</div>
 
-<!-- منطقة الطباعة -->
-<div id="printArea"></div>
+</main>
 
 </body>
 </html>
