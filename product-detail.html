@@ -113,6 +113,9 @@
     .pd-actions-main { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
     .pd-actions-main .btn { flex: 1 1 180px; justify-content: center; }
     .pd-wa-btn { flex: 1 1 180px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: var(--radius); background: var(--forest); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; }
+    .pd-compare-btn { flex: 1 1 180px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: var(--radius); background: #fff; border: 1.5px solid var(--ink); color: var(--ink); font-weight: 700; font-size: 14px; cursor: pointer; }
+    .pd-compare-btn.active { background: var(--ink); color: #fff; }
+    .pd-compare-note { font-size: 13px; color: var(--muted); margin: -4px 0 10px; }
     .pd-wa-btn:hover { opacity: .92; }
 
     .pd-meta-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; margin-top: var(--space-3); }
@@ -254,7 +257,11 @@
             <a class="pd-wa-btn" id="pdWaBtn" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-whatsapp" aria-hidden="true"></i> <span id="pdWaText">تواصل واتساب</span>
             </a>
+            <button type="button" class="pd-compare-btn" id="pdCompareBtn">
+              <i class="fa fa-balance-scale" aria-hidden="true"></i> <span id="pdCompareText">أضف للمقارنة</span>
+            </button>
           </div>
+          <p class="pd-compare-note" id="pdCompareNote" hidden></p>
 
           <a class="pd-ds-btn" id="pdDatasheetBtn" href="#" target="_blank" rel="noopener" hidden style="width:100%; justify-content:center; margin-bottom: var(--space-3);">
             <i class="fa fa-file-pdf-o" aria-hidden="true"></i> <span id="pdDatasheetText">تحميل الداتا شيت</span>
@@ -302,6 +309,15 @@
     <i class="fab fa-whatsapp" aria-hidden="true"></i>
   </a>
 
+  <div class="compare-bar" data-compare-bar hidden>
+    <a class="compare-bar-link" href="compare.html">
+      <i class="fa fa-balance-scale" aria-hidden="true"></i>
+      <span id="compareBarText">قارن المنتجات</span>
+      <span class="compare-badge-count"><span data-compare-badge>0</span>/3</span>
+    </a>
+  </div>
+  <script src="compare.js"></script>
+
   <script defer src="app.js"></script>
 
   <script>
@@ -329,6 +345,7 @@
             factTempRange: 'مدى التشغيل', factWeight: 'الوزن', factIpRating: 'درجة الحماية', factCycleLife: 'عدد دورات الشحن', factCapacity: 'السعة الاسمية', factVoltage: 'الجهد الاسمي',
             chooseModel: 'اختر الموديل', choosePumpType: 'اختر نوع الطلمبة', chooseAccessoryType: 'اختر نوع المنتج', chooseTechDetails: 'اختر التفاصيل الفنية',
             chooseMaterial: 'اختر الخامة', chooseDiameter: 'اختر المقاس', materialStainless: 'ستانلس', materialCastIron: 'حديد زهر', materialStainlessCastIronCap: 'ستانلس بكاب حديد زهر', materialWaterCooled: 'تبريد مياة', materialOther: 'أخرى', inch: 'بوصة',
+            compareAdd: 'أضف للمقارنة', compareAdded: 'مُضاف للمقارنة ✓', compareBarText: 'قارن المنتجات', compareFullError: 'وصلت للحد الأقصى (3 منتجات) — امسح واحد من صفحة المقارنة أولاً.', compareCategoryError: 'تقدر تقارن منتجات من نفس الفئة بس. امسح المقارنة الحالية عشان تبدأ بفئة جديدة.',
             phase3_380v: '3 فاز 380 فولت', phase3_220v: '3 فاز 220 فولت', phase1_220v: 'سينجل فاز 220 فولت',
             tierUpTo5: 'حتى 5 حصان', tier5to20: '5 – 20 حصان', tier20to50: '20 – 50 حصان', tier50to100: '50 – 100 حصان', tierOver100: 'أكتر من 100 حصان' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
@@ -342,6 +359,7 @@
             factTempRange: 'Operating Range', factWeight: 'Weight', factIpRating: 'Protection Rating', factCycleLife: 'Cycle Life', factCapacity: 'Rated Capacity', factVoltage: 'Rated Voltage',
             chooseModel: 'Choose Model', choosePumpType: 'Choose Pump Type', chooseAccessoryType: 'Choose Product Type', chooseTechDetails: 'Choose Technical Details',
             chooseMaterial: 'Choose Material', chooseDiameter: 'Choose Size', materialStainless: 'Stainless Steel', materialCastIron: 'Cast Iron', materialStainlessCastIronCap: 'Stainless with Cast Iron Cap', materialWaterCooled: 'Water-Cooled', materialOther: 'Other', inch: 'in',
+            compareAdd: 'Add to Compare', compareAdded: 'Added to Compare ✓', compareBarText: 'Compare Products', compareFullError: 'You\u2019ve reached the limit (3 products) — remove one from the compare page first.', compareCategoryError: 'You can only compare products from the same category. Clear the current comparison to start a new category.',
             phase3_380v: '3-Phase 380V', phase3_220v: '3-Phase 220V', phase1_220v: 'Single-Phase 220V',
             tierUpTo5: 'Up to 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Over 100 HP' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
@@ -355,6 +373,7 @@
             factTempRange: 'Rango de Funcionamiento', factWeight: 'Peso', factIpRating: 'Índice de Protección', factCycleLife: 'Ciclos de Vida', factCapacity: 'Capacidad Nominal', factVoltage: 'Voltaje Nominal',
             chooseModel: 'Elegir Modelo', choosePumpType: 'Elegir Tipo de Bomba', chooseAccessoryType: 'Elegir Tipo de Producto', chooseTechDetails: 'Elegir Detalles Técnicos',
             chooseMaterial: 'Elegir Material', chooseDiameter: 'Elegir Tamaño', materialStainless: 'Acero Inoxidable', materialCastIron: 'Hierro Fundido', materialStainlessCastIronCap: 'Inoxidable con Tapa de Hierro Fundido', materialWaterCooled: 'Refrigerado por Agua', materialOther: 'Otro', inch: 'pulg',
+            compareAdd: 'Añadir a Comparar', compareAdded: 'Añadido a Comparar ✓', compareBarText: 'Comparar Productos', compareFullError: 'Has alcanzado el límite (3 productos) — elimina uno desde la página de comparación primero.', compareCategoryError: 'Solo puedes comparar productos de la misma categoría. Borra la comparación actual para empezar una nueva.',
             phase3_380v: 'Trifásico 380V', phase3_220v: 'Trifásico 220V', phase1_220v: 'Monofásico 220V',
             tierUpTo5: 'Hasta 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Más de 100 HP' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
@@ -368,6 +387,7 @@
             factTempRange: '工作温度范围', factWeight: '重量', factIpRating: '防护等级', factCycleLife: '循环寿命', factCapacity: '额定容量', factVoltage: '额定电压',
             chooseModel: '选择型号', choosePumpType: '选择水泵类型', chooseAccessoryType: '选择产品类型', chooseTechDetails: '选择技术细节',
             chooseMaterial: '选择材质', chooseDiameter: '选择尺寸', materialStainless: '不锈钢', materialCastIron: '铸铁', materialStainlessCastIronCap: '不锈钢(铸铁端盖)', materialWaterCooled: '水冷式', materialOther: '其他', inch: '英寸',
+            compareAdd: '加入比较', compareAdded: '已加入比较 ✓', compareBarText: '比较产品', compareFullError: '已达到上限(3件产品)——请先在比较页面删除一件。', compareCategoryError: '只能比较同一类别的产品。请先清空当前比较列表再开始新的类别。',
             phase3_380v: '三相380V', phase3_220v: '三相220V', phase1_220v: '单相220V',
             tierUpTo5: '5马力以下', tier5to20: '5 – 20马力', tier20to50: '20 – 50马力', tier50to100: '50 – 100马力', tierOver100: '100马力以上' },
     };
@@ -528,6 +548,20 @@
       document.getElementById('pdCodeLabel').textContent = t('productCode');
       document.getElementById('pdCatLabel').textContent = t('category');
       document.getElementById('pdSimilarTitle').textContent = t('similarProducts');
+      const compareBarText = document.getElementById('compareBarText');
+      if (compareBarText) compareBarText.textContent = t('compareBarText');
+      updateCompareButton();
+    }
+
+    // Reflects whether the currently selected variant is already in the
+    // compare list, and (re)renders the button's label accordingly.
+    function updateCompareButton() {
+      const btn = document.getElementById('pdCompareBtn');
+      const label = document.getElementById('pdCompareText');
+      if (!btn || !label || !selected) return;
+      const inList = window.AlaslCompare && window.AlaslCompare.has(selected.id);
+      btn.classList.toggle('active', !!inList);
+      label.textContent = inList ? t('compareAdded') : t('compareAdd');
     }
 
     function selectVariant(row) {
@@ -544,6 +578,7 @@
       const stockBadge = document.getElementById('pdStockBadge');
       if (row.in_stock === false) { stockBadge.textContent = t('outOfStock'); stockBadge.hidden = false; }
       else { stockBadge.hidden = true; }
+      updateCompareButton();
 
       const rowsSpec = [];
       if (row.brand) rowsSpec.push([t('specBrand'), escapeHtml(row.brand)]);
@@ -1252,6 +1287,27 @@
           }, 50);
         });
       });
+
+      const compareBtn = document.getElementById('pdCompareBtn');
+      const compareNote = document.getElementById('pdCompareNote');
+      if (compareBtn) {
+        compareBtn.addEventListener('click', () => {
+          if (!selected || !window.AlaslCompare) return;
+          compareNote.hidden = true;
+          if (window.AlaslCompare.has(selected.id)) {
+            window.AlaslCompare.removeItem(selected.id);
+            updateCompareButton();
+            return;
+          }
+          const result = window.AlaslCompare.addItem({ id: selected.id, category: selected.category });
+          if (result.ok) {
+            updateCompareButton();
+          } else {
+            compareNote.textContent = result.reason === 'full' ? t('compareFullError') : t('compareCategoryError');
+            compareNote.hidden = false;
+          }
+        });
+      }
     });
 
     if (document.readyState === 'loading') {

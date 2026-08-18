@@ -1286,6 +1286,44 @@ details[open] summary::after {
   box-shadow: 0 14px 36px rgba(37, 211, 102, 0.55);
 }
 
+/* ── Compare bar ── */
+.compare-bar {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-3);
+  transform: translateX(-50%);
+  z-index: 14;
+  max-width: calc(100% - 2 * var(--space-3));
+}
+.compare-bar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink, #1a1a1a);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+.compare-bar-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+}
+.compare-bar-link i { font-size: 18px; }
+.compare-badge-count {
+  background: var(--brand, #b5842a);
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 /* ── Dashboard ── */
 .dashboard-shell {
   min-height: 100vh;
