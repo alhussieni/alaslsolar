@@ -53,10 +53,8 @@ async function checkRepStatus(userId) {
 
 function showMsg(el, text, kind) {
   if (!el) return;
-  if (!text) { el.style.display = "none"; el.textContent = ""; return; }
-  el.textContent = text;
-  el.className = "note" + (kind ? " " + kind : "");
-  el.style.display = "";
+  el.textContent = text || "";
+  el.style.color = kind === "error" ? "#b23b23" : kind === "ok" ? "var(--forest)" : "var(--muted)";
 }
 
 async function updateAuthState(session) {
