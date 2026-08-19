@@ -43,7 +43,60 @@ async function updateAuthState(session) {
   loadIncomingCart();
 }
 
-/* ---------------- استقبال نتيجة الحاسبة ---------------- */
+/* ---------------- وضع القدرة المباشرة (الأساسي) ---------------- */
+
+function pickClosestByHp(rows, targetHp) {
+  if (!rows.length) return null;
+  const withHp = rows.filter((r) => r.power_hp != null);
+  if (!withHp.length) return null;
+  const atOrAbove = withHp.filter((r) => r.power_hp >= targetHp).sort((a, b) => a.power_hp - b.power_hp);
+  if (atOrAbove.length) return atOrAbove[0];
+  return withHp.sort((a, b) => b.power_hp - a.power_hp)[0]; // أقرب واحد أقل لو معندناش أعلى
+}
+
+async function searchByHp() {
+  const msgEl = $("[data-hp-message]");
+  const hp = parseFloat($("#hpInput").value);
+  if (!hp || hp <= 0) { showMsg(msgEl, "اكتب قدرة صحيحة بالحصان.", "error"); return; }
+
+  showMsg(msgEl, "جاري البحث في الكتالوج...", "");
+
+  const { data, error } = await client.from("products")
+    .select("id,category,brand,name_ar,price,power_hp")
+    .in("category", ["well_motors", "pumps"])
+    .eq("published", true)
+    .eq("in_stock", true)
+    .not("price", "is", null)
+    .gt("price", 0);
+
+  if (error || !data) { showMsg(msgEl, "تعذر تحميل الكتالوج.", "error"); return; }
+
+  const motor = pickClosestByHp(data.filter((r) => r.category === "well_motors"), hp);
+  const pump = pickClosestByHp(data.filter((r) => r.category === "pumps"), hp);
+
+  const missing = [];
+  if (!motor) missing.push("موتور غاطس");
+  if (!pump) missing.push("طلمبة");
+  if (missing.length) {
+    showMsg(msgEl, `مفيش (${missing.join("، ")}) بقدرة ${hp} حصان في الكتالوج حاليًا — جرّب الحاسبة الفنية الكاملة أو بلّغ الأدمن يضيف الموديل ده.`, "error");
+    return;
+  }
+
+  quoteRows = [motor, pump].map((p) => ({
+    label: `${p.category === "well_motors" ? "موتور غاطس" : "طلمبة"} — ${p.brand || ""} — ${p.name_ar || ""}`,
+    productId: p.id, category: p.category, brand: p.brand,
+    qty: 1, unitPrice: p.price, discountPct: 0,
+  }));
+
+  showMsg(msgEl, `تم تجهيز عرض بقدرة أقرب ${motor.power_hp} حصان. راجع البنود تحت.`, "ok");
+  $("[data-empty-cart]").hidden = true;
+  $("[data-quote-content]").hidden = false;
+  renderQuoteTable();
+  updateBanner();
+  $("[data-quote-content]").scrollIntoView({ behavior: "smooth" });
+}
+
+/* ---------------- استقبال نتيجة الحاسبة الفنية (اختياري) ---------------- */
 
 function loadIncomingCart() {
   let items = [];
@@ -52,11 +105,7 @@ function loadIncomingCart() {
     if (raw) items = JSON.parse(raw) || [];
   } catch (e) { items = []; }
 
-  if (!items.length) {
-    $("[data-empty-cart]").hidden = false;
-    $("[data-quote-content]").hidden = true;
-    return;
-  }
+  if (!items.length) return; // القدرة المباشرة هي الوضع الافتراضي، مفيش تحذير محتاج يظهر
 
   quoteRows = items.map((it) => ({
     label: it.name, productId: it.id || null, category: it.category || null, brand: it.brand || null,
@@ -189,6 +238,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!client) return;
 
   $("#saveQuoteBtn")?.addEventListener("click", saveQuote);
+  $("#hpSearchBtn")?.addEventListener("click", searchByHp);
+  $("#hpInput")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); searchByHp(); } });
   $("#custName")?.addEventListener("input", updateBanner);
   $("#custPhone")?.addEventListener("input", updateBanner);
   document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {

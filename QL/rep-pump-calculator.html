@@ -729,13 +729,17 @@
     }
 
     function prodRow(num, catLabel, row, powerLabel, badge, catKey, brands, currentBrand) {
-      window.__lastPumpRecs = window.__lastPumpRecs || [];
-      window.__lastPumpRecs.push({
-        id: row.id, category: row.category, brand: row.brand,
-        name: `${catLabel} — ${row.brand ? row.brand + ' — ' : ''}${row.name_ar || ''}`,
-        price: parseFloat(row.price) || 0,
-        qty: 1,
-      });
+      // الإنفرتر بقى جزء من عرض سعر "تشغيل منظومة الري بالطاقة الشمسية" المنفصل،
+      // مش عرض سعر البئر (موتور+طلمبة+ماسورة) — نعرضه هنا للمعلومية بس من غير ما ندخّله في السلة.
+      if (catKey !== 'inverter_brand') {
+        window.__lastPumpRecs = window.__lastPumpRecs || [];
+        window.__lastPumpRecs.push({
+          id: row.id, category: row.category, brand: row.brand,
+          name: `${catLabel} — ${row.brand ? row.brand + ' — ' : ''}${row.name_ar || ''}`,
+          price: parseFloat(row.price) || 0,
+          qty: 1,
+        });
+      }
       return `<tr>
         <td class="prodrec-num">${num}</td>
         <td>
