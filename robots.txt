@@ -1,7 +1,5 @@
 User-agent: *
 Disallow: /article.html
-Disallow: /product-detail.html
-Disallow: /compare.html
 
 Allow: /
 
