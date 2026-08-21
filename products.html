@@ -47,6 +47,7 @@
         prod_note_label: "Note:",
         prod_note_text: "Prices are approximate and may change — contact us to confirm before ordering.",
         compare_bar_text: "Compare Products",
+        cart_bar_text: "Cart",
         prod_cat_all: "All",
         prod_cat_inverters: "⚡ Inverters",
         prod_cat_panels: "☀️ Solar Panels",
@@ -115,6 +116,7 @@
         prod_note_label: "ملاحظة:",
         prod_note_text: "الأسعار تقريبية وقد تتغير — تواصل معنا للتأكيد قبل الطلب.",
         compare_bar_text: "قارن المنتجات",
+        cart_bar_text: "السلة",
         prod_cat_all: "الكل",
         prod_cat_inverters: "⚡ إنفرترات",
         prod_cat_panels: "☀️ ألواح شمسية",
@@ -183,6 +185,7 @@
         prod_note_label: "Nota:",
         prod_note_text: "Los precios son aproximados y pueden cambiar — contáctenos para confirmar antes de pedir.",
         compare_bar_text: "Comparar Productos",
+        cart_bar_text: "Carrito",
         prod_cat_all: "Todos",
         prod_cat_inverters: "⚡ Inversores",
         prod_cat_panels: "☀️ Paneles solares",
@@ -251,6 +254,7 @@
         prod_note_label: "注意：",
         prod_note_text: "价格为参考价，可能变动——订购前请联系我们确认。",
         compare_bar_text: "比较产品",
+        cart_bar_text: "购物车",
         prod_cat_all: "全部",
         prod_cat_inverters: "⚡ 逆变器",
         prod_cat_panels: "☀️ 太阳能板",
@@ -1019,14 +1023,24 @@
     <i class="fab fa-whatsapp" aria-hidden="true"></i>
   </a>
 
-  <div class="compare-bar" data-compare-bar hidden>
-    <a class="compare-bar-link" href="compare.html">
-      <i class="fa fa-balance-scale" aria-hidden="true"></i>
-      <span data-i18n="compare_bar_text">قارن المنتجات</span>
-      <span class="compare-badge-count"><span data-compare-badge>0</span>/3</span>
-    </a>
+  <div class="floating-bars">
+    <div class="compare-bar" data-compare-bar hidden>
+      <a class="compare-bar-link" href="compare.html">
+        <i class="fa fa-balance-scale" aria-hidden="true"></i>
+        <span data-i18n="compare_bar_text">قارن المنتجات</span>
+        <span class="compare-badge-count"><span data-compare-badge>0</span>/3</span>
+      </a>
+    </div>
+    <div class="cart-bar" data-cart-bar hidden>
+      <a class="cart-bar-link" href="cart.html">
+        <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+        <span data-i18n="cart_bar_text">السلة</span>
+        <span class="cart-badge-count"><span data-cart-badge>0</span></span>
+      </a>
+    </div>
   </div>
   <script src="compare.js"></script>
+  <script src="cart.js"></script>
 
   <script>
   (function () {
