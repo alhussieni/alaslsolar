@@ -1286,16 +1286,21 @@ details[open] summary::after {
   box-shadow: 0 14px 36px rgba(37, 211, 102, 0.55);
 }
 
-/* ── Compare bar ── */
-.compare-bar {
+/* ── Floating action bars (compare / cart) ── */
+.floating-bars {
   position: fixed;
   left: 50%;
   bottom: var(--space-3);
   transform: translateX(-50%);
   z-index: 14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   max-width: calc(100% - 2 * var(--space-3));
 }
-.compare-bar-link {
+.compare-bar-link,
+.cart-bar-link {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1310,12 +1315,16 @@ details[open] summary::after {
   transition: transform 0.2s, box-shadow 0.2s;
   white-space: nowrap;
 }
-.compare-bar-link:hover {
+.compare-bar-link:hover,
+.cart-bar-link:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
 }
-.compare-bar-link i { font-size: 18px; }
-.compare-badge-count {
+.compare-bar-link i,
+.cart-bar-link i { font-size: 18px; }
+.cart-bar-link { background: var(--brand-dark, #7a5620); }
+.compare-badge-count,
+.cart-badge-count {
   background: var(--brand, #b5842a);
   color: #fff;
   border-radius: 999px;
@@ -1323,6 +1332,7 @@ details[open] summary::after {
   font-size: 12px;
   font-weight: 800;
 }
+.cart-badge-count { background: #fff; color: var(--brand-dark, #7a5620); }
 
 /* ── Dashboard ── */
 .dashboard-shell {
