@@ -37,6 +37,7 @@
     .cart-line-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
     .cart-line-name a { color: inherit; text-decoration: none; }
     .cart-line-name a:hover { text-decoration: underline; }
+    .cart-line-detail { font-size: 12px; color: var(--ink); opacity: .75; margin-bottom: 2px; }
     .cart-line-unit { font-size: 12px; color: var(--muted); }
     .cart-qty-stepper { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; flex-shrink: 0; }
     .cart-qty-stepper button { width: 32px; height: 36px; border: none; background: var(--bg-alt, #f7f5f2); font-size: 16px; font-weight: 700; cursor: pointer; }
@@ -223,7 +224,45 @@
     function t(key) { return (T[getLang()] || T.ar)[key]; }
     function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
     function fmt(n) { return Number(n).toLocaleString('en-US'); }
+
+    // Panels: `price` is EGP-per-watt, not a flat unit price — the real
+    // price of one panel = price * power_watt. Every other category's
+    // price is already the flat per-unit price. This is specific to
+    // panels; nothing else on the site is priced this way.
+    function unitPrice(row) {
+      if (row.category === 'panels' && row.power_watt != null) {
+        return Math.round(Number(row.price) * Number(row.power_watt) * 100) / 100;
+      }
+      return Number(row.price);
+    }
     function getField(row, field) { const l = getLang(); return row[`${field}_${l}`] || row[`${field}_ar`] || row[`${field}_en`] || row[field] || ''; }
+
+    const VOLTAGE_PHASE_LABELS = {
+      ar: { '3phase_380v': '3 فاز 380 فولت', '3phase_220v': '3 فاز 220 فولت', single_220v: 'سينجل فاز 220 فولت' },
+      en: { '3phase_380v': '3-Phase 380V', '3phase_220v': '3-Phase 220V', single_220v: 'Single-Phase 220V' },
+      es: { '3phase_380v': 'Trifásico 380V', '3phase_220v': 'Trifásico 220V', single_220v: 'Monofásico 220V' },
+      zh: { '3phase_380v': '三相380V', '3phase_220v': '三相220V', single_220v: '单相220V' },
+    };
+
+    // Cart lines showed only the generic product name ("VEICHI Inverter"),
+    // which for categories like inverters carries no power/model info at
+    // all in name_ar — the customer couldn't tell which exact item they'd
+    // picked. Always pair the name with its specs (which reliably carries
+    // the differentiating HP/KW/diameter/pressure/etc across every
+    // category), plus the voltage/phase or model code for inverters where
+    // two different products can otherwise share identical specs text.
+    function productLabel(row) {
+      const bits = [getField(row, 'specs')];
+      if (row.category === 'inverters' || row.category === 'offgrid') {
+        const vpMap = VOLTAGE_PHASE_LABELS[getLang()] || VOLTAGE_PHASE_LABELS.ar;
+        const vp = row.inverter_voltage_phase && vpMap[row.inverter_voltage_phase];
+        if (vp) bits.push(vp);
+        else if (row.model_available) bits.push(row.model_available);
+      } else if (row.model_available) {
+        bits.push(row.model_available);
+      }
+      return bits.filter(Boolean).join(' — ');
+    }
 
     function detailHref(row) {
       const multiModelCat = ['inverters', 'offgrid', 'pumps', 'well_motors'].includes(row.category);
@@ -267,7 +306,7 @@
       }
 
       const ids = items.map(x => x.id);
-      const { data: rows, error } = await sb.from('products').select('id, category, brand, model_available, price, image_url, name_ar, name_en, name_es, name_zh, unit').in('id', ids);
+      const { data: rows, error } = await sb.from('products').select('id, category, brand, model_available, price, image_url, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh, unit, power_watt, inverter_voltage_phase').in('id', ids);
       loading.hidden = true;
 
       if (error || !rows || rows.length === 0) {
@@ -287,23 +326,28 @@
       empty.hidden = true; content.hidden = false;
 
       const linesEl = document.getElementById('cartLines');
-      linesEl.innerHTML = liveRows.map(r => `
+      linesEl.innerHTML = liveRows.map(r => {
+        const price = unitPrice(r);
+        const label = productLabel(r);
+        return `
         <div class="cart-line" data-line-id="${r.id}">
           <img src="${escapeHtml(r.image_url || 'solar.jpg')}" alt="">
           <div class="cart-line-info">
-            <div class="cart-line-name"><a href="${detailHref(r)}">${escapeHtml(getField(r, 'name'))}</a></div>
-            <div class="cart-line-unit">${fmt(r.price)} ${t('egp')}${r.unit ? ' / ' + escapeHtml(r.unit) : ''}</div>
+            <div class="cart-line-name"><a href="${detailHref(r)}">${escapeHtml(r.brand)} ${escapeHtml(getField(r, 'name'))}</a></div>
+            ${label ? `<div class="cart-line-detail">${escapeHtml(label)}</div>` : ''}
+            <div class="cart-line-unit">${fmt(price)} ${t('egp')}${r.category !== 'panels' && r.unit ? ' / ' + escapeHtml(r.unit) : ''}</div>
           </div>
           <div class="cart-qty-stepper">
             <button type="button" data-qty-minus="${r.id}">−</button>
             <input type="number" min="1" step="1" value="${r.qty}" data-qty-input="${r.id}">
             <button type="button" data-qty-plus="${r.id}">+</button>
           </div>
-          <div class="cart-line-total">${fmt(r.price * r.qty)} ${t('egp')}</div>
+          <div class="cart-line-total">${fmt(price * r.qty)} ${t('egp')}</div>
           <button type="button" class="cart-line-remove" data-remove-id="${r.id}" aria-label="${t('remove')}"><i class="fa fa-trash" aria-hidden="true"></i></button>
-        </div>`).join('');
+        </div>`;
+      }).join('');
 
-      const subtotal = liveRows.reduce((sum, r) => sum + r.price * r.qty, 0);
+      const subtotal = liveRows.reduce((sum, r) => sum + unitPrice(r) * r.qty, 0);
       document.getElementById('cartSubtotalValue').textContent = `${fmt(subtotal)} ${t('egp')}`;
 
       linesEl.querySelectorAll('[data-qty-minus]').forEach(btn => {

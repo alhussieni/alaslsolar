@@ -48,6 +48,7 @@
     .cmp-col-header { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 180px; }
     .cmp-col-img { width: 100px; height: 100px; border-radius: var(--radius); border: 1px solid var(--line); background: #fff; object-fit: contain; }
     .cmp-col-name { font-weight: 800; font-size: 15px; text-align: center; }
+    .cmp-col-detail { font-size: 12px; color: var(--ink); opacity: .75; text-align: center; }
     .cmp-col-price { font-weight: 800; color: var(--brand-dark); font-size: 17px; }
     .cmp-col-remove { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline; }
     .cmp-col-remove:hover { color: #c0392b; }
@@ -193,6 +194,38 @@
     function getField(row, field) { const l = getLang(); return row[`${field}_${l}`] || row[`${field}_ar`] || row[`${field}_en`] || row[field] || ''; }
     function getListField(row, field) { const l = getLang(); return row[`${field}_${l}`] || row[`${field}_ar`] || row[`${field}_en`] || row[field] || null; }
 
+    // Panels: `price` is EGP-per-watt, not a flat unit price — the real
+    // price of one panel = price * power_watt. Every other category's
+    // price is already the flat per-unit price.
+    function unitPrice(row) {
+      if (row.category === 'panels' && row.power_watt != null) {
+        return Math.round(Number(row.price) * Number(row.power_watt) * 100) / 100;
+      }
+      return Number(row.price);
+    }
+
+    const VOLTAGE_PHASE_LABELS = {
+      ar: { '3phase_380v': '3 فاز 380 فولت', '3phase_220v': '3 فاز 220 فولت', single_220v: 'سينجل فاز 220 فولت' },
+      en: { '3phase_380v': '3-Phase 380V', '3phase_220v': '3-Phase 220V', single_220v: 'Single-Phase 220V' },
+      es: { '3phase_380v': 'Trifásico 380V', '3phase_220v': 'Trifásico 220V', single_220v: 'Monofásico 220V' },
+      zh: { '3phase_380v': '三相380V', '3phase_220v': '三相220V', single_220v: '单相220V' },
+    };
+    // Same "show what was actually picked" fix as cart.html — pairs the
+    // (often generic) name with specs, plus voltage/phase or model code
+    // for inverters where specs alone can't tell two products apart.
+    function productLabel(row) {
+      const bits = [getField(row, 'specs')];
+      if (row.category === 'inverters' || row.category === 'offgrid') {
+        const vpMap = VOLTAGE_PHASE_LABELS[getLang()] || VOLTAGE_PHASE_LABELS.ar;
+        const vp = row.inverter_voltage_phase && vpMap[row.inverter_voltage_phase];
+        if (vp) bits.push(vp);
+        else if (row.model_available) bits.push(row.model_available);
+      } else if (row.model_available) {
+        bits.push(row.model_available);
+      }
+      return bits.filter(Boolean).join(' — ');
+    }
+
     const MATERIAL_LABELS = {
       ar: { stainless: 'ستانلس', cast_iron: 'حديد زهر', stainless_cast_iron_cap: 'ستانلس بكاب حديد زهر' },
       en: { stainless: 'Stainless Steel', cast_iron: 'Cast Iron', stainless_cast_iron_cap: 'Stainless with Cast Iron Cap' },
@@ -225,7 +258,7 @@
 
       const specs = [
         [t('rowBrand'), rows.map(r => text(r.brand))],
-        [t('rowPrice'), rows.map(r => `${fmt(r.price)} ${t('egp')}`)],
+        [t('rowPrice'), rows.map(r => `${fmt(unitPrice(r))} ${t('egp')}`)],
         [t('rowModel'), rows.map(r => text(r.model_available))],
         [t('rowSpecs'), rows.map(r => text(getField(r, 'specs')))],
       ];
@@ -278,8 +311,9 @@
         <th>
           <div class="cmp-col-header">
             <img class="cmp-col-img" src="${escapeHtml(r.image_url || 'solar.jpg')}" alt="${escapeHtml(getField(r, 'name'))}">
-            <span class="cmp-col-name">${escapeHtml(getField(r, 'name'))}</span>
-            <span class="cmp-col-price">${fmt(r.price)} ${t('egp')}</span>
+            <span class="cmp-col-name">${escapeHtml(r.brand)} ${escapeHtml(getField(r, 'name'))}</span>
+            ${productLabel(r) ? `<span class="cmp-col-detail">${escapeHtml(productLabel(r))}</span>` : ''}
+            <span class="cmp-col-price">${fmt(unitPrice(r))} ${t('egp')}</span>
             <a class="cmp-col-link" href="${detailHref(r)}">${t('viewProduct')}</a>
             <button type="button" class="cmp-col-remove" data-remove-id="${r.id}">${t('remove')}</button>
           </div>
