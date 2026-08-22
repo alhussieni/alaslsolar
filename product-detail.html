@@ -228,6 +228,7 @@
           <div class="pd-price-box">
             <span class="stock-badge" id="pdStockBadge" hidden></span>
             <div class="pd-price"><span id="pdPrice"></span> <span class="pd-unit" id="pdPriceUnit"></span></div>
+            <p class="pd-price-hint" id="pdPanelTotalHint" hidden></p>
             <p class="pd-price-hint" id="pdPriceHint">السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.</p>
           </div>
 
@@ -364,7 +365,7 @@
     };
     const T = {
       ar: { back: 'الرجوع لكل المنتجات', loading: 'جاري تحميل بيانات المنتج…', error: 'تعذّر العثور على هذا المنتج — قد يكون غير منشور أو تم حذفه.',
-            choosePower: 'اختر القدرة', choosePressure: 'اختر الضغط', chooseVoltage: 'اختر الفولت', chooseAmp: 'اختر الأمبير', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', outOfStock: 'غير متاح حاليًا', datasheet: 'تحميل الداتا شيت',
+            choosePower: 'اختر القدرة', choosePressure: 'اختر الضغط', chooseVoltage: 'اختر الفولت', chooseAmp: 'اختر الأمبير', priceHint: 'السعر تقريبي وقابل للتغيير — تواصل معنا للتأكيد.', panelTotalHint: 'يعني {price} ج.م للوح الواحد ({watt} وات).', outOfStock: 'غير متاح حاليًا', datasheet: 'تحميل الداتا شيت',
             quote: 'اطلب عرض سعر', whatsapp: 'تواصل واتساب', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specDetails: 'المواصفات', specChemistry: 'نوع الكيمياء', specNotes: 'ملاحظات', specDiameter: 'المقاس',
             home: 'الرئيسية', products: 'المنتجات', productCode: 'رقم المنتج:', category: 'التصنيف:',
             tabDesc: 'الوصف', tabSpecs: 'المواصفات', tabApps: 'التطبيقات', tabWarranty: 'الضمان', tabFiles: 'الملفات',
@@ -379,7 +380,7 @@
             phase3_380v: '3 فاز 380 فولت', phase3_220v: '3 فاز 220 فولت', phase1_220v: 'سينجل فاز 220 فولت',
             tierUpTo5: 'حتى 5 حصان', tier5to20: '5 – 20 حصان', tier20to50: '20 – 50 حصان', tier50to100: '50 – 100 حصان', tierOver100: 'أكتر من 100 حصان' },
       en: { back: 'Back to all products', loading: 'Loading product details…', error: 'Could not find this product — it may be unpublished or removed.',
-            choosePower: 'Choose Power', choosePressure: 'Choose Pressure Rating', chooseVoltage: 'Choose Voltage', chooseAmp: 'Choose Amp-Hour', priceHint: 'Price is approximate and subject to change — contact us to confirm.', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
+            choosePower: 'Choose Power', choosePressure: 'Choose Pressure Rating', chooseVoltage: 'Choose Voltage', chooseAmp: 'Choose Amp-Hour', priceHint: 'Price is approximate and subject to change — contact us to confirm.', panelTotalHint: 'That\u2019s {price} EGP per panel ({watt}W).', outOfStock: 'Currently Unavailable', datasheet: 'Download Datasheet',
             quote: 'Request a Quote', whatsapp: 'Chat on WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specDetails: 'Specifications', specChemistry: 'Chemistry', specNotes: 'Notes', specDiameter: 'Diameter',
             home: 'Home', products: 'Products', productCode: 'Product code:', category: 'Category:',
             tabDesc: 'Description', tabSpecs: 'Specifications', tabApps: 'Applications', tabWarranty: 'Warranty', tabFiles: 'Files',
@@ -394,7 +395,7 @@
             phase3_380v: '3-Phase 380V', phase3_220v: '3-Phase 220V', phase1_220v: 'Single-Phase 220V',
             tierUpTo5: 'Up to 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Over 100 HP' },
       es: { back: 'Volver a todos los productos', loading: 'Cargando detalles del producto…', error: 'No se pudo encontrar este producto.',
-            choosePower: 'Elegir Potencia', choosePressure: 'Elegir Presión', chooseVoltage: 'Elegir Voltaje', chooseAmp: 'Elegir Amperios', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
+            choosePower: 'Elegir Potencia', choosePressure: 'Elegir Presión', chooseVoltage: 'Elegir Voltaje', chooseAmp: 'Elegir Amperios', priceHint: 'Precio aproximado y sujeto a cambios — contáctenos para confirmar.', panelTotalHint: 'Eso es {price} EGP por panel ({watt}W).', outOfStock: 'No Disponible', datasheet: 'Descargar Ficha Técnica',
             quote: 'Solicitar Presupuesto', whatsapp: 'Chatear por WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specDetails: 'Especificaciones', specChemistry: 'Química', specNotes: 'Notas', specDiameter: 'Diámetro',
             home: 'Inicio', products: 'Productos', productCode: 'Código de producto:', category: 'Categoría:',
             tabDesc: 'Descripción', tabSpecs: 'Especificaciones', tabApps: 'Aplicaciones', tabWarranty: 'Garantía', tabFiles: 'Archivos',
@@ -409,7 +410,7 @@
             phase3_380v: 'Trifásico 380V', phase3_220v: 'Trifásico 220V', phase1_220v: 'Monofásico 220V',
             tierUpTo5: 'Hasta 5 HP', tier5to20: '5 – 20 HP', tier20to50: '20 – 50 HP', tier50to100: '50 – 100 HP', tierOver100: 'Más de 100 HP' },
       zh: { back: '返回所有产品', loading: '正在加载产品详情…', error: '未找到该产品。',
-            choosePower: '选择功率', choosePressure: '选择压力等级', chooseVoltage: '选择电压', chooseAmp: '选择安时', priceHint: '价格为参考价，可能变动——请联系我们确认。', outOfStock: '暂时缺货', datasheet: '下载规格书',
+            choosePower: '选择功率', choosePressure: '选择压力等级', chooseVoltage: '选择电压', chooseAmp: '选择安时', priceHint: '价格为参考价，可能变动——请联系我们确认。', panelTotalHint: '即每块面板 {price} 埃及镑（{watt}瓦）。', outOfStock: '暂时缺货', datasheet: '下载规格书',
             quote: '获取报价', whatsapp: 'WhatsApp 联系', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specDetails: '规格', specChemistry: '化学类型', specNotes: '备注', specDiameter: '尺寸',
             home: '首页', products: '产品', productCode: '产品编号:', category: '分类:',
             tabDesc: '描述', tabSpecs: '规格', tabApps: '应用', tabWarranty: '保修', tabFiles: '文件',
@@ -610,6 +611,15 @@
       document.getElementById('pdPrice').textContent = fmt(row.price);
       document.getElementById('pdPriceUnit').textContent = unitLabel(row);
       document.getElementById('pdCode').textContent = row.sku || row.model_available || row.id;
+
+      const panelHint = document.getElementById('pdPanelTotalHint');
+      if (row.category === 'panels' && row.power_watt != null) {
+        const total = Math.round(Number(row.price) * Number(row.power_watt) * 100) / 100;
+        panelHint.textContent = t('panelTotalHint').replace('{price}', fmt(total)).replace('{watt}', row.power_watt);
+        panelHint.hidden = false;
+      } else {
+        panelHint.hidden = true;
+      }
 
       const stockBadge = document.getElementById('pdStockBadge');
       if (row.in_stock === false) { stockBadge.textContent = t('outOfStock'); stockBadge.hidden = false; }
