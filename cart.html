@@ -309,13 +309,22 @@
       }
 
       const ids = items.map(x => x.id);
-      const { data: rows, error } = await sb.from('products').select('id, category, brand, model_available, price, image_url, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh, unit, power_watt, inverter_voltage_phase').in('id', ids);
+      const [{ data: rows, error }, { data: logos }] = await Promise.all([
+        sb.from('products').select('id, category, brand, model_available, price, image_url, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh, unit, power_watt, inverter_voltage_phase').in('id', ids),
+        sb.from('brand_logos').select('brand, logo_url'),
+      ]);
       loading.hidden = true;
 
       if (error || !rows || rows.length === 0) {
         empty.hidden = false; content.hidden = true;
         return;
       }
+
+      const brandLogos = {};
+      (logos || []).forEach((l) => { brandLogos[l.brand] = l.logo_url; });
+      // Same fallback rule used across the site: real product photo, else
+      // the brand's logo, else a generic placeholder as last resort.
+      const imageFor = (row) => row.image_url || brandLogos[row.brand] || 'solar.jpg';
 
       liveRows = items
         .map(it => { const r = rows.find(r => String(r.id) === String(it.id)); return r ? { ...r, qty: it.qty } : null; })
@@ -334,7 +343,7 @@
         const label = productLabel(r);
         return `
         <div class="cart-line" data-line-id="${r.id}">
-          <img src="${escapeHtml(r.image_url || 'solar.jpg')}" alt="">
+          <img src="${escapeHtml(imageFor(r))}" alt="">
           <div class="cart-line-info">
             <div class="cart-line-name"><a href="${detailHref(r)}">${escapeHtml(r.brand)} ${escapeHtml(getField(r, 'name'))}</a></div>
             ${label ? `<div class="cart-line-detail">${escapeHtml(label)}</div>` : ''}

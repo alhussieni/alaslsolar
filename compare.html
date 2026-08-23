@@ -297,12 +297,20 @@
       }
 
       const ids = list.map(x => x.id);
-      const { data: rows, error } = await sb.from('products').select('*').in('id', ids);
+      const [{ data: rows, error }, { data: logos }] = await Promise.all([
+        sb.from('products').select('*').in('id', ids),
+        sb.from('brand_logos').select('brand, logo_url'),
+      ]);
       loading.hidden = true;
       if (error || !rows || rows.length === 0) {
         empty.hidden = false; content.hidden = true;
         return;
       }
+      const brandLogos = {};
+      (logos || []).forEach((l) => { brandLogos[l.brand] = l.logo_url; });
+      // Same fallback rule used across the site: real product photo, else
+      // the brand's logo, else a generic placeholder as last resort.
+      const imageFor = (row) => row.image_url || brandLogos[row.brand] || 'solar.jpg';
       // Preserve the order the visitor added them in
       const ordered = ids.map(id => rows.find(r => String(r.id) === String(id))).filter(Boolean);
       empty.hidden = true; content.hidden = false;
@@ -313,7 +321,7 @@
       const headerCells = ordered.map(r => `
         <th>
           <div class="cmp-col-header">
-            <img class="cmp-col-img" src="${escapeHtml(r.image_url || 'solar.jpg')}" alt="${escapeHtml(getField(r, 'name'))}">
+            <img class="cmp-col-img" src="${escapeHtml(imageFor(r))}" alt="${escapeHtml(getField(r, 'name'))}">
             <span class="cmp-col-name">${escapeHtml(r.brand)} ${escapeHtml(getField(r, 'name'))}</span>
             ${productLabel(r) ? `<span class="cmp-col-detail">${escapeHtml(productLabel(r))}</span>` : ''}
             <span class="cmp-col-price">${fmt(unitPrice(r))} ${t('egp')}</span>
