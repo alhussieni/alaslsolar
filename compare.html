@@ -35,6 +35,7 @@
     .cmp-empty .btn { margin-top: var(--space-3); }
 
     .cmp-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: var(--space-3); flex-wrap: wrap; }
+    .cmp-vat-note { font-size: 12px; color: var(--muted); margin-top: 10px; text-align: center; }
     .cmp-clear-btn { background: none; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 8px 16px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; }
     .cmp-clear-btn:hover { border-color: #c0392b; color: #c0392b; }
 
@@ -118,6 +119,7 @@
         <div class="cmp-table-scroll">
           <table class="cmp-table" id="cmpTable"></table>
         </div>
+        <p class="cmp-vat-note" id="cmpVatNote">الأسعار غير شاملة ضريبة القيمة المضافة 14%.</p>
       </div>
 
       <div id="cmpLoading" class="cmp-empty">
@@ -153,25 +155,25 @@
     const T = {
       ar: { kicker: 'مقارنة المنتجات', title: 'قارن حتى 3 منتجات', intro: 'قارن منتجات من نفس الفئة جنب بعض عشان تختار الأنسب ليك.',
         empty: 'لسه معندكش أي منتجات للمقارنة. افتح أي منتج واضغط "أضف للمقارنة".', browse: 'تصفح المنتجات', loading: 'جاري التحميل…',
-        clear: 'مسح الكل', count: (n) => `${n} من 3 منتجات`, remove: 'إزالة', viewProduct: 'عرض المنتج', outOfStock: 'غير متاح حاليًا', inStock: 'متاح',
+        clear: 'مسح الكل', count: (n) => `${n} من 3 منتجات`, remove: 'إزالة', viewProduct: 'عرض المنتج', outOfStock: 'غير متاح حاليًا', inStock: 'متاح', vatNote: 'الأسعار غير شاملة ضريبة القيمة المضافة 14%.',
         rowBrand: 'الماركة', rowPrice: 'السعر', rowModel: 'الموديل', rowSpecs: 'المواصفات', rowMaterial: 'الخامة', rowDiameter: 'المقاس',
         rowPressure: 'الضغط', rowFeatures: 'المميزات', rowApplications: 'الاستخدامات', rowDescription: 'الوصف', rowStock: 'التوفر', rowWarranty: 'الضمان',
         egp: 'ج.م', years: 'سنوات ضمان', dash: '—' },
       en: { kicker: 'Product Comparison', title: 'Compare up to 3 products', intro: 'Compare products from the same category side by side to pick the best fit.',
         empty: 'You haven\u2019t added any products to compare yet. Open a product and tap "Add to Compare".', browse: 'Browse Products', loading: 'Loading…',
-        clear: 'Clear All', count: (n) => `${n} of 3 products`, remove: 'Remove', viewProduct: 'View Product', outOfStock: 'Currently Unavailable', inStock: 'In Stock',
+        clear: 'Clear All', count: (n) => `${n} of 3 products`, remove: 'Remove', viewProduct: 'View Product', outOfStock: 'Currently Unavailable', inStock: 'In Stock', vatNote: 'Prices exclude 14% VAT.',
         rowBrand: 'Brand', rowPrice: 'Price', rowModel: 'Model', rowSpecs: 'Specifications', rowMaterial: 'Material', rowDiameter: 'Diameter',
         rowPressure: 'Pressure', rowFeatures: 'Key Features', rowApplications: 'Applications', rowDescription: 'Description', rowStock: 'Availability', rowWarranty: 'Warranty',
         egp: 'EGP', years: 'years warranty', dash: '—' },
       es: { kicker: 'Comparación de Productos', title: 'Compara hasta 3 productos', intro: 'Compara productos de la misma categoría uno al lado del otro para elegir el más adecuado.',
         empty: 'Aún no has añadido productos para comparar. Abre un producto y toca "Añadir a Comparar".', browse: 'Explorar Productos', loading: 'Cargando…',
-        clear: 'Borrar Todo', count: (n) => `${n} de 3 productos`, remove: 'Eliminar', viewProduct: 'Ver Producto', outOfStock: 'No Disponible', inStock: 'Disponible',
+        clear: 'Borrar Todo', count: (n) => `${n} de 3 productos`, remove: 'Eliminar', viewProduct: 'Ver Producto', outOfStock: 'No Disponible', inStock: 'Disponible', vatNote: 'Los precios no incluyen el IVA del 14%.',
         rowBrand: 'Marca', rowPrice: 'Precio', rowModel: 'Modelo', rowSpecs: 'Especificaciones', rowMaterial: 'Material', rowDiameter: 'Diámetro',
         rowPressure: 'Presión', rowFeatures: 'Características', rowApplications: 'Aplicaciones', rowDescription: 'Descripción', rowStock: 'Disponibilidad', rowWarranty: 'Garantía',
         egp: 'EGP', years: 'años de garantía', dash: '—' },
       zh: { kicker: '产品比较', title: '最多比较3款产品', intro: '并排比较同一类别的产品，选出最适合的一款。',
         empty: '您还没有添加任何产品进行比较。打开产品页面并点击"加入比较"。', browse: '浏览产品', loading: '加载中…',
-        clear: '清空全部', count: (n) => `已选 ${n}/3 款产品`, remove: '移除', viewProduct: '查看产品', outOfStock: '暂时缺货', inStock: '现货',
+        clear: '清空全部', count: (n) => `已选 ${n}/3 款产品`, remove: '移除', viewProduct: '查看产品', outOfStock: '暂时缺货', inStock: '现货', vatNote: '价格不含14%增值税。',
         rowBrand: '品牌', rowPrice: '价格', rowModel: '型号', rowSpecs: '规格', rowMaterial: '材质', rowDiameter: '尺寸',
         rowPressure: '压力', rowFeatures: '主要特点', rowApplications: '应用', rowDescription: '描述', rowStock: '库存', rowWarranty: '保修',
         egp: 'EGP', years: '年保修', dash: '—' },
@@ -243,6 +245,7 @@
       document.getElementById('cmpBrowseBtn').textContent = t('browse');
       document.getElementById('cmpLoadingText').textContent = t('loading');
       document.getElementById('cmpClearBtn').textContent = t('clear');
+      document.getElementById('cmpVatNote').textContent = t('vatNote');
     }
 
     function detailHref(row) {

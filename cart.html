@@ -48,6 +48,7 @@
 
     .cart-summary { margin-top: var(--space-3); padding: var(--space-3); background: var(--bg-alt, #f7f5f2); border-radius: var(--radius-lg); }
     .cart-summary-row { display: flex; justify-content: space-between; font-weight: 800; font-size: 18px; }
+    .cart-vat-note { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: end; }
 
     .cart-form { margin-top: var(--space-4); }
     .cart-form h2 { font-size: 18px; margin-bottom: 6px; }
@@ -119,6 +120,7 @@
             <span id="cartSubtotalLabel">الإجمالي</span>
             <span id="cartSubtotalValue"></span>
           </div>
+          <p class="cart-vat-note" id="cartVatNote">الأسعار غير شاملة ضريبة القيمة المضافة 14%.</p>
         </div>
 
         <form class="cart-form" id="cartForm">
@@ -182,28 +184,28 @@
     const T = {
       ar: { kicker: 'السلة', title: 'سلة المنتجات', intro: 'جمّع المنتجات اللي محتاجها، وحدد الكمية، واطلب عرض سعر بيها كلها مرة واحدة.',
         empty: 'السلة فاضية. تصفح المنتجات وأضف اللي محتاجه.', browse: 'تصفح المنتجات', loading: 'جاري التحميل…',
-        subtotal: 'الإجمالي', egp: 'ج.م', remove: 'إزالة',
+        subtotal: 'الإجمالي', egp: 'ج.م', remove: 'إزالة', vatNote: 'الأسعار غير شاملة ضريبة القيمة المضافة 14%.',
         formTitle: 'اطلب عرض سعر بمحتويات السلة', formHint: 'هيتواصل معاك مندوب المبيعات على الرقم ده يديك عرض السعر النهائي.',
         nameLabel: 'الاسم', phoneLabel: 'رقم الهاتف', cityLabel: 'المدينة (اختياري)', submit: 'اطلب عرض السعر', submitting: 'جاري الإرسال…',
         errName: 'اكتب الاسم من فضلك.', errPhone: 'اكتب رقم هاتف صحيح (8 أرقام على الأقل).', errGeneric: 'حصل خطأ، حاول تاني.',
         successTitle: 'تم إرسال طلبك بنجاح!', successText: 'هيتواصل معاك مندوب المبيعات قريبًا على الرقم اللي سجّلته يديك عرض السعر النهائي.', successBtn: 'تصفح منتجات تانية' },
       en: { kicker: 'Cart', title: 'Your Cart', intro: 'Gather the products you need, set quantities, and request one quote for everything at once.',
         empty: 'Your cart is empty. Browse products and add what you need.', browse: 'Browse Products', loading: 'Loading…',
-        subtotal: 'Subtotal', egp: 'EGP', remove: 'Remove',
+        subtotal: 'Subtotal', egp: 'EGP', remove: 'Remove', vatNote: 'Prices exclude 14% VAT.',
         formTitle: 'Request a Quote for Your Cart', formHint: 'A sales rep will contact you on this number with a final quote.',
         nameLabel: 'Name', phoneLabel: 'Phone Number', cityLabel: 'City (optional)', submit: 'Request Quote', submitting: 'Submitting…',
         errName: 'Please enter your name.', errPhone: 'Please enter a valid phone number (at least 8 digits).', errGeneric: 'Something went wrong, please try again.',
         successTitle: 'Your request was sent successfully!', successText: 'A sales rep will contact you soon on the number you provided with a final quote.', successBtn: 'Browse More Products' },
       es: { kicker: 'Carrito', title: 'Tu Carrito', intro: 'Reúne los productos que necesitas, define las cantidades, y solicita una cotización para todo a la vez.',
         empty: 'Tu carrito está vacío. Explora los productos y añade lo que necesites.', browse: 'Explorar Productos', loading: 'Cargando…',
-        subtotal: 'Subtotal', egp: 'EGP', remove: 'Eliminar',
+        subtotal: 'Subtotal', egp: 'EGP', remove: 'Eliminar', vatNote: 'Los precios no incluyen el IVA del 14%.',
         formTitle: 'Solicitar Cotización de tu Carrito', formHint: 'Un representante de ventas te contactará a este número con la cotización final.',
         nameLabel: 'Nombre', phoneLabel: 'Número de Teléfono', cityLabel: 'Ciudad (opcional)', submit: 'Solicitar Cotización', submitting: 'Enviando…',
         errName: 'Por favor ingresa tu nombre.', errPhone: 'Por favor ingresa un número de teléfono válido (mínimo 8 dígitos).', errGeneric: 'Algo salió mal, inténtalo de nuevo.',
         successTitle: '¡Tu solicitud fue enviada con éxito!', successText: 'Un representante de ventas te contactará pronto al número que proporcionaste con la cotización final.', successBtn: 'Explorar Más Productos' },
       zh: { kicker: '购物车', title: '我的购物车', intro: '收集您需要的产品，设置数量，一次性为所有产品申请报价。',
         empty: '购物车是空的。浏览产品并添加您需要的商品。', browse: '浏览产品', loading: '加载中…',
-        subtotal: '总计', egp: 'EGP', remove: '移除',
+        subtotal: '总计', egp: 'EGP', remove: '移除', vatNote: '价格不含14%增值税。',
         formTitle: '为购物车内容申请报价', formHint: '销售代表将通过此号码与您联系，提供最终报价。',
         nameLabel: '姓名', phoneLabel: '电话号码', cityLabel: '城市（可选）', submit: '申请报价', submitting: '提交中…',
         errName: '请输入您的姓名。', errPhone: '请输入有效的电话号码（至少8位数字）。', errGeneric: '出现错误，请重试。',
@@ -279,6 +281,7 @@
       document.getElementById('cartBrowseBtn').textContent = t('browse');
       document.getElementById('cartLoadingText').textContent = t('loading');
       document.getElementById('cartSubtotalLabel').textContent = t('subtotal');
+      document.getElementById('cartVatNote').textContent = t('vatNote');
       document.getElementById('cartFormTitle').textContent = t('formTitle');
       document.getElementById('cartFormHint').textContent = t('formHint');
       document.getElementById('cartNameLabel').textContent = t('nameLabel');
