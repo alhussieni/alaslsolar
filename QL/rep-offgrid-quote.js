@@ -208,6 +208,10 @@ function readLoads() {
 
 /* ---------------- الحساب ---------------- */
 
+function recalcIfAlreadyCalculated() {
+  if (lastResult) runCalc();
+}
+
 function runCalc() {
   const msgEl = $("[data-calc-message]");
   const loads = readLoads();
@@ -396,8 +400,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#ogCalcBtn").addEventListener("click", runCalc);
   $("#ogPanelBrand").addEventListener("change", buildPanelWattOptions);
   $("#ogBattBrand").addEventListener("change", buildBatteryOptions);
-  $("#ogBattType")?.addEventListener("change", refreshBatteryVoltageOptions);
-  $("#ogBattVoltage")?.addEventListener("change", refreshBatteryAhOptions);
+  $("#ogBattType")?.addEventListener("change", () => { refreshBatteryVoltageOptions(); recalcIfAlreadyCalculated(); });
+  $("#ogBattVoltage")?.addEventListener("change", () => { refreshBatteryAhOptions(); recalcIfAlreadyCalculated(); });
+  $("#ogBattAh")?.addEventListener("change", recalcIfAlreadyCalculated);
+  $("#ogPanelWatt")?.addEventListener("change", recalcIfAlreadyCalculated);
   $("#saveQuoteBtn").addEventListener("click", saveQuote);
   $("#custName").addEventListener("input", updateBanner);
   $("#custPhone").addEventListener("input", updateBanner);
