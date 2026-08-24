@@ -100,8 +100,17 @@
             <div><label>ماركة الإنفرتر</label><select id="ogInvBrand"></select></div>
             <div><label>ماركة البطارية</label><select id="ogBattBrand"></select></div>
           </div>
-          <label>ماركة الألواح</label>
-          <select id="ogPanelBrand"></select>
+          <div class="row2" style="margin-top:6px">
+            <div><label>نوع البطارية</label><select id="ogBattType"><option value="">كل الأنواع</option></select></div>
+            <div><label>فولت البطارية</label><select id="ogBattVoltage"><option value="">تلقائي (الأنسب هندسيًا)</option></select></div>
+          </div>
+          <label>سعة البطارية (AH)</label>
+          <select id="ogBattAh"><option value="">تلقائي (الأنسب هندسيًا)</option></select>
+          <label style="margin-top:6px">ماركة الألواح</label>
+          <div class="row2">
+            <select id="ogPanelBrand"></select>
+            <select id="ogPanelWatt"><option value="">تلقائي (الأنسب هندسيًا)</option></select>
+          </div>
           <div class="row2" style="margin-top:6px">
             <div><label>الطور</label>
               <select id="ogPhase"><option value="single">أحادي</option><option value="three">ثلاثي</option></select>

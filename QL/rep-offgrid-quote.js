@@ -93,17 +93,68 @@ async function loadCatalog() {
     .filter((r) => r.powerKW && r.voltage);
 
   catalog.batteries = data.filter((r) => r.category === "batteries" && r.in_stock !== false && r.published !== false && hasPrice(r))
-    .map((r) => ({ id: r.id, brand: r.brand, voltage: Number(r.voltage_v), ah: Number(r.capacity_ah),
+    .map((r) => ({ id: r.id, brand: r.brand, type: r.model_available || "", voltage: Number(r.voltage_v), ah: Number(r.capacity_ah),
       dod: r.dod ? Number(r.dod) : null, unitPrice: Number(r.price) }))
     .filter((r) => r.voltage && r.ah && r.dod);
 
   catalog.panels = data.filter((r) => r.category === "panels" && r.in_stock !== false && r.published !== false && hasPrice(r))
     .map((r) => ({ id: r.id, brand: r.brand, power: r.power_watt ? Number(r.power_watt) : null,
-      voc: r.voc ? Number(r.voc) : null, vimp: r.vimp ? Number(r.vimp) : null, pricePerWatt: Number(r.price) }));
+      voc: r.voc ? Number(r.voc) : null, vimp: r.vimp ? Number(r.vimp) : null, pricePerWatt: Number(r.price) }))
+    .filter((r) => r.power);
 
   fillBrandSelect($("#ogInvBrand"), [...new Set(catalog.inverters.map((r) => r.brand))].sort(), settings?.preferred_offgrid_inverter_brand);
   fillBrandSelect($("#ogBattBrand"), [...new Set(catalog.batteries.map((r) => r.brand))].sort(), settings?.preferred_offgrid_battery_brand);
   fillBrandSelect($("#ogPanelBrand"), [...new Set(catalog.panels.map((r) => r.brand))].sort(), settings?.preferred_offgrid_panel_brand);
+
+  buildPanelWattOptions();
+  buildBatteryOptions();
+}
+
+/* ---------------- خيارات القدرة/الفولت/السعة المعتمدة على الماركة ---------------- */
+
+function buildPanelWattOptions() {
+  const brand = $("#ogPanelBrand").value;
+  const sel = $("#ogPanelWatt");
+  if (!sel) return;
+  const watts = [...new Set(catalog.panels.filter((p) => p.brand === brand && p.power).map((p) => p.power))].sort((a, b) => a - b);
+  sel.innerHTML = `<option value="">تلقائي (الأنسب هندسيًا)</option>` + watts.map((w) => `<option value="${w}">${w} وات</option>`).join("");
+}
+
+function buildBatteryOptions() {
+  const brand = $("#ogBattBrand").value;
+  const typeSel = $("#ogBattType");
+  const voltSel = $("#ogBattVoltage");
+  const ahSel = $("#ogBattAh");
+  if (!typeSel || !voltSel || !ahSel) return;
+
+  const brandBatts = catalog.batteries.filter((b) => b.brand === brand);
+  const types = [...new Set(brandBatts.map((b) => b.type).filter(Boolean))];
+  typeSel.innerHTML = `<option value="">كل الأنواع</option>` + types.map((t) => `<option value="${t}">${t}</option>`).join("");
+  typeSel.closest("div").style.display = types.length ? "" : "none";
+
+  refreshBatteryVoltageOptions();
+}
+
+function refreshBatteryVoltageOptions() {
+  const brand = $("#ogBattBrand").value;
+  const type = $("#ogBattType")?.value || "";
+  const voltSel = $("#ogBattVoltage");
+  if (!voltSel) return;
+  const pool = catalog.batteries.filter((b) => b.brand === brand && (!type || b.type === type));
+  const volts = [...new Set(pool.map((b) => b.voltage))].sort((a, b) => a - b);
+  voltSel.innerHTML = `<option value="">تلقائي (الأنسب هندسيًا)</option>` + volts.map((v) => `<option value="${v}">${v}V</option>`).join("");
+  refreshBatteryAhOptions();
+}
+
+function refreshBatteryAhOptions() {
+  const brand = $("#ogBattBrand").value;
+  const type = $("#ogBattType")?.value || "";
+  const voltage = $("#ogBattVoltage")?.value || "";
+  const ahSel = $("#ogBattAh");
+  if (!ahSel) return;
+  const pool = catalog.batteries.filter((b) => b.brand === brand && (!type || b.type === type) && (!voltage || b.voltage === Number(voltage)));
+  const ahs = [...new Set(pool.map((b) => b.ah))].sort((a, b) => a - b);
+  ahSel.innerHTML = `<option value="">تلقائي (الأنسب هندسيًا)</option>` + ahs.map((a) => `<option value="${a}">${a} AH</option>`).join("");
 }
 
 function fillBrandSelect(sel, brands, preferred) {
@@ -172,7 +223,11 @@ function runCalc() {
     phase: $("#ogPhase").value,
     invBrand: $("#ogInvBrand").value,
     battBrand: $("#ogBattBrand").value,
+    battType: $("#ogBattType")?.value || "",
+    battVoltage: $("#ogBattVoltage")?.value || "",
+    battAh: $("#ogBattAh")?.value || "",
     panelBrand: $("#ogPanelBrand").value,
+    panelWatt: $("#ogPanelWatt")?.value || "",
   };
   const gp = {
     steelPerUnit: bomSettings?.steel_customer_per_unit ?? 1500,
@@ -224,7 +279,7 @@ function buildQuoteRows(result) {
     qty: steelRow.qty, unitPrice: steelRow.unitPrice, discountPct: 0 });
   quoteRows.push({ key: "cables", label: "كابلات 6 مم", type: "bom_fixed", bomKey: "cables",
     qty: cablesRow.qty, unitPrice: cablesRow.unitPrice, discountPct: 0 });
-  quoteRows.push({ key: "battery", label: `بطاريات — ${result.batt.brand} ${result.batt.ah}AH-${result.batt.voltage}V`, type: "product",
+  quoteRows.push({ key: "battery", label: `بطاريات — ${result.batt.brand}${result.batt.type ? " " + result.batt.type : ""} ${result.batt.ah}AH-${result.batt.voltage}V`, type: "product",
     product_id: result.batt.id, qty: result.batteryCount, unitPrice: result.batt.unitPrice, discountPct: 0 });
   quoteRows.push({ key: "accessories", label: "إكسسوارات (لوحة تجميع / MC4 / فيوز / قواطع)", type: "bom_fixed", bomKey: "accessories",
     qty: 1, unitPrice: bomSettings?.accessories_customer_fixed ?? 2500, discountPct: 0 });
@@ -339,6 +394,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (v !== "") addLoadRow(Number(v));
   });
   $("#ogCalcBtn").addEventListener("click", runCalc);
+  $("#ogPanelBrand").addEventListener("change", buildPanelWattOptions);
+  $("#ogBattBrand").addEventListener("change", buildBatteryOptions);
+  $("#ogBattType")?.addEventListener("change", refreshBatteryVoltageOptions);
+  $("#ogBattVoltage")?.addEventListener("change", refreshBatteryAhOptions);
   $("#saveQuoteBtn").addEventListener("click", saveQuote);
   $("#custName").addEventListener("input", updateBanner);
   $("#custPhone").addEventListener("input", updateBanner);
