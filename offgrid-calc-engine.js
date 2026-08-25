@@ -230,10 +230,34 @@ function computeOffgridMaterials(catalog, gp, inputs) {
 
   const grandTotal = rows.reduce((s, r) => s + r.total, 0);
 
+  const invRatedW = inv.powerKW * 1000;
+  const invSurgeW = invRatedW * (inv.surgeCapacityPct || surgePctDefault);
+  const dayLoadWh = sumDay * (morningEnabled ? 1 : 0);
+  const nightLoadWh = R4;
+  const dailyProductionKWh = panelWatt ? (O2 * panelWatt * psh * systemEfficiency) / 1000 : 0;
+  const batteryUsagePct = O9 ? Math.round((autonomyEnergyWh / O9) * 100) : null;
+
   return {
     errors, inv, batt, panel,
     panelCount: O2, batteryCount: O6, storedKWh: O9 / 1000,
     rows, grandTotal, offer: true,
+    /* بيانات إضافية للبريف الفني عند الطباعة */
+    brief: {
+      panelKWp: (O2 * panelWatt) / 1000,
+      dailyProductionKWh,
+      dayLoadKWh: dayLoadWh / 1000,
+      nightLoadKWh: nightLoadWh / 1000,
+      storedKWh: O9 / 1000,
+      batteryUsagePct,
+      peakInstantaneousKW: peakInstantaneousW / 1000,
+      invRatedKW: invRatedW / 1000,
+      invSurgeKW: invSurgeW / 1000,
+      panelsPerString, stringCount,
+      batterySeriesCount: O7, batteryParallelStrings: O8,
+      stringVimp, invMpptMin: inv.pvMpptMin || null, invMpptMax: inv.pvMpptMax || null,
+      mpptOk: pvLimitVerified ? !((inv.pvMpptMin && stringVimp < inv.pvMpptMin) || (inv.pvMpptMax && stringVimp > inv.pvMpptMax)) : null,
+      autonomyDays,
+    },
   };
 }
 
