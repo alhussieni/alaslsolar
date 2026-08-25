@@ -38,6 +38,67 @@ let quoteRows = []; // { key, label, type, product_id, watt, qty, unitPrice, dis
 
 function $(sel) { return document.querySelector(sel); }
 function fmt(n) { return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 }); }
+function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 1 }); }
+
+/* رسم بياني أعمدة بسيط بصيغة SVG — ثابت وقت التوليد، بيطبع صح في كل المتصفحات
+   من غير الاعتماد على مكتبة رسم بيانات خارجية أو تحميل غير متزامن */
+function svgBarCompare(title, bars) {
+  const colors = ["#c8752d", "#3b6e52", "#8a6d3b", "#5b7fa6"];
+  const max = Math.max(...bars.map((b) => b.value), 0.001);
+  const barW = 78, gap = 26, chartH = 130, baseY = 150;
+  const width = bars.length * (barW + gap) + gap;
+  const barsSvg = bars.map((b, i) => {
+    const h = Math.max((b.value / max) * chartH, 2);
+    const x = gap + i * (barW + gap);
+    const y = baseY - h;
+    return `
+      <rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${colors[i % colors.length]}" rx="4"></rect>
+      <text x="${x + barW / 2}" y="${y - 8}" font-size="13" font-weight="700" text-anchor="middle" fill="#17120f">${fmt1(b.value)}${b.unit || ""}</text>
+      <text x="${x + barW / 2}" y="${baseY + 18}" font-size="11" text-anchor="middle" fill="#555">${b.label}</text>
+    `;
+  }).join("");
+  return `
+    <div style="margin-top:14px; page-break-inside: avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:6px;">${title}</div>
+      <svg viewBox="0 0 ${width} 178" width="100%" style="max-width:380px; display:block;" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="${baseY}" x2="${width}" y2="${baseY}" stroke="#ddd" stroke-width="1"></line>
+        ${barsSvg}
+      </svg>
+    </div>`;
+}
+
+/* ملخص فني سريع لقدرات المنظومة — يُضاف في نهاية عرض السعر المطبوع */
+function buildTechBrief(r) {
+  if (!r || !r.brief) return "";
+  const b = r.brief;
+  const invOk = b.peakInstantaneousKW <= b.invSurgeKW;
+  return `
+    <div style="margin-top:22px; padding-top:14px; border-top:2px dashed #e4d8ca; page-break-inside: avoid;">
+      <div style="font-size:15px; font-weight:800; margin-bottom:10px;">ملخص فني سريع للمنظومة</div>
+      <table class="print-table" style="font-size:12px;">
+        <tbody>
+          <tr><td>إجمالي قدرة الألواح / الإنتاجية اليومية المتوقعة</td><td>${fmt1(b.panelKWp)} kWp — ${fmt1(b.dailyProductionKWh)} kWh/يوم</td></tr>
+          <tr><td>إجمالي الأحمال النهارية / الليلية</td><td>${fmt1(b.dayLoadKWh)} kWh نهار — ${fmt1(b.nightLoadKWh)} kWh ليل</td></tr>
+          <tr><td>إجمالي الطاقة المخزنة بالبطاريات</td><td>${fmt1(b.storedKWh)} kWh${b.batteryUsagePct != null ? ` (استخدام ~${b.batteryUsagePct}% من السعة الكاملة عند أقصى تفريغ مصمم)` : ""}</td></tr>
+          <tr><td>أقصى قدرة لحظية عند تشغيل كل الأجهزة معًا</td><td>${fmt1(b.peakInstantaneousKW)} kW — الإنفرتر: ${fmt1(b.invRatedKW)} kW مستمر / ${fmt1(b.invSurgeKW)} kW إقلاع ${invOk ? "— كافٍ ✓" : "— ⚠ راجع الأحمال"}</td></tr>
+          <tr><td>تكوين مصفوفة الألواح</td><td>${fmt(b.panelsPerString)} على التوالي × ${fmt(b.stringCount)} سلسلة بالتوازي</td></tr>
+          <tr><td>تكوين بنك البطاريات</td><td>${fmt(b.batterySeriesCount)} على التوالي × ${fmt(b.batteryParallelStrings)} بالتوازي</td></tr>
+          <tr><td>أيام الاستقلالية المصمم عليها</td><td>${fmt(b.autonomyDays)} يوم بدون شحن</td></tr>
+          <tr><td>فولت سلسلة الألواح مقابل نطاق MPPT للإنفرتر</td><td>${b.stringVimp != null ? fmt1(b.stringVimp) + " V" : "—"}${(b.invMpptMin || b.invMpptMax) ? ` (النطاق ${fmt(b.invMpptMin) || "—"}–${fmt(b.invMpptMax) || "—"} V)` : ""} ${b.mpptOk === true ? "— ضمن النطاق ✓" : b.mpptOk === false ? "— ⚠ خارج النطاق راجع التصميم" : ""}</td></tr>
+        </tbody>
+      </table>
+      ${svgBarCompare("إنتاج الألواح اليومي مقابل الاستهلاك (kWh)", [
+        { label: "إنتاج الألواح", value: b.dailyProductionKWh, unit: "" },
+        { label: "استهلاك نهاري", value: b.dayLoadKWh, unit: "" },
+        { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
+      ])}
+      ${svgBarCompare("سعة البطاريات مقابل الاستهلاك الليلي (kWh)", [
+        { label: "سعة البطاريات", value: b.storedKWh, unit: "" },
+        { label: "استهلاك ليلي متفق عليه", value: b.nightLoadKWh, unit: "" },
+      ])}
+      <div style="font-size:10.5px; color:#888; margin-top:10px;">الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.</div>
+    </div>`;
+}
 
 async function initClient() {
   for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) await new Promise((r) => setTimeout(r, 50));
@@ -363,7 +424,10 @@ async function saveQuote() {
 
 function printQuote(q) {
   const area = document.getElementById("printArea");
-  const dateStr = new Date(q.createdAt).toLocaleDateString("ar-EG");
+  const issueDate = new Date(q.createdAt);
+  const dateStr = issueDate.toLocaleDateString("ar-EG");
+  const validUntil = new Date(issueDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+  const validUntilStr = validUntil.toLocaleDateString("ar-EG");
   const typeLabel = q.quoteType === "supply_install" ? "توريد وتركيب" : "توريد فقط";
   const rows = (q.items || []).map((it) => `
     <tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>
@@ -371,7 +435,7 @@ function printQuote(q) {
   area.innerHTML = `
     <div class="print-header">
       <img src="logo.png" alt="الأصل للطاقة الشمسية">
-      <div style="text-align:left;"><div class="print-title">عرض سعر — نظام أوف جريد</div><div>#${q.id} — ${dateStr}</div></div>
+      <div style="text-align:left;"><div class="print-title">عرض سعر — نظام أوف جريد</div><div>#${q.id} — ${dateStr}</div><div style="font-size:11px; color:#a33;">صالح حتى ${validUntilStr}</div></div>
     </div>
     <div style="margin-bottom:16px; font-size:13px;">
       <div><strong>العميل:</strong> ${q.customer.name} — ${q.customer.phone}${q.customer.city ? " — " + q.customer.city : ""}</div>
@@ -382,6 +446,7 @@ function printQuote(q) {
       <tbody>${rows}</tbody>
     </table>
     <div class="print-totals"><div class="row grand"><span>الإجمالي الكلي</span><span>${fmt(q.total)} ج.م</span></div></div>
+    ${buildTechBrief(lastResult)}
     <div class="print-footer">الأصل للطاقة الشمسية — alaslsolar.com — هذا العرض قابل للتغيير حسب الأسعار وقت التعاقد.</div>
   `;
   setTimeout(() => window.print(), 100);
