@@ -494,12 +494,8 @@ function printQuote(q) {
 
   area.innerHTML = `
     <div class="print-header">
-      <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-        <img src="../logo.png" alt="الأصل للطاقة الشمسية">
-        <div class="print-brand-name">الأصل للطاقة الشمسية والتوريدات العمومية</div>
-      </div>
+      <div class="print-title">عرض سعر — نظام أوف جريد</div>
       <div style="text-align:left;">
-        <div class="print-title">عرض سعر — نظام أوف جريد</div>
         <div class="print-meta-line">رقم العرض: ${quoteNo}</div>
         <div class="print-meta-line">التاريخ: ${dateStr}</div>
       </div>
@@ -525,12 +521,6 @@ function printQuote(q) {
     </div>
 
     ${buildTechBrief(r, "print-table")}
-
-    <div class="print-footer2">
-      <div><i class="fa-solid fa-envelope"></i>Sales@AlaslSolar.Com &nbsp; <i class="fa-solid fa-envelope"></i>info@AlaslSolar.Com</div>
-      <div><i class="fa-solid fa-location-dot"></i>م 3 مدينة السادات - طريق القاهرة الاسكندرية الصحراوي</div>
-      <div><i class="fa-brands fa-whatsapp"></i>+201200074344 &nbsp; <i class="fa-solid fa-globe"></i>Www.AlaslSolar.Com</div>
-    </div>
   `;
   setTimeout(() => window.print(), 100);
 }

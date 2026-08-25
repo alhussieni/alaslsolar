@@ -18,28 +18,32 @@
   <script defer src="rep-offgrid-quote.js"></script>
   <style>
     #printArea { display: none; }
-    @page { size: A4; margin: 14mm 12mm; }
+    @page { size: A4; margin: 0; }
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
-      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 0; direction: rtl; font-family: 'Cairo', sans-serif; }
+      #printArea {
+        display: block; position: absolute; top: 0; right: 0; left: 0;
+        width: 210mm; min-height: 297mm; box-sizing: border-box;
+        background: url('../letterhead.jpg') no-repeat top center / 210mm 297mm;
+        padding: 80mm 14mm 26mm 14mm;
+        direction: rtl; font-family: 'Cairo', sans-serif;
+      }
 
-      .print-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #c8752d; padding-bottom: 12px; margin-bottom: 18px; }
-      .print-header img { height: 62px; }
-      .print-brand-name { font-size: 11px; font-weight: 800; color: #c8752d; margin-top: 4px; line-height: 1.4; max-width: 130px; }
-      .print-title { font-size: 20px; font-weight: 800; color: #17120f; }
+      .print-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #c8752d; padding-bottom: 10px; margin-bottom: 16px; }
+      .print-title { font-size: 19px; font-weight: 800; color: #17120f; }
       .print-meta-line { font-size: 12px; color: #444; margin-top: 3px; }
 
       .print-info-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-      .print-info-box { flex: 1 1 0; min-width: 100px; border: 1px solid #e4d8ca; border-radius: 8px; padding: 8px 6px; text-align: center; background: #fbf6ef; }
+      .print-info-box { flex: 1 1 0; min-width: 100px; border: 1px solid #e4d8ca; border-radius: 8px; padding: 8px 6px; text-align: center; background: rgba(251,246,239,0.9); }
       .print-info-box .lbl { font-size: 10px; color: #8a7a68; margin-bottom: 4px; }
       .print-info-box .val { font-size: 12.5px; font-weight: 800; color: #17120f; }
 
-      .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; }
       .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
       .print-table th { background: #f3e4d4; }
 
-      .print-grand-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; background: #fbf6ef; border: 1.5px solid #c8752d; border-radius: 10px; padding: 12px 18px; page-break-inside: avoid; }
+      .print-grand-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(251,246,239,0.9); border: 1.5px solid #c8752d; border-radius: 10px; padding: 12px 18px; page-break-inside: avoid; }
       .print-grand-box .amount { font-size: 22px; font-weight: 800; color: #c8752d; }
       .print-grand-box .note { font-size: 10.5px; color: #777; }
 
@@ -47,13 +51,6 @@
       .print-terms h4 { font-size: 13px; margin: 0 0 6px; }
       .print-terms .row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 4px 0; border-bottom: 1px dashed #eee; }
       .print-terms .fine { font-size: 10.5px; color: #888; margin-top: 8px; }
-
-      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
-      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
-      .print-totals .grand { font-weight: 800; font-size: 17px; border-top: 2px solid #17120f; margin-top: 6px; padding-top: 8px; }
-
-      .print-footer2 { margin-top: 24px; border-top: 1px solid #eee; padding-top: 10px; font-size: 10.5px; color: #666; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
-      .print-footer2 i { color: #c8752d; margin-left: 4px; }
     }
   </style>
 </head>
