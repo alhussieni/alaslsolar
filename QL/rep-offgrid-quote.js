@@ -67,15 +67,17 @@ function svgBarCompare(title, bars) {
     </div>`;
 }
 
-/* ملخص فني سريع لقدرات المنظومة — يُضاف في نهاية عرض السعر المطبوع */
-function buildTechBrief(r) {
+/* ملخص فني سريع لقدرات المنظومة — يُستخدم على الشاشة وفي الطباعة بنفس الدالة
+   tableClass: "bom" للعرض على الشاشة (متسايل أصلاً)، "print-table" للطباعة */
+function buildTechBrief(r, tableClass) {
   if (!r || !r.brief) return "";
   const b = r.brief;
+  const cls = tableClass || "print-table";
   const invOk = b.peakInstantaneousKW <= b.invSurgeKW;
   return `
     <div style="margin-top:22px; padding-top:14px; border-top:2px dashed #e4d8ca; page-break-inside: avoid;">
       <div style="font-size:15px; font-weight:800; margin-bottom:10px;">ملخص فني سريع للمنظومة</div>
-      <table class="print-table" style="font-size:12px;">
+      <table class="${cls}" style="font-size:12px; width:100%;">
         <tbody>
           <tr><td>إجمالي قدرة الألواح / الإنتاجية اليومية المتوقعة</td><td>${fmt1(b.panelKWp)} kWp — ${fmt1(b.dailyProductionKWh)} kWh/يوم</td></tr>
           <tr><td>إجمالي الأحمال النهارية / الليلية</td><td>${fmt1(b.dayLoadKWh)} kWh نهار — ${fmt1(b.nightLoadKWh)} kWh ليل</td></tr>
@@ -313,6 +315,7 @@ function runCalc() {
     showMsg(msgEl, result.errors.join(" | "), "error");
     $("[data-quote-section]").hidden = true;
     $("[data-quote-empty]").hidden = false;
+    if ($("#techBriefCard")) $("#techBriefCard").hidden = true;
     return;
   }
   showMsg(msgEl, result.errors && result.errors.length ? "تنبيه: " + result.errors.join(" | ") : "", result.errors && result.errors.length ? "error" : "ok");
@@ -359,6 +362,12 @@ function buildQuoteRows(result) {
   renderQuoteTable();
   $("[data-quote-section]").hidden = false;
   $("[data-quote-empty]").hidden = true;
+
+  const briefBody = $("#techBriefBody");
+  if (briefBody) {
+    briefBody.innerHTML = buildTechBrief(result, "bom");
+    $("#techBriefCard").hidden = false;
+  }
 }
 
 function renderQuoteTable() {
@@ -446,7 +455,7 @@ function printQuote(q) {
       <tbody>${rows}</tbody>
     </table>
     <div class="print-totals"><div class="row grand"><span>الإجمالي الكلي</span><span>${fmt(q.total)} ج.م</span></div></div>
-    ${buildTechBrief(lastResult)}
+    ${buildTechBrief(lastResult, "print-table")}
     <div class="print-footer">الأصل للطاقة الشمسية — alaslsolar.com — هذا العرض قابل للتغيير حسب الأسعار وقت التعاقد.</div>
   `;
   setTimeout(() => window.print(), 100);
