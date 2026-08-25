@@ -37,8 +37,8 @@ let lastResult = null;
 let quoteRows = []; // { key, label, type, product_id, watt, qty, unitPrice, discountPct }
 
 function $(sel) { return document.querySelector(sel); }
-function fmt(n) { return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 }); }
-function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 1 }); }
+function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
+function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 1 }); }
 
 /* رسم بياني أعمدة بسيط بصيغة SVG — ثابت وقت التوليد، بيطبع صح في كل المتصفحات
    من غير الاعتماد على مكتبة رسم بيانات خارجية أو تحميل غير متزامن */
@@ -48,11 +48,12 @@ function svgBarCompare(title, bars) {
   const barW = 78, gap = 26, chartH = 130, baseY = 150;
   const width = bars.length * (barW + gap) + gap;
   const barsSvg = bars.map((b, i) => {
+    const color = b.color || colors[i % colors.length];
     const h = Math.max((b.value / max) * chartH, 2);
     const x = gap + i * (barW + gap);
     const y = baseY - h;
     return `
-      <rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${colors[i % colors.length]}" rx="4"></rect>
+      <rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${color}" rx="4"></rect>
       <text x="${x + barW / 2}" y="${y - 8}" font-size="13" font-weight="700" text-anchor="middle" fill="#17120f">${fmt1(b.value)}${b.unit || ""}</text>
       <text x="${x + barW / 2}" y="${baseY + 18}" font-size="11" text-anchor="middle" fill="#555">${b.label}</text>
     `;
@@ -74,6 +75,23 @@ function buildTechBrief(r, tableClass) {
   const b = r.brief;
   const cls = tableClass || "print-table";
   const invOk = b.peakInstantaneousKW <= b.invSurgeKW;
+
+  const totalConsumptionKWh = b.dayLoadKWh + b.nightLoadKWh;
+  const prodDelta = b.dailyProductionKWh - totalConsumptionKWh;
+  const prodSurplusBar = prodDelta >= 0
+    ? { label: "الفائض", value: prodDelta, color: "#3b6e52" }
+    : { label: "⚠ عجز", value: Math.abs(prodDelta), color: "#b23b3b" };
+  const prodCaption = prodDelta >= 0
+    ? `فائض إنتاج يومي ~${fmt1(prodDelta)} kWh (${fmt(totalConsumptionKWh ? (prodDelta / totalConsumptionKWh) * 100 : 0)}% فوق الاستهلاك)`
+    : `⚠ عجز إنتاج يومي ~${fmt1(Math.abs(prodDelta))} kWh — الإنتاج أقل من الاستهلاك، راجع التصميم`;
+
+  const storageDelta = b.storedKWh - b.nightLoadKWh;
+  const storageSurplusBar = storageDelta >= 0
+    ? { label: "الفائض", value: storageDelta, color: "#3b6e52" }
+    : { label: "⚠ عجز", value: Math.abs(storageDelta), color: "#b23b3b" };
+  const storageCaption = storageDelta >= 0
+    ? `فائض تخزين ~${fmt1(storageDelta)} kWh فوق الاستهلاك الليلي المتفق عليه`
+    : `⚠ سعة البطاريات أقل من الاستهلاك الليلي المتفق عليه بـ ~${fmt1(Math.abs(storageDelta))} kWh`;
   return `
     <div style="margin-top:22px; padding-top:14px; border-top:2px dashed #e4d8ca; page-break-inside: avoid;">
       <div style="font-size:15px; font-weight:800; margin-bottom:10px;">ملخص فني سريع للمنظومة</div>
@@ -93,11 +111,15 @@ function buildTechBrief(r, tableClass) {
         { label: "إنتاج الألواح", value: b.dailyProductionKWh, unit: "" },
         { label: "استهلاك نهاري", value: b.dayLoadKWh, unit: "" },
         { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
+        prodSurplusBar,
       ])}
+      <div style="font-size:11px; color:#666; margin-top:-6px; margin-bottom:6px;">${prodCaption}</div>
       ${svgBarCompare("سعة البطاريات مقابل الاستهلاك الليلي (kWh)", [
         { label: "سعة البطاريات", value: b.storedKWh, unit: "" },
         { label: "استهلاك ليلي متفق عليه", value: b.nightLoadKWh, unit: "" },
+        storageSurplusBar,
       ])}
+      <div style="font-size:11px; color:#666; margin-top:-6px; margin-bottom:6px;">${storageCaption}</div>
       <div style="font-size:10.5px; color:#888; margin-top:10px;">الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.</div>
     </div>`;
 }
@@ -328,7 +350,7 @@ function updateBanner() {
   const phone = $("#custPhone").value.trim();
   $("#bannerName").textContent = name || "—";
   $("#bannerPhone").textContent = phone || "—";
-  $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG");
+  $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG-u-nu-latn");
 }
 
 function buildQuoteRows(result) {
@@ -434,9 +456,9 @@ async function saveQuote() {
 function printQuote(q) {
   const area = document.getElementById("printArea");
   const issueDate = new Date(q.createdAt);
-  const dateStr = issueDate.toLocaleDateString("ar-EG");
+  const dateStr = issueDate.toLocaleDateString("ar-EG-u-nu-latn");
   const validUntil = new Date(issueDate.getTime() + 3 * 24 * 60 * 60 * 1000);
-  const validUntilStr = validUntil.toLocaleDateString("ar-EG");
+  const validUntilStr = validUntil.toLocaleDateString("ar-EG-u-nu-latn");
   const typeLabel = q.quoteType === "supply_install" ? "توريد وتركيب" : "توريد فقط";
   const rows = (q.items || []).map((it) => `
     <tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>
