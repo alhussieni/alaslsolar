@@ -455,30 +455,82 @@ async function saveQuote() {
 
 function printQuote(q) {
   const area = document.getElementById("printArea");
+  const r = lastResult;
   const issueDate = new Date(q.createdAt);
   const dateStr = issueDate.toLocaleDateString("ar-EG-u-nu-latn");
   const validUntil = new Date(issueDate.getTime() + 3 * 24 * 60 * 60 * 1000);
   const validUntilStr = validUntil.toLocaleDateString("ar-EG-u-nu-latn");
   const typeLabel = q.quoteType === "supply_install" ? "توريد وتركيب" : "توريد فقط";
+  const quoteNo = `Q-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, "0")}${String(issueDate.getDate()).padStart(2, "0")}-${String(q.id).padStart(3, "0")}`;
+
   const rows = (q.items || []).map((it) => `
     <tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>
   `).join("");
+
+  const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
+  const infoRow1 = `
+    <div class="print-info-grid">
+      ${infoBox("العميل / المشروع", `${q.customer.name} — ${q.customer.phone}${q.customer.city ? " — " + q.customer.city : ""}`)}
+      ${infoBox("نوع العرض", typeLabel)}
+      ${infoBox("تاريخ الإصدار", dateStr)}
+      ${infoBox("صالح حتى", validUntilStr)}
+    </div>`;
+  const infoRow2 = r ? `
+    <div class="print-info-grid">
+      ${infoBox("عدد الألواح", fmt(r.panelCount))}
+      ${infoBox("القدرة المصممة", fmt1(r.brief.panelKWp) + " kWp")}
+      ${infoBox("موديل الإنفرتر", `${r.inv.brand} ${r.inv.type || ""}`)}
+      ${infoBox("فولت سلسلة الألواح", r.brief.stringVimp != null ? fmt1(r.brief.stringVimp) + " V" : "—")}
+      ${infoBox("بنك البطاريات", `${fmt(r.brief.batterySeriesCount)}×${fmt(r.brief.batteryParallelStrings)}`)}
+      ${infoBox("أيام الاستقلالية", fmt(r.brief.autonomyDays) + " يوم")}
+    </div>` : "";
+
+  /* شروط السداد: نفس نسب 70/25/5 المعتمدة في عروض الأون-جريد لحالة "توريد وتركيب".
+     لعروض "توريد فقط" مفيش مرحلة تشغيل من شركتنا، فقسّمناها 70/30 على التوريد بدل التركيب —
+     ده افتراض مبدئي مني، لو عندكم نسبة تانية معتمدة لحالة التوريد فقط قولّي أظبطها. */
+  const paymentTerms = q.quoteType === "supply_install"
+    ? [["مقدم عند التعاقد (٪70)", q.total * 0.70], ["عند التوريد (٪25)", q.total * 0.25], ["عند التشغيل (٪5)", q.total * 0.05]]
+    : [["مقدم عند التعاقد (٪70)", q.total * 0.70], ["عند التوريد (٪30)", q.total * 0.30]];
+
   area.innerHTML = `
     <div class="print-header">
-      <img src="logo.png" alt="الأصل للطاقة الشمسية">
-      <div style="text-align:left;"><div class="print-title">عرض سعر — نظام أوف جريد</div><div>#${q.id} — ${dateStr}</div><div style="font-size:11px; color:#a33;">صالح حتى ${validUntilStr}</div></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <img src="../logo.png" alt="الأصل للطاقة الشمسية">
+        <div class="print-brand-name">الأصل للطاقة الشمسية والتوريدات العمومية</div>
+      </div>
+      <div style="text-align:left;">
+        <div class="print-title">عرض سعر — نظام أوف جريد</div>
+        <div class="print-meta-line">رقم العرض: ${quoteNo}</div>
+        <div class="print-meta-line">التاريخ: ${dateStr}</div>
+      </div>
     </div>
-    <div style="margin-bottom:16px; font-size:13px;">
-      <div><strong>العميل:</strong> ${q.customer.name} — ${q.customer.phone}${q.customer.city ? " — " + q.customer.city : ""}</div>
-      <div><strong>نوع العرض:</strong> ${typeLabel}</div>
-    </div>
+
+    ${infoRow1}
+    ${infoRow2}
+
     <table class="print-table">
       <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="print-totals"><div class="row grand"><span>الإجمالي الكلي</span><span>${fmt(q.total)} ج.م</span></div></div>
-    ${buildTechBrief(lastResult, "print-table")}
-    <div class="print-footer">الأصل للطاقة الشمسية — alaslsolar.com — هذا العرض قابل للتغيير حسب الأسعار وقت التعاقد.</div>
+
+    <div class="print-grand-box">
+      <div class="note">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
+      <div class="amount">${fmt(q.total)} ج.م</div>
+    </div>
+
+    <div class="print-terms">
+      <h4>شروط السداد</h4>
+      ${paymentTerms.map(([label, val]) => `<div class="row"><span>${label}</span><span>${fmt(val)} ج.م</span></div>`).join("")}
+      <div class="fine">هذا العرض ساري لمدة 3 أيام من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
+    </div>
+
+    ${buildTechBrief(r, "print-table")}
+
+    <div class="print-footer2">
+      <div><i class="fa-solid fa-envelope"></i>Sales@AlaslSolar.Com &nbsp; <i class="fa-solid fa-envelope"></i>info@AlaslSolar.Com</div>
+      <div><i class="fa-solid fa-location-dot"></i>م 3 مدينة السادات - طريق القاهرة الاسكندرية الصحراوي</div>
+      <div><i class="fa-brands fa-whatsapp"></i>+201200074344 &nbsp; <i class="fa-solid fa-globe"></i>Www.AlaslSolar.Com</div>
+    </div>
   `;
   setTimeout(() => window.print(), 100);
 }
