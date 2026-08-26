@@ -34,6 +34,7 @@ let bomSettings = null;
 let addedLoadIdx = [];
 let quoteType = "supply_only";
 let lastResult = null;
+let catalogCablePricePerMeter = null;
 let quoteRows = []; // { key, label, type, product_id, watt, qty, unitPrice, discountPct }
 
 function $(sel) { return document.querySelector(sel); }
@@ -165,7 +166,7 @@ async function loadCatalog() {
 
   const { data, error } = await client.from("products")
     .select("id,category,brand,model_available,price,voltage_v,power_kw,surge_capacity_pct,pv_voc_max,pv_mppt_min,pv_mppt_max,capacity_ah,dod,power_watt,vimp,voc,in_stock,published,name_ar")
-    .in("category", ["offgrid", "batteries", "panels"]);
+    .in("category", ["offgrid", "batteries", "panels", "cables"]);
   if (error || !data) { $("[data-calc-message]").textContent = "تعذر تحميل الكتالوج."; return; }
 
   const hasPrice = (r) => r.price != null && Number(r.price) > 0;
@@ -186,6 +187,13 @@ async function loadCatalog() {
     .map((r) => ({ id: r.id, brand: r.brand, power: r.power_watt ? Number(r.power_watt) : null,
       voc: r.voc ? Number(r.voc) : null, vimp: r.vimp ? Number(r.vimp) : null, pricePerWatt: Number(r.price) }))
     .filter((r) => r.power);
+
+  /* سعر متر الكابل بيتاخد من كتالوج المنتجات (فئة "cables") بدل الرقم الثابت في إعدادات الأدمن —
+     بندور على متغير 6مم (المستخدم في الحساب) بالاسم أو اسم المنتج بالعربي؛ لو مش موجود، بنرجع
+     تلقائيًا للقيمة الاحتياطية المسجلة في إعدادات الأدمن (offgrid_bom_settings). */
+  const cableProducts = data.filter((r) => r.category === "cables" && r.in_stock !== false && r.published !== false && hasPrice(r));
+  const cable6mm = cableProducts.find((r) => /6\s*mm|6\s*مم/i.test(`${r.model_available || ""} ${r.name_ar || ""}`));
+  catalogCablePricePerMeter = cable6mm ? Number(cable6mm.price) : null;
 
   fillBrandSelect($("#ogInvBrand"), [...new Set(catalog.inverters.map((r) => r.brand))].sort(), settings?.preferred_offgrid_inverter_brand);
   fillBrandSelect($("#ogBattBrand"), [...new Set(catalog.batteries.map((r) => r.brand))].sort(), settings?.preferred_offgrid_battery_brand);
@@ -320,7 +328,7 @@ function runCalc() {
   };
   const gp = {
     steelPerUnit: bomSettings?.steel_customer_per_unit ?? 1500,
-    cablesPerMeter: bomSettings?.cables_customer_per_meter ?? 65,
+    cablesPerMeter: catalogCablePricePerMeter ?? bomSettings?.cables_customer_per_meter ?? 65,
     cableMetersPerSteelUnit: bomSettings?.cable_meters_per_steel_unit ?? 20,
     accessoriesFixed: bomSettings?.accessories_customer_fixed ?? 2500,
     batteryChargeSunHours: bomSettings?.battery_charge_sun_hours ?? 5.5,
