@@ -41,6 +41,58 @@ function $(sel) { return document.querySelector(sel); }
 function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
 function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 1 }); }
 
+/* منحنى تقديري لتوزيع الإنتاج/الاستهلاك خلال 24 ساعة — Area للإنتاج الشمسي (منحنى جرسي بين الشروق
+   والغروب) و Line متدرّج للاستهلاك (مستوى نهار مختلف عن الليل). البيانات هنا تقديرية/توضيحية:
+   بنفترض نافذة شمس ثابتة 6ص–6م ومنحنى جيبي متماثل — مش قياس فعلي بالساعة لأن المحرك أصلاً
+   بيشتغل بمجاميع نهار/ليل بس، مش بروفايل حمل بالساعة. */
+function svgDayCurve(dailyProductionKWh, dayLoadKWh, nightLoadKWh) {
+  const sunStart = 6, sunEnd = 18; // نافذة شمس تقديرية ثابتة
+  const dayHours = sunEnd - sunStart, nightHours = 24 - dayHours;
+  const prodPeakKW = dailyProductionKWh * Math.PI / (2 * dayHours); // من حل تكامل نصف موجة جيبية
+  const dayLevelKW = dayLoadKWh / dayHours;
+  const nightLevelKW = nightLoadKWh / nightHours;
+  const maxVal = Math.max(prodPeakKW, dayLevelKW, nightLevelKW, 0.001);
+
+  const x0 = 46, xW = 500, yBase = 148, yTop = 14;
+  const x = (h) => x0 + (h / 24) * xW;
+  const y = (v) => yBase - (v / maxVal) * (yBase - yTop);
+
+  const prodPts = [];
+  for (let h = 0; h <= 24; h += 0.5) {
+    const p = (h >= sunStart && h <= sunEnd) ? prodPeakKW * Math.sin(Math.PI * (h - sunStart) / dayHours) : 0;
+    prodPts.push(`${x(h)},${y(p)}`);
+  }
+  const areaPath = `M ${prodPts.join(" L ")} Z`;
+
+  const consPts = [
+    `${x(0)},${y(nightLevelKW)}`, `${x(sunStart)},${y(nightLevelKW)}`,
+    `${x(sunStart)},${y(dayLevelKW)}`, `${x(sunEnd)},${y(dayLevelKW)}`,
+    `${x(sunEnd)},${y(nightLevelKW)}`, `${x(24)},${y(nightLevelKW)}`,
+  ];
+  const linePath = `M ${consPts.join(" L ")}`;
+
+  const hourTicks = [0, 6, 12, 18, 24].map((h) => `
+    <line x1="${x(h)}" y1="${yBase}" x2="${x(h)}" y2="${yBase + 4}" stroke="#bbb" stroke-width="1"></line>
+    <text x="${x(h)}" y="${yBase + 16}" font-size="10" text-anchor="middle" fill="#777">${h}</text>
+  `).join("");
+
+  return `
+    <div style="margin-top:14px; page-break-inside: avoid;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:2px;">منحنى تقديري للإنتاج والاستهلاك خلال اليوم (kW بالساعة)</div>
+      <div style="font-size:10px; color:#999; margin-bottom:6px;">توضيحي وتقديري — نافذة شمس مفترضة 6ص–6م بمنحنى جيبي، مش قياس فعلي بالساعة</div>
+      <svg viewBox="0 0 560 178" width="100%" style="max-width:420px; display:block;" xmlns="http://www.w3.org/2000/svg">
+        <line x1="${x0}" y1="${yBase}" x2="${x0 + xW}" y2="${yBase}" stroke="#ddd" stroke-width="1"></line>
+        <path d="${areaPath}" fill="#c8752d" fill-opacity="0.28" stroke="#c8752d" stroke-width="1.5"></path>
+        <path d="${linePath}" fill="none" stroke="#3b6e52" stroke-width="2"></path>
+        ${hourTicks}
+        <rect x="${x0}" y="4" width="10" height="10" fill="#c8752d" fill-opacity="0.5"></rect>
+        <text x="${x0 + 14}" y="13" font-size="10.5" fill="#555">إنتاج الألواح (تقديري)</text>
+        <line x1="${x0 + 150}" y1="9" x2="${x0 + 170}" y2="9" stroke="#3b6e52" stroke-width="2"></line>
+        <text x="${x0 + 175}" y="13" font-size="10.5" fill="#555">الاستهلاك (نهار/ليل)</text>
+      </svg>
+    </div>`;
+}
+
 /* رسم بياني أعمدة بسيط بصيغة SVG — ثابت وقت التوليد، بيطبع صح في كل المتصفحات
    من غير الاعتماد على مكتبة رسم بيانات خارجية أو تحميل غير متزامن */
 function svgBarCompare(title, bars) {
@@ -69,19 +121,16 @@ function svgBarCompare(title, bars) {
     </div>`;
 }
 
-/* ملخص فني سريع لقدرات المنظومة — يُستخدم على الشاشة وفي الطباعة بنفس الدالة
-   tableClass: "bom" للعرض على الشاشة (متسايل أصلاً)، "print-table" للطباعة */
-function buildTechBrief(r, tableClass) {
-  if (!r || !r.brief) return "";
+/* ملخص فني سريع لقدرات المنظومة — مقسّم لأجزاء (بلوكات) مستقلة عشان تتوزّع على
+   صفحات الطباعة بدل ما تتحشر في بلوك واحد ضخم. tableClass: "bom" للشاشة، "print-table" للطباعة */
+function buildTechBriefBlocks(r, tableClass) {
+  if (!r || !r.brief) return [];
   const b = r.brief;
   const cls = tableClass || "print-table";
   const invOk = b.peakInstantaneousKW <= b.invSurgeKW;
 
   const totalConsumptionKWh = b.dayLoadKWh + b.nightLoadKWh;
   const prodDelta = b.dailyProductionKWh - totalConsumptionKWh;
-  const prodSurplusBar = prodDelta >= 0
-    ? { label: "الفائض", value: prodDelta, color: "#3b6e52" }
-    : { label: "⚠ عجز", value: Math.abs(prodDelta), color: "#b23b3b" };
   const prodCaption = prodDelta >= 0
     ? `فائض إنتاج يومي ~${fmt1(prodDelta)} kWh (${fmt(totalConsumptionKWh ? (prodDelta / totalConsumptionKWh) * 100 : 0)}% فوق الاستهلاك)`
     : `⚠ عجز إنتاج يومي ~${fmt1(Math.abs(prodDelta))} kWh — الإنتاج أقل من الاستهلاك، راجع التصميم`;
@@ -93,8 +142,9 @@ function buildTechBrief(r, tableClass) {
   const storageCaption = storageDelta >= 0
     ? `فائض تخزين ~${fmt1(storageDelta)} kWh فوق الاستهلاك الليلي المتفق عليه`
     : `⚠ سعة البطاريات أقل من الاستهلاك الليلي المتفق عليه بـ ~${fmt1(Math.abs(storageDelta))} kWh`;
-  return `
-    <div style="margin-top:22px; padding-top:14px; border-top:2px dashed #e4d8ca; page-break-inside: avoid;">
+
+  const statsBlock = `
+    <div style="margin-top:22px; padding-top:14px; border-top:2px dashed #e4d8ca;">
       <div style="font-size:15px; font-weight:800; margin-bottom:10px;">ملخص فني سريع للمنظومة</div>
       <table class="${cls}" style="font-size:12px; width:100%;">
         <tbody>
@@ -108,13 +158,16 @@ function buildTechBrief(r, tableClass) {
           <tr><td>فولت سلسلة الألواح مقابل نطاق MPPT للإنفرتر</td><td>${b.stringVimp != null ? fmt1(b.stringVimp) + " V" : "—"}${(b.invMpptMin || b.invMpptMax) ? ` (النطاق ${fmt(b.invMpptMin) || "—"}–${fmt(b.invMpptMax) || "—"} V)` : ""} ${b.mpptOk === true ? "— ضمن النطاق ✓" : b.mpptOk === false ? "— ⚠ خارج النطاق راجع التصميم" : ""}</td></tr>
         </tbody>
       </table>
-      ${svgBarCompare("إنتاج الألواح اليومي مقابل الاستهلاك (kWh)", [
-        { label: "إنتاج الألواح", value: b.dailyProductionKWh, unit: "" },
-        { label: "استهلاك نهاري", value: b.dayLoadKWh, unit: "" },
-        { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
-        prodSurplusBar,
-      ])}
+    </div>`;
+
+  const dayCurveBlock = `
+    <div>
+      ${svgDayCurve(b.dailyProductionKWh, b.dayLoadKWh, b.nightLoadKWh)}
       <div style="font-size:11px; color:#666; margin-top:-6px; margin-bottom:6px;">${prodCaption}</div>
+    </div>`;
+
+  const battChartBlock = `
+    <div>
       ${svgBarCompare("سعة البطاريات مقابل الاستهلاك الليلي (kWh)", [
         { label: "سعة البطاريات", value: b.storedKWh, unit: "" },
         { label: "استهلاك ليلي متفق عليه", value: b.nightLoadKWh, unit: "" },
@@ -123,6 +176,13 @@ function buildTechBrief(r, tableClass) {
       <div style="font-size:11px; color:#666; margin-top:-6px; margin-bottom:6px;">${storageCaption}</div>
       <div style="font-size:10.5px; color:#888; margin-top:10px;">الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.</div>
     </div>`;
+
+  return [statsBlock, dayCurveBlock, battChartBlock];
+}
+
+/* نسخة العرض على الشاشة — بلوك واحد مجمّع، مفيش تقسيم لصفحات هنا */
+function buildTechBrief(r, tableClass) {
+  return buildTechBriefBlocks(r, tableClass).join("");
 }
 
 async function initClient() {
@@ -461,7 +521,70 @@ async function saveQuote() {
   printQuote({ id: quoteId, customer: { name, phone, city }, quoteType, items: saved?.items || items, total: saved?.total || 0, createdAt: saved?.created_at || new Date() });
 }
 
-function printQuote(q) {
+/* ---------------- توزيع محتوى الطباعة على صفحات A4 فعلية (كل صفحة بالليتر هيد كامل) ---------------- */
+
+const MM_TO_PX = 96 / 25.4;
+const PAGE_CONTENT_W_MM = 210 - 14 - 14; // عرض المحتوى داخل هوامش الصفحة اليمين/الشمال
+const PAGE_CONTENT_H_MM = 297 - 80 - 26; // الارتفاع المتاح بين مساحة اللوجو فوق والفوتر تحت
+const PAGE_SAFETY_BUFFER_MM = 12; // هامش أمان لفروق قياس الخط بين الشاشة والطباعة
+
+function measureBlockHeightPx(stage, html) {
+  stage.innerHTML = html;
+  return stage.getBoundingClientRect().height;
+}
+
+/* units: مصفوفة { type: 'row'|'block', html } — الوحدات دي معناها "ما ينفعش يتقطّع نصين"
+   بين صفحتين. صفوف الجدول بتتجمّع تلقائيًا في جدول واحد بعنوان لكل صفحة تحتوي عليها. */
+async function paginatePrintUnits(units, tableHead) {
+  await (document.fonts && document.fonts.ready ? document.fonts.ready.catch(() => {}) : Promise.resolve());
+
+  const stage = document.createElement("div");
+  stage.style.cssText = `position:absolute; visibility:hidden; left:-9999px; top:0; width:${PAGE_CONTENT_W_MM}mm; direction:rtl; font-family:'Cairo',sans-serif;`;
+  document.body.appendChild(stage);
+
+  const theadHeightPx = measureBlockHeightPx(stage, `<table class="print-table"><thead>${tableHead}</thead></table>`);
+  const maxH = (PAGE_CONTENT_H_MM - PAGE_SAFETY_BUFFER_MM) * MM_TO_PX;
+
+  const pages = [[]];
+  let curH = 0;
+  for (const unit of units) {
+    const wrappedForMeasure = unit.type === "row" ? `<table class="print-table"><tbody>${unit.html}</tbody></table>` : unit.html;
+    let h = measureBlockHeightPx(stage, wrappedForMeasure);
+    const curPage = pages[pages.length - 1];
+    const startsNewTableOnThisPage = unit.type === "row" && (curPage.length === 0 || curPage[curPage.length - 1].type !== "row");
+    if (startsNewTableOnThisPage) h += theadHeightPx;
+
+    if (curH + h > maxH && curPage.length > 0) {
+      pages.push([]);
+      curH = 0;
+      if (unit.type === "row") h += theadHeightPx; // أول صف في الصفحة الجديدة هيفتح جدول جديد بعنوانه
+    }
+    pages[pages.length - 1].push(unit);
+    curH += h;
+  }
+  document.body.removeChild(stage);
+  return pages;
+}
+
+function renderPrintPages(pages, tableHead) {
+  return pages.map((pageUnits) => {
+    const parts = [];
+    let i = 0;
+    while (i < pageUnits.length) {
+      if (pageUnits[i].type === "row") {
+        let rowsHtml = "";
+        while (i < pageUnits.length && pageUnits[i].type === "row") { rowsHtml += pageUnits[i].html; i++; }
+        parts.push(`<table class="print-table"><thead>${tableHead}</thead><tbody>${rowsHtml}</tbody></table>`);
+      } else {
+        parts.push(pageUnits[i].html);
+        i++;
+      }
+    }
+    return `<div class="printPage">${parts.join("")}</div>`;
+  }).join("");
+}
+
+async function printQuote(q) {
   const area = document.getElementById("printArea");
   const r = lastResult;
   const issueDate = new Date(q.createdAt);
@@ -471,9 +594,11 @@ function printQuote(q) {
   const typeLabel = q.quoteType === "supply_install" ? "توريد وتركيب" : "توريد فقط";
   const quoteNo = `Q-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, "0")}${String(issueDate.getDate()).padStart(2, "0")}-${String(q.id).padStart(3, "0")}`;
 
-  const rows = (q.items || []).map((it) => `
-    <tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>
-  `).join("");
+  const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr>`;
+  const rowUnits = (q.items || []).map((it) => ({
+    type: "row",
+    html: `<tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>`,
+  }));
 
   const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
   const infoRow1 = `
@@ -500,37 +625,43 @@ function printQuote(q) {
     ? [["مقدم عند التعاقد (٪70)", q.total * 0.70], ["عند التوريد (٪25)", q.total * 0.25], ["عند التشغيل (٪5)", q.total * 0.05]]
     : [["مقدم عند التعاقد (٪70)", q.total * 0.70], ["عند التوريد (٪30)", q.total * 0.30]];
 
-  area.innerHTML = `
-    <div class="print-header">
-      <div class="print-title">عرض سعر — نظام أوف جريد</div>
-      <div style="text-align:left;">
-        <div class="print-meta-line">رقم العرض: ${quoteNo}</div>
-        <div class="print-meta-line">التاريخ: ${dateStr}</div>
+  const headerBlock = {
+    type: "block",
+    html: `
+      <div class="print-header">
+        <div class="print-title">عرض سعر — نظام أوف جريد</div>
+        <div style="text-align:left;">
+          <div class="print-meta-line">رقم العرض: ${quoteNo}</div>
+          <div class="print-meta-line">التاريخ: ${dateStr}</div>
+        </div>
       </div>
-    </div>
+      ${infoRow1}
+      ${infoRow2}
+    `,
+  };
+  const grandBoxBlock = {
+    type: "block",
+    html: `
+      <div class="print-grand-box">
+        <div class="note">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
+        <div class="amount">${fmt(q.total)} ج.م</div>
+      </div>`,
+  };
+  const termsBlock = {
+    type: "block",
+    html: `
+      <div class="print-terms">
+        <h4>شروط السداد</h4>
+        ${paymentTerms.map(([label, val]) => `<div class="row"><span>${label}</span><span>${fmt(val)} ج.م</span></div>`).join("")}
+        <div class="fine">هذا العرض ساري لمدة 3 أيام من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
+      </div>`,
+  };
+  const briefBlocks = buildTechBriefBlocks(r, "print-table").map((html) => ({ type: "block", html }));
 
-    ${infoRow1}
-    ${infoRow2}
-
-    <table class="print-table">
-      <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-
-    <div class="print-grand-box">
-      <div class="note">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
-      <div class="amount">${fmt(q.total)} ج.م</div>
-    </div>
-
-    <div class="print-terms">
-      <h4>شروط السداد</h4>
-      ${paymentTerms.map(([label, val]) => `<div class="row"><span>${label}</span><span>${fmt(val)} ج.م</span></div>`).join("")}
-      <div class="fine">هذا العرض ساري لمدة 3 أيام من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
-    </div>
-
-    ${buildTechBrief(r, "print-table")}
-  `;
-  setTimeout(() => window.print(), 100);
+  const units = [headerBlock, ...rowUnits, grandBoxBlock, termsBlock, ...briefBlocks];
+  const pages = await paginatePrintUnits(units, tableHead);
+  area.innerHTML = renderPrintPages(pages, tableHead);
+  setTimeout(() => window.print(), 150);
 }
 
 /* ---------------- ربط الأحداث ---------------- */
