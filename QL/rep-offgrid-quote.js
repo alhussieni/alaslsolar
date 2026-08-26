@@ -612,10 +612,15 @@ async function printQuote(q) {
         <div class="fine">هذا العرض ساري لمدة 3 أيام من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
       </div>`,
   };
+  const quoteUnits = [headerBlock, ...rowUnits, grandBoxBlock, termsBlock];
   const briefBlocks = buildTechBriefBlocks(r, "print-table").map((html) => ({ type: "block", html }));
 
-  const units = [headerBlock, ...rowUnits, grandBoxBlock, termsBlock, ...briefBlocks];
-  const pages = await paginatePrintUnits(units, tableHead);
+  /* عرض السعر والبريف الفني بيتوزّعوا كل واحد لوحده على صفحاته — البريف دايمًا بيبدأ
+     من أول صفحة جديدة حتى لو فاضل مساحة في آخر صفحة عرض السعر، عشان الفصل يكون ثابت
+     ومتوقّع (صفحة ١ = عرض السعر كامل، صفحة ٢+ = البريف والرسوم) مش حسب المساحة المتاحة. */
+  const quotePages = await paginatePrintUnits(quoteUnits, tableHead);
+  const briefPages = briefBlocks.length ? await paginatePrintUnits(briefBlocks, tableHead) : [];
+  const pages = [...quotePages, ...briefPages];
   area.innerHTML = renderPrintPages(pages, tableHead);
   setTimeout(() => window.print(), 150);
 }
