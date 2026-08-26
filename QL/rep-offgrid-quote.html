@@ -22,14 +22,17 @@
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
-      #printArea {
-        display: block; position: absolute; top: 0; right: 0; left: 0;
-        width: 210mm; min-height: 297mm; box-sizing: border-box;
+      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; }
+
+      .printPage {
+        width: 210mm; min-height: 297mm; box-sizing: border-box; position: relative;
         background: url('letterhead.jpg') no-repeat top center / 210mm 297mm;
         print-color-adjust: exact; -webkit-print-color-adjust: exact;
         padding: 80mm 14mm 26mm 14mm;
         direction: rtl; font-family: 'Cairo', sans-serif;
+        page-break-after: always;
       }
+      .printPage:last-child { page-break-after: auto; }
 
       .print-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #c8752d; padding-bottom: 10px; margin-bottom: 16px; }
       .print-title { font-size: 19px; font-weight: 800; color: #17120f; }
@@ -44,11 +47,11 @@
       .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
       .print-table th { background: #f3e4d4; }
 
-      .print-grand-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(251,246,239,0.9); border: 1.5px solid #c8752d; border-radius: 10px; padding: 12px 18px; page-break-inside: avoid; }
+      .print-grand-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(251,246,239,0.9); border: 1.5px solid #c8752d; border-radius: 10px; padding: 12px 18px; }
       .print-grand-box .amount { font-size: 22px; font-weight: 800; color: #c8752d; }
       .print-grand-box .note { font-size: 10.5px; color: #777; }
 
-      .print-terms { margin-top: 16px; page-break-inside: avoid; }
+      .print-terms { margin-top: 16px; }
       .print-terms h4 { font-size: 13px; margin: 0 0 6px; }
       .print-terms .row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 4px 0; border-bottom: 1px dashed #eee; }
       .print-terms .fine { font-size: 10.5px; color: #888; margin-top: 8px; }
