@@ -977,6 +977,7 @@ async function loadLists() {
   loadBrandLogos();
   loadCalcSettings();
   loadOffgridSettings();
+  loadOffgridBomSettings();
   loadOffgridPresets();
 }
 
@@ -1971,6 +1972,45 @@ async function saveOffgridSettings(event) {
   msg.textContent = error ? ('خطأ: ' + error.message) : '✅ تم حفظ إعدادات الأوف جريد';
   setTimeout(() => { msg.textContent = ''; }, 3500);
 }
+
+// ── أسعار بنود التوريد والتركيب (شاسيه/كابلات احتياطي/نقل/تركيب/إكسسوارات) — جدول offgrid_bom_settings ──
+const BOM_FIELD_MAP = {
+  bomSteelPerUnit: 'steel_customer_per_unit',
+  bomCablesPerMeter: 'cables_customer_per_meter',
+  bomCableMetersPerSteelUnit: 'cable_meters_per_steel_unit',
+  bomAccessoriesFixed: 'accessories_customer_fixed',
+  bomTransportFixed: 'transport_customer_fixed',
+  bomInstallPerUnit: 'install_customer_per_unit',
+};
+
+async function loadOffgridBomSettings() {
+  if (!client) return;
+  const { data, error } = await client.from('offgrid_bom_settings').select('*').eq('id', 1).maybeSingle();
+  if (error) { console.error('offgrid_bom_settings load error', error); return; }
+  for (const [inputId, col] of Object.entries(BOM_FIELD_MAP)) {
+    const el = document.getElementById(inputId);
+    if (el && data && data[col] != null) el.value = data[col];
+  }
+}
+
+async function saveOffgridBomSettings() {
+  const msg = document.getElementById('bomSettingsMessage');
+  const payload = { updated_at: new Date().toISOString() };
+  for (const [inputId, col] of Object.entries(BOM_FIELD_MAP)) {
+    const el = document.getElementById(inputId);
+    if (!el || el.value === '') continue; // الأعمدة كلها NOT NULL — نتجاهل الفاضي بدل ما نبعت null ونوقّف الحفظ كله
+    payload[col] = Number(el.value);
+  }
+  const { error } = await client.from('offgrid_bom_settings').upsert({ id: 1, ...payload });
+  msg.style.color = error ? '#c33' : '#2a7a2a';
+  msg.textContent = error ? ('خطأ: ' + error.message) : '✅ تم حفظ أسعار البنود';
+  setTimeout(() => { msg.textContent = ''; }, 3500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const bomBtn = document.getElementById('bomSettingsSaveBtn');
+  if (bomBtn) bomBtn.addEventListener('click', saveOffgridBomSettings);
+});
 
 async function loadOffgridPresets() {
   const list = document.getElementById('offgridPresetsList');

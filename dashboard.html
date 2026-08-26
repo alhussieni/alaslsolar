@@ -838,6 +838,26 @@
               </div>
             </div>
 
+            <div style="margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px dashed var(--line)">
+              <h4 style="margin:0 0 6px;font-size:14px">💰 أسعار بنود التوريد والتركيب (للعميل)</h4>
+              <p style="color:var(--muted);font-size:12.5px;margin:0 0 var(--space-2)">
+                الشاسيه الحديد سعر ثابت لكل وحدة (الوحدة = لوحين). الكابلات بتتسعّر تلقائيًا من منتج "كابل شمسي 6MM" في المخزون —
+                القيمة هنا احتياطية بس لو المنتج مش موجود. الإكسسوارات سعر افتراضي يقدر المندوب يعدّله يدويًا لكل عرض حسب الموقع.
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--space-2)">
+                <div><label>شاسيه حديد — سعر الوحدة (لوحين)</label><input type="number" step="0.01" id="bomSteelPerUnit" placeholder="1500"></div>
+                <div><label>كابلات — سعر المتر (احتياطي)</label><input type="number" step="0.01" id="bomCablesPerMeter" placeholder="65"></div>
+                <div><label>متر كابل لكل وحدة شاسيه</label><input type="number" step="0.01" id="bomCableMetersPerSteelUnit" placeholder="20"></div>
+                <div><label>إكسسوارات — سعر افتراضي ثابت</label><input type="number" step="0.01" id="bomAccessoriesFixed" placeholder="2500"></div>
+                <div><label>نقل — سعر ثابت</label><input type="number" step="0.01" id="bomTransportFixed" placeholder="0"></div>
+                <div><label>تركيب — سعر لكل وحدة شاسيه</label><input type="number" step="0.01" id="bomInstallPerUnit" placeholder="0"></div>
+              </div>
+              <div style="margin-top:var(--space-2)">
+                <button class="btn btn-primary" type="button" id="bomSettingsSaveBtn" style="font-size:13px">💾 حفظ أسعار البنود</button>
+              </div>
+              <p class="form-note" id="bomSettingsMessage" style="margin-top:6px"></p>
+            </div>
+
             <div style="margin-top:var(--space-2)">
               <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ إعدادات الأوف جريد</button>
             </div>
