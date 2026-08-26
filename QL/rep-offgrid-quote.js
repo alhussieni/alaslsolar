@@ -41,58 +41,6 @@ function $(sel) { return document.querySelector(sel); }
 function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
 function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 1 }); }
 
-/* منحنى تقديري لتوزيع الإنتاج/الاستهلاك خلال 24 ساعة — Area للإنتاج الشمسي (منحنى جرسي بين الشروق
-   والغروب) و Line متدرّج للاستهلاك (مستوى نهار مختلف عن الليل). البيانات هنا تقديرية/توضيحية:
-   بنفترض نافذة شمس ثابتة 6ص–6م ومنحنى جيبي متماثل — مش قياس فعلي بالساعة لأن المحرك أصلاً
-   بيشتغل بمجاميع نهار/ليل بس، مش بروفايل حمل بالساعة. */
-function svgDayCurve(dailyProductionKWh, dayLoadKWh, nightLoadKWh) {
-  const sunStart = 6, sunEnd = 18; // نافذة شمس تقديرية ثابتة
-  const dayHours = sunEnd - sunStart, nightHours = 24 - dayHours;
-  const prodPeakKW = dailyProductionKWh * Math.PI / (2 * dayHours); // من حل تكامل نصف موجة جيبية
-  const dayLevelKW = dayLoadKWh / dayHours;
-  const nightLevelKW = nightLoadKWh / nightHours;
-  const maxVal = Math.max(prodPeakKW, dayLevelKW, nightLevelKW, 0.001);
-
-  const x0 = 46, xW = 500, yBase = 148, yTop = 14;
-  const x = (h) => x0 + (h / 24) * xW;
-  const y = (v) => yBase - (v / maxVal) * (yBase - yTop);
-
-  const prodPts = [];
-  for (let h = 0; h <= 24; h += 0.5) {
-    const p = (h >= sunStart && h <= sunEnd) ? prodPeakKW * Math.sin(Math.PI * (h - sunStart) / dayHours) : 0;
-    prodPts.push(`${x(h)},${y(p)}`);
-  }
-  const areaPath = `M ${prodPts.join(" L ")} Z`;
-
-  const consPts = [
-    `${x(0)},${y(nightLevelKW)}`, `${x(sunStart)},${y(nightLevelKW)}`,
-    `${x(sunStart)},${y(dayLevelKW)}`, `${x(sunEnd)},${y(dayLevelKW)}`,
-    `${x(sunEnd)},${y(nightLevelKW)}`, `${x(24)},${y(nightLevelKW)}`,
-  ];
-  const linePath = `M ${consPts.join(" L ")}`;
-
-  const hourTicks = [0, 6, 12, 18, 24].map((h) => `
-    <line x1="${x(h)}" y1="${yBase}" x2="${x(h)}" y2="${yBase + 4}" stroke="#bbb" stroke-width="1"></line>
-    <text x="${x(h)}" y="${yBase + 16}" font-size="10" text-anchor="middle" fill="#777">${h}</text>
-  `).join("");
-
-  return `
-    <div style="margin-top:14px; page-break-inside: avoid;">
-      <div style="font-size:13px; font-weight:700; margin-bottom:2px;">منحنى تقديري للإنتاج والاستهلاك خلال اليوم (kW بالساعة)</div>
-      <div style="font-size:10px; color:#999; margin-bottom:6px;">توضيحي وتقديري — نافذة شمس مفترضة 6ص–6م بمنحنى جيبي، مش قياس فعلي بالساعة</div>
-      <svg viewBox="0 0 560 178" width="100%" style="max-width:420px; display:block;" xmlns="http://www.w3.org/2000/svg">
-        <line x1="${x0}" y1="${yBase}" x2="${x0 + xW}" y2="${yBase}" stroke="#ddd" stroke-width="1"></line>
-        <path d="${areaPath}" fill="#c8752d" fill-opacity="0.28" stroke="#c8752d" stroke-width="1.5"></path>
-        <path d="${linePath}" fill="none" stroke="#3b6e52" stroke-width="2"></path>
-        ${hourTicks}
-        <rect x="${x0}" y="4" width="10" height="10" fill="#c8752d" fill-opacity="0.5"></rect>
-        <text x="${x0 + 14}" y="13" font-size="10.5" fill="#555">إنتاج الألواح (تقديري)</text>
-        <line x1="${x0 + 150}" y1="9" x2="${x0 + 170}" y2="9" stroke="#3b6e52" stroke-width="2"></line>
-        <text x="${x0 + 175}" y="13" font-size="10.5" fill="#555">الاستهلاك (نهار/ليل)</text>
-      </svg>
-    </div>`;
-}
-
 /* رسم بياني أعمدة بسيط بصيغة SVG — ثابت وقت التوليد، بيطبع صح في كل المتصفحات
    من غير الاعتماد على مكتبة رسم بيانات خارجية أو تحميل غير متزامن */
 function svgBarCompare(title, bars) {
@@ -131,6 +79,9 @@ function buildTechBriefBlocks(r, tableClass) {
 
   const totalConsumptionKWh = b.dayLoadKWh + b.nightLoadKWh;
   const prodDelta = b.dailyProductionKWh - totalConsumptionKWh;
+  const prodSurplusBar = prodDelta >= 0
+    ? { label: "الفائض", value: prodDelta, color: "#3b6e52" }
+    : { label: "⚠ عجز", value: Math.abs(prodDelta), color: "#b23b3b" };
   const prodCaption = prodDelta >= 0
     ? `فائض إنتاج يومي ~${fmt1(prodDelta)} kWh (${fmt(totalConsumptionKWh ? (prodDelta / totalConsumptionKWh) * 100 : 0)}% فوق الاستهلاك)`
     : `⚠ عجز إنتاج يومي ~${fmt1(Math.abs(prodDelta))} kWh — الإنتاج أقل من الاستهلاك، راجع التصميم`;
@@ -162,7 +113,12 @@ function buildTechBriefBlocks(r, tableClass) {
 
   const dayCurveBlock = `
     <div>
-      ${svgDayCurve(b.dailyProductionKWh, b.dayLoadKWh, b.nightLoadKWh)}
+      ${svgBarCompare("إنتاج الألواح اليومي مقابل الاستهلاك (kWh)", [
+        { label: "إنتاج الألواح", value: b.dailyProductionKWh, unit: "" },
+        { label: "استهلاك نهاري", value: b.dayLoadKWh, unit: "" },
+        { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
+        prodSurplusBar,
+      ])}
       <div style="font-size:11px; color:#666; margin-top:-6px; margin-bottom:6px;">${prodCaption}</div>
     </div>`;
 
