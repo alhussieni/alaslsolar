@@ -71,6 +71,34 @@ table.admtable input, table.bom input { padding: 5px 6px; font-size: 12.5px; bor
 .rq-msg.error { color: #b23b23; }
 .rq-msg.ok { color: var(--forest); }
 
+/* زرار خفيف الوزن للأفعال الثانوية (زي "إضافة") على خلفيات فاتحة — .btn-secondary
+   الأساسي في الموقع مصمم للخلفيات الداكنة (نص أبيض) فبيختفي على كارت أبيض */
+.btn-outline {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1.5px solid var(--brand); background: var(--brand-soft); color: var(--brand-dark);
+  border-radius: var(--radius); font: inherit; font-weight: 700; font-size: 14px;
+  padding: 8px 16px; cursor: pointer; transition: background .18s, transform .18s;
+}
+.btn-outline:hover { background: var(--brand); color: #fff; transform: translateY(-1px); }
+.btn-outline:active { transform: scale(0.97); }
+
+/* بادج رقم الخطوة — بيستخدم بس لما الترتيب فعلًا يمثل تسلسل خطوات حقيقي (زي فورم إصدار عرض السعر) */
+.step-eyebrow { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.step-eyebrow .step-num {
+  display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px;
+  border-radius: 50%; background: var(--brand); color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.step-eyebrow .step-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .3px; }
+.card > h3.step-title { margin-top: 0; }
+
+/* تجميع الحقول المتقدمة/الاختيارية بوزن بصري أهدأ — عشان عين المستخدم تفضل على المسار
+   الأساسي، وميحتاجش يقرر في كل التفاصيل دي إلا لو فعلًا محتاج تخصيص يدوي */
+.advanced-group {
+  margin-top: 10px; padding: 10px 12px; background: #faf7f2; border: 1px dashed var(--line); border-radius: var(--radius);
+}
+.advanced-group > .adv-label { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+.advanced-group label { font-size: 12px; }
+
 .tag { font-size: 11px; background: var(--brand-soft); color: var(--brand-dark); padding: 2px 9px; border-radius: 20px; font-weight: 700; margin-inline-start: 8px; }
 .num { font-variant-numeric: tabular-nums; }
 .rw-remove { background: none; border: none; color: #b23; cursor: pointer; font-size: 12px; }

@@ -84,7 +84,7 @@
       <div class="input-rail">
 
         <div class="card">
-          <h3>بيانات العميل</h3>
+          <div class="step-eyebrow"><span class="step-num">١</span><span class="step-label">بيانات العميل</span></div>
           <label>اسم العميل *</label>
           <input type="text" id="custName" required>
           <label>رقم الهاتف / واتساب *</label>
@@ -94,7 +94,7 @@
         </div>
 
         <div class="card">
-          <h3>نوع العرض</h3>
+          <div class="step-eyebrow"><span class="step-num">٢</span><span class="step-label">نوع العرض</span></div>
           <div class="seg">
             <button type="button" class="rq-type-btn active" data-quote-type="supply_only">توريد فقط</button>
             <button type="button" class="rq-type-btn" data-quote-type="supply_install">توريد وتركيب</button>
@@ -102,11 +102,11 @@
         </div>
 
         <div class="card">
-          <h3>الأحمال المطلوب تشغيلها</h3>
+          <div class="step-eyebrow"><span class="step-num">٣</span><span class="step-label">الأحمال المطلوب تشغيلها</span></div>
           <label>إضافة جهاز من القائمة</label>
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
             <select id="ogLoadPicker" style="flex:1"></select>
-            <button type="button" class="btn btn-secondary" id="ogAddLoadBtn" style="min-height:44px">+ إضافة</button>
+            <button type="button" class="btn-outline" id="ogAddLoadBtn" style="min-height:44px;white-space:nowrap">+ إضافة</button>
           </div>
           <table class="admtable" id="ogLoadsTable">
             <thead><tr><th>الجهاز</th><th>وات</th><th>العدد</th><th>نهار</th><th>ليل</th><th></th></tr></thead>
@@ -115,23 +115,28 @@
         </div>
 
         <div class="card">
-          <h3>إعدادات النظام</h3>
+          <div class="step-eyebrow"><span class="step-num">٤</span><span class="step-label">إعدادات النظام</span></div>
           <div class="row2">
             <div><label>ماركة الإنفرتر</label><select id="ogInvBrand"></select></div>
             <div><label>ماركة البطارية</label><select id="ogBattBrand"></select></div>
           </div>
-          <div class="row2" style="margin-top:6px">
-            <div><label>نوع البطارية</label><select id="ogBattType"><option value="">كل الأنواع</option></select></div>
-            <div><label>فولت البطارية</label><select id="ogBattVoltage"><option value="">تلقائي (الأنسب هندسيًا)</option></select></div>
-          </div>
-          <label>سعة البطارية (AH)</label>
-          <select id="ogBattAh"><option value="">تلقائي (الأنسب هندسيًا)</option></select>
           <label style="margin-top:6px">ماركة الألواح</label>
           <div class="row2">
             <select id="ogPanelBrand"></select>
             <select id="ogPanelWatt"><option value="">تلقائي (الأنسب هندسيًا)</option></select>
           </div>
-          <div class="row2" style="margin-top:6px">
+
+          <div class="advanced-group">
+            <div class="adv-label">تخصيص البطارية يدويًا (اختياري — افتراضيًا "تلقائي" يختار الأنسب هندسيًا)</div>
+            <div class="row2">
+              <div><label>نوع البطارية</label><select id="ogBattType"><option value="">كل الأنواع</option></select></div>
+              <div><label>فولت البطارية</label><select id="ogBattVoltage"><option value="">تلقائي</option></select></div>
+            </div>
+            <label>سعة البطارية (AH)</label>
+            <select id="ogBattAh"><option value="">تلقائي</option></select>
+          </div>
+
+          <div class="row2" style="margin-top:10px">
             <div><label>الطور</label>
               <select id="ogPhase"><option value="single">أحادي</option><option value="three">ثلاثي</option></select>
             </div>
@@ -147,9 +152,11 @@
               <input type="checkbox" id="ogNight" checked style="width:auto;min-height:auto"> أحمال ليلية
             </label>
           </div>
-          <button type="button" class="btn btn-primary" id="ogCalcBtn" style="width:100%;margin-top:16px">
-            <i class="fa-solid fa-calculator"></i> احسب النظام
-          </button>
+          <div style="border-top:1px solid var(--line);margin-top:18px;padding-top:14px">
+            <button type="button" class="btn btn-primary" id="ogCalcBtn" style="width:100%;min-height:56px;font-size:16px">
+              <i class="fa-solid fa-calculator"></i> احسب النظام
+            </button>
+          </div>
           <p class="form-note" data-calc-message></p>
         </div>
 
@@ -158,22 +165,17 @@
       <!-- ===== عمود عرض السعر ===== -->
       <div class="quote-shell" id="quoteShell">
 
-        <div class="card" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;align-items:center">
-          <div style="display:flex;align-items:center;gap:10px">
-            <img src="../logo.png" alt="الأصل للطاقة الشمسية" style="width:46px;height:46px;object-fit:contain">
-            <div>
-              <div style="font-family:'Cairo';font-weight:800;font-size:16px">الأصل للطاقة الشمسية</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">alaslsolar.com</div>
-            </div>
+        <div class="card" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 18px;background:#faf7f2;box-shadow:none">
+          <div style="display:flex;align-items:center;gap:8px">
+            <img src="../logo.png" alt="الأصل للطاقة الشمسية" style="width:32px;height:32px;object-fit:contain">
+            <div style="font-family:'Cairo';font-weight:700;font-size:13px;color:var(--muted)">الأصل للطاقة الشمسية</div>
           </div>
           <div>
-            <div style="font-size:11px;color:var(--muted)">عرض سعر مُقدَّم إلى</div>
-            <div id="bannerName" style="font-family:'Cairo';font-weight:800;font-size:18px">—</div>
-            <div id="bannerPhone" class="num" style="font-size:12.5px;color:var(--muted)">—</div>
+            <div id="bannerName" style="font-family:'Cairo';font-weight:700;font-size:14px">—</div>
+            <div id="bannerPhone" class="num" style="font-size:11.5px;color:var(--muted)">—</div>
           </div>
           <div style="text-align:left">
-            <div style="font-size:11px;color:var(--muted)">تاريخ العرض</div>
-            <div class="num" style="font-size:14px;font-weight:700" id="bannerDate">—</div>
+            <div class="num" style="font-size:12.5px;color:var(--muted)" id="bannerDate">—</div>
           </div>
         </div>
 
@@ -198,7 +200,8 @@
         </div>
 
         <div class="card" data-quote-empty style="text-align:center;color:var(--muted);padding:40px 18px">
-          احسب النظام من العمود الجانبي عشان يظهر عرض السعر هنا.
+          <i class="fa-solid fa-arrow-right" style="color:var(--brand);margin-left:6px"></i>
+          كمّل الخطوات ١–٤ في العمود الجانبي، وبعدين اضغط "احسب النظام" عشان يظهر عرض السعر هنا.
         </div>
 
       </div>
