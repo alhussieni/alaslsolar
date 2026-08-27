@@ -46,8 +46,11 @@ function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { max
 function svgBarCompare(title, bars, maxWidthPx) {
   const colors = ["#c8752d", "#3b6e52", "#8a6d3b", "#5b7fa6"];
   const max = Math.max(...bars.map((b) => b.value), 0.001);
-  const barW = 78, gap = 26, chartH = 130, baseY = 150;
-  const width = bars.length * (barW + gap) + gap;
+  const chartH = 130, baseY = 150;
+  const width = 340; // عرض viewBox ثابت لكل الرسومات — عشان أي رسمين يتحطوا جنب بعض ياخدوا بالظبط نفس النسبة والحجم مهما اختلف عدد الأعمدة
+  const n = bars.length;
+  const gap = 20;
+  const barW = Math.max((width - gap * (n + 1)) / n, 18);
   const barsSvg = bars.map((b, i) => {
     const color = b.color || colors[i % colors.length];
     const h = Math.max((b.value / max) * chartH, 2);
