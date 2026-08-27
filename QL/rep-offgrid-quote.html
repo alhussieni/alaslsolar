@@ -34,14 +34,14 @@
       }
       .printPage:last-child { page-break-after: auto; }
 
-      .print-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #c8752d; padding-bottom: 10px; margin-bottom: 16px; }
-      .print-title { font-size: 19px; font-weight: 800; color: #17120f; }
-      .print-meta-line { font-size: 12px; color: #444; margin-top: 3px; }
+      .print-topright { position: absolute; top: 8mm; right: 14mm; width: 148mm; text-align: right; z-index: 2; }
+      .print-topright .tr-title { font-size: 16px; font-weight: 800; color: #17120f; border-bottom: 2px solid #c8752d; padding-bottom: 6px; margin-bottom: 6px; }
+      .print-topright .tr-meta { font-size: 10px; color: #555; }
 
-      .print-info-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-      .print-info-box { flex: 1 1 0; min-width: 100px; border: 1px solid #e4d8ca; border-radius: 8px; padding: 8px 6px; text-align: center; background: rgba(251,246,239,0.9); }
-      .print-info-box .lbl { font-size: 10px; color: #8a7a68; margin-bottom: 4px; }
-      .print-info-box .val { font-size: 12.5px; font-weight: 800; color: #17120f; }
+      .print-info-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; justify-content: flex-end; }
+      .print-info-box { flex: 0 1 auto; min-width: 60px; border: 1px solid #e4d8ca; border-radius: 6px; padding: 4px 6px; text-align: center; background: rgba(251,246,239,0.92); }
+      .print-info-box .lbl { font-size: 7.5px; color: #8a7a68; margin-bottom: 2px; white-space: nowrap; }
+      .print-info-box .val { font-size: 9.5px; font-weight: 800; color: #17120f; white-space: nowrap; }
 
       .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; }
       .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
