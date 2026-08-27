@@ -221,7 +221,16 @@ async function loadCatalog() {
   fillBrandSelect($("#ogPanelBrand"), [...new Set(catalog.panels.map((r) => r.brand))].sort(), settings?.preferred_offgrid_panel_brand);
 
   buildPanelWattOptions();
+  buildInvPowerOptions();
   buildBatteryOptions();
+}
+
+function buildInvPowerOptions() {
+  const brand = $("#ogInvBrand").value;
+  const sel = $("#ogInvPowerKW");
+  if (!sel) return;
+  const powers = [...new Set(catalog.inverters.filter((m) => m.brand === brand && m.powerKW).map((m) => m.powerKW))].sort((a, b) => a - b);
+  sel.innerHTML = `<option value="">تلقائي (الأنسب هندسيًا)</option>` + powers.map((p) => `<option value="${p}">${p} كيلوواط</option>`).join("");
 }
 
 /* ---------------- خيارات القدرة/الفولت/السعة المعتمدة على الماركة ---------------- */
@@ -340,6 +349,7 @@ function runCalc() {
     autonomyDays: $("#ogAutonomy").value,
     phase: $("#ogPhase").value,
     invBrand: $("#ogInvBrand").value,
+    invPowerKW: $("#ogInvPowerKW")?.value || "",
     battBrand: $("#ogBattBrand").value,
     battType: $("#ogBattType")?.value || "",
     battVoltage: $("#ogBattVoltage")?.value || "",
@@ -574,7 +584,7 @@ async function printQuote(q) {
     <div class="print-info-grid">
       ${infoBox("عدد الألواح", fmt(r.panelCount))}
       ${infoBox("القدرة المصممة", fmt1(r.brief.panelKWp) + " kWp")}
-      ${infoBox("موديل الإنفرتر", `${r.inv.brand} ${r.inv.type || ""}`)}
+      ${infoBox("موديل الإنفرتر", `${r.inv.brand} ${r.inv.type || ""}${r.brief.invUnits > 1 ? ` × ${r.brief.invUnits}` : ""}`)}
       ${infoBox("فولت سلسلة الألواح", r.brief.stringVimp != null ? fmt1(r.brief.stringVimp) + " V" : "—")}
       ${infoBox("بنك البطاريات", `${fmt(r.brief.batterySeriesCount)}×${fmt(r.brief.batteryParallelStrings)}`)}
       ${infoBox("أيام الاستقلالية", fmt(r.brief.autonomyDays) + " يوم")}
@@ -653,6 +663,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   $("#ogCalcBtn").addEventListener("click", runCalc);
   $("#ogPanelBrand").addEventListener("change", buildPanelWattOptions);
+  $("#ogInvBrand").addEventListener("change", buildInvPowerOptions);
+  $("#ogInvPowerKW")?.addEventListener("change", recalcIfAlreadyCalculated);
   $("#ogBattBrand").addEventListener("change", buildBatteryOptions);
   $("#ogBattType")?.addEventListener("change", () => { refreshBatteryVoltageOptions(); recalcIfAlreadyCalculated(); });
   $("#ogBattVoltage")?.addEventListener("change", () => { refreshBatteryAhOptions(); recalcIfAlreadyCalculated(); });
