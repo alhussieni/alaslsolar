@@ -13,14 +13,26 @@ function roundUpTo(value, decimals) {
   return Math.ceil(value * f) / f;
 }
 
-function pickInverterForBrand(catalog, brand, requiredKW, peakInstantaneousW, defaultSurgePct) {
+function pickInverterForBrand(catalog, brand, requiredKW, peakInstantaneousW, defaultSurgePct, requestedPowerKW) {
   const options = catalog.inverters.filter(m => m.brand === brand).sort((a, b) => a.powerKW - b.powerKW);
-  if (!options.length) return { model: null, undersized: false, surgeUndersized: false };
+  if (!options.length) return { model: null, undersized: false, surgeUndersized: false, units: 1, reason: 'no_brand' };
   const surgeCapOf = m => m.powerKW * 1000 * (m.surgeCapacityPct || defaultSurgePct || 1);
+
+  if (requestedPowerKW) {
+    const model = options.find(m => m.powerKW === requestedPowerKW);
+    if (!model) return { model: null, undersized: false, surgeUndersized: false, units: 1, reason: 'not_found' };
+    // كام وحدة محتاجة بالتوازي عشان تغطي القدرة المستمرة والقدرة اللحظية (Surge) مع بعض —
+    // ده اللي بيسمح باستخدام أكتر من جهاز أصغر مربوطين مع بعض بدل جهاز كبير مش متوفر بالمخزن
+    const unitsForContinuous = Math.ceil(requiredKW / model.powerKW);
+    const unitsForSurge = Math.ceil(peakInstantaneousW / surgeCapOf(model));
+    const units = Math.max(unitsForContinuous, unitsForSurge, 1);
+    return { model, undersized: false, surgeUndersized: false, units, reason: null };
+  }
+
   const fit = options.find(m => m.powerKW >= requiredKW && peakInstantaneousW <= surgeCapOf(m));
-  if (fit) return { model: fit, undersized: false, surgeUndersized: false };
+  if (fit) return { model: fit, undersized: false, surgeUndersized: false, units: 1, reason: null };
   const largest = options[options.length - 1];
-  return { model: largest, undersized: largest.powerKW < requiredKW, surgeUndersized: peakInstantaneousW > surgeCapOf(largest) };
+  return { model: largest, undersized: largest.powerKW < requiredKW, surgeUndersized: peakInstantaneousW > surgeCapOf(largest), units: 1, reason: null };
 }
 
 function pickBatteryForBrand(catalog, brand, inverterVoltage, requestedVoltage, requestedAh, requestedType) {
@@ -114,12 +126,20 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const R5 = (sumDay * (morningEnabled ? 1 : 0)) + R4;
   const R6 = psh ? R5 / psh : 0;
 
-  /* ---- 2) اختيار الانفرتر تلقائيًا ---- */
+  /* ---- 2) اختيار الانفرتر (يدويًا لو المستخدم حدد قدرة معينة، وإلا تلقائيًا) ---- */
   const requiredKW = roundUpTo(R2 / 1000, 1);
   const surgePctDefault = gp.defaultSurgeCapacityPct || 1.5;
-  const { model: inv, undersized: invUndersized, surgeUndersized } =
-    pickInverterForBrand(catalog, inputs.invBrand, requiredKW, peakInstantaneousW, surgePctDefault);
-  if (!inv) { errors.push(`مفيش موديلات انفرتر مسجلة لماركة "${inputs.invBrand}".`); return { errors }; }
+  const requestedInvPowerKW = inputs.invPowerKW ? Number(inputs.invPowerKW) : null;
+  const { model: inv, undersized: invUndersized, surgeUndersized, units: invUnits, reason: invReason } =
+    pickInverterForBrand(catalog, inputs.invBrand, requiredKW, peakInstantaneousW, surgePctDefault, requestedInvPowerKW);
+  if (!inv) {
+    const msg = invReason === 'not_found'
+      ? `مفيش موديل انفرتر بقدرة ${requestedInvPowerKW} كيلوواط من ماركة "${inputs.invBrand}".`
+      : `مفيش موديلات انفرتر مسجلة لماركة "${inputs.invBrand}".`;
+    errors.push(msg);
+    return { errors };
+  }
+  if (invUnits > 1) errors.push(`ℹ تم استخدام ${invUnits} إنفرتر ${inv.powerKW} كيلوواط مربوطين بالتوازي (بدل جهاز واحد أكبر) لتغطية القدرة المستمرة و/أو اللحظية المطلوبة.`);
   if (invUndersized) errors.push(`⚠ أكبر انفرتر متاح من ماركة ${inv.brand} (${inv.powerKW} كيلوواط) لسه أصغر من القدرة اللحظية المطلوبة (${requiredKW} كيلوواط) — قلل الأحمال أو جرّب ماركة تانية.`);
   const inverterVoltage = inv.voltage;
 
@@ -222,7 +242,8 @@ function computeOffgridMaterials(catalog, gp, inputs) {
     rows.push({ name: 'الألواح', type: panel.brand, qty: O2, unitPrice: 0, total: 0 });
     errors.push('⚠ سعر الألواح لهذه الماركة غير مكتمل في الموقع — القيمة غير محسوبة بدقة في الإجمالي.');
   }
-  rows.push({ name: 'انفرتر', type: `${inv.brand} ${inv.type}`, qty: phaseQty, unitPrice: inv.unitPrice, total: phaseQty * inv.unitPrice });
+  const invQty = phaseQty * invUnits;
+  rows.push({ name: 'انفرتر', type: `${inv.brand} ${inv.type}`, qty: invQty, unitPrice: inv.unitPrice, total: invQty * inv.unitPrice });
   rows.push({ name: 'شاسيه', type: 'حديد مجلفن', qty: steelQty, unitPrice: gp.steelPerUnit, total: steelQty * gp.steelPerUnit });
   rows.push({ name: 'كابلات', type: '6 مم', qty: cablesQty, unitPrice: gp.cablesPerMeter, total: cablesQty * gp.cablesPerMeter });
   rows.push({ name: 'بطاريات', type: `${batt.brand} ${batt.ah}AH-${batt.voltage}V`, qty: O6, unitPrice: batt.unitPrice, total: O6 * batt.unitPrice });
@@ -230,7 +251,7 @@ function computeOffgridMaterials(catalog, gp, inputs) {
 
   const grandTotal = rows.reduce((s, r) => s + r.total, 0);
 
-  const invRatedW = inv.powerKW * 1000;
+  const invRatedW = inv.powerKW * 1000 * invUnits;
   const invSurgeW = invRatedW * (inv.surgeCapacityPct || surgePctDefault);
   const dayLoadWh = sumDay * (morningEnabled ? 1 : 0);
   const nightLoadWh = R4;
@@ -256,7 +277,7 @@ function computeOffgridMaterials(catalog, gp, inputs) {
       batterySeriesCount: O7, batteryParallelStrings: O8,
       stringVimp, invMpptMin: inv.pvMpptMin || null, invMpptMax: inv.pvMpptMax || null,
       mpptOk: pvLimitVerified ? !((inv.pvMpptMin && stringVimp < inv.pvMpptMin) || (inv.pvMpptMax && stringVimp > inv.pvMpptMax)) : null,
-      autonomyDays,
+      autonomyDays, invUnits,
     },
   };
 }
