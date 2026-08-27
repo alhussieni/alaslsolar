@@ -43,7 +43,7 @@ function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { max
 
 /* رسم بياني أعمدة بسيط بصيغة SVG — ثابت وقت التوليد، بيطبع صح في كل المتصفحات
    من غير الاعتماد على مكتبة رسم بيانات خارجية أو تحميل غير متزامن */
-function svgBarCompare(title, bars) {
+function svgBarCompare(title, bars, maxWidthPx) {
   const colors = ["#c8752d", "#3b6e52", "#8a6d3b", "#5b7fa6"];
   const max = Math.max(...bars.map((b) => b.value), 0.001);
   const barW = 78, gap = 26, chartH = 130, baseY = 150;
@@ -62,7 +62,7 @@ function svgBarCompare(title, bars) {
   return `
     <div style="margin-top:14px; page-break-inside: avoid;">
       <div style="font-size:13px; font-weight:700; margin-bottom:6px;">${title}</div>
-      <svg viewBox="0 0 ${width} 178" width="100%" style="max-width:380px; display:block;" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 ${width} 178" width="100%" style="max-width:${maxWidthPx || 380}px; display:block;" xmlns="http://www.w3.org/2000/svg">
         <line x1="0" y1="${baseY}" x2="${width}" y2="${baseY}" stroke="#ddd" stroke-width="1"></line>
         ${barsSvg}
       </svg>
@@ -95,7 +95,7 @@ function buildTechBriefBlocks(r, tableClass) {
     : `⚠ سعة البطاريات أقل من الاستهلاك الليلي المتفق عليه بـ ~${fmt1(Math.abs(storageDelta))} kWh`;
 
   const statsBlock = `
-    <div style="margin-top:22px; padding-top:14px; border-top:2px dashed #e4d8ca;">
+    <div>
       <div style="font-size:15px; font-weight:800; margin-bottom:10px;">ملخص فني سريع للمنظومة</div>
       <table class="${cls}" style="font-size:12px; width:100%;">
         <tbody>
@@ -111,29 +111,31 @@ function buildTechBriefBlocks(r, tableClass) {
       </table>
     </div>`;
 
-  const dayCurveBlock = `
-    <div>
-      ${svgBarCompare("إنتاج الألواح اليومي مقابل الاستهلاك (kWh)", [
-        { label: "إنتاج الألواح", value: b.dailyProductionKWh, unit: "" },
-        { label: "استهلاك نهاري", value: b.dayLoadKWh, unit: "" },
-        { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
-        prodSurplusBar,
-      ])}
-      <div style="font-size:11px; color:#666; margin-top:-6px; margin-bottom:6px;">${prodCaption}</div>
-    </div>`;
+  /* الرسمين جنب بعض في صف واحد (بدل تحت بعض) بعرض مصغّر 10% — بيوفّر مساحة رأسية
+     كبيرة ويمنع أي تداخل محتمل مع الفوتر تحت */
+  const chartsRowBlock = `
+    <div style="display:flex; gap:14px; margin-top:14px; page-break-inside: avoid;">
+      <div style="flex:1; min-width:0;">
+        ${svgBarCompare("إنتاج الألواح اليومي مقابل الاستهلاك (kWh)", [
+          { label: "إنتاج الألواح", value: b.dailyProductionKWh, unit: "" },
+          { label: "استهلاك نهاري", value: b.dayLoadKWh, unit: "" },
+          { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
+          prodSurplusBar,
+        ], 342)}
+        <div style="font-size:10px; color:#666; margin-top:-6px;">${prodCaption}</div>
+      </div>
+      <div style="flex:1; min-width:0;">
+        ${svgBarCompare("سعة البطاريات مقابل الاستهلاك الليلي (kWh)", [
+          { label: "سعة البطاريات", value: b.storedKWh, unit: "" },
+          { label: "استهلاك ليلي متفق عليه", value: b.nightLoadKWh, unit: "" },
+          storageSurplusBar,
+        ], 342)}
+        <div style="font-size:10px; color:#666; margin-top:-6px;">${storageCaption}</div>
+      </div>
+    </div>
+    <div style="font-size:10px; color:#888; margin-top:10px;">الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.</div>`;
 
-  const battChartBlock = `
-    <div>
-      ${svgBarCompare("سعة البطاريات مقابل الاستهلاك الليلي (kWh)", [
-        { label: "سعة البطاريات", value: b.storedKWh, unit: "" },
-        { label: "استهلاك ليلي متفق عليه", value: b.nightLoadKWh, unit: "" },
-        storageSurplusBar,
-      ])}
-      <div style="font-size:11px; color:#666; margin-top:-6px; margin-bottom:6px;">${storageCaption}</div>
-      <div style="font-size:10.5px; color:#888; margin-top:10px;">الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.</div>
-    </div>`;
-
-  return [statsBlock, dayCurveBlock, battChartBlock];
+  return [statsBlock, chartsRowBlock];
 }
 
 /* نسخة العرض على الشاشة — بلوك واحد مجمّع، مفيش تقسيم لصفحات هنا */
