@@ -522,8 +522,8 @@ async function paginatePrintUnits(units, tableHead) {
   return pages;
 }
 
-function renderPrintPages(pages, tableHead) {
-  return pages.map((pageUnits) => {
+function renderPrintPages(pages, tableHead, topRights) {
+  return pages.map((pageUnits, idx) => {
     const parts = [];
     let i = 0;
     while (i < pageUnits.length) {
@@ -536,7 +536,8 @@ function renderPrintPages(pages, tableHead) {
         i++;
       }
     }
-    return `<div class="printPage">${parts.join("")}</div>`;
+    const topRight = (topRights && topRights[idx]) || "";
+    return `<div class="printPage">${topRight}${parts.join("")}</div>`;
   }).join("");
 }
 
@@ -581,20 +582,23 @@ async function printQuote(q) {
     ? [["مقدم عند التعاقد (٪70)", q.total * 0.70], ["عند التوريد (٪25)", q.total * 0.25], ["عند التشغيل (٪5)", q.total * 0.05]]
     : [["مقدم عند التعاقد (٪70)", q.total * 0.70], ["عند التوريد (٪30)", q.total * 0.30]];
 
-  const headerBlock = {
-    type: "block",
-    html: `
-      <div class="print-header">
-        <div class="print-title">عرض سعر — نظام أوف جريد</div>
-        <div style="text-align:left;">
-          <div class="print-meta-line">رقم العرض: ${quoteNo}</div>
-          <div class="print-meta-line">التاريخ: ${dateStr}</div>
-        </div>
-      </div>
+  /* الهيدر (عنوان + رقم عرض + تاريخ + صناديق المعلومات) بقى عنصر مطلق الموضع بيتحط أعلى
+     يمين كل صفحة بجوار اللوجو، مش جزء من تدفق المحتوى العادي — عشان الجدول يبدأ فورًا
+     تحت منطقة اللوجو من غير ما ينتظر ارتفاع الهيدر والصناديق. النسخة الكاملة (بالصناديق)
+     تظهر في أول صفحة بس؛ باقي الصفحات (تكملة عرض السعر أو صفحة البريف) بتاخد نسخة مصغّرة. */
+  const topRightFull = `
+    <div class="print-topright">
+      <div class="tr-title">عرض سعر — نظام أوف جريد</div>
+      <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
       ${infoRow1}
       ${infoRow2}
-    `,
-  };
+    </div>`;
+  const topRightMinimal = (title) => `
+    <div class="print-topright">
+      <div class="tr-title">${title}</div>
+      <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
+    </div>`;
+
   const grandBoxBlock = {
     type: "block",
     html: `
@@ -612,16 +616,23 @@ async function printQuote(q) {
         <div class="fine">هذا العرض ساري لمدة 3 أيام من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
       </div>`,
   };
-  const quoteUnits = [headerBlock, ...rowUnits, grandBoxBlock, termsBlock];
+  const quoteUnits = [...rowUnits, grandBoxBlock, termsBlock];
   const briefBlocks = buildTechBriefBlocks(r, "print-table").map((html) => ({ type: "block", html }));
 
-  /* عرض السعر والبريف الفني بيتوزّعوا كل واحد لوحده على صفحاته — البريف دايمًا بيبدأ
-     من أول صفحة جديدة حتى لو فاضل مساحة في آخر صفحة عرض السعر، عشان الفصل يكون ثابت
-     ومتوقّع (صفحة ١ = عرض السعر كامل، صفحة ٢+ = البريف والرسوم) مش حسب المساحة المتاحة. */
+  /* عرض السعر بيتوزّع بالقياس الفعلي (ممكن ياخد أكتر من صفحة لو البنود كتير جدًا).
+     البريف الفني دايمًا صفحة واحدة بس، مهما كان طوله — من غير قياس أو تقسيم، عشان
+     يفضل ثابت ومتوقّع زي ما اتفقنا (صفحة مخصصة له لوحده، لا تزيد ولا تنقص). */
   const quotePages = await paginatePrintUnits(quoteUnits, tableHead);
-  const briefPages = briefBlocks.length ? await paginatePrintUnits(briefBlocks, tableHead) : [];
+  const briefPages = briefBlocks.length ? [briefBlocks] : [];
   const pages = [...quotePages, ...briefPages];
-  area.innerHTML = renderPrintPages(pages, tableHead);
+
+  const topRights = pages.map((_, idx) => {
+    if (idx === 0) return topRightFull;
+    if (idx < quotePages.length) return topRightMinimal("عرض سعر — نظام أوف جريد (تابع)");
+    return topRightMinimal("ملخص فني سريع للمنظومة");
+  });
+
+  area.innerHTML = renderPrintPages(pages, tableHead, topRights);
   setTimeout(() => window.print(), 150);
 }
 
