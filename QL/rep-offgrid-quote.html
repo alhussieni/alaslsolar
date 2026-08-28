@@ -117,39 +117,42 @@
           </table>
         </div>
 
-        <div class="card">
+        <div class="card" id="ogSystemCard">
           <div class="step-eyebrow"><span class="step-num">٤</span><span class="step-label">إعدادات النظام</span></div>
-          <div class="row2">
-            <div><label>ماركة الإنفرتر</label><select id="ogInvBrand"></select></div>
-            <div><label>قدرة الإنفرتر</label><select id="ogInvPowerKW"><option value="">تلقائي (الأنسب هندسيًا)</option></select></div>
-          </div>
-          <label style="margin-top:6px">ماركة البطارية</label>
-          <select id="ogBattBrand"></select>
-          <label style="margin-top:6px">ماركة الألواح</label>
-          <div class="row2">
-            <select id="ogPanelBrand"></select>
-            <select id="ogPanelWatt"><option value="">تلقائي (الأنسب هندسيًا)</option></select>
-          </div>
 
+          <div class="subsection-label"><i class="fa-solid fa-plug-circle-bolt"></i> الإنفرتر</div>
+          <div class="row2">
+            <div><label>الماركة</label><select id="ogInvBrand"></select></div>
+            <div><label>القدرة</label><select id="ogInvPowerKW"><option value="">تلقائي</option></select></div>
+          </div>
+          <label>الطور</label>
+          <select id="ogPhase"><option value="single">أحادي</option><option value="three">ثلاثي</option></select>
+
+          <div class="subsection-label"><i class="fa-solid fa-car-battery"></i> البطارية</div>
+          <label>الماركة</label>
+          <select id="ogBattBrand"></select>
           <div class="advanced-group">
-            <div class="adv-label">تخصيص البطارية يدويًا (اختياري — افتراضيًا "تلقائي" يختار الأنسب هندسيًا)</div>
+            <div class="adv-label">تخصيص يدوي (اختياري — افتراضيًا "تلقائي" يختار الأنسب هندسيًا)</div>
             <div class="row2">
-              <div><label>نوع البطارية</label><select id="ogBattType"><option value="">كل الأنواع</option></select></div>
-              <div><label>فولت البطارية</label><select id="ogBattVoltage"><option value="">تلقائي</option></select></div>
+              <div><label>النوع</label><select id="ogBattType"><option value="">كل الأنواع</option></select></div>
+              <div><label>الفولت</label><select id="ogBattVoltage"><option value="">تلقائي</option></select></div>
             </div>
-            <label>سعة البطارية (AH)</label>
+            <label>السعة (AH)</label>
             <select id="ogBattAh"><option value="">تلقائي</option></select>
           </div>
 
-          <div class="row2" style="margin-top:10px">
-            <div><label>الطور</label>
-              <select id="ogPhase"><option value="single">أحادي</option><option value="three">ثلاثي</option></select>
-            </div>
-            <div><label>ساعات الشمس (PSH)</label><input type="number" id="ogPsh" value="6" step="0.1"></div>
+          <div class="subsection-label"><i class="fa-solid fa-solar-panel"></i> الألواح</div>
+          <div class="row2">
+            <div><label>الماركة</label><select id="ogPanelBrand"></select></div>
+            <div><label>القدرة</label><select id="ogPanelWatt"><option value="">تلقائي</option></select></div>
           </div>
-          <label>أيام الاستقلالية</label>
-          <input type="number" id="ogAutonomy" value="0" step="1">
-          <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+
+          <div class="subsection-label"><i class="fa-solid fa-sliders"></i> إعدادات عامة</div>
+          <div class="row2">
+            <div><label>ساعات الشمس (PSH)</label><input type="number" id="ogPsh" value="6" step="0.1"></div>
+            <div><label>أيام الاستقلالية</label><input type="number" id="ogAutonomy" value="0" step="1"></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
             <label style="display:flex;gap:6px;align-items:center;margin:0;font-size:13px;cursor:pointer">
               <input type="checkbox" id="ogMorning" checked style="width:auto;min-height:auto"> أحمال صباحية
             </label>
@@ -157,6 +160,7 @@
               <input type="checkbox" id="ogNight" checked style="width:auto;min-height:auto"> أحمال ليلية
             </label>
           </div>
+
           <div style="border-top:1px solid var(--line);margin-top:18px;padding-top:14px">
             <button type="button" class="btn btn-primary" id="ogCalcBtn" style="width:100%;min-height:56px;font-size:16px">
               <i class="fa-solid fa-calculator"></i> احسب النظام
