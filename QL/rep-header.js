@@ -6,6 +6,7 @@
     { href: "index.html", label: "بوابة المناديب", icon: "fa-house" },
     { href: "rep-offgrid-quote.html", label: "حاسبة أوف جريد", icon: "fa-car-battery" },
     { href: "rep-quotes.html", label: "عروض المنتجات", icon: "fa-file-invoice" },
+    { href: "rep-crm.html", label: "CRM", icon: "fa-users" },
     { href: "rep-settings.html", label: "الإعدادات", icon: "fa-gear" },
   ];
 
