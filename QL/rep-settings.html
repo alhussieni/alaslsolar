@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>الإعدادات | مناديب الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="rep-widgets.css">
+  <script defer src="rep-header.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="rep-settings.js"></script>
+</head>
+<body>
+
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <a class="dashboard-logo" href="index.html">
+      <img src="../logo-white.png" alt="الأصل للطاقة الشمسية">
+    </a>
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">بوابة المناديب</p>
+      <h1>الإعدادات</h1>
+    </div>
+  </section>
+
+  <section class="dashboard-card" data-auth-panel style="max-width:420px;text-align:center">
+    <h2>تسجيل دخول المندوب</h2>
+    <form class="admin-form" data-login-form>
+      <label for="loginEmail">البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" required autocomplete="username">
+      <label for="loginPassword">كلمة المرور</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password">
+      <button type="submit" class="btn btn-primary">دخول</button>
+      <p class="form-note" data-auth-message></p>
+    </form>
+  </section>
+
+  <div class="rep-main" data-rep-panel hidden style="max-width:520px;padding-top:0">
+
+    <div class="dashboard-toolbar" style="position:static">
+      <div>
+        <h2 style="margin:0;font-size:18px" data-user-name>—</h2>
+      </div>
+      <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
+    </div>
+
+    <div class="card">
+      <h3>الاسم الظاهر في عروض الأسعار</h3>
+      <p style="color:var(--muted);font-size:12.5px;margin:0 0 var(--space-2)">
+        ده الاسم اللي بيشوفه العميل في أي عرض سعر بتصدره.
+      </p>
+      <form data-name-form>
+        <label for="settingsName">الاسم</label>
+        <input type="text" id="settingsName" required maxlength="80">
+        <button type="submit" class="btn btn-primary" style="margin-top:var(--space-2)">حفظ الاسم</button>
+        <p class="form-note" data-name-message></p>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>تغيير كلمة المرور</h3>
+      <p style="color:var(--muted);font-size:12.5px;margin:0 0 var(--space-2)">
+        كلمة المرور دي خاصة بيك وحدك — محدش تاني (حتى الأدمن) يقدر يشوفها أو يغيّرها من غيرك.
+      </p>
+      <form data-password-form>
+        <label for="currentPassword">كلمة المرور الحالية</label>
+        <input type="password" id="currentPassword" required autocomplete="current-password">
+        <label for="newPassword">كلمة المرور الجديدة</label>
+        <input type="password" id="newPassword" required minlength="6" autocomplete="new-password">
+        <label for="confirmPassword">تأكيد كلمة المرور الجديدة</label>
+        <input type="password" id="confirmPassword" required minlength="6" autocomplete="new-password">
+        <button type="submit" class="btn btn-primary" style="margin-top:var(--space-2)">تغيير كلمة المرور</button>
+        <p class="form-note" data-password-message></p>
+      </form>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
