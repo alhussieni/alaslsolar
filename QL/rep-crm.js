@@ -190,6 +190,7 @@ function renderQuoteList() {
         <td>
           <button type="button" class="btn" data-toggle-detail="${q.id}" style="font-size:12px">التفاصيل</button>
           <button type="button" class="btn" data-quick-print="${q.id}" style="font-size:12px">طباعة</button>
+          ${isAdmin ? `<button type="button" class="btn btn-secondary dark" data-delete="${q.id}" style="font-size:12px">حذف</button>` : ""}
         </td>
       </tr>
       <tr class="crm-quote-detail-row" id="detail-${q.id}" hidden><td colspan="${isAdmin ? 7 : 6}"></td></tr>
@@ -199,7 +200,27 @@ function renderQuoteList() {
   filtered.forEach((q) => {
     tbody.querySelector(`[data-toggle-detail="${q.id}"]`).addEventListener("click", () => toggleDetail(q));
     tbody.querySelector(`[data-quick-print="${q.id}"]`).addEventListener("click", () => quickPrint(q));
+    const delBtn = tbody.querySelector(`[data-delete="${q.id}"]`);
+    if (delBtn) delBtn.addEventListener("click", () => handleDelete(q));
   });
+}
+
+/* ---------------- حذف عرض سعر (أدمن بس — الصلاحية دي متأكّدة من قاعدة البيانات
+   نفسها عبر RLS، مش بس مخفية في الواجهة) ---------------- */
+async function handleDelete(q) {
+  const customerName = q.customers?.name || "بدون اسم";
+  const confirmed = window.confirm(`هتحذف عرض #${q.id} (${customerName}) نهائيًا. الإجراء ده مش قابل للتراجع، متأكد؟`);
+  if (!confirmed) return;
+
+  showMsg("جاري الحذف...");
+  const { error } = await client.from("quotes").delete().eq("id", q.id);
+  if (error) { showMsg("تعذر الحذف: " + error.message, "error"); return; }
+
+  allQuotes = allQuotes.filter((x) => x.id !== q.id);
+  showMsg("✅ تم حذف العرض.", "ok");
+  renderStats();
+  if (isAdmin) renderRepBreakdown();
+  renderQuoteList();
 }
 
 function toggleDetail(q) {
