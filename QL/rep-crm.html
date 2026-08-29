@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>CRM | مناديب الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="rep-widgets.css">
+  <script defer src="rep-header.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="rep-crm.js"></script>
+  <style>
+    .crm-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-3); }
+    .crm-stat-box { flex: 1 1 140px; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; background: #fff; }
+    .crm-stat-box .lbl { font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+    .crm-stat-box .val { font-size: 20px; font-weight: 800; color: var(--brand-dark); }
+
+    .crm-rep-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: var(--space-3); }
+    .crm-rep-table th, .crm-rep-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: center; }
+    .crm-rep-table th { color: var(--muted); font-size: 11.5px; font-weight: 700; }
+    .crm-rep-table tbody tr:hover { background: #faf7f2; cursor: pointer; }
+    .crm-rep-table tbody tr.active-filter { background: var(--brand-soft); }
+
+    .crm-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--space-2); }
+    .crm-filters input, .crm-filters select { flex: 1; min-width: 140px; }
+
+    .crm-quote-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .crm-quote-table th, .crm-quote-table td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: center; }
+    .crm-quote-table th { color: var(--muted); font-size: 11.5px; font-weight: 700; }
+    .crm-quote-detail-row td { text-align: right; background: #faf7f2; padding: 12px 16px; }
+    .crm-quote-detail-row table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
+    .crm-quote-detail-row th, .crm-quote-detail-row td.dtd { border: 1px solid var(--line); padding: 5px 8px; text-align: center; background: #fff; }
+
+    #printAreaCrm { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #printAreaCrm, #printAreaCrm * { visibility: visible; }
+      #printAreaCrm { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 24px; direction: rtl; }
+      .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #c8752d; padding-bottom: 12px; margin-bottom: 16px; }
+      .print-header img { height: 55px; }
+      .print-title { font-size: 20px; font-weight: 800; color: #17120f; }
+      .print-meta { font-size: 13px; color: #555; margin-bottom: 16px; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
+      .print-table th { background: #f3e4d4; }
+      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
+      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
+      .print-totals .grand { font-weight: 800; font-size: 17px; border-top: 2px solid #17120f; margin-top: 6px; padding-top: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <a class="dashboard-logo" href="index.html">
+      <img src="../logo-white.png" alt="الأصل للطاقة الشمسية">
+    </a>
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">بوابة المناديب</p>
+      <h1>CRM — عروض الأسعار</h1>
+    </div>
+  </section>
+
+  <section class="dashboard-card" data-auth-panel style="max-width:420px;text-align:center">
+    <h2>تسجيل دخول المندوب</h2>
+    <form class="admin-form" data-login-form>
+      <label for="loginEmail">البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" required autocomplete="username">
+      <label for="loginPassword">كلمة المرور</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password">
+      <button type="submit" class="btn btn-primary">دخول</button>
+      <p class="form-note" data-auth-message></p>
+    </form>
+  </section>
+
+  <div class="rep-main" data-rep-panel hidden style="max-width:1000px;padding-top:0">
+
+    <div class="dashboard-toolbar" style="position:static">
+      <div>
+        <h2 style="margin:0;font-size:18px" data-user-name>—</h2>
+      </div>
+      <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
+    </div>
+
+    <div class="crm-stats" id="crmStats"></div>
+
+    <div class="card" id="crmRepBreakdownCard" hidden>
+      <h3>عدد العروض لكل مندوب</h3>
+      <table class="crm-rep-table" id="crmRepTable">
+        <thead><tr><th>المندوب</th><th>عدد العروض</th><th>إجمالي القيمة</th></tr></thead>
+        <tbody id="crmRepTableBody"></tbody>
+      </table>
+      <p class="form-note" style="margin:0">دوس على أي مندوب في الجدول عشان تفلتر القائمة تحت على عروضه بس. دوس تاني عشان تشيل الفلتر.</p>
+    </div>
+
+    <div class="card">
+      <h3>العروض</h3>
+      <div class="crm-filters">
+        <input type="text" id="crmSearch" placeholder="دور بالاسم أو رقم التليفون...">
+        <select id="crmTypeFilter">
+          <option value="">كل الأنواع</option>
+          <option value="supply_only">توريد فقط</option>
+          <option value="supply_install">توريد وتركيب</option>
+        </select>
+      </div>
+      <p class="form-note" data-crm-message></p>
+      <table class="crm-quote-table" id="crmQuoteTable">
+        <thead>
+          <tr>
+            <th>#</th><th>التاريخ</th><th>العميل</th><th class="crm-col-rep" hidden>المندوب</th>
+            <th>النوع</th><th>الإجمالي</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="crmQuoteBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<div id="printAreaCrm"></div>
+
+</body>
+</html>
