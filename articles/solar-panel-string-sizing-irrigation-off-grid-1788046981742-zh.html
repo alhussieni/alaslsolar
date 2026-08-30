@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-N97W09ZNSP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-N97W09ZNSP');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0b0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <title>لماذا يختلف عدد الألواح في String بين أنظمة الري والـOff-Grid؟ | Al Asl Solar</title>
+  <meta name="description" content="شرح مبسط وهندسي لسبب اختلاف عدد الألواح الشمسية في كل String بين أنظمة تشغيل الغواطس ومحطات الري وأنظمة الـOff-Grid، مع مثال عملي لمحطة 100 حصان في المنيا باستخدام ألواح AIKO 650W وإنفرتر VEICHI.">
+  <meta property="og:title" content="لماذا يختلف عدد الألواح في String بين أنظمة الري والـOff-Grid؟ | Al Asl Solar">
+  <meta property="og:description" content="شرح مبسط وهندسي لسبب اختلاف عدد الألواح الشمسية في كل String بين أنظمة تشغيل الغواطس ومحطات الري وأنظمة الـOff-Grid، مع مثال عملي لمحطة 100 حصان في المنيا باستخدام ألواح AIKO 650W وإنفرتر VEICHI.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://alaslsolar.com/articles/solar-panel-string-sizing-irrigation-off-grid-1788046981742-zh.html">
+  <meta property="og:image" content="https://nymkmrdbicfuniobunth.supabase.co/storage/v1/object/public/site-media/articles/1788047135842-f42547332b3098.jpg">
+  <link rel="canonical" href="https://alaslsolar.com/articles/solar-panel-string-sizing-irrigation-off-grid-1788046981742-zh.html">
+  <link rel="alternate" hreflang="en" href="https://alaslsolar.com/articles/solar-panel-string-sizing-irrigation-off-grid-1788046981742.html">
+  <link rel="alternate" hreflang="ar" href="https://alaslsolar.com/articles/solar-panel-string-sizing-irrigation-off-grid-1788046981742-ar.html">
+  <link rel="alternate" hreflang="es" href="https://alaslsolar.com/articles/solar-panel-string-sizing-irrigation-off-grid-1788046981742-es.html">
+  <link rel="alternate" hreflang="zh" href="https://alaslsolar.com/articles/solar-panel-string-sizing-irrigation-off-grid-1788046981742-zh.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"لماذا يختلف عدد الألواح في String بين أنظمة الري والـOff-Grid؟","description":"شرح مبسط وهندسي لسبب اختلاف عدد الألواح الشمسية في كل String بين أنظمة تشغيل الغواطس ومحطات الري وأنظمة الـOff-Grid، مع مثال عملي لمحطة 100 حصان في المنيا باستخدام ألواح AIKO 650W وإنفرتر VEICHI.","image":"https://nymkmrdbicfuniobunth.supabase.co/storage/v1/object/public/site-media/articles/1788047135842-f42547332b3098.jpg","inLanguage":"zh","datePublished":"2026-08-29","dateModified":"2026-08-29","author":{"@type":"Organization","name":"Al Asl Solar","url":"https://alaslsolar.com"},"publisher":{"@type":"Organization","name":"Al Asl Solar","logo":{"@type":"ImageObject","url":"https://alaslsolar.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://alaslsolar.com/articles/solar-panel-string-sizing-irrigation-off-grid-1788046981742-zh.html"}}</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="../app.js"></script>
+  <script defer src="../article-lang-switcher.js"></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="Al Asl Solar home">
+      <img src="../logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
+    </a>
+    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
+      <i class="fa fa-bars" aria-hidden="true"></i>
+      <span class="sr-only">打开菜单</span>
+    </button>
+    <nav class="site-menu" id="siteMenu" aria-label="主导航">
+      <a href="../index.html" data-i18n="nav_home">Home</a>
+      <a href="../about.html" data-i18n="nav_about">About Us</a>
+      <a href="../services.html" data-i18n="nav_services">Services</a>
+      <a href="../products.html" data-i18n="nav_products">Products</a>
+      <a href="../projects.html" data-i18n="nav_projects">Projects</a>
+      <a href="../articles.html" data-i18n="nav_articles">Articles</a>
+      <a href="../calculators.html" data-i18n="nav_calculators">Calculators</a>
+      <a href="../contact.html" data-i18n="nav_contact">Contact</a>
+      <div class="lang-switcher" role="group" aria-label="Language">
+        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
+          <i class="ti ti-world" aria-hidden="true"></i>
+          <span id="langLabel" data-i18n="language">Language</span>
+          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
+        </button>
+        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
+          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
+          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
+          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
+          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <p class="eyebrow">Knowledge center</p>
+      <h1>لماذا يختلف عدد الألواح في String بين أنظمة الري والـOff-Grid؟</h1>
+      <p class="article-lang-switcher" style="margin-top:0.5rem;font-size:0.9rem;opacity:0.75;">
+        <a href="solar-panel-string-sizing-irrigation-off-grid-1788046981742.html">English</a> | <a href="solar-panel-string-sizing-irrigation-off-grid-1788046981742-ar.html">العربية</a> | <a href="solar-panel-string-sizing-irrigation-off-grid-1788046981742-es.html">Español</a> | <a href="solar-panel-string-sizing-irrigation-off-grid-1788046981742-zh.html" aria-current="true">中文</a>
+      </p>
+    </section>
+
+    <section class="section">
+      <article class="article-detail-content">
+        <img src="https://nymkmrdbicfuniobunth.supabase.co/storage/v1/object/public/site-media/articles/1788047135842-f42547332b3098.jpg" alt="لماذا يختلف عدد الألواح في String بين أنظمة الري والـOff-Grid؟" loading="eager">
+        <span>2026年8月29日</span>
+        <div><p style="text-align: right;">تمام. هذه المرة هخلي المقال <strong>متصل ومريح في القراءة</strong>: العناوين فقط عند الانتقال لفكرة جديدة، والفقرات أطول ومترابطة، بدون تحويل كل معلومة إلى سطر مستقل، مع الحفاظ على المثال والحسابات.</p><h1 style="text-align: right;">لماذا نستخدم 14–15–16 لوحًا في المجموعة الواحدة لأنظمة الري؟ ولماذا قد نستخدم 3–4 أو 7–10 ألواح في أنظمة الـOff-Grid؟</h1><p style="text-align: right;">لو كنت صاحب مزرعة أو مهندسًا يعمل في الطاقة الشمسية، فمن المؤكد أنك لاحظت أن طريقة توصيل الألواح تختلف من نظام إلى آخر. في محطات الري وتشغيل الغواطس قد تجد 14 أو 15 أو 16 لوحًا متصلًا معًا في مجموعة واحدة، بينما في أنظمة الـOff-Grid قد تجد 3 أو 4 ألواح فقط، وأحيانًا 7 أو 8 أو 9 أو 10 ألواح.</p><p style="text-align: right;">وهنا يظهر سؤال منطقي جدًا: <strong>لماذا هذا الاختلاف؟</strong> هل الـ15 لوحًا أفضل من 4 ألواح؟ وهل زيادة عدد الألواح في المجموعة تعني أن النظام أقوى؟ أم أن الشركات تختار هذه الأرقام بطريقة مختلفة من مشروع إلى آخر؟</p><p style="text-align: right;">الحقيقة أن عدد الألواح في المجموعة الواحدة، أو ما يسمى بالـ<strong>String</strong>، لا يتم تحديده بناءً على قدرة اللوح بالواط فقط، وإنما يتم تحديده أساسًا بناءً على <strong>الجهد الذي يحتاجه الإنفرتر حتى يعمل داخل نطاق التشغيل المناسب</strong>، مع مراعاة التيار والقدرة ودرجة الحرارة وظروف الموقع.</p><h2 style="text-align: right;">نبدأ من مثال حقيقي: غاطس 100 حصان في المنيا</h2><p style="text-align: right;">لنفترض أننا نقوم بتصميم محطة طاقة شمسية في منطقة المنيا لتشغيل موتور غاطس قدرته <strong>100 حصان</strong>. سنستخدم في المثال ألواح <strong>AIKO بقدرة 650W</strong> وإنفرتر <strong>VEICHI</strong> مناسب لتشغيل موتور بهذه القدرة، مع كون الحد الأقصى لجهد الـDC في الإنفرتر المستخدم حاليًا هو <strong>900V</strong>.</p><p style="text-align: right;">التصميم الذي نريد الوصول إليه هو استخدام <strong>15 لوحًا في كل String وعدد 10 Strings</strong>، أي إجمالي 150 لوحًا.</p><p style="text-align: right;">بالتالي تكون القدرة الإجمالية للألواح:</p><p style="text-align: right;"><strong>150 × 650W = 97,500W</strong></p><p style="text-align: right;">أي أن إجمالي قدرة المحطة الشمسية يبلغ تقريبًا <strong>97.5kWp</strong>.</p><p style="text-align: right;">وقد يبدو الرقم كبيرًا عند مقارنته بموتور 100 حصان، لكن هنا يجب أن نفهم أن قدرة الموتور الاسمية ليست هي نفسها القدرة التي يجب أن تكون مساوية تمامًا لقدرة الألواح. فالموتور 100 حصان يعادل تقريبًا 74.6kW من القدرة الميكانيكية، بينما المنظومة الشمسية تتعرض لخسائر مختلفة، كما أن الألواح لا تنتج 650W طوال ساعات النهار. لذلك قد يتم تصميم قدرة الـPV أعلى من القدرة الاسمية المطلوبة حتى تستطيع المنظومة الاستفادة من ساعات الإشعاع الأقل في بداية ونهاية اليوم، مع الالتزام بحدود الإنفرتر.</p><p style="text-align: right;">لكن لماذا تحديدًا 15 لوحًا في المجموعة؟</p><h2 style="text-align: right;">السر في الجهد وليس في عدد الواطات</h2><p style="text-align: right;">عندما نوصل الألواح على التوالي <strong>Series Connection</strong>، فإن الجهد يتجمع، بينما يظل التيار قريبًا من تيار اللوح الواحد.</p><p style="text-align: right;">إذا افترضنا أن لوح AIKO 650W المستخدم في المثال لديه جهد تشغيل Vmp في حدود <strong>45.5V</strong> وجهد دائرة مفتوحة Voc في حدود <strong>54.8V</strong>، فإن توصيل 15 لوحًا على التوالي يعطينا جهد تشغيل تقريبي:</p><p style="text-align: right;"><strong>15 × 45.5 = 682.5V</strong></p><p style="text-align: right;">أي حوالي <strong>682V Vmp</strong>.</p><p style="text-align: right;">أما جهد الدائرة المفتوحة في ظروف الاختبار القياسية فيكون:</p><p style="text-align: right;"><strong>15 × 54.8 = 822V Voc</strong></p><p style="text-align: right;">إذن كل مجموعة من الـ15 لوحًا ستكون قدرتها:</p><p style="text-align: right;"><strong>15 × 650W = 9,750W</strong></p><p style="text-align: right;">أي <strong>9.75kWp</strong>، وتكون مصممة للعمل عند جهد تشغيل مرتفع نسبيًا يناسب فئة إنفرترات ضخ الطاقة الشمسية المستخدمة في هذه التطبيقات.</p><p style="text-align: right;">وهنا نصل إلى الفكرة الأساسية: <strong>نحن لا نستخدم 15 لوحًا لأن الرقم 15 هو الرقم الصحيح دائمًا، وإنما لأن هذا العدد في هذا المثال يضع جهد الـString في منطقة مناسبة لتشغيل الإنفرتر.</strong></p><h2 style="text-align: right;">ولكن هل 822V آمنة مع إنفرتر 900V؟</h2><p style="text-align: right;">عند النظر إلى الأرقام الأولية، نجد أن Voc للـString عند ظروف الاختبار القياسية يبلغ حوالي <strong>822V</strong>، بينما الحد الأقصى للـDC في الإنفرتر المستخدم هو <strong>900V</strong>.</p><p style="text-align: right;">لكن هذا لا يعني أن الحساب انتهى.</p><p style="text-align: right;">السبب أن قيمة Voc تتغير مع درجة الحرارة. وعندما تنخفض درجة حرارة الخلية الشمسية، يرتفع الجهد. وبالتالي يجب ألا نعتمد على قيمة 822V وحدها، وإنما نحسب Voc عند <strong>أقل درجة حرارة تصميمية متوقعة في موقع المشروع</strong> باستخدام معامل درجة الحرارة الموجود في Datasheet للوح AIKO.</p><p style="text-align: right;">وهذه نقطة مهمة جدًا في تصميم الـString؛ لأن الحد الأقصى البالغ 900V هو <strong>Maximum DC Voltage</strong>، وليس بالضرورة الجهد الذي نريد أن تعمل عنده الألواح طوال الوقت.</p><p style="text-align: right;">هناك فرق بين الحد الأقصى للجهد الذي يتحمله الإنفرتر وبين <strong>نطاق الـMPPT</strong> الذي يعمل داخله الإنفرتر على تتبع نقطة القدرة القصوى للألواح.</p><p style="text-align: right;">لذلك عند اختيار عدد الألواح لا نسأل فقط: "هل الجهد أقل من 900V؟"، وإنما نسأل أيضًا: "هل جهد التشغيل يقع داخل نطاق الـMPPT؟ وهل سيظل Voc آمنًا في ظروف درجات الحرارة المختلفة؟ وهل التيار والقدرة ضمن حدود الإنفرتر؟"</p><h2 style="text-align: right;">لماذا لا نستخدم 4 ألواح فقط؟</h2><p style="text-align: right;">لنرجع إلى نفس اللوح.</p><p style="text-align: right;">إذا استخدمنا 4 ألواح على التوالي، فسيكون جهد التشغيل تقريبًا:</p><p style="text-align: right;"><strong>4 × 45.5 = 182V</strong></p><p style="text-align: right;">وهذا أقل بكثير من جهد String مكون من 15 لوحًا والذي يبلغ حوالي 682V.</p><p style="text-align: right;">إذا كان الإنفرتر المستخدم يحتاج إلى جهد أعلى حتى يدخل نطاق الـMPPT المناسب، فإن وجود 4 ألواح فقط لن يكون حلًا لمجرد أن مجموع قدرتها الشمسية يبدو مقبولًا.</p><p style="text-align: right;">وهنا تظهر واحدة من أكثر النقاط التي تسبب سوء فهم في تصميم الأنظمة الشمسية: <strong>الإنفرتر لا يحتاج إلى القدرة فقط، وإنما يحتاج إلى جهد وتيار مناسبين معًا.</strong></p><p style="text-align: right;">قد يكون لديك عدد كبير من الألواح، ولكن إذا تم تقسيمها إلى Strings قصيرة جدًا وأصبح جهدها منخفضًا، فلن تستطيع الوصول إلى نقطة التشغيل المطلوبة للإنفرتر.</p><h2 style="text-align: right;">طيب لماذا يمكن أن نرى 3 أو 4 أو 7 أو 8 أو 9 أو 10 ألواح في الـOff-Grid؟</h2><p style="text-align: right;">لأن الإنفرتر المستخدم في نظام الـOff-Grid قد يكون مصممًا بجهد دخل PV مختلف تمامًا عن Solar Pump Inverter.</p><p style="text-align: right;">النظام المنزلي مثلًا قد يكون مصممًا للعمل مع بطارية وجهد DC مختلف، وقد يكون نطاق الـMPPT الخاص به أقل أو أوسع، حسب الموديل.</p><p style="text-align: right;">لذلك قد نجد في نظام معين 4 ألواح في String، وفي نظام آخر 8 ألواح، وفي نظام ثالث 10 ألواح.</p><p style="text-align: right;">ولو استخدمنا نفس لوح AIKO 650W كمثال تقريبي، فإن 4 ألواح تعطي حوالي 182V عند Vmp، و8 ألواح حوالي 364V، و10 ألواح حوالي 455V، و15 لوحًا حوالي 682V.</p><p style="text-align: right;">إذن الأرقام مختلفة، لكن المبدأ واحد: <strong>عدد الألواح يتم اختياره للوصول إلى الجهد المناسب للإنفرتر.</strong></p><h2 style="text-align: right;">لماذا نستخدم 10 Strings في مثالنا؟</h2><p style="text-align: right;">لأننا افترضنا أن التصميم المطلوب هو 150 لوحًا، ومع 15 لوحًا لكل String يصبح لدينا:</p><p style="text-align: right;"><strong>150 ÷ 15 = 10 Strings</strong></p><p style="text-align: right;">وبالتالي:</p><p style="text-align: right;"><strong>10 Strings × 9.75kWp = 97.5kWp</strong></p><p style="text-align: right;">وهذا يعطينا مصفوفة شمسية بقدرة 97.5kWp لتشغيل منظومة غاطس 100 حصان.</p><p style="text-align: right;">لكن هنا أيضًا لا يكفي أن نقول "10 Strings وخلاص". يجب توزيع هذه الـStrings على مداخل الـMPPT الخاصة بالإنفرتر بطريقة تتوافق مع الحد الأقصى للتيار وعدد الـMPPT والـStrings التي يسمح بها الموديل المستخدم.</p><p style="text-align: right;">فالـString الواحد يحدد الجهد، بينما تجميع عدة Strings على التوازي يرفع التيار.</p><p style="text-align: right;">وهذه هي القاعدة البسيطة التي تساعد على فهم الموضوع:</p><p style="text-align: right;"><strong>Series → زيادة الجهد.</strong></p><p style="text-align: right;"><strong>Parallel → زيادة التيار.</strong></p><h2 style="text-align: right;">لماذا لا نزيد عدد الألواح إلى 16 أو 17؟</h2><p style="text-align: right;">لأن زيادة الألواح في الـString تعني زيادة الجهد.</p><p style="text-align: right;">في مثالنا، 15 لوحًا تعطي Voc عند STC في حدود <strong>822V</strong>.</p><p style="text-align: right;">أما 16 لوحًا فستعطي تقريبًا:</p><p style="text-align: right;"><strong>16 × 54.8 = 876.8V</strong></p><p style="text-align: right;">قد يبدو هذا أقل من 900V، لكننا لم نضع تأثير انخفاض درجة الحرارة في الحساب بعد.</p><p style="text-align: right;">عند انخفاض درجة الحرارة يمكن أن يرتفع Voc، وبالتالي قد يصبح الـString قريبًا جدًا من الحد الأقصى أو يتجاوزه، حسب ظروف الموقع والمواصفات الفعلية للوح.</p><p style="text-align: right;">لذلك قد يكون 15 لوحًا مناسبًا، بينما 16 يحتاج إلى دراسة أكثر دقة، و17 قد يكون غير مقبول تمامًا.</p><p style="text-align: right;">وهذا هو السبب في أن <strong>العدد الأكبر ليس دائمًا أفضل</strong>.</p><h2 style="text-align: right;">وماذا لو استخدمنا 14 لوحًا؟</h2><p style="text-align: right;">14 لوحًا من نفس اللوح يعطينا تقريبًا:</p><p style="text-align: right;"><strong>Vmp ≈ 637V</strong></p><p style="text-align: right;">و</p><p style="text-align: right;"><strong>Voc ≈ 767V عند STC</strong></p><p style="text-align: right;">وهذا يعطي هامشًا أكبر من ناحية الجهد الأقصى، لكنه في المقابل يخفض جهد التشغيل قليلًا.</p><p style="text-align: right;">لذلك المقارنة بين 14 و15 و16 لا تكون على أساس "مين أقوى؟"، وإنما على أساس:</p><p style="text-align: right;"><strong>أي عدد يحقق أفضل توافق بين جهد التشغيل ونطاق الـMPPT، مع إبقاء Voc داخل الحدود الآمنة في أسوأ ظروف درجة الحرارة؟</strong></p><p style="text-align: right;">وهذه هي الطريقة الصحيحة لاختيار عدد الألواح في المجموعة.</p><h2 style="text-align: right;">لماذا قدرة 97.5kWp مع موتور 100 حصان؟</h2><p style="text-align: right;">قد يبدو السؤال غريبًا في البداية: إذا كان الموتور حوالي 75kW، فلماذا نضع ألواحًا بقدرة 97.5kWp؟</p><p style="text-align: right;">السبب أن القدرة المكتوبة على اللوح هي قدرة اسمية يتم الوصول إليها في ظروف اختبار محددة، بينما إنتاج اللوح في المزرعة يتأثر بدرجة الحرارة والغبار وزاوية التركيب والإشعاع الشمسي والخسائر الكهربائية.</p><p style="text-align: right;">كذلك فإن الهدف من محطة الري ليس فقط تشغيل الموتور في أفضل لحظات الشمس، وإنما الحصول على فترة تشغيل أطول والاستفادة من الطاقة الشمسية خلال أكبر جزء ممكن من ساعات النهار.</p><p style="text-align: right;">لذلك يمكن أن تكون زيادة قدرة الـPV عن القدرة الاسمية للإنفرتر جزءًا من التصميم، بشرط أن تكون ضمن الحدود التي يسمح بها الإنفرتر وأن تكون الـStrings والجهود والتيارات محسوبة بشكل صحيح.</p><h2 style="text-align: right;">أهم خطأ: نقل تصميم من مشروع إلى آخر</h2><p style="text-align: right;">قد تجد محطة ري تعمل بـ15 لوحًا في الـString، فتعتقد أن كل محطات الري تحتاج إلى 15 لوحًا.</p><p style="text-align: right;">وقد ترى محطة أخرى تعمل بـ16 لوحًا، فتعتقد أن 16 أفضل.</p><p style="text-align: right;">وقد ترى نظام Off-Grid يستخدم 8 ألواح، فتعتقد أن محطة الري يمكن أن تعمل بنفس العدد.</p><p style="text-align: right;">لكن هذا التفكير غير صحيح.</p><p style="text-align: right;">حتى لو كان الموتور في مشروعين بنفس القدرة، فإن اختلاف نوع اللوح أو Voc أو Vmp أو الإنفرتر أو نطاق الـMPPT أو درجة حرارة الموقع يمكن أن يغير العدد الصحيح للألواح في الـString.</p><p style="text-align: right;">ولهذا لا يتم تصميم الـString بالاعتماد على "عدد متعارف عليه"، وإنما يتم حسابه لكل مشروع.</p><h2 style="text-align: right;">إذن ما الذي يجب أن نراجعه قبل اعتماد أي String؟</h2><p style="text-align: right;">نحتاج إلى قراءة Datasheet اللوح والإنفرتر معًا، ومراجعة <strong>Vmp وVoc وImp وIsc</strong> للوح، بالإضافة إلى <strong>MPPT Voltage Range وMaximum DC Voltage وMaximum PV Current والقدرة القصوى للـPV</strong> الخاصة بالإنفرتر.</p><p style="text-align: right;">بعد ذلك نأخذ درجة حرارة الموقع في الاعتبار، خصوصًا أقل درجة حرارة يمكن أن تحدث، لأن ارتفاع Voc في الأجواء الباردة هو أحد أهم الأمور التي يجب التأكد منها قبل اعتماد عدد الألواح على التوالي.</p><p style="text-align: right;">وبعد تحديد عدد الألواح في الـString، نحدد عدد الـStrings وطريقة توزيعها على الـMPPT، ثم نراجع التيار الإجمالي والقدرة الكلية للمصفوفة.</p><h2 style="text-align: right;">الخلاصة</h2><p style="text-align: right;">السبب في أننا نرى <strong>14 أو 15 أو 16 لوحًا</strong> في المجموعة الواحدة في كثير من أنظمة الري، بينما نرى <strong>3 أو 4 أو 7 أو 8 أو 9 أو 10 ألواح</strong> في بعض أنظمة الـOff-Grid، ليس أن أحد الأعداد أفضل من الآخر.</p><p style="text-align: right;">السبب ببساطة هو أن <strong>كل إنفرتر له احتياجات جهد مختلفة</strong>.</p><p style="text-align: right;">وفي مثالنا لمحطة غاطس <strong>100 حصان في المنيا</strong> باستخدام ألواح <strong>AIKO 650W</strong>، إذا استخدمنا <strong>15 لوحًا في الـString و10 Strings</strong> فسيكون لدينا <strong>150 لوحًا بإجمالي 97.5kWp</strong>.</p><p style="text-align: right;">كل String قدرته حوالي <strong>9.75kWp</strong>، وجهد التشغيل التقريبي له حوالي <strong>682V</strong>، بينما يصل Voc إلى حوالي <strong>822V عند STC</strong>.</p><p style="text-align: right;">وبما أن الحد الأقصى للـDC في الإنفرتر المستخدم هو <strong>900V</strong>، فإن التصميم يبدو مناسبًا مبدئيًا من ناحية الحد الأقصى عند STC، لكن الاعتماد النهائي يجب أن يتضمن <strong>حساب Voc عند أقل درجة حرارة تصميمية في المنيا</strong> ومراجعته مع الحد الأقصى للإنفرتر، بالإضافة إلى التأكد من أن جهد التشغيل يقع داخل نطاق الـMPPT وأن التيار وعدد الـStrings متوافقان مع الإنفرتر.</p><p style="text-align: right;">وهنا نصل إلى الإجابة على السؤال الأساسي:</p><blockquote><p style="text-align: right;"><strong>لماذا 15 لوحًا في محطة الري بينما قد نستخدم 4 ألواح في نظام Off-Grid؟</strong></p></blockquote><p style="text-align: right;">لأننا لا نختار عدد الألواح أولًا ثم نبحث عن طريقة لتشغيلها.</p><p style="text-align: right;"><strong>نحن نبدأ من مواصفات الإنفرتر والموتور وظروف المشروع، ثم نحسب عدد الألواح المناسب لكل String.</strong></p><p style="text-align: right;">فالـ15 لوحًا ليست قاعدة، والـ4 ألواح ليست قاعدة.</p><h3 style="text-align: right;">الرقم الصحيح هو الرقم الذي يجعل المنظومة تعمل داخل المنطقة التي صُممت لها.</h3><p style="text-align: right;">ولهذا فإن تصميم الـString الصحيح ليس مجرد طريقة لتوصيل الألواح، بل هو جزء أساسي من تصميم محطة الطاقة الشمسية بالكامل.</p><hr><h3 style="text-align: right;">في Alasl Solar</h3><p style="text-align: right;">عند تصميم محطات الطاقة الشمسية لتشغيل الغواطس والمضخات في المزارع المصرية، لا يتم اختيار عدد الألواح في المجموعة بناءً على رقم ثابت أو تصميم سابق فقط، وإنما تتم مطابقة <strong>الألواح + الإنفرتر + الموتور + ظروف الموقع</strong> للوصول إلى التصميم المناسب.</p><p style="text-align: right;"><strong>لأن الفرق بين 14 و15 و16 لوحًا قد يبدو بسيطًا على الورق، لكنه كهربائيًا قد يصنع فرقًا كبيرًا في جهد الـString وسلامة وتشغيل المنظومة.</strong></p><p style="text-align: right;"><strong>Alasl Solar — حلول الطاقة الشمسية للمزارع والمشروعات في مصر.</strong></p></div>
+      </article>
+      <p style="margin-top:2rem;">
+        <a href="../articles.html">← Back to articles</a>
+      </p>
+    </section>
+  </main>
+
+
+  <footer class="site-footer">
+    <div>
+      <strong>Al Asl Solar Energy</strong>
+      <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
+    </div>
+    <div class="social-links" aria-label="Social links">
+      <a href="https://linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+      <a href="https://youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+      <a href="https://facebook.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+      <a href="https://instagram.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+      <a href="https://tiktok.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+    </div>
+  </footer>
+  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="Contact Al Asl Solar on WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+  </a>
+</body>
+</html>
