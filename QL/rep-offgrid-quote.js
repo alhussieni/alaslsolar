@@ -153,7 +153,7 @@ async function initClient() {
 }
 
 async function checkRepStatus(userId) {
-  const { data, error } = await client.from("reps").select("id, display_name, active").eq("id", userId).maybeSingle();
+  const { data, error } = await client.from("reps").select("id, display_name, active, can_access_offgrid").eq("id", userId).maybeSingle();
   if (error || !data || !data.active) return null;
   return data;
 }
@@ -171,6 +171,15 @@ async function updateAuthState(session) {
   if (!session) { authPanel.hidden = false; repPanel.hidden = true; return; }
   const rep = await checkRepStatus(session.user.id);
   if (!rep) { authPanel.hidden = false; repPanel.hidden = true; return; }
+  if (!rep.can_access_offgrid) {
+    authPanel.hidden = true;
+    repPanel.hidden = false;
+    repPanel.innerHTML = `<div class="card" style="text-align:center;padding:40px 18px;color:var(--muted)">
+      <i class="fa-solid fa-lock" style="font-size:22px;color:#b23b23;margin-bottom:8px"></i><br>
+      معندكش صلاحية الوصول لحاسبة الأوف جريد. تواصل مع الأدمن لو محتاج الصلاحية دي.
+    </div>`;
+    return;
+  }
   authPanel.hidden = true;
   repPanel.hidden = false;
   userName.textContent = rep.display_name;
