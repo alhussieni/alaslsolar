@@ -23,7 +23,7 @@ async function initClient() {
 }
 
 async function checkRepStatus(userId) {
-  const { data, error } = await client.from("reps").select("id, display_name, active").eq("id", userId).maybeSingle();
+  const { data, error } = await client.from("reps").select("id, display_name, active, can_access_crm").eq("id", userId).maybeSingle();
   if (error || !data || !data.active) return null;
   return data;
 }
@@ -76,6 +76,14 @@ async function updateAuthState(session) {
   repPanel.hidden = false;
   logoutBtn.hidden = false;
   userName.textContent = isAdmin ? `${rep?.display_name || session.user.email} (أدمن)` : (rep?.display_name || "—");
+
+  if (!isAdmin && rep && !rep.can_access_crm) {
+    repPanel.innerHTML = `<div class="card" style="text-align:center;padding:40px 18px;color:var(--muted)">
+      <i class="fa-solid fa-lock" style="font-size:22px;color:#b23b23;margin-bottom:8px"></i><br>
+      معندكش صلاحية الوصول لـ CRM. تواصل مع الأدمن لو محتاج الصلاحية دي.
+    </div>`;
+    return;
+  }
 
   document.querySelectorAll(".crm-col-rep").forEach((el) => { el.hidden = !isAdmin; });
   $("#crmRepBreakdownCard").hidden = !isAdmin;

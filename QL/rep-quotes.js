@@ -47,7 +47,7 @@ async function initClient() {
 async function checkRepStatus(userId) {
   const { data, error } = await client
     .from("reps")
-    .select("id, display_name, active")
+    .select("id, display_name, active, can_access_products")
     .eq("id", userId)
     .maybeSingle();
   if (error || !data || !data.active) return null;
@@ -85,6 +85,14 @@ async function updateAuthState(session) {
   repPanel.hidden = false;
   logoutBtn.hidden = false;
   userName.textContent = rep.display_name;
+
+  if (!rep.can_access_products) {
+    repPanel.innerHTML = `<div class="card" style="text-align:center;padding:40px 18px;color:var(--muted)">
+      <i class="fa-solid fa-lock" style="font-size:22px;color:#b23b23;margin-bottom:8px"></i><br>
+      معندكش صلاحية الوصول لعروض المنتجات. تواصل مع الأدمن لو محتاج الصلاحية دي.
+    </div>`;
+    return;
+  }
 
   await loadCategories();
   await loadMyQuotes();
