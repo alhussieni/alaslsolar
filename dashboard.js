@@ -979,6 +979,7 @@ async function loadLists() {
   loadOffgridSettings();
   loadOffgridBomSettings();
   loadOffgridPresets();
+  loadReps();
 }
 
 // ── Category visibility (show/hide an entire product category from the public site) ──
@@ -2329,4 +2330,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadBrandsForCategory();
   loadDiscountsList();
+});
+
+// ── إدارة المناديب (إضافة مندوب جديد عن طريق دعوة بالإيميل + تعديل صلاحياته) ──
+
+async function loadReps() {
+  const tbody = document.getElementById('repsListBody');
+  if (!tbody || !client) return;
+
+  const [{ data: reps, error }, { data: quotes }] = await Promise.all([
+    client.from('reps').select('id, display_name, email, active, can_access_offgrid, can_access_products, can_access_crm').order('created_at', { ascending: false }),
+    client.from('quotes').select('rep_id'),
+  ]);
+
+  if (error) { tbody.innerHTML = `<tr><td colspan="8" style="padding:12px;color:red">خطأ: ${error.message}</td></tr>`; return; }
+
+  const quoteCounts = {};
+  (quotes || []).forEach((q) => { quoteCounts[q.rep_id] = (quoteCounts[q.rep_id] || 0) + 1; });
+
+  if (!reps || !reps.length) { tbody.innerHTML = `<tr><td colspan="8" style="padding:12px;color:var(--muted)">مفيش مناديب مسجلين لسه.</td></tr>`; return; }
+
+  const checkboxCell = (repId, field, checked) =>
+    `<input type="checkbox" data-rep-perm="${repId}" data-perm-field="${field}" ${checked ? "checked" : ""} style="width:auto">`;
+
+  tbody.innerHTML = reps.map((r) => `
+    <tr>
+      <td style="padding:8px">${r.display_name || "—"}</td>
+      <td style="padding:8px" class="num" dir="ltr">${r.email}</td>
+      <td style="padding:8px">${checkboxCell(r.id, "can_access_offgrid", r.can_access_offgrid)}</td>
+      <td style="padding:8px">${checkboxCell(r.id, "can_access_products", r.can_access_products)}</td>
+      <td style="padding:8px">${checkboxCell(r.id, "can_access_crm", r.can_access_crm)}</td>
+      <td style="padding:8px">${quoteCounts[r.id] || 0}</td>
+      <td style="padding:8px">${checkboxCell(r.id, "active", r.active)}</td>
+      <td style="padding:8px"><span class="form-note" data-rep-save-msg="${r.id}" style="min-height:auto"></span></td>
+    </tr>
+  `).join("");
+
+  tbody.querySelectorAll("[data-rep-perm]").forEach((cb) => {
+    cb.addEventListener("change", async () => {
+      const repId = cb.dataset.repPerm;
+      const field = cb.dataset.permField;
+      const msgEl = tbody.querySelector(`[data-rep-save-msg="${repId}"]`);
+      const { error: saveError } = await client.from('reps').update({ [field]: cb.checked }).eq('id', repId);
+      if (msgEl) {
+        msgEl.textContent = saveError ? "تعذر الحفظ" : "✅ اتحفظ";
+        msgEl.style.color = saveError ? "#c33" : "#2a7a2a";
+        setTimeout(() => { msgEl.textContent = ""; }, 2500);
+      }
+    });
+  });
+}
+
+async function handleRepInvite(e) {
+  e.preventDefault();
+  const msg = document.getElementById('repInviteBtn').parentElement.querySelector('[data-rep-invite-message]')
+    || document.querySelector('[data-rep-invite-message]');
+  const btn = document.getElementById('repInviteBtn');
+  const name = document.getElementById('repNewName').value.trim();
+  const email = document.getElementById('repNewEmail').value.trim();
+
+  if (!name || !email) { msg.textContent = "اكتب الاسم والإيميل."; msg.className = "form-note"; msg.style.color = "#c33"; return; }
+
+  btn.disabled = true;
+  msg.textContent = "جاري إرسال الدعوة...";
+  msg.style.color = "";
+
+  const permissions = {
+    offgrid: document.getElementById('repNewPermOffgrid').checked,
+    products: document.getElementById('repNewPermProducts').checked,
+    crm: document.getElementById('repNewPermCrm').checked,
+  };
+  const redirectTo = window.location.origin + "/QL/rep-set-password.html";
+
+  const { data, error } = await client.functions.invoke('invite-rep', {
+    body: { email, display_name: name, permissions, redirect_to: redirectTo },
+  });
+
+  btn.disabled = false;
+  if (error || data?.error) {
+    msg.textContent = "تعذر إرسال الدعوة: " + (data?.error || error.message);
+    msg.style.color = "#c33";
+    return;
+  }
+
+  msg.textContent = "✅ تم إرسال الدعوة بنجاح.";
+  msg.style.color = "#2a7a2a";
+  document.getElementById('repInviteForm').reset();
+  document.getElementById('repNewPermOffgrid').checked = true;
+  document.getElementById('repNewPermProducts').checked = true;
+  document.getElementById('repNewPermCrm').checked = true;
+  loadReps();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('repInviteForm');
+  if (form) form.addEventListener('submit', handleRepInvite);
 });

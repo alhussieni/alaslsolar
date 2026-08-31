@@ -221,6 +221,9 @@
           <button class="dash-nav-item" data-target="section-supplier-discounts" onclick="showDashSection('section-supplier-discounts', this)">
             <span>💸 خصومات الموردين</span>
           </button>
+          <button class="dash-nav-item" data-target="section-reps" onclick="showDashSection('section-reps', this)">
+            <span>👥 المناديب</span>
+          </button>
         </nav>
 
         <div class="dash-main">
@@ -1044,6 +1047,53 @@
               </tr>
             </thead>
             <tbody id="sdListBody"><tr><td colspan="4" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+          </table>
+        </article>
+      </div>
+
+      <!-- Reps Management -->
+      <div class="dashboard-grid" id="section-reps" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+        <article class="dash-card">
+          <h2 style="margin-top:0">👥 إضافة مندوب جديد</h2>
+          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+            بندي المندوب دعوة بالإيميل عشان يحدد كلمة المرور بنفسه — محدش هنا هيشوفها.
+          </p>
+          <form id="repInviteForm" style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:flex-end">
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">الاسم الظاهر</label>
+              <input type="text" id="repNewName" required style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">البريد الإلكتروني</label>
+              <input type="email" id="repNewEmail" required style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px;min-width:220px">
+            </div>
+            <button type="submit" class="btn btn-primary" id="repInviteBtn" style="font-size:13px">إرسال الدعوة</button>
+          </form>
+          <div style="display:flex;gap:16px;margin-top:var(--space-2);flex-wrap:wrap">
+            <label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer">
+              <input type="checkbox" id="repNewPermOffgrid" checked style="width:auto"> حاسبة أوف جريد
+            </label>
+            <label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer">
+              <input type="checkbox" id="repNewPermProducts" checked style="width:auto"> عروض المنتجات
+            </label>
+            <label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer">
+              <input type="checkbox" id="repNewPermCrm" checked style="width:auto"> CRM
+            </label>
+          </div>
+          <p class="form-note" data-rep-invite-message></p>
+        </article>
+
+        <article class="dash-card">
+          <h2 style="margin-top:0">المناديب الحاليين</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="text-align:right;color:var(--muted);font-size:12px">
+                <th style="padding:8px">الاسم</th><th style="padding:8px">الإيميل</th>
+                <th style="padding:8px">أوف جريد</th><th style="padding:8px">منتجات</th><th style="padding:8px">CRM</th>
+                <th style="padding:8px">عدد العروض</th><th style="padding:8px">نشط</th><th style="padding:8px"></th>
+              </tr>
+            </thead>
+            <tbody id="repsListBody"><tr><td colspan="8" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
           </table>
         </article>
       </div>
