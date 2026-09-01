@@ -72,6 +72,12 @@
 
     .toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
     .toolbar-btns .btn { flex: 1; min-width: 140px; }
+
+    .install-items-list { display: flex; flex-direction: column; gap: 6px; }
+    .install-item-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: var(--radius); font-size: 13px; cursor: pointer; }
+    .install-item-row input[type="checkbox"] { width: auto; }
+    .install-item-row span:nth-child(2) { flex: 1; }
+    .install-item-row .price { font-size: 12px; color: var(--muted); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -202,16 +208,25 @@
 
         <div class="card">
           <h3>نوع العرض</h3>
-          <div class="seg" style="flex-direction:column">
-            <button type="button" class="active" data-supply="supply_only" style="text-align:right;padding:12px">
-              توريد خامات فقط (ألواح + انفرتر + لوحة تجميع + MC4 + كابلات)
-            </button>
-            <button type="button" data-supply="supply_install" style="text-align:right;padding:12px">
-              توريد وتركيب شامل الضمان (كل البنود عدا التأريض والريأكتور)
-            </button>
+          <div class="seg">
+            <button type="button" data-preset="supply_only">توريد خامات فقط</button>
+            <button type="button" data-preset="supply_install">توريد وتركيب كامل</button>
           </div>
-          <p style="font-size:12px;color:var(--muted);margin-top:8px">
-            اختيار أحد الخيارين يحدد بنود العرض تلقائيًا — تقدر تحسب وتقارن السعرين من غير ما تعيد الحساب.
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">
+            دوس على أحد الخيارين كبداية سريعة — بيحدد البنود تحت تلقائيًا، وبعدها عدّل أي بند لوحده حسب طلب العميل.
+          </p>
+
+          <h4 style="margin-top:var(--space-2);margin-bottom:6px;font-size:13px;color:var(--muted)">بنود التركيب (كل بند اختياري لوحده)</h4>
+          <div class="install-items-list">
+            <label class="install-item-row"><input type="checkbox" data-item-key="structure"> <span>الشاسيه/الحوامل</span> <span class="price" data-item-price="structure"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="concrete"> <span>الخرسانة</span> <span class="price" data-item-price="concrete"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="earth"> <span>التأريض</span> <span class="price" data-item-price="earth"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="install_mech"> <span>تركيب ميكانيكي</span> <span class="price" data-item-price="install_mech"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="install_elec"> <span>تركيب كهربائي</span> <span class="price" data-item-price="install_elec"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="transport"> <span>النقل</span> <span class="price" data-item-price="transport"></span></label>
+          </div>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:6px">
+            الأسعار جنب كل بند بتظهر بعد ما تدوس "احسب العرض" مرة واحدة. تعديل البنود بعد كده بيحدّث السعر فورًا من غير إعادة حساب.
           </p>
         </div>
 

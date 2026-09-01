@@ -4,17 +4,28 @@
    بتحصل في Edge Function اسمها solar-pump-quote (service_role)،
    الصفحة دي بس بتبعت المدخلات وتعرض السعر النهائي الراجع، ومعندهاش
    وصول مباشر لنسب خصم الموردين ولا التكلفة الداخلية.
+
+   بنود التركيب (structure/concrete/earth/install_mech/install_elec/
+   transport) كل واحد منها اختياري لوحده عبر checkbox — مش مربوط
+   بزوج ثابت "توريد" / "توريد وتركيب". زرارين "نوع العرض" في الفورم
+   هما بس preset سريع بيفعّل/يلغي كل الـ6 checkboxes مرة واحدة،
+   والمندوب بعد كده يعدّل أي بند لوحده حسب طلب العميل الفعلي.
    ============================================================ */
+
+const INSTALL_KEYS = ["structure", "concrete", "earth", "install_mech", "install_elec", "transport"];
 
 let client = null;
 let currentSession = null;
 let currentMount = "fixed";
-let currentSupply = "supply_only";
 let lastResult = null; // { specs, baseItems, installOnlyItems, supplyOnlyTotal, supplyInstallTotal, ... }
 
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
 function fmt(n) { return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 }); }
+
+function getCheckedInstallKeys() {
+  return INSTALL_KEYS.filter((k) => $(`[data-item-key="${k}"]`)?.checked);
+}
 
 async function initClient() {
   for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) {
@@ -113,13 +124,6 @@ async function loadPumpsForHp(hp) {
   sel.innerHTML = `<option value="">— اختيار تلقائي —</option>${opts}`;
 }
 
-/* ---------------- أزرار التبديل ---------------- */
-
-function setSeg(groupSelector, dataAttr, value, cb) {
-  $$(groupSelector).forEach((b) => b.classList.toggle("active", b.dataset[dataAttr] === value));
-  cb(value);
-}
-
 /* ---------------- الحساب (نداء Edge Function) ---------------- */
 
 async function calcQuote() {
@@ -136,11 +140,15 @@ async function calcQuote() {
   $("#calcBtn").disabled = true;
 
   try {
+    // بنبعت included_install_keys بس عشان نبني notes الحفظ لاحقًا؛ الحساب
+    // الفعلي بيرجع كل البنود (base + installOnly) بغض النظر عنها، فنقدر
+    // نبدّل الاختيارات بعد كده محليًا من غير نداء تاني.
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
       body: {
         action: "quote", hp, panel_product_id: panelId,
-        supply_type: currentSupply, structure_mount: currentMount,
+        structure_mount: currentMount,
         include_pump: includePump, pump_product_id: pumpId,
+        included_install_keys: getCheckedInstallKeys(),
       },
     });
     $("#calcBtn").disabled = false;
@@ -176,7 +184,6 @@ function renderResult() {
 
   $("[data-price-supply-only]").textContent = fmt(r.supplyOnlyTotal) + " ج.م";
   $("[data-price-supply-install]").textContent = fmt(r.supplyInstallTotal) + " ج.م";
-  $$("[data-price-card]").forEach((el) => el.classList.toggle("active", el.dataset.priceCard === currentSupply));
 
   $("[data-specs-grid]").innerHTML = `
     <div class="spec-box"><div class="val">${fmt(s.arrays)}</div><div class="lbl">عدد السلاسل</div></div>
@@ -191,13 +198,30 @@ function renderResult() {
   if (s.inverterWarning) { warnBox.hidden = false; warnBox.textContent = s.inverterWarning; }
   else { warnBox.hidden = true; }
 
-  const items = currentSupply === "supply_install" ? [...r.baseItems, ...r.installOnlyItems] : r.baseItems;
+  // أسعار بنود التركيب جنب الـ checkboxes
+  r.installOnlyItems.forEach((it) => {
+    const el = $(`[data-item-price="${it.key}"]`);
+    if (el) el.textContent = fmt(it.sell) + " ج.م";
+  });
+
+  renderItemsAndTotal();
+}
+
+// إعادة رسم جدول التفصيل والسعر النهائي بناءً على الـ checkboxes الحالية،
+// من غير أي نداء جديد للسيرفر — البيانات كلها موجودة في lastResult أصلاً.
+function renderItemsAndTotal() {
+  if (!lastResult) return;
+  const r = lastResult;
+  const checkedKeys = getCheckedInstallKeys();
+  const selectedInstall = r.installOnlyItems.filter((it) => checkedKeys.includes(it.key));
+  const items = [...r.baseItems, ...selectedInstall];
+
   $("[data-items-body]").innerHTML = items.map((it) => `
     <tr><td>${it.label}</td><td>${it.type}</td><td>${it.qty}</td><td>${it.warranty}</td><td>${fmt(it.sell)} ج.م</td></tr>
   `).join("");
 
-  const grand = currentSupply === "supply_install" ? r.supplyInstallTotal : r.supplyOnlyTotal;
-  $("[data-grand-total]").textContent = fmt(grand) + " ج.م";
+  const total = items.reduce((s, it) => s + it.sell, 0);
+  $("[data-grand-total]").textContent = fmt(Math.round(total)) + " ج.م";
 }
 
 /* ---------------- الحفظ والطباعة ---------------- */
@@ -222,8 +246,9 @@ async function saveAndPrint() {
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
       body: {
         action: "save", hp, panel_product_id: panelId,
-        supply_type: currentSupply, structure_mount: currentMount,
+        structure_mount: currentMount,
         include_pump: includePump, pump_product_id: pumpId,
+        included_install_keys: getCheckedInstallKeys(),
         customer_name: name, customer_phone: phone,
       },
     });
@@ -248,7 +273,6 @@ async function saveAndPrint() {
 function printQuote(r, custName, custPhone, hp) {
   const area = document.getElementById("printArea");
   const dateStr = new Date().toLocaleDateString("ar-EG");
-  const supplyLabel = r.supplyType === "supply_install" ? "توريد وتركيب شامل الضمان" : "توريد خامات فقط";
 
   const rows = r.items.map((it) => `
     <tr><td>${it.label}</td><td>${it.type}</td><td>${it.qty}</td><td>${it.warranty}</td><td>${fmt(it.sell)} ج.م</td></tr>
@@ -264,7 +288,7 @@ function printQuote(r, custName, custPhone, hp) {
       <div class="print-intro">
         تحية طيبة وبعد،<br>
         نتشرف بتقديم عرض سعر منظومة توليد الكهرباء من خلال الطاقة الشمسية لتشغيل محطة ري / محرك غطاس
-        بقدرة ${hp} حصان — ${supplyLabel}${r.includePump ? " (شامل الغطاس)" : ""}.
+        بقدرة ${hp} حصان${r.includePump ? " (شامل الغطاس)" : ""}.
       </div>
       <table class="print-table">
         <thead><tr><th>المكونات</th><th>النوع</th><th>العدد</th><th>الضمان</th><th>السعر</th></tr></thead>
@@ -276,7 +300,7 @@ function printQuote(r, custName, custPhone, hp) {
       </div>
       <div class="print-terms">
         الارتباط بهذا السعر لمدة ثلاثة أيام فقط من تاريخ العرض (${dateStr}).<br>
-        يقع على عاتق العميل تجهيز الموقع (أعمال الحفر والصب اللازمة) قبل موعد التوريد.<br>
+        يقع على عاتق العميل تجهيز الموقع (أعمال الحفر والصب اللازمة) قبل موعد التوريد إن وُجدت ضمن العرض.<br>
         نلتزم بتوفير الدعم الفني وقطع الغيار للمنظومة حتى 10 سنوات من تاريخ التشغيل.
       </div>
       <div class="print-footer">الأصل للطاقة الشمسية — alaslsolar.com — هذا العرض قابل للتغيير حسب الأسعار وقت التعاقد.</div>
@@ -296,12 +320,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#calcBtn").addEventListener("click", calcQuote);
   $("#saveQuoteBtn").addEventListener("click", saveAndPrint);
 
-  $$("[data-mount]").forEach((b) => b.addEventListener("click", () => setSeg("[data-mount]", "mount", b.dataset.mount, (v) => { currentMount = v; })));
+  $$("[data-mount]").forEach((b) => b.addEventListener("click", () => {
+    $$("[data-mount]").forEach((x) => x.classList.toggle("active", x === b));
+    currentMount = b.dataset.mount;
+  }));
 
-  $$("[data-supply]").forEach((b) => b.addEventListener("click", () => setSeg("[data-supply]", "supply", b.dataset.supply, (v) => {
-    currentSupply = v;
-    if (lastResult) renderResult();
-  })));
+  // زرارين "نوع العرض": preset سريع بيفعّل/يلغي كل الـ6 checkboxes مرة واحدة
+  $$("[data-preset]").forEach((b) => b.addEventListener("click", () => {
+    const checkAll = b.dataset.preset === "supply_install";
+    INSTALL_KEYS.forEach((k) => { const el = $(`[data-item-key="${k}"]`); if (el) el.checked = checkAll; });
+    renderItemsAndTotal();
+  }));
+
+  // كل checkbox بند تركيب: تعديل فوري للسعر من غير نداء جديد للسيرفر
+  INSTALL_KEYS.forEach((k) => {
+    const el = $(`[data-item-key="${k}"]`);
+    if (el) el.addEventListener("change", renderItemsAndTotal);
+  });
 
   $("[data-advanced-toggle]").addEventListener("click", () => {
     $("[data-advanced-body]").classList.toggle("open");
