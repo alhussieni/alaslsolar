@@ -2260,6 +2260,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categorySelect = document.getElementById("sdCategory");
   const brandSelect = document.getElementById("sdBrand");
   const pctInput = document.getElementById("sdPct");
+  const salePctInput = document.getElementById("sdSalePct");
   const saveBtn = document.getElementById("sdSaveBtn");
   const listBody = document.getElementById("sdListBody");
   const msg = document.querySelector("[data-sd-message]");
@@ -2281,25 +2282,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadExistingDiscountForSelection() {
     const { data } = await client.from("supplier_discounts")
-      .select("supplier_discount_pct")
+      .select("supplier_discount_pct,sale_discount_pct")
       .eq("category", categorySelect.value)
       .eq("brand", brandSelect.value)
       .maybeSingle();
     pctInput.value = data?.supplier_discount_pct ?? 0;
+    salePctInput.value = data?.sale_discount_pct ?? 0;
   }
 
   async function loadDiscountsList() {
-    listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr>`;
+    listBody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr>`;
     const { data, error } = await client.from("supplier_discounts")
-      .select("category,brand,supplier_discount_pct")
+      .select("category,brand,supplier_discount_pct,sale_discount_pct")
       .order("category", { ascending: true });
-    if (error) { listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:#b23">تعذر التحميل: ${error.message}</td></tr>`; return; }
-    if (!data || !data.length) { listBody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:var(--muted)">مفيش خصومات مسجّلة لسه.</td></tr>`; return; }
+    if (error) { listBody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:#b23">تعذر التحميل: ${error.message}</td></tr>`; return; }
+    if (!data || !data.length) { listBody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:var(--muted)">مفيش خصومات مسجّلة لسه.</td></tr>`; return; }
     listBody.innerHTML = data.map((r) => `
       <tr data-cat="${r.category}" data-brand="${r.brand}" style="border-bottom:1px solid var(--line)">
         <td style="padding:8px">${r.category}</td>
         <td style="padding:8px">${r.brand}</td>
         <td style="padding:8px">${r.supplier_discount_pct}%</td>
+        <td style="padding:8px">${r.sale_discount_pct}%</td>
         <td style="padding:8px"><button type="button" class="sd-delete-btn" style="padding:5px 12px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:12px;cursor:pointer">حذف</button></td>
       </tr>`).join("");
     listBody.querySelectorAll(".sd-delete-btn").forEach((btn) => {
@@ -2315,10 +2318,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const category = categorySelect.value;
     const brand = brandSelect.value;
     const pct = Math.max(0, Math.min(100, parseFloat(pctInput.value) || 0));
+    const salePct = Math.max(0, Math.min(100, parseFloat(salePctInput.value) || 0));
     if (!category || !brand) { if (msg) { msg.style.color = "#b23"; msg.textContent = "اختار الفئة والماركة الأول."; } return; }
+    if (salePct > pct) {
+      if (msg) { msg.style.color = "#b23"; msg.textContent = "خصم البيع لازم يكون أقل من أو يساوي خصم المورد — دلوقتي أكبر منه."; }
+      return;
+    }
     saveBtn.disabled = true;
     const { error } = await client.from("supplier_discounts")
-      .upsert({ category, brand, supplier_discount_pct: pct, updated_at: new Date().toISOString() }, { onConflict: "category,brand" });
+      .upsert({ category, brand, supplier_discount_pct: pct, sale_discount_pct: salePct, updated_at: new Date().toISOString() }, { onConflict: "category,brand" });
     saveBtn.disabled = false;
     if (error) { if (msg) { msg.style.color = "#b23"; msg.textContent = "تعذر الحفظ: " + error.message; } return; }
     if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم الحفظ."; setTimeout(() => { if (msg) msg.textContent = ""; }, 2500); }
@@ -2330,6 +2338,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadBrandsForCategory();
   loadDiscountsList();
+});
+
+/* ============================================================
+   تكاليف تركيب محطات الري الشمسية — بتقرأ/تكتب في irrigation_bom_settings
+   (صف واحد فقط، id=1). محمي بـ RLS: تحديث للأدمن بس.
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  const fields = {
+    bomConcretePerUnit: "concrete_per_unit",
+    bomEarthingPerUnit: "earthing_per_unit",
+    bomMechInstallPerPanel: "mech_install_per_panel",
+    bomElecInstallPerPanel: "elec_install_per_panel",
+    bomTransportPerTrip: "transport_per_trip",
+    bomTransportMinimum: "transport_minimum",
+  };
+  const saveBtn = document.getElementById("bomSaveBtn");
+  const msg = document.querySelector("[data-bom-message]");
+  if (!saveBtn) return;
+
+  async function loadBomSettings() {
+    const { data, error } = await client.from("irrigation_bom_settings").select("*").eq("id", 1).maybeSingle();
+    if (error || !data) return;
+    for (const [inputId, col] of Object.entries(fields)) {
+      const el = document.getElementById(inputId);
+      if (el) el.value = data[col] ?? 0;
+    }
+  }
+
+  saveBtn.addEventListener("click", async () => {
+    const update = { updated_at: new Date().toISOString() };
+    for (const [inputId, col] of Object.entries(fields)) {
+      const el = document.getElementById(inputId);
+      update[col] = Math.max(0, parseFloat(el?.value) || 0);
+    }
+    saveBtn.disabled = true;
+    const { error } = await client.from("irrigation_bom_settings").update(update).eq("id", 1);
+    saveBtn.disabled = false;
+    if (error) { if (msg) { msg.style.color = "#b23"; msg.textContent = "تعذر الحفظ: " + error.message; } return; }
+    if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم الحفظ."; setTimeout(() => { if (msg) msg.textContent = ""; }, 2500); }
+  });
+
+  loadBomSettings();
 });
 
 // ── إدارة المناديب (إضافة مندوب جديد عن طريق دعوة بالإيميل + تعديل صلاحياته) ──

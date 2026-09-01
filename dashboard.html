@@ -1022,7 +1022,9 @@
                 <option value="inverters">إنفرترات (ري)</option>
                 <option value="pumps">مضخات</option>
                 <option value="well_motors">موتورات آبار</option>
-                <option value="chassis">شاسيهات</option>
+                <option value="structures">شاسيهات</option>
+                <option value="combiners">لوحات تجميع</option>
+                <option value="cables">كابلات</option>
               </select>
             </div>
             <div>
@@ -1032,22 +1034,63 @@
               </select>
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">نسبة الخصم %</label>
-              <input type="number" id="sdPct" min="0" max="100" step="0.5" value="0" style="width:100px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">خصم المورد % (تكلفة الشركة)</label>
+              <input type="number" id="sdPct" min="0" max="100" step="0.5" value="0" style="width:110px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">خصم البيع % (للعميل)</label>
+              <input type="number" id="sdSalePct" min="0" max="100" step="0.5" value="0" style="width:110px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
             </div>
             <button type="button" class="btn btn-primary" id="sdSaveBtn" style="font-size:13px">حفظ الخصم</button>
           </div>
           <p class="form-note" data-sd-message></p>
+          <p class="form-note" style="color:var(--muted)">خصم البيع لازم يكون أقل من أو يساوي خصم المورد دايمًا (عشان الشركة متبيعش بخسارة) — القاعدة نفسها بترفض أي قيمة مخالفة.</p>
 
           <h3 style="margin-top:var(--space-3);font-size:15px">الخصومات المسجّلة حاليًا</h3>
           <table style="width:100%;border-collapse:collapse;font-size:13px">
             <thead>
               <tr style="text-align:right;color:var(--muted);font-size:12px">
-                <th style="padding:8px">الفئة</th><th style="padding:8px">الماركة</th><th style="padding:8px">الخصم %</th><th style="padding:8px"></th>
+                <th style="padding:8px">الفئة</th><th style="padding:8px">الماركة</th><th style="padding:8px">خصم المورد</th><th style="padding:8px">خصم البيع</th><th style="padding:8px"></th>
               </tr>
             </thead>
             <tbody id="sdListBody"><tr><td colspan="4" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
           </table>
+        </article>
+
+        <article class="dash-card">
+          <h2 style="margin-top:0">🏗️ تكاليف تركيب محطات الري الشمسية</h2>
+          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+            الأسعار دي مش منتج له كارت في الكتالوج (خرسانة، تأريض، تركيب، نقل) — بتتحسب لوحدها
+            جوه عرض سعر "محطة ري بالطاقة الشمسية" اللي المندوب بيقدمها للعميل. عدّلها هنا وقت ما الأسعار تتغير.
+          </p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-2)">
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">الخرسانة (جنيه/وحدة)</label>
+              <input type="number" id="bomConcretePerUnit" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">التأريض (جنيه/بئر)</label>
+              <input type="number" id="bomEarthingPerUnit" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">تركيب ميكانيكي (جنيه/لوح)</label>
+              <input type="number" id="bomMechInstallPerPanel" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">تركيب كهربائي (جنيه/لوح)</label>
+              <input type="number" id="bomElecInstallPerPanel" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">النقل (جنيه/رحلة)</label>
+              <input type="number" id="bomTransportPerTrip" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">حد أدنى للنقل (جنيه)</label>
+              <input type="number" id="bomTransportMinimum" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" id="bomSaveBtn" style="font-size:13px;margin-top:var(--space-2)">حفظ التكاليف</button>
+          <p class="form-note" data-bom-message></p>
         </article>
       </div>
 
