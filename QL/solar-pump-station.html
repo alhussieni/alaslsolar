@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>محطة ري بالطاقة الشمسية | مناديب الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="rep-widgets.css">
+  <script defer src="rep-header.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="solar-pump-station.js"></script>
+  <style>
+    #printArea { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 0; direction: rtl; }
+      .print-letterhead { width: 100%; display: block; }
+      .print-body { padding: 18px 24px; }
+      .print-meta { font-size: 13px; color: #555; margin-bottom: 14px; display: flex; justify-content: space-between; }
+      .print-intro { font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+      .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 7px; text-align: center; }
+      .print-table th { background: #f3e4d4; }
+      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
+      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
+      .print-totals .grand { font-weight: 800; font-size: 18px; border-top: 2px solid #17120f; margin-top: 6px; padding-top: 8px; }
+      .print-terms { margin-top: 20px; font-size: 11.5px; color: #555; line-height: 1.8; }
+      .print-footer { margin-top: 18px; font-size: 11px; color: #777; border-top: 1px solid #e4d8ca; padding-top: 8px; }
+    }
+    .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 12px; }
+    .spec-box { background: var(--surface-2, #f6f1ea); border-radius: var(--radius); padding: 10px; text-align: center; }
+    .spec-box .val { font-weight: 800; font-size: 17px; color: var(--brand-dark, #17120f); }
+    .spec-box .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .warn-box { background: #fdf1e0; border: 1px solid #e8b96a; border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: #7a4d0a; margin-top: 10px; }
+    .items-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    .items-table th, .items-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; }
+    .items-table th { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <a class="dashboard-logo" href="index.html">
+      <img src="../logo-white.png" alt="الأصل للطاقة الشمسية">
+    </a>
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">بوابة المناديب</p>
+      <h1>محطة ري بالطاقة الشمسية</h1>
+    </div>
+  </section>
+
+  <section class="dashboard-card" data-auth-panel style="max-width:420px;text-align:center">
+    <h2>تسجيل دخول المندوب</h2>
+    <form class="admin-form" data-login-form>
+      <label for="loginEmail">البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" required autocomplete="username">
+      <label for="loginPassword">كلمة المرور</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password">
+      <button type="submit" class="btn btn-primary">دخول</button>
+      <p class="form-note" data-auth-message></p>
+    </form>
+  </section>
+
+  <div class="rep-main" data-rep-panel hidden style="max-width:820px;padding-top:0">
+
+    <div class="dashboard-toolbar" style="position:static">
+      <div><h2 style="margin:0;font-size:18px" data-user-name>—</h2></div>
+      <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
+    </div>
+
+    <div class="card">
+      <h3>بيانات العميل</h3>
+      <div class="row2">
+        <div><label>اسم العميل</label><input type="text" id="custName" required></div>
+        <div><label>رقم الهاتف / واتساب</label><input type="tel" id="custPhone" required placeholder="01xxxxxxxxx"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>بيانات المنظومة</h3>
+      <div class="row2">
+        <div>
+          <label>القدرة المطلوبة (حصان الغطاس HP)</label>
+          <input type="number" id="hpInput" min="1" step="0.5" placeholder="مثال: 20">
+        </div>
+        <div>
+          <label>نوع اللوح الشمسي</label>
+          <select id="panelSelect"><option value="">جاري تحميل الألواح...</option></select>
+        </div>
+      </div>
+
+      <label style="display:block;margin-top:var(--space-2)">نوع التثبيت (الشاسيه)</label>
+      <div class="seg">
+        <button type="button" class="active" data-mount="fixed">ثابت</button>
+        <button type="button" data-mount="rotational">متحرك</button>
+      </div>
+
+      <label style="display:block;margin-top:var(--space-2)">نوع العرض</label>
+      <div class="seg">
+        <button type="button" class="active" data-supply="supply_only">توريد خامات فقط</button>
+        <button type="button" data-supply="supply_install">توريد وتركيب</button>
+      </div>
+
+      <div style="margin-top:var(--space-2)">
+        <label style="display:flex;gap:8px;align-items:center;font-weight:700;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="includePumpChk" style="width:auto"> تضمين الغطاس نفسه في العرض
+        </label>
+        <div data-pump-wrap hidden style="margin-top:8px">
+          <label>اختيار الغطاس (اختياري — سيب فاضي للاختيار التلقائي حسب القدرة)</label>
+          <select id="pumpSelect"><option value="">— اختيار تلقائي —</option></select>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="calcBtn" style="width:100%;margin-top:var(--space-3)">
+        <i class="fa-solid fa-calculator"></i> احسب العرض
+      </button>
+      <p class="form-note" data-calc-message></p>
+    </div>
+
+    <div class="card" data-result-card hidden>
+      <h3>المواصفات الفنية</h3>
+      <div class="specs-grid" data-specs-grid></div>
+      <div class="warn-box" data-inverter-warning hidden></div>
+
+      <h3 style="margin-top:var(--space-3)">تفصيل عرض السعر</h3>
+      <table class="items-table">
+        <thead><tr><th>البند</th><th>النوع</th><th>العدد</th><th>السعر</th></tr></thead>
+        <tbody data-items-body></tbody>
+      </table>
+
+      <div class="totalbar" style="flex-direction:column;gap:6px;align-items:flex-start;padding:14px 18px;margin-top:12px">
+        <div style="font-size:14px;color:rgba(255,255,255,.75)">الإجمالي قبل الضريبة: <strong data-subtotal class="num">0</strong> ج.م</div>
+        <div class="big num">السعر النهائي: <span data-grand-total>0</span> ج.م</div>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="saveQuoteBtn" style="width:100%;margin-top:16px">
+        <i class="fa-solid fa-print"></i> حفظ العرض وطباعته
+      </button>
+      <p class="form-note" data-save-message></p>
+    </div>
+
+  </div>
+</main>
+
+<div id="printArea"></div>
+
+</body>
+</html>
