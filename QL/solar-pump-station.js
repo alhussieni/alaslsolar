@@ -10,7 +10,7 @@ let client = null;
 let currentSession = null;
 let currentMount = "fixed";
 let currentSupply = "supply_only";
-let lastResult = null;
+let lastResult = null; // { specs, baseItems, installOnlyItems, supplyOnlyTotal, supplyInstallTotal, ... }
 
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
@@ -83,8 +83,6 @@ async function handleLogout() {
 }
 
 /* ---------------- تحميل الألواح والغطاسات من الكتالوج الحقيقي ---------------- */
-/* ملاحظة: السعر المعروض هنا هو price المعلن العام — مش خصم، فمفيش أي حساسية
-   في قراءته مباشرة من المتصفح، نفس منتجات الموقع العام بالظبط. */
 
 async function loadPanels() {
   const sel = $("#panelSelect");
@@ -115,7 +113,7 @@ async function loadPumpsForHp(hp) {
   sel.innerHTML = `<option value="">— اختيار تلقائي —</option>${opts}`;
 }
 
-/* ---------------- أزرار التبديل (تثبيت / نوع العرض) ---------------- */
+/* ---------------- أزرار التبديل ---------------- */
 
 function setSeg(groupSelector, dataAttr, value, cb) {
   $$(groupSelector).forEach((b) => b.classList.toggle("active", b.dataset[dataAttr] === value));
@@ -137,10 +135,6 @@ async function calcQuote() {
   msg.textContent = "جاري الحساب..."; msg.className = "form-note";
   $("#calcBtn").disabled = true;
 
-  const { data: sessionData } = await client.auth.getSession();
-  const jwt = sessionData?.session?.access_token;
-  if (!jwt) { msg.textContent = "الجلسة منتهية، سجّل دخول تاني."; msg.className = "form-note error"; $("#calcBtn").disabled = false; return; }
-
   try {
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
       body: {
@@ -158,7 +152,7 @@ async function calcQuote() {
     }
 
     msg.textContent = ""; lastResult = data;
-    renderResult(data);
+    renderResult();
   } catch (e) {
     $("#calcBtn").disabled = false;
     msg.textContent = "تعذر الاتصال بالخادم: " + e.message;
@@ -166,31 +160,44 @@ async function calcQuote() {
   }
 }
 
-function renderResult(r) {
-  $("[data-result-card]").hidden = false;
-
+function renderResult() {
+  if (!lastResult) return;
+  const r = lastResult;
   const s = r.specs;
+
+  $("[data-summary-card]").hidden = false;
+  $("[data-specs-card]").hidden = false;
+  $("[data-details-card]").hidden = false;
+
+  $("[data-chip-inverter]").textContent = s.inverterModel;
+  $("[data-chip-panels]").textContent = `${fmt(s.totalPanels)} لوح`;
+  $("[data-chip-kw]").textContent = `${fmt(s.calcKW)} KW`;
+  $("[data-chip-perkw]").textContent = `${fmt(s.sarPerKW)} ج.م / KW`;
+
+  $("[data-price-supply-only]").textContent = fmt(r.supplyOnlyTotal) + " ج.م";
+  $("[data-price-supply-install]").textContent = fmt(r.supplyInstallTotal) + " ج.م";
+  $$("[data-price-card]").forEach((el) => el.classList.toggle("active", el.dataset.priceCard === currentSupply));
+
   $("[data-specs-grid]").innerHTML = `
-    <div class="spec-box"><div class="val">${fmt(s.calcKW)}</div><div class="lbl">KW فعلي</div></div>
-    <div class="spec-box"><div class="val">${fmt(s.totalPanels)}</div><div class="lbl">عدد الألواح</div></div>
     <div class="spec-box"><div class="val">${fmt(s.arrays)}</div><div class="lbl">عدد السلاسل</div></div>
     <div class="spec-box"><div class="val">${fmt(s.panelsPerString)}</div><div class="lbl">ألواح/سلسلة</div></div>
     <div class="spec-box"><div class="val">${fmt(s.Vimp)}V</div><div class="lbl">Vimp الكلي</div></div>
     <div class="spec-box"><div class="val">${fmt(s.Voc)}V</div><div class="lbl">Voc الكلي</div></div>
-    <div class="spec-box"><div class="val">${s.inverterModel}</div><div class="lbl">الإنفرتر</div></div>
-    <div class="spec-box"><div class="val">${fmt(s.sarPerKW)}</div><div class="lbl">ج.م / KW</div></div>
+    <div class="spec-box"><div class="val">${fmt(s.Iimp)}A</div><div class="lbl">Iimp الكلي</div></div>
+    <div class="spec-box"><div class="val">${fmt(s.Isc)}A</div><div class="lbl">Isc الكلي</div></div>
   `;
 
   const warnBox = $("[data-inverter-warning]");
   if (s.inverterWarning) { warnBox.hidden = false; warnBox.textContent = s.inverterWarning; }
   else { warnBox.hidden = true; }
 
-  $("[data-items-body]").innerHTML = r.items.map((it) => `
-    <tr><td>${it.label}</td><td>${it.type}</td><td>${it.qty}</td><td>${fmt(it.sell)} ج.م</td></tr>
+  const items = currentSupply === "supply_install" ? [...r.baseItems, ...r.installOnlyItems] : r.baseItems;
+  $("[data-items-body]").innerHTML = items.map((it) => `
+    <tr><td>${it.label}</td><td>${it.type}</td><td>${it.qty}</td><td>${it.warranty}</td><td>${fmt(it.sell)} ج.م</td></tr>
   `).join("");
 
-  $("[data-subtotal]").textContent = fmt(r.sellTotal);
-  $("[data-grand-total]").textContent = fmt(r.finalTotal);
+  const grand = currentSupply === "supply_install" ? r.supplyInstallTotal : r.supplyOnlyTotal;
+  $("[data-grand-total]").textContent = fmt(grand) + " ج.م";
 }
 
 /* ---------------- الحفظ والطباعة ---------------- */
@@ -230,7 +237,7 @@ async function saveAndPrint() {
 
     msg.textContent = `تم حفظ العرض رقم #${data.quote_id}.`;
     msg.className = "form-note ok";
-    printQuote(data, name, phone);
+    printQuote(data, name, phone, hp);
   } catch (e) {
     $("#saveQuoteBtn").disabled = false;
     msg.textContent = "تعذر الاتصال بالخادم: " + e.message;
@@ -238,7 +245,7 @@ async function saveAndPrint() {
   }
 }
 
-function printQuote(r, custName, custPhone) {
+function printQuote(r, custName, custPhone, hp) {
   const area = document.getElementById("printArea");
   const dateStr = new Date().toLocaleDateString("ar-EG");
   const supplyLabel = r.supplyType === "supply_install" ? "توريد وتركيب شامل الضمان" : "توريد خامات فقط";
@@ -257,7 +264,7 @@ function printQuote(r, custName, custPhone) {
       <div class="print-intro">
         تحية طيبة وبعد،<br>
         نتشرف بتقديم عرض سعر منظومة توليد الكهرباء من خلال الطاقة الشمسية لتشغيل محطة ري / محرك غطاس
-        بقدرة ${$("#hpInput").value} حصان — ${supplyLabel}${r.includePump ? " (شامل الغطاس)" : ""}.
+        بقدرة ${hp} حصان — ${supplyLabel}${r.includePump ? " (شامل الغطاس)" : ""}.
       </div>
       <table class="print-table">
         <thead><tr><th>المكونات</th><th>النوع</th><th>العدد</th><th>الضمان</th><th>السعر</th></tr></thead>
@@ -290,7 +297,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#saveQuoteBtn").addEventListener("click", saveAndPrint);
 
   $$("[data-mount]").forEach((b) => b.addEventListener("click", () => setSeg("[data-mount]", "mount", b.dataset.mount, (v) => { currentMount = v; })));
-  $$("[data-supply]").forEach((b) => b.addEventListener("click", () => setSeg("[data-supply]", "supply", b.dataset.supply, (v) => { currentSupply = v; })));
+
+  $$("[data-supply]").forEach((b) => b.addEventListener("click", () => setSeg("[data-supply]", "supply", b.dataset.supply, (v) => {
+    currentSupply = v;
+    if (lastResult) renderResult();
+  })));
+
+  $("[data-advanced-toggle]").addEventListener("click", () => {
+    $("[data-advanced-body]").classList.toggle("open");
+  });
 
   $("#includePumpChk").addEventListener("change", (e) => {
     $("[data-pump-wrap]").hidden = !e.target.checked;
