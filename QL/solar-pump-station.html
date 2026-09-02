@@ -18,13 +18,31 @@
   <script defer src="solar-pump-station.js"></script>
   <style>
     #printArea { display: none; }
-    @page { size: A4 portrait; margin: 12mm; }
+    @page { size: A4 portrait; margin: 0; }
     @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 0; direction: rtl; }
-      .print-letterhead { width: 100%; display: block; }
-      .print-body { padding: 18px 24px; }
+      /* بدل الاعتماد على visibility (اللي بيسيب مساحة فاضية للعناصر
+         المخفية وبيسبب صفحة أولى فاضية)، بنشيل الصفحة الأساسية بالكامل
+         من الـ layout ونسيب #printArea بس. */
+      body > *:not(#printArea) { display: none !important; }
+      #printArea { display: block !important; }
+
+      /* letterhead.jpg هي تصميم صفحة A4 كاملة (لوجو فوق + فوتر تواصل تحت)
+         مش مجرد هيدر — فبنحطها كخلفية للصفحة نفسها عشان تتكرر تلقائيًا في
+         كل صفحة يطلعها المحتوى، بدل ما تكون صورة واحدة في أول المحتوى بس. */
+      body {
+        margin: 0;
+        background-image: url('letterhead.jpg');
+        background-position: top center;
+        background-size: 210mm 297mm;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      /* هامش علوي (70مم) يمشي تحت منطقة اللوجو، وهامش سفلي (28مم) يوقف
+         قبل شريط التواصل في الفوتر — القياسات دي مأخوذة من تحليل تصميم
+         letterhead.jpg نفسه. */
+      .print-body { padding: 70mm 15mm 28mm 15mm; }
       .print-meta { font-size: 13px; color: #555; margin-bottom: 14px; display: flex; justify-content: space-between; }
       .print-intro { font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
       .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
