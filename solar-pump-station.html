@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>محطة ري بالطاقة الشمسية | مناديب الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="rep-widgets.css">
+  <script defer src="rep-header.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="solar-pump-station.js"></script>
+  <style>
+    #printArea { display: none; }
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+      /* بدل الاعتماد على visibility (اللي بيسيب مساحة فاضية للعناصر
+         المخفية وبيسبب صفحة أولى فاضية)، بنشيل الصفحة الأساسية بالكامل
+         من الـ layout ونسيب #printArea بس. */
+      body > *:not(#printArea) { display: none !important; }
+      #printArea { display: block !important; }
+
+      /* letterhead.jpg هي تصميم صفحة A4 كاملة (لوجو فوق + فوتر تواصل تحت)
+         مش مجرد هيدر — فبنحطها كخلفية للصفحة نفسها عشان تتكرر تلقائيًا في
+         كل صفحة يطلعها المحتوى، بدل ما تكون صورة واحدة في أول المحتوى بس. */
+      body {
+        margin: 0;
+        background-image: url('letterhead.jpg');
+        background-position: top center;
+        background-size: 210mm 297mm;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      /* هامش علوي (70مم) يمشي تحت منطقة اللوجو، وهامش سفلي (28مم) يوقف
+         قبل شريط التواصل في الفوتر — القياسات دي مأخوذة من تحليل تصميم
+         letterhead.jpg نفسه. */
+      .print-body { padding: 70mm 15mm 28mm 15mm; }
+      .print-meta { font-size: 13px; color: #555; margin-bottom: 14px; display: flex; justify-content: space-between; }
+      .print-intro { font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+      .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 7px; text-align: center; }
+      .print-table th { background: #f3e4d4; }
+      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
+      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
+      .print-totals .grand { font-weight: 800; font-size: 18px; border-top: 2px solid #17120f; margin-top: 6px; padding-top: 8px; }
+      .print-terms { margin-top: 20px; font-size: 11.5px; color: #555; line-height: 1.8; }
+      .print-footer { margin-top: 18px; font-size: 11px; color: #777; border-top: 1px solid #e4d8ca; padding-top: 8px; }
+    }
+
+    /* القاعدة الذهبية (38.2% / 61.8%) لتوزيع العمودين — نفس نسبة .grid2
+       المستخدمة في باقي صفحات المناديب، عشان النتيجة (الأهم للمندوب) تاخد
+       مساحة بصرية أكبر من عمود الإدخال. */
+    .sps-layout { display: grid; grid-template-columns: minmax(320px, 38.2%) minmax(0, 61.8%); gap: var(--space-4); align-items: start; }
+    @media (max-width: 1020px) { .sps-layout { grid-template-columns: 1fr; } }
+    .sps-col { display: flex; flex-direction: column; gap: var(--space-3); }
+    /* عرض النتيجة على الشمال، الفورم على اليمين */
+    .sps-col:first-child { order: 2; }
+    .sps-col:last-child { order: 1; position: sticky; top: var(--space-3); align-self: start; }
+    @media (max-width: 1020px) { .sps-col:last-child { position: static; } }
+
+    /* تصغير كارتي "ملخص المنظومة" و"المواصفات الفنية" — مساحة أقل، وضوح
+       زي ما هو (وزن الخط والتباين متغيرش، بس المسافات والأحجام اتصغرت). */
+    [data-summary-card], [data-specs-card] { padding: 14px 16px; }
+    [data-summary-card] h3, [data-specs-card] h3 { font-size: 14px; margin-bottom: 4px; }
+
+    /* شرائح قيم صغيرة (زي البادجات الزرقاء في المرجع) */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .chip { border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 11.5px; font-weight: 700; color: var(--brand-dark); background: var(--brand-soft); }
+    .chip.outline { background: #fff; color: var(--ink); }
+
+    .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 7px; margin-top: 10px; }
+    .spec-box { background: #f6f1ea; border-radius: var(--radius); padding: 7px; text-align: center; }
+    .spec-box .val { font-weight: 800; font-size: 14px; color: var(--brand-dark); }
+    .spec-box .lbl { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+    .price-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .price-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 9px; text-align: center; cursor: pointer; transition: .15s; }
+    .price-card.active { border-color: var(--brand); background: var(--brand-soft); }
+    .price-card .amt { font-weight: 800; font-size: 15px; color: var(--brand-dark); }
+    .price-card .lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .warn-box { background: #fdf1e0; border: 1px solid #e8b96a; border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: #7a4d0a; margin-top: 10px; }
+
+    .items-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    .items-table th, .items-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; }
+    .items-table th { color: var(--muted); font-size: 12px; }
+
+    .final-price-banner { background: var(--forest); color: #fff; border-radius: var(--radius); padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+    .final-price-banner .lbl { font-size: 13px; opacity: .85; }
+    .final-price-banner .amt { font-size: 22px; font-weight: 800; }
+
+    /* أزرار الفورم — تناسق موحّد في الحجم مع مكوّن .seg (نفس الارتفاع
+       والحواف والوزن)، بدل الأحجام الافتراضية المتفاوتة لكل زرار. */
+    #calcBtn, #confirmAdvancedBtn, #saveQuoteBtn {
+      min-height: 44px; padding: 0 18px; font-size: 13.5px; font-weight: 700;
+      border-radius: var(--radius); white-space: nowrap;
+    }
+    #calcBtn { flex: 0 0 auto; }
+
+    .advanced-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--brand-dark); margin-top: var(--space-2); user-select: none; }
+    .advanced-body { display: none; margin-top: var(--space-2); }
+    .advanced-body.open { display: block; }
+
+    .toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .toolbar-btns .btn { flex: 1; min-width: 140px; }
+
+    .install-items-list { display: flex; flex-direction: column; gap: 6px; }
+    .install-item-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: var(--radius); font-size: 13px; cursor: pointer; }
+    .install-item-row input[type="checkbox"] { width: auto; }
+    .install-item-row span:nth-child(2) { flex: 1; }
+    .install-item-row .price { font-size: 12px; color: var(--muted); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <a class="dashboard-logo" href="index.html">
+      <img src="../logo-white.png" alt="الأصل للطاقة الشمسية">
+    </a>
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">بوابة المناديب</p>
+      <h1>محطة ري بالطاقة الشمسية</h1>
+    </div>
+  </section>
+
+  <section class="dashboard-card" data-auth-panel style="max-width:420px;text-align:center">
+    <h2>تسجيل دخول المندوب</h2>
+    <form class="admin-form" data-login-form>
+      <label for="loginEmail">البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" required autocomplete="username">
+      <label for="loginPassword">كلمة المرور</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password">
+      <button type="submit" class="btn btn-primary">دخول</button>
+      <p class="form-note" data-auth-message></p>
+    </form>
+  </section>
+
+  <div class="rep-main" data-rep-panel hidden style="max-width:1100px;padding-top:0">
+
+    <div class="dashboard-toolbar" style="position:static">
+      <div><h2 style="margin:0;font-size:18px" data-user-name>—</h2></div>
+      <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
+    </div>
+
+    <div class="sps-layout">
+
+      <!-- عمود النتيجة (هيظهر شمال الصفحة بفضل CSS order) -->
+      <div class="sps-col">
+
+        <div class="card" data-summary-card hidden>
+          <h3>ملخص المنظومة</h3>
+          <div class="chip-row">
+            <span class="chip" data-chip-inverter>—</span>
+            <span class="chip" data-chip-panels>—</span>
+            <span class="chip" data-chip-kw>—</span>
+            <span class="chip outline" data-chip-perkw>—</span>
+          </div>
+          <div class="price-cards">
+            <div class="price-card" data-price-card="supply_only">
+              <div class="amt" data-price-supply-only>—</div>
+              <div class="lbl">توريد خامات فقط</div>
+            </div>
+            <div class="price-card" data-price-card="supply_install">
+              <div class="amt" data-price-supply-install>—</div>
+              <div class="lbl">توريد وتركيب شامل الضمان</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" data-specs-card hidden>
+          <h3>المواصفات الفنية</h3>
+          <div class="specs-grid" data-specs-grid></div>
+          <div class="warn-box" data-inverter-warning hidden></div>
+        </div>
+
+        <div class="card" data-details-card hidden>
+          <h3>تفصيل عرض السعر</h3>
+          <table class="items-table">
+            <thead><tr><th>البند</th><th>النوع</th><th>العدد</th><th>الضمان</th><th>السعر</th></tr></thead>
+            <tbody data-items-body></tbody>
+          </table>
+          <div class="final-price-banner">
+            <span class="lbl">السعر النهائي شامل الضريبة</span>
+            <span class="amt" data-grand-total>0 ج.م</span>
+          </div>
+
+          <div class="toolbar-btns">
+            <button type="button" class="btn btn-outline" id="saveQuoteBtn"><i class="fa-solid fa-print"></i> طباعة / حفظ PDF</button>
+          </div>
+          <p class="form-note" data-save-message></p>
+        </div>
+
+      </div>
+
+      <!-- عمود الفورم (هيظهر يمين الصفحة بفضل CSS order) -->
+      <div class="sps-col">
+
+        <div class="card">
+          <div class="step-eyebrow">
+            <span class="step-num">1</span>
+            <span class="step-label">بيانات العميل</span>
+          </div>
+          <div class="row2">
+            <div><label>اسم العميل *</label><input type="text" id="custName" required></div>
+            <div><label>رقم الهاتف / واتساب *</label><input type="tel" id="custPhone" required placeholder="01xxxxxxxxx"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="step-eyebrow">
+            <span class="step-num">2</span>
+            <span class="step-label">مواصفات المنظومة</span>
+          </div>
+
+          <div class="subsection-label" style="margin-top:0;padding-top:0;border-top:none">
+            <i class="fa-solid fa-gauge-high"></i> قدرة الغطاس
+          </div>
+          <label>القدرة المطلوبة (حصان الغطاس HP)</label>
+          <div style="display:flex;gap:8px">
+            <input type="number" id="hpInput" min="1" step="0.5" placeholder="مثال: 20" style="flex:1">
+            <button type="button" class="btn btn-primary" id="calcBtn" style="white-space:nowrap"><i class="fa-solid fa-calculator"></i> تأكيد</button>
+          </div>
+
+          <div class="subsection-label">
+            <i class="fa-solid fa-solar-panel"></i> اللوح الشمسي
+          </div>
+          <div class="row2">
+            <div>
+              <label>الشركة المصنعة</label>
+              <select id="panelBrandSelect"><option value="">جاري تحميل الألواح...</option></select>
+            </div>
+            <div>
+              <label>القدرة (Watt)</label>
+              <select id="panelWattSelect"><option value="">اختار الشركة أولاً</option></select>
+            </div>
+          </div>
+
+          <div class="subsection-label">
+            <i class="fa-solid fa-plug-circle-bolt"></i> الإنفرتر
+          </div>
+          <label>الشركة المصنعة</label>
+          <select id="inverterBrandSelect"><option value="">تلقائي (الأنسب للقدرة)</option></select>
+
+          <div class="subsection-label">
+            <i class="fa-solid fa-screwdriver-wrench"></i> التركيب والشاسيه
+          </div>
+          <label>نوع التثبيت</label>
+          <div class="seg">
+            <button type="button" class="active" data-mount="fixed">ثابت</button>
+            <button type="button" data-mount="rotational">متحرك</button>
+          </div>
+
+          <label style="margin-top:var(--space-2);display:flex;gap:8px;align-items:center;font-weight:700;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="includePumpChk" style="width:auto"> تضمين الغطاس نفسه في العرض
+          </label>
+          <div data-pump-wrap hidden style="margin-top:8px">
+            <label>اختيار الغطاس (اختياري — سيب فاضي للاختيار التلقائي حسب القدرة)</label>
+            <select id="pumpSelect"><option value="">— اختيار تلقائي —</option></select>
+          </div>
+
+          <div class="advanced-toggle" data-advanced-toggle>
+            <i class="fa-solid fa-chevron-down"></i> إعدادات متقدمة
+          </div>
+          <div class="advanced-body" data-advanced-body>
+            <div class="advanced-group">
+              <div class="adv-label">للاستخدام اليدوي فقط — تعديل القيم الافتراضية لحساب المنظومة</div>
+              <label>تعديل عدد الألواح/سلسلة</label>
+              <input type="number" id="panelsPerStringAdjustInput" value="0" step="1">
+
+              <label style="margin-top:var(--space-2)">تعديل عدد السلاسل (Strings)</label>
+              <input type="number" id="stringsAdjustInput" value="0" step="1">
+
+              <label style="margin-top:var(--space-2)">هامش زيادة قدرة الانفرتر (KW)</label>
+              <input type="number" id="inverterPowerIncreaseInput" value="0" step="0.5">
+
+              <button type="button" class="btn btn-primary" id="confirmAdvancedBtn" style="margin-top:var(--space-2);width:100%">
+                <i class="fa-solid fa-check"></i> تأكيد التعديلات
+              </button>
+            </div>
+          </div>
+
+          <p class="form-note" data-calc-message></p>
+        </div>
+
+        <div class="card">
+          <div class="step-eyebrow">
+            <span class="step-num">3</span>
+            <span class="step-label">نوع العرض والبنود</span>
+          </div>
+          <div class="seg">
+            <button type="button" data-preset="supply_only">توريد خامات فقط</button>
+            <button type="button" data-preset="supply_install">توريد وتركيب كامل</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:4px">
+            دوس على أحد الخيارين كبداية سريعة — بيحدد البنود تحت تلقائيًا، وبعدها عدّل أي بند لوحده حسب طلب العميل.
+          </p>
+
+          <h4 style="margin-top:var(--space-2);margin-bottom:6px;font-size:13px;color:var(--muted)">بنود العرض (كل بند اختياري لوحده — الغي أي بند العميل هيوفره بنفسه)</h4>
+          <div class="install-items-list">
+            <label class="install-item-row"><input type="checkbox" data-item-key="inverter"> <span>الإنفرتر</span> <span class="price" data-item-price="inverter"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="combiner"> <span>لوحة التجميع</span> <span class="price" data-item-price="combiner"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="cables"> <span>الكابلات DC</span> <span class="price" data-item-price="cables"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="mc4"> <span>وصلات MC4</span> <span class="price" data-item-price="mc4"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="structure"> <span>الشاسيه/الحوامل</span> <span class="price" data-item-price="structure"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="concrete"> <span>الخرسانة</span> <span class="price" data-item-price="concrete"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="earth"> <span>التأريض</span> <span class="price" data-item-price="earth"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="install_mech"> <span>تركيب ميكانيكي</span> <span class="price" data-item-price="install_mech"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="install_elec"> <span>تركيب كهربائي</span> <span class="price" data-item-price="install_elec"></span></label>
+            <label class="install-item-row"><input type="checkbox" data-item-key="transport"> <span>النقل</span> <span class="price" data-item-price="transport"></span></label>
+          </div>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:6px">
+            الألواح دايمًا مشمولة (هي أساس الحساب). الأسعار جنب كل بند بتظهر بعد "احسب العرض" — وتعديل البنود بعد كده فوري من غير إعادة حساب.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div id="printArea"></div>
+
+</body>
+</html>
