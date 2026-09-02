@@ -184,8 +184,19 @@
             <button type="button" class="btn btn-primary" id="calcBtn" style="white-space:nowrap"><i class="fa-solid fa-calculator"></i> تأكيد</button>
           </div>
 
-          <label style="margin-top:var(--space-2)">نوع اللوح الشمسي</label>
-          <select id="panelSelect"><option value="">جاري تحميل الألواح...</option></select>
+          <div class="row2" style="margin-top:var(--space-2)">
+            <div>
+              <label>الشركة المصنعة للوح</label>
+              <select id="panelBrandSelect"><option value="">جاري تحميل الألواح...</option></select>
+            </div>
+            <div>
+              <label>قدرة اللوح (Watt)</label>
+              <select id="panelWattSelect"><option value="">اختار الشركة أولاً</option></select>
+            </div>
+          </div>
+
+          <label style="margin-top:var(--space-2)">نوع الإنفرتر (الشركة المصنعة)</label>
+          <select id="inverterBrandSelect"><option value="">تلقائي (الأنسب للقدرة)</option></select>
 
           <div class="advanced-toggle" data-advanced-toggle>
             <i class="fa-solid fa-chevron-down"></i> إعدادات متقدمة

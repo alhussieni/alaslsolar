@@ -69,6 +69,7 @@ async function updateAuthState(session) {
   userName.textContent = rep.display_name;
 
   await loadPanels();
+  await loadInverterBrands();
 }
 
 async function handleLogin(e) {
@@ -95,20 +96,45 @@ async function handleLogout() {
 
 /* ---------------- تحميل الألواح والغطاسات من الكتالوج الحقيقي ---------------- */
 
+let allPanels = [];
+
 async function loadPanels() {
-  const sel = $("#panelSelect");
+  const brandSel = $("#panelBrandSelect");
+  const wattSel = $("#panelWattSelect");
   const { data, error } = await client
     .from("products")
     .select("id,brand,name_ar,power_watt,vimp")
     .eq("category", "panels").eq("published", true)
     .not("vimp", "is", null).not("power_watt", "is", null)
-    .order("power_watt", { ascending: false });
+    .order("brand", { ascending: true }).order("power_watt", { ascending: false });
 
   if (error || !data || !data.length) {
-    sel.innerHTML = `<option value="">مفيش ألواح متاحة حاليًا</option>`;
+    brandSel.innerHTML = `<option value="">مفيش ألواح متاحة حاليًا</option>`;
+    wattSel.innerHTML = `<option value="">—</option>`;
     return;
   }
-  sel.innerHTML = data.map((p) => `<option value="${p.id}">${p.brand} ${p.power_watt}W</option>`).join("");
+  allPanels = data;
+  const brands = [...new Set(data.map((p) => p.brand))];
+  brandSel.innerHTML = `<option value="">اختار الشركة</option>` + brands.map((b) => `<option value="${b}">${b}</option>`).join("");
+  wattSel.innerHTML = `<option value="">اختار الشركة أولاً</option>`;
+}
+
+function populatePanelWattages(brand) {
+  const wattSel = $("#panelWattSelect");
+  if (!brand) { wattSel.innerHTML = `<option value="">اختار الشركة أولاً</option>`; return; }
+  const matches = allPanels.filter((p) => p.brand === brand);
+  wattSel.innerHTML = matches.map((p) => `<option value="${p.id}">${p.power_watt}W</option>`).join("");
+}
+
+async function loadInverterBrands() {
+  const sel = $("#inverterBrandSelect");
+  const { data, error } = await client
+    .from("products")
+    .select("brand")
+    .eq("category", "inverters").eq("published", true);
+  if (error || !data || !data.length) { sel.innerHTML = `<option value="">تلقائي (الأنسب للقدرة)</option>`; return; }
+  const brands = [...new Set(data.map((p) => p.brand))];
+  sel.innerHTML = `<option value="">تلقائي (الأنسب للقدرة)</option>` + brands.map((b) => `<option value="${b}">${b}</option>`).join("");
 }
 
 async function loadPumpsForHp(hp) {
@@ -129,12 +155,13 @@ async function loadPumpsForHp(hp) {
 async function calcQuote() {
   const msg = $("[data-calc-message]");
   const hp = parseFloat($("#hpInput").value);
-  const panelId = $("#panelSelect").value;
+  const panelId = $("#panelWattSelect").value;
+  const inverterBrand = $("#inverterBrandSelect").value || null;
   const includePump = $("#includePumpChk").checked;
   const pumpId = $("#pumpSelect").value || null;
 
   if (!hp || hp <= 0) { msg.textContent = "دخّل قدرة الغطاس بالحصان."; msg.className = "form-note error"; return; }
-  if (!panelId) { msg.textContent = "اختار نوع اللوح الشمسي."; msg.className = "form-note error"; return; }
+  if (!panelId) { msg.textContent = "اختار الشركة وقدرة اللوح الشمسي."; msg.className = "form-note error"; return; }
 
   msg.textContent = "جاري الحساب..."; msg.className = "form-note";
   $("#calcBtn").disabled = true;
@@ -146,7 +173,7 @@ async function calcQuote() {
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
       body: {
         action: "quote", hp, panel_product_id: panelId,
-        structure_mount: currentMount,
+        structure_mount: currentMount, inverter_brand: inverterBrand,
         include_pump: includePump, pump_product_id: pumpId,
         included_item_keys: getCheckedInstallKeys(),
       },
@@ -238,7 +265,8 @@ async function saveAndPrint() {
   $("#saveQuoteBtn").disabled = true;
 
   const hp = parseFloat($("#hpInput").value);
-  const panelId = $("#panelSelect").value;
+  const panelId = $("#panelWattSelect").value;
+  const inverterBrand = $("#inverterBrandSelect").value || null;
   const includePump = $("#includePumpChk").checked;
   const pumpId = $("#pumpSelect").value || null;
 
@@ -246,7 +274,7 @@ async function saveAndPrint() {
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
       body: {
         action: "save", hp, panel_product_id: panelId,
-        structure_mount: currentMount,
+        structure_mount: currentMount, inverter_brand: inverterBrand,
         include_pump: includePump, pump_product_id: pumpId,
         included_item_keys: getCheckedInstallKeys(),
         customer_name: name, customer_phone: phone,
@@ -319,6 +347,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("[data-logout]").addEventListener("click", handleLogout);
   $("#calcBtn").addEventListener("click", calcQuote);
   $("#saveQuoteBtn").addEventListener("click", saveAndPrint);
+
+  $("#panelBrandSelect").addEventListener("change", (e) => populatePanelWattages(e.target.value));
 
   $$("[data-mount]").forEach((b) => b.addEventListener("click", () => {
     $$("[data-mount]").forEach((x) => x.classList.toggle("active", x === b));
