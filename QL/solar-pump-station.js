@@ -335,8 +335,7 @@ function printQuote(r, custName, custPhone, hp) {
   `).join("");
 
   area.innerHTML = `
-    <img class="print-letterhead" src="letterhead.jpg" alt="الأصل للطاقة الشمسية">
-    <div class="print-body">
+    <div class="print-body" dir="rtl">
       <div class="print-meta">
         <div><strong>عرض سعر مُقدَّم إلى:</strong> ${custName} — ${custPhone}</div>
         <div><strong>تاريخ العرض:</strong> ${dateStr}</div>
