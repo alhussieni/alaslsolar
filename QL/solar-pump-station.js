@@ -68,8 +68,8 @@ async function updateAuthState(session) {
   authPanel.hidden = true; repPanel.hidden = false; logoutBtn.hidden = false;
   userName.textContent = rep.display_name;
 
-  await loadPanelBrands();
-  await loadInverters();
+  await loadPanels();
+  await loadInverterBrands();
 }
 
 async function handleLogin(e) {
@@ -94,46 +94,47 @@ async function handleLogout() {
   await updateAuthState(null);
 }
 
-/* ---------------- تحميل الألواح (على مرحلتين: ماركة ← قدرة) والإنفرترات والغطاسات ---------------- */
+/* ---------------- تحميل الألواح والغطاسات من الكتالوج الحقيقي ---------------- */
 
-let allPanels = []; // كاش محلي لكل الألواح المنشورة الكاملة المواصفات
+let allPanels = [];
 
-async function loadPanelBrands() {
+async function loadPanels() {
+  const brandSel = $("#panelBrandSelect");
+  const wattSel = $("#panelWattSelect");
   const { data, error } = await client
     .from("products")
     .select("id,brand,name_ar,power_watt,vimp")
     .eq("category", "panels").eq("published", true)
     .not("vimp", "is", null).not("power_watt", "is", null)
-    .order("brand", { ascending: true });
+    .order("brand", { ascending: true }).order("power_watt", { ascending: false });
 
-  const brandSel = $("#panelBrandSelect");
   if (error || !data || !data.length) {
     brandSel.innerHTML = `<option value="">مفيش ألواح متاحة حاليًا</option>`;
+    wattSel.innerHTML = `<option value="">—</option>`;
     return;
   }
   allPanels = data;
   const brands = [...new Set(data.map((p) => p.brand))];
-  brandSel.innerHTML = brands.map((b) => `<option value="${b}">${b}</option>`).join("");
-  loadPanelModelsForBrand(brands[0]);
+  brandSel.innerHTML = `<option value="">اختار الشركة</option>` + brands.map((b) => `<option value="${b}">${b}</option>`).join("");
+  wattSel.innerHTML = `<option value="">اختار الشركة أولاً</option>`;
 }
 
-function loadPanelModelsForBrand(brand) {
-  const sel = $("#panelSelect");
-  const models = allPanels.filter((p) => p.brand === brand).sort((a, b) => a.power_watt - b.power_watt);
-  if (!models.length) { sel.innerHTML = `<option value="">مفيش موديلات لهذه الماركة</option>`; return; }
-  sel.innerHTML = models.map((p) => `<option value="${p.id}">${p.power_watt}W</option>`).join("");
+function populatePanelWattages(brand) {
+  const wattSel = $("#panelWattSelect");
+  if (!brand) { wattSel.innerHTML = `<option value="">اختار الشركة أولاً</option>`; return; }
+  const matches = allPanels.filter((p) => p.brand === brand);
+  wattSel.innerHTML = matches.map((p) => `<option value="${p.id}">${p.power_watt}W</option>`).join("");
 }
 
-async function loadInverters() {
-  const sel = $("#inverterSelect");
+async function loadInverterBrands() {
+  const sel = $("#inverterBrandSelect");
   const { data, error } = await client
     .from("products")
-    .select("id,brand,power_kw")
-    .eq("category", "inverters").eq("published", true)
-    .order("brand", { ascending: true }).order("power_kw", { ascending: true });
-  if (error || !data) return;
-  const opts = data.map((p) => `<option value="${p.id}">${p.brand} ${p.power_kw} KW</option>`).join("");
-  sel.innerHTML = `<option value="">— اختيار تلقائي حسب القدرة —</option>${opts}`;
+    .select("brand")
+    .eq("category", "inverters").eq("published", true);
+  if (error || !data || !data.length) { sel.innerHTML = `<option value="">تلقائي (الأنسب للقدرة)</option>`; return; }
+  const brands = [...new Set(data.map((p) => p.brand))];
+  sel.innerHTML = `<option value="">تلقائي (الأنسب للقدرة)</option>` + brands.map((b) => `<option value="${b}">${b}</option>`).join("");
 }
 
 async function loadPumpsForHp(hp) {
@@ -154,12 +155,16 @@ async function loadPumpsForHp(hp) {
 async function calcQuote() {
   const msg = $("[data-calc-message]");
   const hp = parseFloat($("#hpInput").value);
-  const panelId = $("#panelSelect").value;
+  const panelId = $("#panelWattSelect").value;
+  const inverterBrand = $("#inverterBrandSelect").value || null;
   const includePump = $("#includePumpChk").checked;
   const pumpId = $("#pumpSelect").value || null;
+  const panelsPerStringAdjust = parseInt($("#panelsPerStringAdjustInput").value, 10) || 0;
+  const stringsAdjust = parseInt($("#stringsAdjustInput").value, 10) || 0;
+  const inverterPowerIncrease = parseFloat($("#inverterPowerIncreaseInput").value) || 0;
 
   if (!hp || hp <= 0) { msg.textContent = "دخّل قدرة الغطاس بالحصان."; msg.className = "form-note error"; return; }
-  if (!panelId) { msg.textContent = "اختار نوع اللوح الشمسي."; msg.className = "form-note error"; return; }
+  if (!panelId) { msg.textContent = "اختار الشركة وقدرة اللوح الشمسي."; msg.className = "form-note error"; return; }
 
   msg.textContent = "جاري الحساب..."; msg.className = "form-note";
   $("#calcBtn").disabled = true;
@@ -171,10 +176,12 @@ async function calcQuote() {
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
       body: {
         action: "quote", hp, panel_product_id: panelId,
-        structure_mount: currentMount,
+        structure_mount: currentMount, inverter_brand: inverterBrand,
         include_pump: includePump, pump_product_id: pumpId,
         included_item_keys: getCheckedInstallKeys(),
-        inverter_product_id: $("#inverterSelect").value || null,
+        panels_per_string_adjust: panelsPerStringAdjust,
+        strings_adjust: stringsAdjust,
+        inverter_power_increase: inverterPowerIncrease,
       },
     });
     $("#calcBtn").disabled = false;
@@ -264,19 +271,25 @@ async function saveAndPrint() {
   $("#saveQuoteBtn").disabled = true;
 
   const hp = parseFloat($("#hpInput").value);
-  const panelId = $("#panelSelect").value;
+  const panelId = $("#panelWattSelect").value;
+  const inverterBrand = $("#inverterBrandSelect").value || null;
   const includePump = $("#includePumpChk").checked;
   const pumpId = $("#pumpSelect").value || null;
+  const panelsPerStringAdjust = parseInt($("#panelsPerStringAdjustInput").value, 10) || 0;
+  const stringsAdjust = parseInt($("#stringsAdjustInput").value, 10) || 0;
+  const inverterPowerIncrease = parseFloat($("#inverterPowerIncreaseInput").value) || 0;
 
   try {
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
       body: {
         action: "save", hp, panel_product_id: panelId,
-        structure_mount: currentMount,
+        structure_mount: currentMount, inverter_brand: inverterBrand,
         include_pump: includePump, pump_product_id: pumpId,
         included_item_keys: getCheckedInstallKeys(),
-        inverter_product_id: $("#inverterSelect").value || null,
         customer_name: name, customer_phone: phone,
+        panels_per_string_adjust: panelsPerStringAdjust,
+        strings_adjust: stringsAdjust,
+        inverter_power_increase: inverterPowerIncrease,
       },
     });
     $("#saveQuoteBtn").disabled = false;
@@ -347,7 +360,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#calcBtn").addEventListener("click", calcQuote);
   $("#saveQuoteBtn").addEventListener("click", saveAndPrint);
 
-  $("#panelBrandSelect").addEventListener("change", (e) => loadPanelModelsForBrand(e.target.value));
+  $("#panelBrandSelect").addEventListener("change", (e) => populatePanelWattages(e.target.value));
+
+  // زر "تأكيد التعديلات" داخل الإعدادات المتقدمة: بيعيد الحساب فورًا بالقيم
+  // الجديدة لو فيه نتيجة سابقة، وإلا القيم هتتبعت تلقائيًا مع أول "احسب العرض".
+  $("#confirmAdvancedBtn").addEventListener("click", () => {
+    if (lastResult) calcQuote();
+    else {
+      const msg = $("[data-calc-message]");
+      msg.textContent = "تم حفظ التعديلات — هتتطبق مع أول حساب للعرض.";
+      msg.className = "form-note ok";
+    }
+  });
 
   $$("[data-mount]").forEach((b) => b.addEventListener("click", () => {
     $$("[data-mount]").forEach((x) => x.classList.toggle("active", x === b));
