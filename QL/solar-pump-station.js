@@ -12,7 +12,7 @@
    والمندوب بعد كده يعدّل أي بند لوحده حسب طلب العميل الفعلي.
    ============================================================ */
 
-const INSTALL_KEYS = ["structure", "concrete", "earth", "install_mech", "install_elec", "transport"];
+const INSTALL_KEYS = ["inverter", "combiner", "cables", "mc4", "structure", "concrete", "earth", "install_mech", "install_elec", "transport"];
 
 let client = null;
 let currentSession = null;
@@ -148,7 +148,7 @@ async function calcQuote() {
         action: "quote", hp, panel_product_id: panelId,
         structure_mount: currentMount,
         include_pump: includePump, pump_product_id: pumpId,
-        included_install_keys: getCheckedInstallKeys(),
+        included_item_keys: getCheckedInstallKeys(),
       },
     });
     $("#calcBtn").disabled = false;
@@ -248,7 +248,7 @@ async function saveAndPrint() {
         action: "save", hp, panel_product_id: panelId,
         structure_mount: currentMount,
         include_pump: includePump, pump_product_id: pumpId,
-        included_install_keys: getCheckedInstallKeys(),
+        included_item_keys: getCheckedInstallKeys(),
         customer_name: name, customer_phone: phone,
       },
     });
