@@ -198,23 +198,36 @@
           <label style="margin-top:var(--space-2)">نوع الإنفرتر (الشركة المصنعة)</label>
           <select id="inverterBrandSelect"><option value="">تلقائي (الأنسب للقدرة)</option></select>
 
+          <label style="margin-top:var(--space-2)">نوع التثبيت (الشاسيه)</label>
+          <div class="seg">
+            <button type="button" class="active" data-mount="fixed">ثابت</button>
+            <button type="button" data-mount="rotational">متحرك</button>
+          </div>
+
+          <label style="margin-top:var(--space-2);display:flex;gap:8px;align-items:center;font-weight:700;font-size:13px;cursor:pointer">
+            <input type="checkbox" id="includePumpChk" style="width:auto"> تضمين الغطاس نفسه في العرض
+          </label>
+          <div data-pump-wrap hidden style="margin-top:8px">
+            <label>اختيار الغطاس (اختياري — سيب فاضي للاختيار التلقائي حسب القدرة)</label>
+            <select id="pumpSelect"><option value="">— اختيار تلقائي —</option></select>
+          </div>
+
           <div class="advanced-toggle" data-advanced-toggle>
             <i class="fa-solid fa-chevron-down"></i> إعدادات متقدمة
           </div>
           <div class="advanced-body" data-advanced-body>
-            <label>نوع التثبيت (الشاسيه)</label>
-            <div class="seg">
-              <button type="button" class="active" data-mount="fixed">ثابت</button>
-              <button type="button" data-mount="rotational">متحرك</button>
-            </div>
+            <label>تعديل عدد الألواح/سلسلة</label>
+            <input type="number" id="panelsPerStringAdjustInput" value="0" step="1">
 
-            <label style="margin-top:var(--space-2);display:flex;gap:8px;align-items:center;font-weight:700;font-size:13px;cursor:pointer">
-              <input type="checkbox" id="includePumpChk" style="width:auto"> تضمين الغطاس نفسه في العرض
-            </label>
-            <div data-pump-wrap hidden style="margin-top:8px">
-              <label>اختيار الغطاس (اختياري — سيب فاضي للاختيار التلقائي حسب القدرة)</label>
-              <select id="pumpSelect"><option value="">— اختيار تلقائي —</option></select>
-            </div>
+            <label style="margin-top:var(--space-2)">تعديل عدد السلاسل (Strings)</label>
+            <input type="number" id="stringsAdjustInput" value="0" step="1">
+
+            <label style="margin-top:var(--space-2)">هامش زيادة قدرة الانفرتر (KW)</label>
+            <input type="number" id="inverterPowerIncreaseInput" value="0" step="0.5">
+
+            <button type="button" class="btn btn-primary" id="confirmAdvancedBtn" style="margin-top:var(--space-2);width:100%">
+              <i class="fa-solid fa-check"></i> تأكيد التعديلات
+            </button>
           </div>
 
           <p class="form-note" data-calc-message></p>

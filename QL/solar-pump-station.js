@@ -159,6 +159,9 @@ async function calcQuote() {
   const inverterBrand = $("#inverterBrandSelect").value || null;
   const includePump = $("#includePumpChk").checked;
   const pumpId = $("#pumpSelect").value || null;
+  const panelsPerStringAdjust = parseInt($("#panelsPerStringAdjustInput").value, 10) || 0;
+  const stringsAdjust = parseInt($("#stringsAdjustInput").value, 10) || 0;
+  const inverterPowerIncrease = parseFloat($("#inverterPowerIncreaseInput").value) || 0;
 
   if (!hp || hp <= 0) { msg.textContent = "دخّل قدرة الغطاس بالحصان."; msg.className = "form-note error"; return; }
   if (!panelId) { msg.textContent = "اختار الشركة وقدرة اللوح الشمسي."; msg.className = "form-note error"; return; }
@@ -176,6 +179,9 @@ async function calcQuote() {
         structure_mount: currentMount, inverter_brand: inverterBrand,
         include_pump: includePump, pump_product_id: pumpId,
         included_item_keys: getCheckedInstallKeys(),
+        panels_per_string_adjust: panelsPerStringAdjust,
+        strings_adjust: stringsAdjust,
+        inverter_power_increase: inverterPowerIncrease,
       },
     });
     $("#calcBtn").disabled = false;
@@ -269,6 +275,9 @@ async function saveAndPrint() {
   const inverterBrand = $("#inverterBrandSelect").value || null;
   const includePump = $("#includePumpChk").checked;
   const pumpId = $("#pumpSelect").value || null;
+  const panelsPerStringAdjust = parseInt($("#panelsPerStringAdjustInput").value, 10) || 0;
+  const stringsAdjust = parseInt($("#stringsAdjustInput").value, 10) || 0;
+  const inverterPowerIncrease = parseFloat($("#inverterPowerIncreaseInput").value) || 0;
 
   try {
     const { data, error } = await client.functions.invoke("solar-pump-quote", {
@@ -278,6 +287,9 @@ async function saveAndPrint() {
         include_pump: includePump, pump_product_id: pumpId,
         included_item_keys: getCheckedInstallKeys(),
         customer_name: name, customer_phone: phone,
+        panels_per_string_adjust: panelsPerStringAdjust,
+        strings_adjust: stringsAdjust,
+        inverter_power_increase: inverterPowerIncrease,
       },
     });
     $("#saveQuoteBtn").disabled = false;
@@ -349,6 +361,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#saveQuoteBtn").addEventListener("click", saveAndPrint);
 
   $("#panelBrandSelect").addEventListener("change", (e) => populatePanelWattages(e.target.value));
+
+  // زر "تأكيد التعديلات" داخل الإعدادات المتقدمة: بيعيد الحساب فورًا بالقيم
+  // الجديدة لو فيه نتيجة سابقة، وإلا القيم هتتبعت تلقائيًا مع أول "احسب العرض".
+  $("#confirmAdvancedBtn").addEventListener("click", () => {
+    if (lastResult) calcQuote();
+    else {
+      const msg = $("[data-calc-message]");
+      msg.textContent = "تم حفظ التعديلات — هتتطبق مع أول حساب للعرض.";
+      msg.className = "form-note ok";
+    }
+  });
 
   $$("[data-mount]").forEach((b) => b.addEventListener("click", () => {
     $$("[data-mount]").forEach((x) => x.classList.toggle("active", x === b));
