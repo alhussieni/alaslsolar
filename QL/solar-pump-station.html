@@ -66,21 +66,26 @@
     .sps-col:last-child { order: 1; position: sticky; top: var(--space-3); align-self: start; }
     @media (max-width: 1020px) { .sps-col:last-child { position: static; } }
 
+    /* تصغير كارتي "ملخص المنظومة" و"المواصفات الفنية" — مساحة أقل، وضوح
+       زي ما هو (وزن الخط والتباين متغيرش، بس المسافات والأحجام اتصغرت). */
+    [data-summary-card], [data-specs-card] { padding: 14px 16px; }
+    [data-summary-card] h3, [data-specs-card] h3 { font-size: 14px; margin-bottom: 4px; }
+
     /* شرائح قيم صغيرة (زي البادجات الزرقاء في المرجع) */
-    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    .chip { border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 12.5px; font-weight: 700; color: var(--brand-dark); background: var(--brand-soft); }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .chip { border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 11.5px; font-weight: 700; color: var(--brand-dark); background: var(--brand-soft); }
     .chip.outline { background: #fff; color: var(--ink); }
 
-    .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 10px; margin-top: 12px; }
-    .spec-box { background: #f6f1ea; border-radius: var(--radius); padding: 10px; text-align: center; }
-    .spec-box .val { font-weight: 800; font-size: 16px; color: var(--brand-dark); }
-    .spec-box .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 7px; margin-top: 10px; }
+    .spec-box { background: #f6f1ea; border-radius: var(--radius); padding: 7px; text-align: center; }
+    .spec-box .val { font-weight: 800; font-size: 14px; color: var(--brand-dark); }
+    .spec-box .lbl { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
-    .price-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-    .price-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px; text-align: center; cursor: pointer; transition: .15s; }
+    .price-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .price-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 9px; text-align: center; cursor: pointer; transition: .15s; }
     .price-card.active { border-color: var(--brand); background: var(--brand-soft); }
-    .price-card .amt { font-weight: 800; font-size: 18px; color: var(--brand-dark); }
-    .price-card .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .price-card .amt { font-weight: 800; font-size: 15px; color: var(--brand-dark); }
+    .price-card .lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
     .warn-box { background: #fdf1e0; border: 1px solid #e8b96a; border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: #7a4d0a; margin-top: 10px; }
 
@@ -91,6 +96,14 @@
     .final-price-banner { background: var(--forest); color: #fff; border-radius: var(--radius); padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
     .final-price-banner .lbl { font-size: 13px; opacity: .85; }
     .final-price-banner .amt { font-size: 22px; font-weight: 800; }
+
+    /* أزرار الفورم — تناسق موحّد في الحجم مع مكوّن .seg (نفس الارتفاع
+       والحواف والوزن)، بدل الأحجام الافتراضية المتفاوتة لكل زرار. */
+    #calcBtn, #confirmAdvancedBtn, #saveQuoteBtn {
+      min-height: 44px; padding: 0 18px; font-size: 13.5px; font-weight: 700;
+      border-radius: var(--radius); white-space: nowrap;
+    }
+    #calcBtn { flex: 0 0 auto; }
 
     .advanced-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--brand-dark); margin-top: var(--space-2); user-select: none; }
     .advanced-body { display: none; margin-top: var(--space-2); }
@@ -181,7 +194,7 @@
           </div>
 
           <div class="toolbar-btns">
-            <button type="button" class="btn btn-secondary" id="saveQuoteBtn"><i class="fa-solid fa-print"></i> طباعة / حفظ PDF</button>
+            <button type="button" class="btn btn-outline" id="saveQuoteBtn"><i class="fa-solid fa-print"></i> طباعة / حفظ PDF</button>
           </div>
           <p class="form-note" data-save-message></p>
         </div>

@@ -21,7 +21,7 @@ let lastResult = null; // { specs, baseItems, installOnlyItems, supplyOnlyTotal,
 
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
-function fmt(n) { return Number(n || 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 }); }
+function fmt(n) { return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 0 }); }
 
 function getCheckedInstallKeys() {
   return INSTALL_KEYS.filter((k) => $(`[data-item-key="${k}"]`)?.checked);
@@ -328,7 +328,7 @@ async function saveAndPrint() {
 
 function printQuote(r, custName, custPhone, hp) {
   const area = document.getElementById("printArea");
-  const dateStr = new Date().toLocaleDateString("ar-EG");
+  const dateStr = new Date().toLocaleDateString("en-GB");
 
   const rows = r.items.map((it) => `
     <tr><td>${it.label}</td><td>${it.type}</td><td>${it.qty}</td><td>${it.warranty}</td><td>${fmt(it.sell)} ج.م</td></tr>
