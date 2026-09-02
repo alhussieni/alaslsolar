@@ -27,6 +27,22 @@ function getCheckedInstallKeys() {
   return INSTALL_KEYS.filter((k) => $(`[data-item-key="${k}"]`)?.checked);
 }
 
+// مكتبة Supabase بترجع رسالة عامة ("Edge Function returned a non-2xx status
+// code") في error.message لما الدالة ترجع 4xx/5xx، وبتخفي رسالة الخطأ
+// الحقيقية اللي احنا راجعينها في جسم الرد. الدالة دي بتحاول تقرأ الجسم
+// الفعلي (error.context) وتطلع منه رسالتنا الحقيقية، وإلا بترجع رسالة
+// المكتبة العامة كحل احتياطي.
+async function extractFnErrorMessage(error, data) {
+  if (data?.error) return data.error;
+  try {
+    if (error?.context && typeof error.context.json === "function") {
+      const body = await error.context.clone().json();
+      if (body?.error) return body.error;
+    }
+  } catch (_) { /* الجسم مش JSON أو اتقرا قبل كده — نتجاهل ونكمل بالرسالة العامة */ }
+  return error?.message || "خطأ غير معروف";
+}
+
 async function initClient() {
   for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) {
     await new Promise((r) => setTimeout(r, 50));
@@ -187,7 +203,7 @@ async function calcQuote() {
     $("#calcBtn").disabled = false;
 
     if (error || data?.error) {
-      msg.textContent = data?.error || ("تعذر الحساب: " + error.message);
+      msg.textContent = await extractFnErrorMessage(error, data);
       msg.className = "form-note error";
       return;
     }
@@ -295,7 +311,7 @@ async function saveAndPrint() {
     $("#saveQuoteBtn").disabled = false;
 
     if (error || data?.error) {
-      msg.textContent = data?.error || ("تعذر الحفظ: " + error.message);
+      msg.textContent = await extractFnErrorMessage(error, data);
       msg.className = "form-note error";
       return;
     }
