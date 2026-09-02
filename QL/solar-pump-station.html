@@ -184,50 +184,35 @@
             <button type="button" class="btn btn-primary" id="calcBtn" style="white-space:nowrap"><i class="fa-solid fa-calculator"></i> تأكيد</button>
           </div>
 
-          <div class="row2" style="margin-top:var(--space-2)">
-            <div>
-              <label>الشركة المصنعة للوح</label>
-              <select id="panelBrandSelect"><option value="">جاري تحميل الألواح...</option></select>
-            </div>
-            <div>
-              <label>قدرة اللوح (Watt)</label>
-              <select id="panelWattSelect"><option value="">اختار الشركة أولاً</option></select>
-            </div>
-          </div>
+          <label style="margin-top:var(--space-2)">الشركة المصنّعة للوح الشمسي</label>
+          <select id="panelBrandSelect"><option value="">جاري التحميل...</option></select>
 
-          <label style="margin-top:var(--space-2)">نوع الإنفرتر (الشركة المصنعة)</label>
-          <select id="inverterBrandSelect"><option value="">تلقائي (الأنسب للقدرة)</option></select>
-
-          <label style="margin-top:var(--space-2)">نوع التثبيت (الشاسيه)</label>
-          <div class="seg">
-            <button type="button" class="active" data-mount="fixed">ثابت</button>
-            <button type="button" data-mount="rotational">متحرك</button>
-          </div>
-
-          <label style="margin-top:var(--space-2);display:flex;gap:8px;align-items:center;font-weight:700;font-size:13px;cursor:pointer">
-            <input type="checkbox" id="includePumpChk" style="width:auto"> تضمين الغطاس نفسه في العرض
-          </label>
-          <div data-pump-wrap hidden style="margin-top:8px">
-            <label>اختيار الغطاس (اختياري — سيب فاضي للاختيار التلقائي حسب القدرة)</label>
-            <select id="pumpSelect"><option value="">— اختيار تلقائي —</option></select>
-          </div>
+          <label style="margin-top:var(--space-2)">قدرة اللوح (واط)</label>
+          <select id="panelSelect"><option value="">اختار الشركة الأول</option></select>
 
           <div class="advanced-toggle" data-advanced-toggle>
             <i class="fa-solid fa-chevron-down"></i> إعدادات متقدمة
           </div>
           <div class="advanced-body" data-advanced-body>
-            <label>تعديل عدد الألواح/سلسلة</label>
-            <input type="number" id="panelsPerStringAdjustInput" value="0" step="1">
+            <label>نوع التثبيت (الشاسيه)</label>
+            <div class="seg">
+              <button type="button" class="active" data-mount="fixed">ثابت</button>
+              <button type="button" data-mount="rotational">متحرك</button>
+            </div>
 
-            <label style="margin-top:var(--space-2)">تعديل عدد السلاسل (Strings)</label>
-            <input type="number" id="stringsAdjustInput" value="0" step="1">
+            <label style="margin-top:var(--space-2)">الإنفرتر</label>
+            <select id="inverterSelect"><option value="">— اختيار تلقائي حسب القدرة —</option></select>
+            <p style="font-size:11.5px;color:var(--muted);margin-top:4px">
+              سيبها "اختيار تلقائي" عشان المحرك يختار أصغر موديل حقيقي يغطي القدرة المطلوبة، أو اختار موديل بعينه لو العميل محدد ماركة معينة.
+            </p>
 
-            <label style="margin-top:var(--space-2)">هامش زيادة قدرة الانفرتر (KW)</label>
-            <input type="number" id="inverterPowerIncreaseInput" value="0" step="0.5">
-
-            <button type="button" class="btn btn-primary" id="confirmAdvancedBtn" style="margin-top:var(--space-2);width:100%">
-              <i class="fa-solid fa-check"></i> تأكيد التعديلات
-            </button>
+            <label style="margin-top:var(--space-2);display:flex;gap:8px;align-items:center;font-weight:700;font-size:13px;cursor:pointer">
+              <input type="checkbox" id="includePumpChk" style="width:auto"> تضمين الغطاس نفسه في العرض
+            </label>
+            <div data-pump-wrap hidden style="margin-top:8px">
+              <label>اختيار الغطاس (اختياري — سيب فاضي للاختيار التلقائي حسب القدرة)</label>
+              <select id="pumpSelect"><option value="">— اختيار تلقائي —</option></select>
+            </div>
           </div>
 
           <p class="form-note" data-calc-message></p>
