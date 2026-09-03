@@ -646,7 +646,16 @@
           .in('category', ['well_motors','pumps','inverters','pipes'])
           .eq('published', true);
         if (error || !data) return null;
-        productCache = data.filter(r => r.in_stock !== false);
+        let rows = data.filter(r => r.in_stock !== false);
+        // Same promo-pricing rule as products.html — this calculator shows
+        // an estimate built from the same prices the customer sees browsing.
+        try {
+          const promoMap = await getActivePromoMap(client);
+          rows = applyPromoPricing(rows, promoMap);
+        } catch (e) {
+          console.error('promo fetch error:', e);
+        }
+        productCache = rows;
         return productCache;
       } catch (e) { return null; }
     }
