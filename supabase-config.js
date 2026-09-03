@@ -11,3 +11,41 @@ function getAlaslSupabase() {
   }
   return window.alaslSupabase;
 }
+
+/* ============================================================
+   خصومات ترويجية — بتأثر على سعر العرض بس (products.html و
+   product-detail.html)، وميّا بتلمس عمود products.price الأصلي
+   في الداتابيز ولا أي حساب في QL/ (عروض أسعار المناديب).
+   الجدول ده منفصل عن supplier_discounts عمدًا (راجع الملاحظة
+   الأمنية في supabase-promotional-discounts.sql) — مسموح بقراءته
+   بالـ anon key لأنه مفيهوش أي بيانات تكلفة/هامش ربح.
+   ============================================================ */
+async function getActivePromoMap(sb) {
+  const map = {};
+  try {
+    const { data, error } = await sb
+      .from('promotional_discounts')
+      .select('category, brand, promo_discount_pct')
+      .eq('is_active', true);
+    if (error || !data) return map;
+    data.forEach((r) => {
+      map[`${r.category}|${r.brand}`] = Number(r.promo_discount_pct) || 0;
+    });
+  } catch (e) {
+    console.error('getActivePromoMap error:', e);
+  }
+  return map;
+}
+
+// Returns a NEW array — never mutates the caller's rows or their .price.
+// Adds .original_price (untouched) and overwrites .price with the
+// discounted value when an active promo matches (category, brand).
+// Products with no matching promo pass through unchanged.
+function applyPromoPricing(rows, promoMap) {
+  return (rows || []).map((r) => {
+    const pct = promoMap[`${r.category}|${r.brand}`];
+    if (!pct) return { ...r, original_price: r.price };
+    const discounted = Math.round((Number(r.price) * (1 - pct / 100)) * 100) / 100;
+    return { ...r, original_price: r.price, price: discounted, promo_pct: pct };
+  });
+}

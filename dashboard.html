@@ -1046,14 +1046,26 @@
           <p class="form-note" data-sd-message></p>
           <p class="form-note" style="color:var(--muted)">خصم البيع لازم يكون أقل من أو يساوي خصم المورد دايمًا (عشان الشركة متبيعش بخسارة) — القاعدة نفسها بترفض أي قيمة مخالفة.</p>
 
+          <div style="border-top:1px dashed var(--line);margin:var(--space-3) 0;padding-top:var(--space-2)">
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">خصم ترويجي % (سعر صفحة المنتجات بس — مبيأثرش على خصم المورد ولا خصم البيع ولا عروض أسعار المناديب)</label>
+            <div style="display:flex;gap:var(--space-2);align-items:flex-end;flex-wrap:wrap">
+              <input type="number" id="sdPromoPct" min="0" max="100" step="0.5" value="0" style="width:110px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)">
+                <input type="checkbox" id="sdPromoActive"> الخصم شغّال دلوقتي (فعّله وقت الحملة، وشيله يدويًا لما تخلص)
+              </label>
+              <button type="button" class="btn btn-secondary" id="sdPromoSaveBtn" style="font-size:13px">حفظ الخصم الترويجي</button>
+            </div>
+            <p class="form-note" data-sd-promo-message></p>
+          </div>
+
           <h3 style="margin-top:var(--space-3);font-size:15px">الخصومات المسجّلة حاليًا</h3>
           <table style="width:100%;border-collapse:collapse;font-size:13px">
             <thead>
               <tr style="text-align:right;color:var(--muted);font-size:12px">
-                <th style="padding:8px">الفئة</th><th style="padding:8px">الماركة</th><th style="padding:8px">خصم المورد</th><th style="padding:8px">خصم البيع</th><th style="padding:8px"></th>
+                <th style="padding:8px">الفئة</th><th style="padding:8px">الماركة</th><th style="padding:8px">خصم المورد</th><th style="padding:8px">خصم البيع</th><th style="padding:8px">خصم ترويجي</th><th style="padding:8px"></th>
               </tr>
             </thead>
-            <tbody id="sdListBody"><tr><td colspan="4" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+            <tbody id="sdListBody"><tr><td colspan="6" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
           </table>
         </article>
 

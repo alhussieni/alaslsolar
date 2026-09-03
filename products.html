@@ -1282,7 +1282,11 @@
             <div class="prod-card-bottom">
               <div>
                 ${badge ? `<div>${badge}</div>` : ''}
-                <span class="prod-card-price">${fmt(p.price)} <span class="prod-unit">${unitFor(p)}</span></span>
+                <span class="prod-card-price">
+                  ${p.promo_pct ? `<span class="prod-price-original" style="text-decoration:line-through;color:var(--muted);font-size:0.8em;margin-inline-end:6px">${fmt(p.original_price)}</span>` : ''}
+                  ${fmt(p.price)} <span class="prod-unit">${unitFor(p)}</span>
+                  ${p.promo_pct ? `<span class="prod-promo-badge" style="background:#c0392b;color:#fff;border-radius:6px;padding:1px 6px;font-size:0.7em;margin-inline-start:6px">-${p.promo_pct}%</span>` : ''}
+                </span>
               </div>
               ${ds}
             </div>
@@ -1855,10 +1859,22 @@
         } catch (e) {
           console.error('brand_logos fetch error:', e);
         }
-        allProducts = rawProducts.map(p => ({
+        const withLogos = rawProducts.map(p => ({
           ...p,
           image_url: p.image_url || (p.brand && brandLogos[p.brand]) || null,
         }));
+
+        // Apply active promotional discounts to the *display* price only.
+        // products.price in the DB is never touched — deleting/deactivating
+        // a promo later just means this map comes back empty and the
+        // original price shows again automatically.
+        let promoMap = {};
+        try {
+          promoMap = await getActivePromoMap(sb);
+        } catch (e) {
+          console.error('promo fetch error:', e);
+        }
+        allProducts = applyPromoPricing(withLogos, promoMap);
         buildFilterTree(sectionOf);
         renderTree();
         renderGrid();
