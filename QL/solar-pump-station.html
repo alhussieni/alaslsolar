@@ -27,18 +27,16 @@
       #printArea { display: block !important; }
 
       /* letterhead.jpg هي تصميم صفحة A4 كاملة (لوجو فوق + فوتر تواصل تحت)
-         مش مجرد هيدر — فبنحطها كخلفية للصفحة نفسها عشان تتكرر تلقائيًا في
-         كل صفحة يطلعها المحتوى، بدل ما تكون صورة واحدة في أول المحتوى بس. */
-      body {
-        margin: 0;
-        background-image: url('letterhead.jpg');
-        background-position: top center;
-        background-size: 210mm 297mm;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+         مش مجرد هيدر. جربنا نحطها كـ background-image بس كروم (ومتصفحات
+         تانية) بتتجاهل background-attachment:fixed تمامًا وقت الطباعة —
+         فبدل الخلفية، بنحط صورة <img> فعلية بموضع ثابت (position:fixed)،
+         وده بيتكرر في كل صفحة طباعة بشكل موثوق. */
+      body { margin: 0; }
+      .print-letterhead-bg {
+        position: fixed; top: 0; left: 0; width: 210mm; height: 297mm; z-index: -1;
       }
+      .print-letterhead-bg img { width: 100%; height: 100%; display: block; object-fit: cover; }
+
       /* هامش علوي (70مم) يمشي تحت منطقة اللوجو، وهامش سفلي (28مم) يوقف
          قبل شريط التواصل في الفوتر — القياسات دي مأخوذة من تحليل تصميم
          letterhead.jpg نفسه. */
