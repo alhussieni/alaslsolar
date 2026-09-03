@@ -489,10 +489,20 @@
         return;
       }
 
-      const { data, error } = await client.from('products')
+      const { data: rawData, error } = await client.from('products')
         .select('category,brand,model_available,price,voltage_v,power_kw,surge_capacity_pct,pv_voc_max,pv_mppt_min,pv_mppt_max,capacity_ah,dod,power_watt,vimp,voc,in_stock,published')
         .in('category', ['offgrid', 'batteries', 'panels']);
-      if (error || !data) { console.error('offgrid catalog load error:', error); return; }
+      if (error || !rawData) { console.error('offgrid catalog load error:', error); return; }
+
+      // Same promo-pricing rule as products.html — this calculator's
+      // estimate is built from the same prices the customer sees browsing.
+      let data = rawData;
+      try {
+        const promoMap = await getActivePromoMap(client);
+        data = applyPromoPricing(rawData, promoMap);
+      } catch (e) {
+        console.error('promo fetch error:', e);
+      }
 
       const hasPrice = r => r.price != null && Number(r.price) > 0;
 
