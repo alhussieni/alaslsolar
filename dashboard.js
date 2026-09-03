@@ -2337,8 +2337,30 @@ document.addEventListener("DOMContentLoaded", () => {
         <td style="padding:8px">${r.promo ? `${r.promo.promo_discount_pct}% ${r.promo.is_active ? '<span style="color:var(--forest)">(شغّال)</span>' : '<span style="color:var(--muted)">(متوقف)</span>'}` : '—'}
           ${r.promo ? `<button type="button" class="sd-promo-delete-btn" style="margin-inline-start:6px;padding:3px 8px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:11px;cursor:pointer">حذف الترويجي</button>` : ''}
         </td>
-        <td style="padding:8px">${r.supplier_discount_pct != null ? '<button type="button" class="sd-delete-btn" style="padding:5px 12px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:12px;cursor:pointer">حذف</button>' : ''}</td>
+        <td style="padding:8px">
+          ${r.supplier_discount_pct != null ? '<button type="button" class="sd-delete-btn" style="padding:5px 12px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:12px;cursor:pointer">حذف</button>' : ''}
+          <button type="button" class="sd-edit-btn" style="margin-inline-start:6px;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">تعديل</button>
+        </td>
       </tr>`).join("");
+    listBody.querySelectorAll(".sd-edit-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const row = e.target.closest("tr");
+        const rowData = rows.find((r) => r.category === row.dataset.cat && r.brand === row.dataset.brand);
+        // Reset the brand dropdown to just this row's brand — avoids mixing
+        // in stale options left over from whatever category was previously
+        // selected, and covers brands with no published products left.
+        categorySelect.value = row.dataset.cat;
+        brandSelect.innerHTML = `<option value="${row.dataset.brand}">${row.dataset.brand}</option>`;
+        brandSelect.value = row.dataset.brand;
+        pctInput.value = rowData?.supplier_discount_pct ?? 0;
+        salePctInput.value = rowData?.sale_discount_pct ?? 0;
+        if (promoPctInput) {
+          promoPctInput.value = rowData?.promo?.promo_discount_pct ?? 0;
+          promoActiveInput.checked = !!rowData?.promo?.is_active;
+        }
+        document.getElementById("section-supplier-discounts").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
     listBody.querySelectorAll(".sd-delete-btn").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
         const row = e.target.closest("tr");
