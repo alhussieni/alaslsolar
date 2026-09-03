@@ -2264,6 +2264,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveBtn = document.getElementById("sdSaveBtn");
   const listBody = document.getElementById("sdListBody");
   const msg = document.querySelector("[data-sd-message]");
+  const promoPctInput = document.getElementById("sdPromoPct");
+  const promoActiveInput = document.getElementById("sdPromoActive");
+  const promoSaveBtn = document.getElementById("sdPromoSaveBtn");
+  const promoMsg = document.querySelector("[data-sd-promo-message]");
   if (!categorySelect || !saveBtn) return;
 
   async function loadBrandsForCategory() {
@@ -2288,27 +2292,64 @@ document.addEventListener("DOMContentLoaded", () => {
       .maybeSingle();
     pctInput.value = data?.supplier_discount_pct ?? 0;
     salePctInput.value = data?.sale_discount_pct ?? 0;
+
+    if (promoPctInput) {
+      const { data: promo } = await client.from("promotional_discounts")
+        .select("promo_discount_pct,is_active")
+        .eq("category", categorySelect.value)
+        .eq("brand", brandSelect.value)
+        .maybeSingle();
+      promoPctInput.value = promo?.promo_discount_pct ?? 0;
+      promoActiveInput.checked = !!promo?.is_active;
+    }
   }
 
   async function loadDiscountsList() {
-    listBody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr>`;
-    const { data, error } = await client.from("supplier_discounts")
-      .select("category,brand,supplier_discount_pct,sale_discount_pct")
-      .order("category", { ascending: true });
-    if (error) { listBody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:#b23">تعذر التحميل: ${error.message}</td></tr>`; return; }
-    if (!data || !data.length) { listBody.innerHTML = `<tr><td colspan="5" style="padding:12px;color:var(--muted)">مفيش خصومات مسجّلة لسه.</td></tr>`; return; }
-    listBody.innerHTML = data.map((r) => `
+    listBody.innerHTML = `<tr><td colspan="6" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr>`;
+    const [{ data, error }, { data: promoData }] = await Promise.all([
+      client.from("supplier_discounts")
+        .select("category,brand,supplier_discount_pct,sale_discount_pct")
+        .order("category", { ascending: true }),
+      client.from("promotional_discounts")
+        .select("category,brand,promo_discount_pct,is_active"),
+    ]);
+    if (error) { listBody.innerHTML = `<tr><td colspan="6" style="padding:12px;color:#b23">تعذر التحميل: ${error.message}</td></tr>`; return; }
+    if (!data || !data.length) { listBody.innerHTML = `<tr><td colspan="6" style="padding:12px;color:var(--muted)">مفيش خصومات مسجّلة لسه.</td></tr>`; return; }
+    // Merge promo rows into the supplier-discount rows by (category, brand)
+    // so each has its own line even if it only exists in one of the two tables.
+    const promoByKey = {};
+    (promoData || []).forEach((p) => { promoByKey[`${p.category}|${p.brand}`] = p; });
+    const promoOnlyKeys = new Set(Object.keys(promoByKey));
+    data.forEach((r) => promoOnlyKeys.delete(`${r.category}|${r.brand}`));
+    const rows = [
+      ...data.map((r) => ({ ...r, promo: promoByKey[`${r.category}|${r.brand}`] || null })),
+      ...[...promoOnlyKeys].map((k) => {
+        const [category, brand] = k.split("|");
+        return { category, brand, supplier_discount_pct: null, sale_discount_pct: null, promo: promoByKey[k] };
+      }),
+    ];
+    listBody.innerHTML = rows.map((r) => `
       <tr data-cat="${r.category}" data-brand="${r.brand}" style="border-bottom:1px solid var(--line)">
         <td style="padding:8px">${r.category}</td>
         <td style="padding:8px">${r.brand}</td>
-        <td style="padding:8px">${r.supplier_discount_pct}%</td>
-        <td style="padding:8px">${r.sale_discount_pct}%</td>
-        <td style="padding:8px"><button type="button" class="sd-delete-btn" style="padding:5px 12px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:12px;cursor:pointer">حذف</button></td>
+        <td style="padding:8px">${r.supplier_discount_pct != null ? r.supplier_discount_pct + '%' : '—'}</td>
+        <td style="padding:8px">${r.sale_discount_pct != null ? r.sale_discount_pct + '%' : '—'}</td>
+        <td style="padding:8px">${r.promo ? `${r.promo.promo_discount_pct}% ${r.promo.is_active ? '<span style="color:var(--forest)">(شغّال)</span>' : '<span style="color:var(--muted)">(متوقف)</span>'}` : '—'}
+          ${r.promo ? `<button type="button" class="sd-promo-delete-btn" style="margin-inline-start:6px;padding:3px 8px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:11px;cursor:pointer">حذف الترويجي</button>` : ''}
+        </td>
+        <td style="padding:8px">${r.supplier_discount_pct != null ? '<button type="button" class="sd-delete-btn" style="padding:5px 12px;border-radius:8px;border:1px solid #b23;background:#fff;color:#b23;font-size:12px;cursor:pointer">حذف</button>' : ''}</td>
       </tr>`).join("");
     listBody.querySelectorAll(".sd-delete-btn").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
         const row = e.target.closest("tr");
         await client.from("supplier_discounts").delete().eq("category", row.dataset.cat).eq("brand", row.dataset.brand);
+        loadDiscountsList();
+      });
+    });
+    listBody.querySelectorAll(".sd-promo-delete-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const row = e.target.closest("tr");
+        await client.from("promotional_discounts").delete().eq("category", row.dataset.cat).eq("brand", row.dataset.brand);
         loadDiscountsList();
       });
     });
@@ -2332,6 +2373,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم الحفظ."; setTimeout(() => { if (msg) msg.textContent = ""; }, 2500); }
     loadDiscountsList();
   });
+
+  if (promoSaveBtn) {
+    promoSaveBtn.addEventListener("click", async () => {
+      const category = categorySelect.value;
+      const brand = brandSelect.value;
+      const pct = Math.max(0, Math.min(100, parseFloat(promoPctInput.value) || 0));
+      const isActive = !!promoActiveInput.checked;
+      if (!category || !brand) { if (promoMsg) { promoMsg.style.color = "#b23"; promoMsg.textContent = "اختار الفئة والماركة الأول."; } return; }
+      promoSaveBtn.disabled = true;
+      const { error } = await client.from("promotional_discounts")
+        .upsert({ category, brand, promo_discount_pct: pct, is_active: isActive, updated_at: new Date().toISOString() }, { onConflict: "category,brand" });
+      promoSaveBtn.disabled = false;
+      if (error) { if (promoMsg) { promoMsg.style.color = "#b23"; promoMsg.textContent = "تعذر الحفظ: " + error.message; } return; }
+      if (promoMsg) { promoMsg.style.color = "var(--forest)"; promoMsg.textContent = "تم الحفظ."; setTimeout(() => { if (promoMsg) promoMsg.textContent = ""; }, 2500); }
+      loadDiscountsList();
+    });
+  }
 
   categorySelect.addEventListener("change", loadBrandsForCategory);
   brandSelect.addEventListener("change", loadExistingDiscountForSelection);

@@ -785,6 +785,14 @@
           const retry = await sb.from('products').select('*').eq('category', row.category).limit(8);
           rows = (retry.data || []).filter(r => r.model_available !== row.model_available);
         }
+        // Same promo pricing rule as the main product fetch above.
+        try {
+          const promoMap = await getActivePromoMap(sb);
+          rows = applyPromoPricing(rows, promoMap);
+        } catch (e) {
+          console.error('promo fetch error:', e);
+        }
+
         // Collapse to one card per brand+model family
         const seen = new Set();
         const cards = [];
@@ -1243,6 +1251,18 @@
           } else {
             rows = data;
           }
+        }
+
+        // Apply active promotional discounts to display price only (same
+        // rule as products.html) — covers the sidebar price, the power/model
+        // picker's price sort, and the per-watt calc below, since they all
+        // read .price on these same row objects. products.price in the DB
+        // is untouched.
+        try {
+          const promoMap = await getActivePromoMap(sb);
+          rows = applyPromoPricing(rows, promoMap);
+        } catch (e) {
+          console.error('promo fetch error:', e);
         }
 
         // Brand-level logo fallback, same rule as products.html: a
