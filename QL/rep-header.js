@@ -3,7 +3,6 @@
    لكل الصفحات عشان أي تعديل على الروابط يحصل مرة واحدة بدل ما نكرره في كل ملف. */
 (function () {
   const NAV_ITEMS = [
-    { href: "index.html", label: "بوابة المناديب", icon: "fa-house" },
     { href: "rep-offgrid-quote.html", label: "حاسبة أوف جريد", icon: "fa-car-battery" },
     { href: "solar-pump-station.html", label: "محطة ري شمسية", icon: "fa-solar-panel" },
     { href: "rep-quotes.html", label: "عروض المنتجات", icon: "fa-file-invoice" },
