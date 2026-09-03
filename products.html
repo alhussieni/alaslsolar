@@ -1383,6 +1383,10 @@
       // meaningful once a specific variant is picked on the detail page.
       const wideSpread = group.length > 1 && min > 0 && (max / min) > 3;
       const priceLine = min === max ? `${fmt(min)}` : (RANGE_TEXT[getLang()] || RANGE_TEXT.ar)(fmt(min), fmt(max));
+      // Every row in a family group shares the same (category, brand), so
+      // they all carry the same promo — group[0] is representative.
+      const promoPct = group[0].promo_pct;
+      const promoBadge = promoPct ? `<span class="prod-promo-badge" style="background:#c0392b;color:#fff;border-radius:6px;padding:1px 6px;font-size:0.7em;margin-inline-start:6px">-${promoPct}%</span>` : '';
 
       const detailHref = 'product-detail.html?' + familyQuery(p);
 
@@ -1398,7 +1402,7 @@
             <div class="prod-card-bottom">
               <div>
                 ${newBadge ? `<div>${newBadge}</div>` : ''}
-                ${wideSpread ? '' : `<span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span></span>`}
+                ${wideSpread ? '' : `<span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span>${promoBadge}</span>`}
               </div>
             </div>
           </div>

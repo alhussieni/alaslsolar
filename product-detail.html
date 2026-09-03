@@ -227,7 +227,11 @@
 
           <div class="pd-price-box">
             <span class="stock-badge" id="pdStockBadge" hidden></span>
-            <div class="pd-price"><span id="pdPrice"></span> <span class="pd-unit" id="pdPriceUnit"></span></div>
+            <div class="pd-price">
+              <span id="pdPriceOriginal" hidden style="text-decoration:line-through;color:var(--muted);font-size:0.7em;margin-inline-end:8px"></span>
+              <span id="pdPrice"></span> <span class="pd-unit" id="pdPriceUnit"></span>
+              <span id="pdPromoBadge" hidden style="background:#c0392b;color:#fff;border-radius:6px;padding:2px 8px;font-size:0.55em;margin-inline-start:8px;vertical-align:middle"></span>
+            </div>
             <p class="pd-price-hint" id="pdPanelTotalHint" hidden></p>
             <p class="pd-price-hint" id="pdPriceHint">السعر تقريبي وغير شامل ضريبة القيمة المضافة 14% وقابل للتغيير — تواصل معنا للتأكيد.</p>
           </div>
@@ -610,6 +614,17 @@
 
       document.getElementById('pdPrice').textContent = fmt(row.price);
       document.getElementById('pdPriceUnit').textContent = unitLabel(row);
+      const pdPriceOriginal = document.getElementById('pdPriceOriginal');
+      const pdPromoBadge = document.getElementById('pdPromoBadge');
+      if (row.promo_pct) {
+        pdPriceOriginal.textContent = fmt(row.original_price);
+        pdPriceOriginal.hidden = false;
+        pdPromoBadge.textContent = `خصم ${row.promo_pct}%`;
+        pdPromoBadge.hidden = false;
+      } else {
+        pdPriceOriginal.hidden = true;
+        pdPromoBadge.hidden = true;
+      }
       document.getElementById('pdCode').textContent = row.sku || row.model_available || row.id;
 
       const panelHint = document.getElementById('pdPanelTotalHint');
@@ -831,7 +846,7 @@
             <div class="pd-similar-media">${media}</div>
             <div class="pd-similar-body">
               <p class="pd-similar-name">${escapeHtml([catText, r.brand].filter(Boolean).join(' '))}</p>
-              <p class="pd-similar-price">${fmt(r.price)} ${escapeHtml(unitLabel(r))}</p>
+              <p class="pd-similar-price">${fmt(r.price)} ${escapeHtml(unitLabel(r))}${r.promo_pct ? ` <span style="background:#c0392b;color:#fff;border-radius:6px;padding:1px 6px;font-size:0.65em">-${r.promo_pct}%</span>` : ''}</p>
             </div>
           </a>`;
         }).join('');
