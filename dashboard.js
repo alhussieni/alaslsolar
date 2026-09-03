@@ -2266,8 +2266,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const msg = document.querySelector("[data-sd-message]");
   const promoPctInput = document.getElementById("sdPromoPct");
   const promoActiveInput = document.getElementById("sdPromoActive");
-  const promoSaveBtn = document.getElementById("sdPromoSaveBtn");
-  const promoMsg = document.querySelector("[data-sd-promo-message]");
   if (!categorySelect || !saveBtn) return;
 
   async function loadBrandsForCategory() {
@@ -2382,36 +2380,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const brand = brandSelect.value;
     const pct = Math.max(0, Math.min(100, parseFloat(pctInput.value) || 0));
     const salePct = Math.max(0, Math.min(100, parseFloat(salePctInput.value) || 0));
+    const promoPct = Math.max(0, Math.min(100, parseFloat(promoPctInput?.value) || 0));
+    const promoActive = !!promoActiveInput?.checked;
     if (!category || !brand) { if (msg) { msg.style.color = "#b23"; msg.textContent = "اختار الفئة والماركة الأول."; } return; }
     if (salePct > pct) {
       if (msg) { msg.style.color = "#b23"; msg.textContent = "خصم البيع لازم يكون أقل من أو يساوي خصم المورد — دلوقتي أكبر منه."; }
       return;
     }
     saveBtn.disabled = true;
-    const { error } = await client.from("supplier_discounts")
-      .upsert({ category, brand, supplier_discount_pct: pct, sale_discount_pct: salePct, updated_at: new Date().toISOString() }, { onConflict: "category,brand" });
+    const [{ error }, promoResult] = await Promise.all([
+      client.from("supplier_discounts")
+        .upsert({ category, brand, supplier_discount_pct: pct, sale_discount_pct: salePct, updated_at: new Date().toISOString() }, { onConflict: "category,brand" }),
+      client.from("promotional_discounts")
+        .upsert({ category, brand, promo_discount_pct: promoPct, is_active: promoActive, updated_at: new Date().toISOString() }, { onConflict: "category,brand" }),
+    ]);
     saveBtn.disabled = false;
-    if (error) { if (msg) { msg.style.color = "#b23"; msg.textContent = "تعذر الحفظ: " + error.message; } return; }
-    if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم الحفظ."; setTimeout(() => { if (msg) msg.textContent = ""; }, 2500); }
+    if (error || promoResult.error) {
+      if (msg) { msg.style.color = "#b23"; msg.textContent = "تعذر الحفظ: " + (error?.message || promoResult.error?.message); }
+      return;
+    }
+    if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم حفظ الخصومات الثلاثة."; setTimeout(() => { if (msg) msg.textContent = ""; }, 2500); }
     loadDiscountsList();
   });
-
-  if (promoSaveBtn) {
-    promoSaveBtn.addEventListener("click", async () => {
-      const category = categorySelect.value;
-      const brand = brandSelect.value;
-      const pct = Math.max(0, Math.min(100, parseFloat(promoPctInput.value) || 0));
-      const isActive = !!promoActiveInput.checked;
-      if (!category || !brand) { if (promoMsg) { promoMsg.style.color = "#b23"; promoMsg.textContent = "اختار الفئة والماركة الأول."; } return; }
-      promoSaveBtn.disabled = true;
-      const { error } = await client.from("promotional_discounts")
-        .upsert({ category, brand, promo_discount_pct: pct, is_active: isActive, updated_at: new Date().toISOString() }, { onConflict: "category,brand" });
-      promoSaveBtn.disabled = false;
-      if (error) { if (promoMsg) { promoMsg.style.color = "#b23"; promoMsg.textContent = "تعذر الحفظ: " + error.message; } return; }
-      if (promoMsg) { promoMsg.style.color = "var(--forest)"; promoMsg.textContent = "تم الحفظ."; setTimeout(() => { if (promoMsg) promoMsg.textContent = ""; }, 2500); }
-      loadDiscountsList();
-    });
-  }
 
   categorySelect.addEventListener("change", loadBrandsForCategory);
   brandSelect.addEventListener("change", loadExistingDiscountForSelection);
