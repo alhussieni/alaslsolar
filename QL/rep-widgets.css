@@ -82,9 +82,9 @@ table.admtable input, table.bom input { padding: 5px 6px; font-size: 12.5px; bor
 #ogSystemCard label { font-size: 11.5px; margin: 6px 0 3px; }
 /* هيدر ثابت لصفحات المندوب — نفس ستايل .site-header العام (لون داكن، sticky) بس بنسخة
    مبسّطة من غير قايمة همبرجر (عدد الروابط قليل وثابت، مش محتاج طي على الموبايل) */
-.rep-header { gap: var(--space-4); }
+.rep-header { gap: var(--space-4); direction: rtl; }
 .rep-header .brand img { width: 90px; height: 52px; object-fit: contain; }
-.rep-nav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.rep-nav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; direction: rtl; }
 .rep-nav-link {
   display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px;
   color: rgba(255,255,255,0.75); font-size: 13.5px; font-weight: 700; text-decoration: none;
