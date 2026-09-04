@@ -84,6 +84,7 @@ async function loadDefaultsAndQuote() {
     if (data) {
       if (Number(data.electricity_price_per_kwh) > 0) $("#fsElecPrice").value = data.electricity_price_per_kwh;
       if (Number(data.diesel_price_per_liter) > 0) $("#fsDieselPrice").value = data.diesel_price_per_liter;
+      if (Number(data.discount_rate_pct) > 0) $("#fsDiscountRate").value = data.discount_rate_pct;
     }
   } catch (e) { console.error("roi_settings fetch error:", e); }
 
@@ -130,12 +131,17 @@ const KWH_PER_PHONE_CHARGE = 0.015; // متوسط استهلاك شحنة موب
 
 function pct(v) { return Number(v || 0) / 100; }
 
+// صافي القيمة الحالية عند معدل خصم معيّن — دي نفس الدالة اللي calcIRR
+// بيدوّر بيها على الجذر (npv=0)، لكن هنا بنستخدمها مباشرة عند معدل
+// الخصم اللي المندوب مدخله (مش بندوّر على معدل، إحنا عايزين القيمة نفسها).
+function calcNPV(cashflows, rate) {
+  return cashflows.reduce((sum, cf, t) => sum + cf / Math.pow(1 + rate, t), 0);
+}
+
 // IRR عن طريق البحث الثنائي (bisection) على NPV=0 — أبسط وأثبت من
 // Newton-Raphson لو الفروض غريبة (مفيش قسمة على صفر أو تشعب).
 function calcIRR(cashflows) {
-  function npv(rate) {
-    return cashflows.reduce((sum, cf, t) => sum + cf / Math.pow(1 + rate, t), 0);
-  }
+  const npv = (rate) => calcNPV(cashflows, rate);
   let lo = -0.99, hi = 10; // من -99% لحد 1000%
   if (npv(lo) * npv(hi) > 0) return null; // مفيش جذر في المدى ده (مشروع خسران تمامًا أو غير واقعي)
   for (let i = 0; i < 100; i++) {
@@ -161,7 +167,7 @@ function runFeasibility(inputs) {
   const {
     capex, systemKw, psh, degradationPct,
     elecPrice, elecEscPct, dieselPrice, dieselEscPct,
-    genKwhPerLiter, maintenancePct,
+    genKwhPerLiter, maintenancePct, discountRatePct,
   } = inputs;
 
   const energyYear1 = systemKw * psh * 365; // kWh/سنة قبل أي تدهور
@@ -211,6 +217,8 @@ function runFeasibility(inputs) {
     gridNetSavings30: gridCumulative[YEARS],
     dieselIRR: calcIRR(dieselCF),
     gridIRR: calcIRR(gridCF),
+    dieselNPV30: calcNPV(dieselCF, pct(discountRatePct)),
+    gridNPV30: calcNPV(gridCF, pct(discountRatePct)),
     dieselPayback: calcPaybackYears(dieselCumulative),
     gridPayback: calcPaybackYears(gridCumulative),
     co2TonsYear1,
@@ -232,6 +240,7 @@ function readInputs() {
     dieselEscPct: parseFloat($("#fsDieselEsc").value) || 0,
     genKwhPerLiter: parseFloat($("#fsGenConsumption").value) || 3.5,
     maintenancePct: parseFloat($("#fsMaintenance").value) || 0,
+    discountRatePct: parseFloat($("#fsDiscountRate").value) || 0,
   };
 }
 
@@ -244,10 +253,12 @@ function irrLabel(rate) {
 
 function renderResults(r) {
   $("[data-diesel-savings]").textContent = fmt(r.dieselNetSavings30) + " ج.م";
+  $("[data-diesel-npv]").textContent = fmt(r.dieselNPV30) + " ج.م";
   $("[data-diesel-irr]").textContent = irrLabel(r.dieselIRR);
   $("[data-diesel-payback]").textContent = paybackLabel(r.dieselPayback);
 
   $("[data-grid-savings]").textContent = fmt(r.gridNetSavings30) + " ج.م";
+  $("[data-grid-npv]").textContent = fmt(r.gridNPV30) + " ج.م";
   $("[data-grid-irr]").textContent = irrLabel(r.gridIRR);
   $("[data-grid-payback]").textContent = paybackLabel(r.gridPayback);
 
@@ -401,6 +412,7 @@ async function saveStudy() {
     diesel_escalation_pct: inputs.dieselEscPct,
     generator_kwh_per_liter: inputs.genKwhPerLiter,
     annual_maintenance_pct: inputs.maintenancePct,
+    discount_rate_pct: inputs.discountRatePct,
   };
 
   const { error } = await client.from("feasibility_studies").insert(row);
@@ -437,17 +449,20 @@ function printStudy() {
         <span>سعر الكهرباء: ${inputs.elecPrice} ج.م/kWh</span>
         <span>سعر الديزيل: ${inputs.dieselPrice} ج.م/لتر</span>
         <span>الصيانة السنوية: ${inputs.maintenancePct}% من CAPEX</span>
+        <span>معدل الخصم (NPV): ${inputs.discountRatePct}%</span>
       </div>
       <div class="print-results">
         <div class="print-result-box">
           <h4>💧 مقابل مولد ديزيل</h4>
           <div class="row"><span>صافي الربح (30 سنة)</span><span>${fmt(r.dieselNetSavings30)} ج.م</span></div>
+          <div class="row"><span>NPV (بمعدل الخصم)</span><span>${fmt(r.dieselNPV30)} ج.م</span></div>
           <div class="row"><span>معدل العائد IRR</span><span>${irrLabel(r.dieselIRR)}</span></div>
           <div class="row"><span>فترة الاسترداد</span><span>${paybackLabel(r.dieselPayback)}</span></div>
         </div>
         <div class="print-result-box">
           <h4>⚡ مقابل شبكة الكهرباء</h4>
           <div class="row"><span>صافي الربح (30 سنة)</span><span>${fmt(r.gridNetSavings30)} ج.م</span></div>
+          <div class="row"><span>NPV (بمعدل الخصم)</span><span>${fmt(r.gridNPV30)} ج.م</span></div>
           <div class="row"><span>معدل العائد IRR</span><span>${irrLabel(r.gridIRR)}</span></div>
           <div class="row"><span>فترة الاسترداد</span><span>${paybackLabel(r.gridPayback)}</span></div>
         </div>
