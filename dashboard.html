@@ -1101,6 +1101,26 @@
           <button type="button" class="btn btn-primary" id="bomSaveBtn" style="font-size:13px;margin-top:var(--space-2)">حفظ التكاليف</button>
           <p class="form-note" data-bom-message></p>
         </article>
+
+        <article class="dash-card">
+          <h2 style="margin-top:0">🔌 إعدادات حساب ROI</h2>
+          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+            سعري الكهرباء والديزيل دول مش مرتبطين بأي منتج أو عرض سعر لحد دلوقتي — بيتخزّنوا هنا
+            عشان يتستخدموا مستقبلًا في حساب مدة استرداد رأس المال (ROI) للعروض. عدّلهم هنا وقت ما الأسعار تتغير.
+          </p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-2)">
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">سعر الكهرباء (جنيه/كيلوواط ساعة)</label>
+              <input type="number" id="roiElectricityPrice" min="0" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">سعر الديزيل (جنيه/لتر)</label>
+              <input type="number" id="roiDieselPrice" min="0" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" id="roiSaveBtn" style="font-size:13px;margin-top:var(--space-2)">حفظ إعدادات ROI</button>
+          <p class="form-note" data-roi-message></p>
+        </article>
       </div>
 
       <!-- Reps Management -->

@@ -2452,6 +2452,46 @@ document.addEventListener("DOMContentLoaded", () => {
   loadBomSettings();
 });
 
+/* ============================================================
+   إعدادات ROI (سعر الكهرباء وسعر الديزيل) — بتقرأ/تكتب في
+   roi_settings (صف واحد فقط، id=1). المناديب والأدمن يقدروا
+   يقروا (لاستخدامها مستقبلًا في حساب ROI جوّه عروض الأسعار)،
+   والأدمن بس يقدر يعدّل.
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  const fields = {
+    roiElectricityPrice: "electricity_price_per_kwh",
+    roiDieselPrice: "diesel_price_per_liter",
+  };
+  const saveBtn = document.getElementById("roiSaveBtn");
+  const msg = document.querySelector("[data-roi-message]");
+  if (!saveBtn) return;
+
+  async function loadRoiSettings() {
+    const { data, error } = await client.from("roi_settings").select("*").eq("id", 1).maybeSingle();
+    if (error || !data) return;
+    for (const [inputId, col] of Object.entries(fields)) {
+      const el = document.getElementById(inputId);
+      if (el) el.value = data[col] ?? 0;
+    }
+  }
+
+  saveBtn.addEventListener("click", async () => {
+    const update = { updated_at: new Date().toISOString() };
+    for (const [inputId, col] of Object.entries(fields)) {
+      const el = document.getElementById(inputId);
+      update[col] = Math.max(0, parseFloat(el?.value) || 0);
+    }
+    saveBtn.disabled = true;
+    const { error } = await client.from("roi_settings").update(update).eq("id", 1);
+    saveBtn.disabled = false;
+    if (error) { if (msg) { msg.style.color = "#b23"; msg.textContent = "تعذر الحفظ: " + error.message; } return; }
+    if (msg) { msg.style.color = "var(--forest)"; msg.textContent = "تم الحفظ."; setTimeout(() => { if (msg) msg.textContent = ""; }, 2500); }
+  });
+
+  loadRoiSettings();
+});
+
 // ── إدارة المناديب (إضافة مندوب جديد عن طريق دعوة بالإيميل + تعديل صلاحياته) ──
 
 async function loadReps() {
