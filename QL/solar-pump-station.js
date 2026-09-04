@@ -316,7 +316,7 @@ async function saveAndPrint() {
       return;
     }
 
-    msg.textContent = `تم حفظ العرض رقم #${data.quote_id}.`;
+    msg.innerHTML = `تم حفظ العرض رقم #${data.quote_id}. — <a href="feasibility-study.html?quote_id=${data.quote_id}" target="_blank" rel="noopener">إضافة دراسة جدوى لنفس العرض ↗</a>`;
     msg.className = "form-note ok";
     printQuote(data, name, phone, hp);
   } catch (e) {

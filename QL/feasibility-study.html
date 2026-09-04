@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>دراسة جدوى | مناديب الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="rep-widgets.css">
+  <script defer src="rep-header.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="feasibility-study.js"></script>
+  <style>
+    #printArea { display: none; }
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+      body > *:not(#printArea) { display: none !important; }
+      #printArea { display: block !important; }
+      body { margin: 0; }
+      .print-letterhead-bg { position: fixed; top: 0; left: 0; width: 210mm; height: 297mm; z-index: -1; }
+      .print-letterhead-bg img { width: 100%; height: 100%; display: block; object-fit: cover; }
+      .print-body { padding: 70mm 15mm 28mm 15mm; }
+      .print-meta { font-size: 13px; color: #555; margin-bottom: 14px; display: flex; justify-content: space-between; }
+      .print-assumptions { font-size: 11.5px; color: #555; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 4px 16px; border-top: 1px solid #e4d8ca; border-bottom: 1px solid #e4d8ca; padding: 8px 0; }
+      .print-results { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+      .print-result-box { border: 1px solid #e4d8ca; border-radius: 8px; padding: 10px 12px; }
+      .print-result-box h4 { margin: 0 0 8px; font-size: 13px; }
+      .print-result-box .row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+      .print-footer { margin-top: 18px; font-size: 11px; color: #777; border-top: 1px solid #e4d8ca; padding-top: 8px; }
+    }
+
+    .fs-layout { display: grid; grid-template-columns: minmax(280px, 34%) minmax(0, 66%); gap: var(--space-4); align-items: start; }
+    @media (max-width: 1020px) { .fs-layout { grid-template-columns: 1fr; } }
+    .fs-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+    .fs-input-grid label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 3px; }
+    .fs-input-grid input { width: 100%; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: var(--radius); font-family: inherit; font-size: 13.5px; }
+    .fs-input-grid .full { grid-column: 1 / -1; }
+
+    .toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .toolbar-btns .btn { flex: 1; min-width: 140px; }
+
+    .fs-results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    @media (max-width: 640px) { .fs-results-grid { grid-template-columns: 1fr; } }
+    .fs-results-col { display: flex; flex-direction: column; gap: var(--space-3); }
+    .fs-result-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 14px; }
+    .fs-result-card h3 { margin: 0 0 10px; font-size: 15px; }
+    .fs-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .fs-stat-box { background: #f6f1ea; border-radius: var(--radius); padding: 10px 6px; text-align: center; }
+    .fs-stat-box .val { font-weight: 800; font-size: 16px; color: var(--brand-dark); }
+    .fs-stat-box .lbl { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+    .fs-result-card.diesel { border-color: #1f3a5f; }
+    .fs-result-card.grid { border-color: #d98324; }
+
+    .fs-chart-wrap { margin-top: var(--space-3); }
+    .fs-chart-legend { display: flex; gap: var(--space-3); font-size: 12px; margin-bottom: 6px; }
+    .fs-chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .fs-chart-legend i { width: 14px; height: 3px; display: inline-block; border-radius: 2px; }
+
+    .fs-impact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
+    .fs-impact-box { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px; text-align: center; }
+    .fs-impact-box .val { font-weight: 800; font-size: 18px; color: var(--forest); }
+    .fs-impact-box .lbl { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  </style>
+</head>
+<body>
+
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">بوابة المناديب</p>
+      <h1>دراسة جدوى</h1>
+    </div>
+  </section>
+
+  <section class="dashboard-card" data-auth-panel style="max-width:420px;text-align:center">
+    <h2>تسجيل دخول المندوب</h2>
+    <form class="admin-form" data-login-form>
+      <label for="loginEmail">البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" required autocomplete="username">
+      <label for="loginPassword">كلمة المرور</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password">
+      <button type="submit" class="btn btn-primary">دخول</button>
+      <p class="form-note" data-auth-message></p>
+    </form>
+  </section>
+
+  <div class="rep-main" data-rep-panel hidden style="max-width:1100px;padding-top:0">
+
+    <div class="dashboard-toolbar" style="position:static">
+      <div><h2 style="margin:0;font-size:18px" data-user-name>—</h2></div>
+      <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
+    </div>
+
+    <p class="form-note" data-quote-link-note style="margin-bottom:var(--space-2)"></p>
+
+    <div class="fs-layout">
+
+      <!-- عمود الافتراضات (يمين) -->
+      <div class="card">
+        <h3 style="margin-top:0">افتراضات دراسة الجدوى</h3>
+        <div class="fs-input-grid">
+          <div class="full">
+            <label for="fsSystemLabel">اسم المنظومة / العرض</label>
+            <input type="text" id="fsSystemLabel" placeholder="مثال: منظومة غطاس 100 حصان">
+          </div>
+          <div>
+            <label for="fsCustomerName">اسم العميل</label>
+            <input type="text" id="fsCustomerName">
+          </div>
+          <div>
+            <label for="fsCustomerPhone">هاتف العميل</label>
+            <input type="text" id="fsCustomerPhone">
+          </div>
+          <div>
+            <label for="fsCapex">تكلفة المنظومة الكلية — CAPEX (ج.م)</label>
+            <input type="number" id="fsCapex" min="0" step="1">
+          </div>
+          <div>
+            <label for="fsSystemKw">قدرة المنظومة (KW)</label>
+            <input type="number" id="fsSystemKw" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="fsPsh">ساعات الذروة الشمسية PSH (ساعة/يوم)</label>
+            <input type="number" id="fsPsh" min="0" step="0.1" value="5.5">
+          </div>
+          <div>
+            <label for="fsDegradation">تدهور كفاءة الألواح سنويًا (%)</label>
+            <input type="number" id="fsDegradation" min="0" step="0.01" value="0.65">
+          </div>
+          <div>
+            <label for="fsElecPrice">سعر كهرباء الشبكة (ج.م/kWh)</label>
+            <input type="number" id="fsElecPrice" min="0" step="0.01">
+          </div>
+          <div>
+            <label for="fsElecEsc">تصاعد سعر الشبكة سنويًا (%)</label>
+            <input type="number" id="fsElecEsc" min="0" step="0.1" value="8">
+          </div>
+          <div>
+            <label for="fsDieselPrice">سعر الديزيل (ج.م/لتر)</label>
+            <input type="number" id="fsDieselPrice" min="0" step="0.01">
+          </div>
+          <div>
+            <label for="fsDieselEsc">تصاعد سعر الديزيل سنويًا (%)</label>
+            <input type="number" id="fsDieselEsc" min="0" step="0.1" value="8">
+          </div>
+          <div>
+            <label for="fsGenConsumption">استهلاك المولد (kWh/لتر ديزيل)</label>
+            <input type="number" id="fsGenConsumption" min="0.1" step="0.1" value="3.5">
+          </div>
+          <div>
+            <label for="fsMaintenance">الصيانة السنوية (% من CAPEX)</label>
+            <input type="number" id="fsMaintenance" min="0" step="0.1" value="1">
+          </div>
+        </div>
+        <p class="form-note" style="color:var(--muted);margin-top:var(--space-2)">
+          الحساب افتراضي لأغراض الإقناع الأولي — مش عرض مالي رسمي، ومبني على الفروض المدخلة هنا بس.
+        </p>
+        <div class="toolbar-btns">
+          <button type="button" class="btn btn-primary" id="fsCalcBtn">احسب دراسة الجدوى</button>
+          <button type="button" class="btn btn-secondary" id="fsSaveBtn">حفظ الدراسة</button>
+        </div>
+        <p class="form-note" data-fs-message></p>
+      </div>
+
+      <!-- عمود النتيجة (شمال) -->
+      <div class="fs-results-col" data-results-col hidden>
+
+        <div class="fs-results-grid">
+          <div class="fs-result-card diesel">
+            <h3>💧 مقابل مولد ديزيل</h3>
+            <div class="fs-stat-row">
+              <div class="fs-stat-box"><div class="val" data-diesel-savings>—</div><div class="lbl">صافي الربح (30 سنة)</div></div>
+              <div class="fs-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">معدل العائد IRR</div></div>
+              <div class="fs-stat-box"><div class="val" data-diesel-payback>—</div><div class="lbl">فترة الاسترداد</div></div>
+            </div>
+          </div>
+          <div class="fs-result-card grid">
+            <h3>⚡ مقابل شبكة الكهرباء</h3>
+            <div class="fs-stat-row">
+              <div class="fs-stat-box"><div class="val" data-grid-savings>—</div><div class="lbl">صافي الربح (30 سنة)</div></div>
+              <div class="fs-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">معدل العائد IRR</div></div>
+              <div class="fs-stat-box"><div class="val" data-grid-payback>—</div><div class="lbl">فترة الاسترداد</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card fs-chart-wrap">
+          <h3 style="margin-top:0">التدفق النقدي التراكمي — 30 سنة</h3>
+          <div class="fs-chart-legend">
+            <span><i style="background:#1f3a5f"></i> مقابل ديزيل</span>
+            <span><i style="background:#d98324"></i> مقابل الشبكة</span>
+          </div>
+          <div data-chart-holder></div>
+          <p class="form-note" style="color:var(--muted)">الخط الأفقي المنقّط = نقطة التعادل (CAPEX)، وتقاطع كل خط معاه = فترة الاسترداد.</p>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">الأثر البيئي (السنة الأولى، مقابل ديزيل)</h3>
+          <div class="fs-impact-grid">
+            <div class="fs-impact-box"><div class="val" data-co2-saved>—</div><div class="lbl">طن CO₂ موفّر / سنة</div></div>
+            <div class="fs-impact-box"><div class="val" data-diesel-liters-saved>—</div><div class="lbl">لتر ديزيل موفّر / سنة</div></div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="fsPrintBtn" style="width:100%">📄 طباعة دراسة الجدوى / حفظ PDF</button>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div id="printArea"></div>
+
+</body>
+</html>

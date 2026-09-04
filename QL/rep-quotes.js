@@ -365,6 +365,7 @@ async function loadMyQuotes() {
     row.innerHTML = `
       <div>#${q.id} — ${q.customers?.name || "بدون اسم"} (${q.customers?.phone || ""}) — ${dateStr} — ${fmt(q.total)} ج.م</div>
       <button type="button" class="btn" data-reprint="${q.id}">طباعة</button>
+      <a class="btn" href="feasibility-study.html?quote_id=${q.id}" target="_blank" rel="noopener">دراسة جدوى</a>
     `;
     list.appendChild(row);
 

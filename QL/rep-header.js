@@ -6,6 +6,7 @@
     { href: "rep-offgrid-quote.html", label: "حاسبة أوف جريد", icon: "fa-car-battery" },
     { href: "solar-pump-station.html", label: "محطة ري شمسية", icon: "fa-solar-panel" },
     { href: "rep-quotes.html", label: "عروض المنتجات", icon: "fa-file-invoice" },
+    { href: "feasibility-study.html", label: "دراسة جدوى", icon: "fa-chart-line" },
     { href: "rep-crm.html", label: "CRM", icon: "fa-users" },
     { href: "rep-settings.html", label: "الإعدادات", icon: "fa-gear" },
   ];
