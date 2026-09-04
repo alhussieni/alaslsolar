@@ -121,6 +121,13 @@ async function loadDefaultsAndQuote() {
 
 const YEARS = 30;
 
+// معاملات تقريبية لإحصائيات "الإقناع السريع" (مش أرقام رسمية، بس تقريب
+// معقول لمصر تحديدًا — الشركة المرجعية اللي بعتلنا أرقامها سعودية وبتستخدم
+// افتراض استهلاك منزل مختلف، فمينفعش ننسخه زي ما هو). عدّلهم لو عندك
+// أرقام أدق.
+const EGYPT_AVG_HOUSEHOLD_KWH_PER_YEAR = 3000; // متوسط استهلاك بيت مصري تقريبًا/سنة
+const KWH_PER_PHONE_CHARGE = 0.015; // متوسط استهلاك شحنة موبايل كاملة
+
 function pct(v) { return Number(v || 0) / 100; }
 
 // IRR عن طريق البحث الثنائي (bisection) على NPV=0 — أبسط وأثبت من
@@ -190,6 +197,14 @@ function runFeasibility(inputs) {
   const co2TonsYear1 = (dieselLitersYear1 * 2.68) / 1000; // 2.68 كجم CO2 لكل لتر ديزيل محروق (معامل قياسي)
   const totalCostWithSolar = capex + maintenanceCost * YEARS;
 
+  // إحصائيات إضافية للإقناع السريع (زي الجدول المرجعي اللي اتبعت) — كلها
+  // مبنية على أرقام السنة الأولى، قبل أي تصاعد أسعار أو تدهور كفاءة.
+  const dieselMonthlySaving = dieselCF[1] / 12;
+  const gridMonthlySaving = gridCF[1] / 12;
+  const annualEnergyMwh = energyYear1 / 1000;
+  const householdsEquivalent = Math.round(energyYear1 / EGYPT_AVG_HOUSEHOLD_KWH_PER_YEAR);
+  const phoneChargesEquivalent = Math.round(energyYear1 / KWH_PER_PHONE_CHARGE);
+
   return {
     dieselCF, gridCF, dieselCumulative, gridCumulative,
     dieselNetSavings30: dieselCumulative[YEARS],
@@ -201,6 +216,7 @@ function runFeasibility(inputs) {
     co2TonsYear1,
     dieselLitersYear1,
     dieselTotalAvoidedCost, gridTotalAvoidedCost, totalCostWithSolar, capex,
+    dieselMonthlySaving, gridMonthlySaving, annualEnergyMwh, householdsEquivalent, phoneChargesEquivalent,
   };
 }
 
@@ -238,6 +254,12 @@ function renderResults(r) {
   $("[data-co2-saved]").textContent = fmt1(r.co2TonsYear1) + " طن";
   $("[data-diesel-liters-saved]").textContent = fmt(r.dieselLitersYear1) + " لتر";
 
+  $("[data-annual-energy]").textContent = fmt1(r.annualEnergyMwh) + " MWh";
+  $("[data-households-equiv]").textContent = fmt(r.householdsEquivalent);
+  $("[data-phones-equiv]").textContent = fmt(r.phoneChargesEquivalent);
+  $("[data-diesel-monthly-saving]").textContent = fmt(r.dieselMonthlySaving) + " ج.م/شهر";
+  $("[data-grid-monthly-saving]").textContent = fmt(r.gridMonthlySaving) + " ج.م/شهر";
+
   renderChart(r);
   $("[data-results-col]").hidden = false;
 }
@@ -245,7 +267,7 @@ function renderResults(r) {
 /* ---------------- رسوم SVG خام (من غير مكتبات خارجية) ---------------- */
 
 function buildChartSvg(r, width, height) {
-  const pad = { top: 16, right: 16, bottom: 26, left: 62 };
+  const pad = { top: 30, right: 18, bottom: 34, left: 74 };
   const allVals = [...r.dieselCumulative, ...r.gridCumulative, 0];
   const minV = Math.min(...allVals);
   const maxV = Math.max(...allVals);
@@ -257,29 +279,37 @@ function buildChartSvg(r, width, height) {
   const y = (v) => pad.top + innerH - ((v - minV) / span) * innerH;
 
   const toPath = (arr) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-  const zeroY = y(0).toFixed(1);
+  const zeroY = y(0);
 
-  // خطوط شبكة أفقية + قيم على المحور الرأسي (min / 0 / max) — بدونها
-  // العميل شايف خط بيصعد من غير ما يعرف بكام.
-  const gridLines = [minV, 0, maxV].map((v) => `
-    <line x1="${pad.left}" y1="${y(v).toFixed(1)}" x2="${width - pad.right}" y2="${y(v).toFixed(1)}" stroke="#e4d8ca" stroke-width="1"></line>
-    <text x="${pad.left - 8}" y="${y(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="10.5" fill="#7a6f5f">${fmt(v)}</text>
-  `).join("");
+  // خطوط شبكة أفقية + قيم على المحور الرأسي (min / 0 / max). تسمية "0"
+  // بتتحط فوق خطها بمسافة (مش متمركزة عليه) عشان متتصادمش مع تسميات
+  // السنين تحت لما نقطة الصفر تكون قريبة من حافة الشارت السفلية.
+  const gridLines = [minV, 0, maxV].map((v) => {
+    const yy = y(v);
+    const labelY = v === 0 ? yy - 6 : yy;
+    const baseline = v === 0 ? "auto" : "middle";
+    return `
+      <line x1="${pad.left}" y1="${yy.toFixed(1)}" x2="${width - pad.right}" y2="${yy.toFixed(1)}" stroke="#e4d8ca" stroke-width="1"></line>
+      <text x="${pad.left - 8}" y="${labelY.toFixed(1)}" text-anchor="end" dominant-baseline="${baseline}" font-size="10.5" fill="#7a6f5f">${fmt(v)}</text>
+    `;
+  }).join("");
 
-  // سنين على المحور الأفقي كل 5 سنين
+  // سنين على المحور الأفقي كل 5 سنين، ابتداءً من سنة 5 — شلنا تسمية
+  // "اليوم" عند سنة 0 لأنها كانت بتتصادم مع تسمية "0" على المحور الرأسي
+  // في نفس الركن لما تكون فترة الاسترداد قصيرة.
   const yearLabels = [];
-  for (let yr = 0; yr <= YEARS; yr += 5) {
-    yearLabels.push(`<text x="${x(yr).toFixed(1)}" y="${height - 6}" text-anchor="middle" font-size="10.5" fill="#7a6f5f">${yr === 0 ? "اليوم" : "سنة " + yr}</text>`);
+  for (let yr = 5; yr <= YEARS; yr += 5) {
+    yearLabels.push(`<text x="${x(yr).toFixed(1)}" y="${height - 10}" text-anchor="middle" font-size="10.5" fill="#7a6f5f">سنة ${yr}</text>`);
   }
 
-  // علامة واضحة عند نقطة الاسترداد الفعلية لكل خط (دائرة + خط رأسي منقّط)
+  // علامة نقطة الاسترداد — دايرة بس (القيمة بالسنين موضّحة أصلاً في كارت
+  // "فترة الاسترداد" فوق الشارت، فمفيش داعي نكررها هنا ونزوّد الزحمة).
   function breakevenMarker(payback, color) {
     if (payback == null) return "";
     const px = x(payback).toFixed(1);
-    const py = y(0).toFixed(1);
     return `
-      <line x1="${px}" y1="${pad.top}" x2="${px}" y2="${py}" stroke="${color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.55"></line>
-      <circle cx="${px}" cy="${py}" r="5" fill="${color}"></circle>
+      <line x1="${px}" y1="${pad.top}" x2="${px}" y2="${zeroY.toFixed(1)}" stroke="${color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"></line>
+      <circle cx="${px}" cy="${zeroY.toFixed(1)}" r="4.5" fill="#fff" stroke="${color}" stroke-width="2.5"></circle>
     `;
   }
 
@@ -426,6 +456,13 @@ function printStudy() {
       <div style="display:flex;gap:14px;margin-top:10px">
         <div style="flex:1">${buildCostBarSvg(r, 340, 200, "diesel")}</div>
         <div style="flex:1">${buildCostBarSvg(r, 340, 200, "grid")}</div>
+      </div>
+      <div class="print-assumptions" style="margin-top:12px">
+        <span>الطاقة المنتجة سنويًا: ${fmt1(r.annualEnergyMwh)} MWh</span>
+        <span>يكفي استهلاك ~${fmt(r.householdsEquivalent)} منزل/سنة</span>
+        <span>توفير شهري (ديزيل): ${fmt(r.dieselMonthlySaving)} ج.م</span>
+        <span>توفير شهري (شبكة): ${fmt(r.gridMonthlySaving)} ج.م</span>
+        <span>CO₂ موفّر: ${fmt1(r.co2TonsYear1)} طن/سنة</span>
       </div>
       <div class="print-footer">
         الحساب افتراضي لأغراض الإقناع الأولي، مبني على الفروض الموضحة أعلاه — مش عرض مالي رسمي وقابل للتغيير حسب الأسعار الفعلية وقت التعاقد.
