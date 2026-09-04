@@ -2462,6 +2462,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const fields = {
     roiElectricityPrice: "electricity_price_per_kwh",
     roiDieselPrice: "diesel_price_per_liter",
+    roiDiscountRate: "discount_rate_pct",
   };
   const saveBtn = document.getElementById("roiSaveBtn");
   const msg = document.querySelector("[data-roi-message]");

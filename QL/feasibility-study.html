@@ -50,7 +50,8 @@
     .fs-results-col { display: flex; flex-direction: column; gap: var(--space-3); }
     .fs-result-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 14px; }
     .fs-result-card h3 { margin: 0 0 10px; font-size: 15px; }
-    .fs-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .fs-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    @media (max-width: 480px) { .fs-stat-row { grid-template-columns: repeat(2, 1fr); } }
     .fs-stat-box { background: #f6f1ea; border-radius: var(--radius); padding: 10px 6px; text-align: center; }
     .fs-stat-box .val { font-weight: 800; font-size: 16px; color: var(--brand-dark); }
     .fs-stat-box .lbl { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
@@ -160,6 +161,10 @@
             <label for="fsMaintenance">الصيانة السنوية (% من CAPEX)</label>
             <input type="number" id="fsMaintenance" min="0" step="0.1" value="1">
           </div>
+          <div>
+            <label for="fsDiscountRate">معدل الخصم لحساب NPV (%)</label>
+            <input type="number" id="fsDiscountRate" min="0" step="0.5" value="19.5">
+          </div>
         </div>
         <p class="form-note" style="color:var(--muted);margin-top:var(--space-2)">
           الحساب افتراضي لأغراض الإقناع الأولي — مش عرض مالي رسمي، ومبني على الفروض المدخلة هنا بس.
@@ -179,6 +184,7 @@
             <h3>💧 مقابل مولد ديزيل</h3>
             <div class="fs-stat-row">
               <div class="fs-stat-box"><div class="val" data-diesel-savings>—</div><div class="lbl">صافي الربح (30 سنة)</div></div>
+              <div class="fs-stat-box"><div class="val" data-diesel-npv>—</div><div class="lbl">NPV (بمعدل الخصم)</div></div>
               <div class="fs-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">معدل العائد IRR</div></div>
               <div class="fs-stat-box"><div class="val" data-diesel-payback>—</div><div class="lbl">فترة الاسترداد</div></div>
             </div>
@@ -187,6 +193,7 @@
             <h3>⚡ مقابل شبكة الكهرباء</h3>
             <div class="fs-stat-row">
               <div class="fs-stat-box"><div class="val" data-grid-savings>—</div><div class="lbl">صافي الربح (30 سنة)</div></div>
+              <div class="fs-stat-box"><div class="val" data-grid-npv>—</div><div class="lbl">NPV (بمعدل الخصم)</div></div>
               <div class="fs-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">معدل العائد IRR</div></div>
               <div class="fs-stat-box"><div class="val" data-grid-payback>—</div><div class="lbl">فترة الاسترداد</div></div>
             </div>
