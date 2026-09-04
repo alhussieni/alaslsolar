@@ -66,6 +66,9 @@
     .fs-impact-box { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px; text-align: center; }
     .fs-impact-box .val { font-weight: 800; font-size: 18px; color: var(--forest); }
     .fs-impact-box .lbl { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+
+    .fs-bar-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+    @media (max-width: 640px) { .fs-bar-compare-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -198,6 +201,14 @@
           </div>
           <div data-chart-holder></div>
           <p class="form-note" style="color:var(--muted)">الخط الأفقي المنقّط = نقطة التعادل (CAPEX)، وتقاطع كل خط معاه = فترة الاسترداد.</p>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">مقارنة سريعة — التكلفة الكلية على 30 سنة</h3>
+          <div class="fs-bar-compare-grid">
+            <div><div data-diesel-bar-holder></div></div>
+            <div><div data-grid-bar-holder></div></div>
+          </div>
         </div>
 
         <div class="card">

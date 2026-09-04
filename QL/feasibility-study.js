@@ -165,6 +165,8 @@ function runFeasibility(inputs) {
   const dieselCumulative = [-capex];
   const gridCumulative = [-capex];
   let dieselLitersYear1 = 0;
+  let dieselTotalAvoidedCost = 0;
+  let gridTotalAvoidedCost = 0;
 
   for (let y = 1; y <= YEARS; y++) {
     const energy = energyYear1 * Math.pow(1 - pct(degradationPct), y - 1);
@@ -173,6 +175,8 @@ function runFeasibility(inputs) {
 
     const dieselAvoided = dieselLiters * dieselPrice * Math.pow(1 + pct(dieselEscPct), y - 1);
     const gridAvoided = energy * elecPrice * Math.pow(1 + pct(elecEscPct), y - 1);
+    dieselTotalAvoidedCost += dieselAvoided;
+    gridTotalAvoidedCost += gridAvoided;
 
     const dieselNet = dieselAvoided - maintenanceCost;
     const gridNet = gridAvoided - maintenanceCost;
@@ -184,6 +188,7 @@ function runFeasibility(inputs) {
   }
 
   const co2TonsYear1 = (dieselLitersYear1 * 2.68) / 1000; // 2.68 كجم CO2 لكل لتر ديزيل محروق (معامل قياسي)
+  const totalCostWithSolar = capex + maintenanceCost * YEARS;
 
   return {
     dieselCF, gridCF, dieselCumulative, gridCumulative,
@@ -195,6 +200,7 @@ function runFeasibility(inputs) {
     gridPayback: calcPaybackYears(gridCumulative),
     co2TonsYear1,
     dieselLitersYear1,
+    dieselTotalAvoidedCost, gridTotalAvoidedCost, totalCostWithSolar, capex,
   };
 }
 
@@ -236,10 +242,10 @@ function renderResults(r) {
   $("[data-results-col]").hidden = false;
 }
 
-/* ---------------- رسم بياني بسيط بـ SVG خام (من غير مكتبات خارجية) ---------------- */
+/* ---------------- رسوم SVG خام (من غير مكتبات خارجية) ---------------- */
 
 function buildChartSvg(r, width, height) {
-  const pad = { top: 10, right: 10, bottom: 20, left: 10 };
+  const pad = { top: 16, right: 16, bottom: 26, left: 62 };
   const allVals = [...r.dieselCumulative, ...r.gridCumulative, 0];
   const minV = Math.min(...allVals);
   const maxV = Math.max(...allVals);
@@ -251,14 +257,76 @@ function buildChartSvg(r, width, height) {
   const y = (v) => pad.top + innerH - ((v - minV) / span) * innerH;
 
   const toPath = (arr) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-
   const zeroY = y(0).toFixed(1);
+
+  // خطوط شبكة أفقية + قيم على المحور الرأسي (min / 0 / max) — بدونها
+  // العميل شايف خط بيصعد من غير ما يعرف بكام.
+  const gridLines = [minV, 0, maxV].map((v) => `
+    <line x1="${pad.left}" y1="${y(v).toFixed(1)}" x2="${width - pad.right}" y2="${y(v).toFixed(1)}" stroke="#e4d8ca" stroke-width="1"></line>
+    <text x="${pad.left - 8}" y="${y(v).toFixed(1)}" text-anchor="end" dominant-baseline="middle" font-size="10.5" fill="#7a6f5f">${fmt(v)}</text>
+  `).join("");
+
+  // سنين على المحور الأفقي كل 5 سنين
+  const yearLabels = [];
+  for (let yr = 0; yr <= YEARS; yr += 5) {
+    yearLabels.push(`<text x="${x(yr).toFixed(1)}" y="${height - 6}" text-anchor="middle" font-size="10.5" fill="#7a6f5f">${yr === 0 ? "اليوم" : "سنة " + yr}</text>`);
+  }
+
+  // علامة واضحة عند نقطة الاسترداد الفعلية لكل خط (دائرة + خط رأسي منقّط)
+  function breakevenMarker(payback, color) {
+    if (payback == null) return "";
+    const px = x(payback).toFixed(1);
+    const py = y(0).toFixed(1);
+    return `
+      <line x1="${px}" y1="${pad.top}" x2="${px}" y2="${py}" stroke="${color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.55"></line>
+      <circle cx="${px}" cy="${py}" r="5" fill="${color}"></circle>
+    `;
+  }
 
   return `
     <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <line x1="${pad.left}" y1="${zeroY}" x2="${width - pad.right}" y2="${zeroY}" stroke="#c9bda8" stroke-width="1" stroke-dasharray="4,4"></line>
+      ${gridLines}
+      ${yearLabels.join("")}
       <path d="${toPath(r.dieselCumulative)}" fill="none" stroke="#1f3a5f" stroke-width="2.5"></path>
       <path d="${toPath(r.gridCumulative)}" fill="none" stroke="#d98324" stroke-width="2.5"></path>
+      ${breakevenMarker(r.dieselPayback, "#1f3a5f")}
+      ${breakevenMarker(r.gridPayback, "#d98324")}
+    </svg>
+  `;
+}
+
+// بار بسيط: التكلفة الكلية على 30 سنة لو فضلت زي ما إنت (ديزيل/شبكة)،
+// مقابل التكلفة الكلية لو ركّبت الطاقة الشمسية (CAPEX + صيانة 30 سنة).
+// أسهل بكتير من خط بياني للعميل اللي مش هيقعد يحلل أرقام — طول العمودين
+// وحده بيوصّل الرسالة.
+function buildCostBarSvg(r, width, height, mode) {
+  const withoutSolar = mode === "diesel" ? r.dieselTotalAvoidedCost : r.gridTotalAvoidedCost;
+  const withSolar = r.totalCostWithSolar;
+  const maxV = Math.max(withoutSolar, withSolar) || 1;
+  const pad = { top: 26, bottom: 30, side: 40 };
+  const barW = 90;
+  const gap = 60;
+  const innerH = height - pad.top - pad.bottom;
+  const barH = (v) => (v / maxV) * innerH;
+
+  const x1 = pad.side;
+  const x2 = pad.side + barW + gap;
+  const h1 = barH(withoutSolar);
+  const h2 = barH(withSolar);
+  const y1 = height - pad.bottom - h1;
+  const y2 = height - pad.bottom - h2;
+  const baseColor = mode === "diesel" ? "#1f3a5f" : "#d98324";
+
+  return `
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <line x1="${pad.side - 10}" y1="${height - pad.bottom}" x2="${width - pad.side + 10}" y2="${height - pad.bottom}" stroke="#c9bda8" stroke-width="1"></line>
+      <rect x="${x1}" y="${y1.toFixed(1)}" width="${barW}" height="${h1.toFixed(1)}" fill="${baseColor}" opacity="0.35" rx="4"></rect>
+      <text x="${x1 + barW / 2}" y="${y1 - 8}" text-anchor="middle" font-size="13" font-weight="700" fill="${baseColor}">${fmt(withoutSolar)}</text>
+      <text x="${x1 + barW / 2}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#7a6f5f">${mode === "diesel" ? "لو فضلت على الديزل" : "لو فضلت على الشبكة"}</text>
+
+      <rect x="${x2}" y="${y2.toFixed(1)}" width="${barW}" height="${h2.toFixed(1)}" fill="var(--forest, #2f7d5e)" rx="4"></rect>
+      <text x="${x2 + barW / 2}" y="${y2 - 8}" text-anchor="middle" font-size="13" font-weight="700" fill="#2f7d5e">${fmt(withSolar)}</text>
+      <text x="${x2 + barW / 2}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#7a6f5f">بالطاقة الشمسية</text>
     </svg>
   `;
 }
@@ -267,6 +335,11 @@ function renderChart(r) {
   const holder = $("[data-chart-holder]");
   const width = Math.max(320, holder.clientWidth || 600);
   holder.innerHTML = buildChartSvg(r, width, 220);
+
+  const dieselBarHolder = $("[data-diesel-bar-holder]");
+  const gridBarHolder = $("[data-grid-bar-holder]");
+  if (dieselBarHolder) dieselBarHolder.innerHTML = buildCostBarSvg(r, dieselBarHolder.clientWidth || 260, 200, "diesel");
+  if (gridBarHolder) gridBarHolder.innerHTML = buildCostBarSvg(r, gridBarHolder.clientWidth || 260, 200, "grid");
 }
 
 /* ---------------- الحفظ ---------------- */
@@ -350,6 +423,10 @@ function printStudy() {
         </div>
       </div>
       <div style="margin-top:14px">${buildChartSvg(r, 700, 200)}</div>
+      <div style="display:flex;gap:14px;margin-top:10px">
+        <div style="flex:1">${buildCostBarSvg(r, 340, 200, "diesel")}</div>
+        <div style="flex:1">${buildCostBarSvg(r, 340, 200, "grid")}</div>
+      </div>
       <div class="print-footer">
         الحساب افتراضي لأغراض الإقناع الأولي، مبني على الفروض الموضحة أعلاه — مش عرض مالي رسمي وقابل للتغيير حسب الأسعار الفعلية وقت التعاقد.
         الأصل للطاقة الشمسية — alaslsolar.com
