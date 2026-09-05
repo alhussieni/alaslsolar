@@ -251,28 +251,43 @@ function irrLabel(rate) {
   return rate == null ? "—" : `${fmt1(rate * 100)}%`;
 }
 
+function setText(sel, text) {
+  const el = document.querySelector(sel);
+  if (el) el.textContent = text;
+}
+
 function renderResults(r) {
-  $("[data-diesel-savings]").textContent = fmt(r.dieselNetSavings30) + " ج.م";
-  $("[data-diesel-npv]").textContent = fmt(r.dieselNPV30) + " ج.م";
-  $("[data-diesel-irr]").textContent = irrLabel(r.dieselIRR);
-  $("[data-diesel-payback]").textContent = paybackLabel(r.dieselPayback);
+  // الشريط الرئيسي — رقم واحد كبير لكل سيناريو
+  setText("[data-diesel-hero]", fmt(r.dieselNetSavings30) + " ج.م");
+  setText("[data-diesel-payback-inline]", paybackLabel(r.dieselPayback));
+  setText("[data-diesel-irr-inline]", irrLabel(r.dieselIRR));
+  setText("[data-grid-hero]", fmt(r.gridNetSavings30) + " ج.م");
+  setText("[data-grid-payback-inline]", paybackLabel(r.gridPayback));
+  setText("[data-grid-irr-inline]", irrLabel(r.gridIRR));
 
-  $("[data-grid-savings]").textContent = fmt(r.gridNetSavings30) + " ج.م";
-  $("[data-grid-npv]").textContent = fmt(r.gridNPV30) + " ج.م";
-  $("[data-grid-irr]").textContent = irrLabel(r.gridIRR);
-  $("[data-grid-payback]").textContent = paybackLabel(r.gridPayback);
+  // تفاصيل الأرقام
+  setText("[data-diesel-savings]", fmt(r.dieselNetSavings30) + " ج.م");
+  setText("[data-diesel-npv]", fmt(r.dieselNPV30) + " ج.م");
+  setText("[data-diesel-irr]", irrLabel(r.dieselIRR));
+  setText("[data-grid-savings]", fmt(r.gridNetSavings30) + " ج.م");
+  setText("[data-grid-npv]", fmt(r.gridNPV30) + " ج.م");
+  setText("[data-grid-irr]", irrLabel(r.gridIRR));
 
-  $("[data-co2-saved]").textContent = fmt1(r.co2TonsYear1) + " طن";
-  $("[data-diesel-liters-saved]").textContent = fmt(r.dieselLitersYear1) + " لتر";
-
-  $("[data-annual-energy]").textContent = fmt1(r.annualEnergyMwh) + " MWh";
-  $("[data-households-equiv]").textContent = fmt(r.householdsEquivalent);
-  $("[data-phones-equiv]").textContent = fmt(r.phoneChargesEquivalent);
-  $("[data-diesel-monthly-saving]").textContent = fmt(r.dieselMonthlySaving) + " ج.م/شهر";
-  $("[data-grid-monthly-saving]").textContent = fmt(r.gridMonthlySaving) + " ج.م/شهر";
+  // لمحة سريعة
+  setText("[data-co2-saved]", fmt1(r.co2TonsYear1) + " طن");
+  setText("[data-diesel-liters-saved]", fmt(r.dieselLitersYear1) + " لتر");
+  setText("[data-annual-energy]", fmt1(r.annualEnergyMwh) + " MWh");
+  setText("[data-households-equiv]", fmt(r.householdsEquivalent));
+  setText("[data-phones-equiv]", fmt(r.phoneChargesEquivalent));
+  setText("[data-diesel-monthly-saving]", fmt(r.dieselMonthlySaving) + " ج.م/شهر");
 
   renderChart(r);
   $("[data-results-col]").hidden = false;
+
+  // بعد أول حساب، نقفل فورم الفروض تلقائيًا عشان العرض قدّام العميل
+  // يبقى نضيف من غير فورم ظاهر — لسه ممكن تفتحه تاني وتعدّل وتعيد الحساب.
+  const details = $("[data-assumptions-details]");
+  if (details) details.open = false;
 }
 
 /* ---------------- رسوم SVG خام (من غير مكتبات خارجية) ---------------- */
@@ -365,7 +380,7 @@ function buildCostBarSvg(r, width, height, mode) {
       <text x="${x1 + barW / 2}" y="${y1 - 8}" text-anchor="middle" font-size="13" font-weight="700" fill="${baseColor}">${fmt(withoutSolar)}</text>
       <text x="${x1 + barW / 2}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#7a6f5f">${mode === "diesel" ? "لو فضلت على الديزل" : "لو فضلت على الشبكة"}</text>
 
-      <rect x="${x2}" y="${y2.toFixed(1)}" width="${barW}" height="${h2.toFixed(1)}" fill="var(--forest, #2f7d5e)" rx="4"></rect>
+      <rect x="${x2}" y="${y2.toFixed(1)}" width="${barW}" height="${h2.toFixed(1)}" fill="#214234" rx="4"></rect>
       <text x="${x2 + barW / 2}" y="${y2 - 8}" text-anchor="middle" font-size="13" font-weight="700" fill="#2f7d5e">${fmt(withSolar)}</text>
       <text x="${x2 + barW / 2}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#7a6f5f">بالطاقة الشمسية</text>
     </svg>
@@ -375,12 +390,18 @@ function buildCostBarSvg(r, width, height, mode) {
 function renderChart(r) {
   const holder = $("[data-chart-holder]");
   const width = Math.max(320, holder.clientWidth || 600);
-  holder.innerHTML = buildChartSvg(r, width, 220);
+  holder.innerHTML = buildChartSvg(r, width, Math.round(width / 1.618));
 
   const dieselBarHolder = $("[data-diesel-bar-holder]");
   const gridBarHolder = $("[data-grid-bar-holder]");
-  if (dieselBarHolder) dieselBarHolder.innerHTML = buildCostBarSvg(r, dieselBarHolder.clientWidth || 260, 200, "diesel");
-  if (gridBarHolder) gridBarHolder.innerHTML = buildCostBarSvg(r, gridBarHolder.clientWidth || 260, 200, "grid");
+  if (dieselBarHolder) {
+    const w = Math.max(260, dieselBarHolder.clientWidth || 260);
+    dieselBarHolder.innerHTML = buildCostBarSvg(r, w, Math.round(w / 1.618), "diesel");
+  }
+  if (gridBarHolder) {
+    const w = Math.max(260, gridBarHolder.clientWidth || 260);
+    gridBarHolder.innerHTML = buildCostBarSvg(r, w, Math.round(w / 1.618), "grid");
+  }
 }
 
 /* ---------------- الحفظ ---------------- */
