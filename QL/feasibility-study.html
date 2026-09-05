@@ -33,6 +33,11 @@
       .print-result-box h4 { margin: 0 0 8px; font-size: 13px; }
       .print-result-box .row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
       .print-footer { margin-top: 18px; font-size: 11px; color: #777; border-top: 1px solid #e4d8ca; padding-top: 8px; }
+      .print-year-table-wrap { page-break-before: always; padding-top: 10mm; }
+      .print-year-table-wrap h4 { font-size: 14px; margin: 0 0 8px; }
+      .print-year-table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+      .print-year-table th, .print-year-table td { padding: 3px 5px; text-align: center; border-bottom: 1px solid #e4d8ca; }
+      .print-year-table thead th { background: #f6f1ea; color: #555; font-weight: 700; }
     }
 
     /* الصفحة مقسومة عمودين بنسبة القاعدة الذهبية: الافتراضات يمين
@@ -96,8 +101,6 @@
     .fs-chart-frame { width: 100%; aspect-ratio: 1.618 / 1; }
     .fs-chart-frame svg { width: 100%; height: 100%; display: block; }
 
-    .fs-bar-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-    @media (max-width: 640px) { .fs-bar-compare-grid { grid-template-columns: 1fr; } }
     .fs-bar-frame { width: 100%; aspect-ratio: 1.618 / 1; }
     .fs-bar-frame svg { width: 100%; height: 100%; display: block; }
 
@@ -106,6 +109,21 @@
     .fs-quickstats-box { border: 1.5px solid var(--line); border-radius: var(--radius); padding: var(--space-2); text-align: center; }
     .fs-quickstats-box .val { font-weight: 800; font-size: 17px; color: var(--forest); }
     .fs-quickstats-box .lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .fs-detail-table {
+      border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,245,0.95));
+      box-shadow: var(--shadow);
+    }
+    .fs-detail-table summary { cursor: pointer; font-weight: 700; font-size: 14px; list-style: none; display: flex; align-items: center; gap: 8px; color: var(--ink); }
+    .fs-detail-table summary::-webkit-details-marker { display: none; }
+    .fs-detail-table summary::before { content: "▸"; transition: transform 0.15s; color: var(--brand); }
+    .fs-detail-table[open] summary::before { transform: rotate(90deg); }
+    .fs-table-scroll { overflow-x: auto; margin-top: var(--space-2); }
+    .fs-year-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+    .fs-year-table th, .fs-year-table td { padding: 6px 10px; text-align: center; border-bottom: 1px solid var(--line); }
+    .fs-year-table thead th { position: sticky; top: 0; background: #f6f1ea; color: var(--muted); font-weight: 700; font-size: 11px; }
+    .fs-year-table tbody tr:nth-child(even) { background: rgba(0,0,0,0.02); }
   </style>
 </head>
 <body>
@@ -265,10 +283,7 @@
 
         <div class="card">
           <h3 style="margin-top:0">مقارنة سريعة — التكلفة الكلية على 30 سنة</h3>
-          <div class="fs-bar-compare-grid">
-            <div class="fs-bar-frame" data-diesel-bar-holder></div>
-            <div class="fs-bar-frame" data-grid-bar-holder></div>
-          </div>
+          <div class="fs-bar-frame" data-cost-bar-holder></div>
         </div>
 
         <div class="card">
@@ -285,6 +300,38 @@
             <div class="fs-quickstats-box"><div class="val" data-diesel-monthly-saving>—</div><div class="lbl">توفير شهري (ديزيل)</div></div>
           </div>
         </div>
+
+        <details class="fs-detail-table">
+          <summary>الجدول التفصيلي سنة بسنة — مقابل مولد ديزيل</summary>
+          <div class="fs-table-scroll">
+            <table class="fs-year-table">
+              <thead>
+                <tr>
+                  <th>سنة</th><th>السنة الميلادية</th><th>الطاقة المنتجة (kWh)</th>
+                  <th>سعر الديزيل المكافئ (ج.م/kWh)</th><th>صيانة المنظومة (ج.م)</th>
+                  <th>القيمة المستردة (ج.م)</th><th>صافي التوفير (ج.م)</th><th>الربح التراكمي (ج.م)</th>
+                </tr>
+              </thead>
+              <tbody data-diesel-year-table></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details class="fs-detail-table">
+          <summary>الجدول التفصيلي سنة بسنة — مقابل شبكة الكهرباء</summary>
+          <div class="fs-table-scroll">
+            <table class="fs-year-table">
+              <thead>
+                <tr>
+                  <th>سنة</th><th>السنة الميلادية</th><th>الطاقة المنتجة (kWh)</th>
+                  <th>سعر الشبكة (ج.م/kWh)</th><th>صيانة المنظومة (ج.م)</th>
+                  <th>القيمة المستردة (ج.م)</th><th>صافي التوفير (ج.م)</th><th>الربح التراكمي (ج.م)</th>
+                </tr>
+              </thead>
+              <tbody data-grid-year-table></tbody>
+            </table>
+          </div>
+        </details>
 
         <button type="button" class="btn btn-primary" id="fsPrintBtn" style="width:100%">📄 طباعة دراسة الجدوى / حفظ PDF</button>
       </div>
