@@ -180,28 +180,47 @@ function runFeasibility(inputs) {
   let dieselLitersYear1 = 0;
   let dieselTotalAvoidedCost = 0;
   let gridTotalAvoidedCost = 0;
+  const yearRows = [];
+  const currentCalendarYear = new Date().getFullYear();
 
   for (let y = 1; y <= YEARS; y++) {
     const energy = energyYear1 * Math.pow(1 - pct(degradationPct), y - 1);
     const dieselLiters = energy / genKwhPerLiter;
     if (y === 1) dieselLitersYear1 = dieselLiters;
 
-    const dieselAvoided = dieselLiters * dieselPrice * Math.pow(1 + pct(dieselEscPct), y - 1);
-    const gridAvoided = energy * elecPrice * Math.pow(1 + pct(elecEscPct), y - 1);
+    const dieselPriceThisYear = dieselPrice * Math.pow(1 + pct(dieselEscPct), y - 1);
+    const gridPriceThisYear = elecPrice * Math.pow(1 + pct(elecEscPct), y - 1);
+    const dieselAvoided = dieselLiters * dieselPriceThisYear;
+    const gridAvoided = energy * gridPriceThisYear;
     dieselTotalAvoidedCost += dieselAvoided;
     gridTotalAvoidedCost += gridAvoided;
 
-    const dieselNet = dieselAvoided - maintenanceCost;
-    const gridNet = gridAvoided - maintenanceCost;
+    // أول سنة ضمان مجاني للمنظومة — مفيش تكلفة صيانة فيها.
+    const yearMaintenance = y === 1 ? 0 : maintenanceCost;
+
+    const dieselNet = dieselAvoided - yearMaintenance;
+    const gridNet = gridAvoided - yearMaintenance;
 
     dieselCF.push(dieselNet);
     gridCF.push(gridNet);
     dieselCumulative.push(dieselCumulative[y - 1] + dieselNet);
     gridCumulative.push(gridCumulative[y - 1] + gridNet);
+
+    yearRows.push({
+      year: y,
+      calendarYear: currentCalendarYear + y - 1,
+      energy,
+      dieselPriceThisYear, gridPriceThisYear,
+      maintenance: yearMaintenance,
+      dieselAvoided, gridAvoided,
+      dieselNet, gridNet,
+      dieselCumulative: dieselCumulative[y],
+      gridCumulative: gridCumulative[y],
+    });
   }
 
   const co2TonsYear1 = (dieselLitersYear1 * 2.68) / 1000; // 2.68 كجم CO2 لكل لتر ديزيل محروق (معامل قياسي)
-  const totalCostWithSolar = capex + maintenanceCost * YEARS;
+  const totalCostWithSolar = capex + maintenanceCost * (YEARS - 1); // أول سنة من غير صيانة
 
   // إحصائيات إضافية للإقناع السريع (زي الجدول المرجعي اللي اتبعت) — كلها
   // مبنية على أرقام السنة الأولى، قبل أي تصاعد أسعار أو تدهور كفاءة.
@@ -225,6 +244,7 @@ function runFeasibility(inputs) {
     dieselLitersYear1,
     dieselTotalAvoidedCost, gridTotalAvoidedCost, totalCostWithSolar, capex,
     dieselMonthlySaving, gridMonthlySaving, annualEnergyMwh, householdsEquivalent, phoneChargesEquivalent,
+    yearRows,
   };
 }
 
@@ -281,6 +301,7 @@ function renderResults(r) {
   setText("[data-phones-equiv]", fmt(r.phoneChargesEquivalent));
   setText("[data-diesel-monthly-saving]", fmt(r.dieselMonthlySaving) + " ج.م/شهر");
 
+  renderYearTables(r);
   renderChart(r);
   $("[data-results-col]").hidden = false;
 
@@ -288,6 +309,27 @@ function renderResults(r) {
   // يبقى نضيف من غير فورم ظاهر — لسه ممكن تفتحه تاني وتعدّل وتعيد الحساب.
   const details = $("[data-assumptions-details]");
   if (details) details.open = false;
+}
+
+function renderYearTables(r) {
+  const dieselBody = $("[data-diesel-year-table]");
+  const gridBody = $("[data-grid-year-table]");
+  if (dieselBody) {
+    dieselBody.innerHTML = r.yearRows.map((row) => `
+      <tr>
+        <td>${row.year}</td><td>${row.calendarYear}</td><td>${fmt(row.energy)}</td>
+        <td>${row.dieselPriceThisYear.toFixed(2)}</td><td>${fmt(row.maintenance)}</td>
+        <td>${fmt(row.dieselAvoided)}</td><td>${fmt(row.dieselNet)}</td><td>${fmt(row.dieselCumulative)}</td>
+      </tr>`).join("");
+  }
+  if (gridBody) {
+    gridBody.innerHTML = r.yearRows.map((row) => `
+      <tr>
+        <td>${row.year}</td><td>${row.calendarYear}</td><td>${fmt(row.energy)}</td>
+        <td>${row.gridPriceThisYear.toFixed(2)}</td><td>${fmt(row.maintenance)}</td>
+        <td>${fmt(row.gridAvoided)}</td><td>${fmt(row.gridNet)}</td><td>${fmt(row.gridCumulative)}</td>
+      </tr>`).join("");
+  }
 }
 
 /* ---------------- رسوم SVG خام (من غير مكتبات خارجية) ---------------- */
@@ -355,38 +397,41 @@ function buildChartSvg(r, width, height) {
   `;
 }
 
-// بار بسيط: التكلفة الكلية على 30 سنة لو فضلت زي ما إنت (ديزيل/شبكة)،
-// مقابل التكلفة الكلية لو ركّبت الطاقة الشمسية (CAPEX + صيانة 30 سنة).
-// أسهل بكتير من خط بياني للعميل اللي مش هيقعد يحلل أرقام — طول العمودين
-// وحده بيوصّل الرسالة.
-function buildCostBarSvg(r, width, height, mode) {
-  const withoutSolar = mode === "diesel" ? r.dieselTotalAvoidedCost : r.gridTotalAvoidedCost;
-  const withSolar = r.totalCostWithSolar;
-  const maxV = Math.max(withoutSolar, withSolar) || 1;
-  const pad = { top: 26, bottom: 30, side: 40 };
-  const barW = 90;
-  const gap = 60;
+// بار واحد بتلات أعمدة: ديزيل، شبكة، طاقة شمسية — مش بارين منفصلين.
+// الترتيب تنازلي عمدًا: العميل أصلاً عارف إن الشبكة أرخص من الديزيل،
+// فلما يشوف الترتيب ده صحيح قدامه بيثق في باقي الأرقام، وبعدين لما
+// يشوف عمود الطاقة الشمسية أقل من الاتنين بفارق واضح، الاقتناع بييجي
+// أقوى لأن الثقة اتبنت الأول.
+function buildThreeWayBarSvg(r, width, height) {
+  const bars = [
+    { label: "لو فضلت على الديزل", value: r.dieselTotalAvoidedCost, color: "#1f3a5f" },
+    { label: "لو فضلت على الشبكة", value: r.gridTotalAvoidedCost, color: "#d98324" },
+    { label: "بالطاقة الشمسية", value: r.totalCostWithSolar, color: "#214234" },
+  ].sort((a, b) => b.value - a.value);
+
+  const maxV = Math.max(...bars.map((b) => b.value)) || 1;
+  const pad = { top: 30, bottom: 32, side: 24 };
   const innerH = height - pad.top - pad.bottom;
+  const innerW = width - pad.side * 2;
+  const gap = innerW * 0.12;
+  const barW = (innerW - gap * (bars.length - 1)) / bars.length;
   const barH = (v) => (v / maxV) * innerH;
 
-  const x1 = pad.side;
-  const x2 = pad.side + barW + gap;
-  const h1 = barH(withoutSolar);
-  const h2 = barH(withSolar);
-  const y1 = height - pad.bottom - h1;
-  const y2 = height - pad.bottom - h2;
-  const baseColor = mode === "diesel" ? "#1f3a5f" : "#d98324";
+  const barsSvg = bars.map((b, i) => {
+    const x = pad.side + i * (barW + gap);
+    const h = barH(b.value);
+    const y = height - pad.bottom - h;
+    return `
+      <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${b.color}" rx="5"></rect>
+      <text x="${(x + barW / 2).toFixed(1)}" y="${(y - 8).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="700" fill="${b.color}">${fmt(b.value)}</text>
+      <text x="${(x + barW / 2).toFixed(1)}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#7a6f5f">${b.label}</text>
+    `;
+  }).join("");
 
   return `
     <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg">
       <line x1="${pad.side - 10}" y1="${height - pad.bottom}" x2="${width - pad.side + 10}" y2="${height - pad.bottom}" stroke="#c9bda8" stroke-width="1"></line>
-      <rect x="${x1}" y="${y1.toFixed(1)}" width="${barW}" height="${h1.toFixed(1)}" fill="${baseColor}" opacity="0.35" rx="4"></rect>
-      <text x="${x1 + barW / 2}" y="${y1 - 8}" text-anchor="middle" font-size="13" font-weight="700" fill="${baseColor}">${fmt(withoutSolar)}</text>
-      <text x="${x1 + barW / 2}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#7a6f5f">${mode === "diesel" ? "لو فضلت على الديزل" : "لو فضلت على الشبكة"}</text>
-
-      <rect x="${x2}" y="${y2.toFixed(1)}" width="${barW}" height="${h2.toFixed(1)}" fill="#214234" rx="4"></rect>
-      <text x="${x2 + barW / 2}" y="${y2 - 8}" text-anchor="middle" font-size="13" font-weight="700" fill="#2f7d5e">${fmt(withSolar)}</text>
-      <text x="${x2 + barW / 2}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#7a6f5f">بالطاقة الشمسية</text>
+      ${barsSvg}
     </svg>
   `;
 }
@@ -396,15 +441,10 @@ function renderChart(r) {
   const width = Math.max(320, holder.clientWidth || 600);
   holder.innerHTML = buildChartSvg(r, width, Math.round(width / 1.618));
 
-  const dieselBarHolder = $("[data-diesel-bar-holder]");
-  const gridBarHolder = $("[data-grid-bar-holder]");
-  if (dieselBarHolder) {
-    const w = Math.max(260, dieselBarHolder.clientWidth || 260);
-    dieselBarHolder.innerHTML = buildCostBarSvg(r, w, Math.round(w / 1.618), "diesel");
-  }
-  if (gridBarHolder) {
-    const w = Math.max(260, gridBarHolder.clientWidth || 260);
-    gridBarHolder.innerHTML = buildCostBarSvg(r, w, Math.round(w / 1.618), "grid");
+  const barHolder = $("[data-cost-bar-holder]");
+  if (barHolder) {
+    const w = Math.max(320, barHolder.clientWidth || 600);
+    barHolder.innerHTML = buildThreeWayBarSvg(r, w, Math.round(w / 1.618));
   }
 }
 
@@ -494,8 +534,7 @@ function printStudy() {
       </div>
       <div style="margin-top:14px">${buildChartSvg(r, 700, 200)}</div>
       <div style="display:flex;gap:14px;margin-top:10px">
-        <div style="flex:1">${buildCostBarSvg(r, 340, 200, "diesel")}</div>
-        <div style="flex:1">${buildCostBarSvg(r, 340, 200, "grid")}</div>
+        <div style="flex:1">${buildThreeWayBarSvg(r, 680, 240)}</div>
       </div>
       <div class="print-assumptions" style="margin-top:12px">
         <span>الطاقة المنتجة سنويًا: ${fmt1(r.annualEnergyMwh)} MWh</span>
@@ -504,6 +543,14 @@ function printStudy() {
         <span>توفير شهري (شبكة): ${fmt(r.gridMonthlySaving)} ج.م</span>
         <span>CO₂ موفّر: ${fmt1(r.co2TonsYear1)} طن/سنة</span>
       </div>
+      <div class="print-year-table-wrap">
+        <h4>الجدول التفصيلي سنة بسنة — مقابل مولد ديزيل</h4>
+        ${buildPrintYearTable(r.yearRows, "diesel")}
+      </div>
+      <div class="print-year-table-wrap">
+        <h4>الجدول التفصيلي سنة بسنة — مقابل شبكة الكهرباء</h4>
+        ${buildPrintYearTable(r.yearRows, "grid")}
+      </div>
       <div class="print-footer">
         الحساب افتراضي لأغراض الإقناع الأولي، مبني على الفروض الموضحة أعلاه — مش عرض مالي رسمي وقابل للتغيير حسب الأسعار الفعلية وقت التعاقد.
         الأصل للطاقة الشمسية — alaslsolar.com
@@ -511,6 +558,24 @@ function printStudy() {
     </div>
   `;
   setTimeout(() => window.print(), 150);
+}
+
+function buildPrintYearTable(yearRows, mode) {
+  const priceLabel = mode === "diesel" ? "سعر الديزيل المكافئ" : "سعر الشبكة";
+  const avoidedLabel = "القيمة المستردة";
+  const rows = yearRows.map((row) => {
+    const price = mode === "diesel" ? row.dieselPriceThisYear : row.gridPriceThisYear;
+    const avoided = mode === "diesel" ? row.dieselAvoided : row.gridAvoided;
+    const net = mode === "diesel" ? row.dieselNet : row.gridNet;
+    const cum = mode === "diesel" ? row.dieselCumulative : row.gridCumulative;
+    return `<tr><td>${row.year}</td><td>${row.calendarYear}</td><td>${fmt(row.energy)}</td><td>${price.toFixed(2)}</td><td>${fmt(row.maintenance)}</td><td>${fmt(avoided)}</td><td>${fmt(net)}</td><td>${fmt(cum)}</td></tr>`;
+  }).join("");
+  return `
+    <table class="print-year-table">
+      <thead><tr><th>سنة</th><th>ميلادي</th><th>الطاقة (kWh)</th><th>${priceLabel}</th><th>الصيانة</th><th>${avoidedLabel}</th><th>صافي التوفير</th><th>الربح التراكمي</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
 }
 
 /* ---------------- ربط الأحداث ---------------- */
