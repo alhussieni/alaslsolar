@@ -532,10 +532,6 @@ function printStudy() {
           <div class="row"><span>فترة الاسترداد</span><span>${paybackLabel(r.gridPayback)}</span></div>
         </div>
       </div>
-      <div style="margin-top:14px">${buildChartSvg(r, 700, 200)}</div>
-      <div style="display:flex;gap:14px;margin-top:10px">
-        <div style="flex:1">${buildThreeWayBarSvg(r, 680, 240)}</div>
-      </div>
       <div class="print-assumptions" style="margin-top:12px">
         <span>الطاقة المنتجة سنويًا: ${fmt1(r.annualEnergyMwh)} MWh</span>
         <span>يكفي استهلاك ~${fmt(r.householdsEquivalent)} منزل/سنة</span>
@@ -543,14 +539,26 @@ function printStudy() {
         <span>توفير شهري (شبكة): ${fmt(r.gridMonthlySaving)} ج.م</span>
         <span>CO₂ موفّر: ${fmt1(r.co2TonsYear1)} طن/سنة</span>
       </div>
-      <div class="print-year-table-wrap">
-        <h4>الجدول التفصيلي سنة بسنة — مقابل مولد ديزيل</h4>
-        ${buildPrintYearTable(r.yearRows, "diesel")}
-      </div>
-      <div class="print-year-table-wrap">
-        <h4>الجدول التفصيلي سنة بسنة — مقابل شبكة الكهرباء</h4>
-        ${buildPrintYearTable(r.yearRows, "grid")}
-      </div>
+    </div>
+
+    <!-- كل قسم تحته صفحة مستقلة بمساحة أمان كاملة فوق وتحت (نفس padding
+         الصفحة الأولى)، عشان محدش يتصادم مع اللوجو أو الفوتر في الليتر
+         هيد بغض النظر عن طول المحتوى في الصفحة اللي قبله. -->
+    <div class="print-body print-page-break" dir="rtl">
+      <h3 style="margin-top:0">التدفق النقدي التراكمي — 30 سنة</h3>
+      ${buildChartSvg(r, 700, 280)}
+      <h3 style="margin-top:18px">مقارنة سريعة — التكلفة الكلية على 30 سنة</h3>
+      ${buildThreeWayBarSvg(r, 700, 320)}
+    </div>
+
+    <div class="print-body print-page-break" dir="rtl">
+      <h4 class="print-year-table-wrap">الجدول التفصيلي سنة بسنة — مقابل مولد ديزيل</h4>
+      ${buildPrintYearTable(r.yearRows, "diesel")}
+    </div>
+
+    <div class="print-body print-page-break" dir="rtl">
+      <h4 class="print-year-table-wrap">الجدول التفصيلي سنة بسنة — مقابل شبكة الكهرباء</h4>
+      ${buildPrintYearTable(r.yearRows, "grid")}
       <div class="print-footer">
         الحساب افتراضي لأغراض الإقناع الأولي، مبني على الفروض الموضحة أعلاه — مش عرض مالي رسمي وقابل للتغيير حسب الأسعار الفعلية وقت التعاقد.
         الأصل للطاقة الشمسية — alaslsolar.com
