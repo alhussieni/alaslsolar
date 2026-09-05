@@ -293,7 +293,7 @@ function renderResults(r) {
 /* ---------------- رسوم SVG خام (من غير مكتبات خارجية) ---------------- */
 
 function buildChartSvg(r, width, height) {
-  const pad = { top: 30, right: 18, bottom: 34, left: 74 };
+  const pad = { top: 36, right: 18, bottom: 34, left: 88 };
   const allVals = [...r.dieselCumulative, ...r.gridCumulative, 0];
   const minV = Math.min(...allVals);
   const maxV = Math.max(...allVals);
@@ -307,10 +307,14 @@ function buildChartSvg(r, width, height) {
   const toPath = (arr) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const zeroY = y(0);
 
-  // خطوط شبكة أفقية + قيم على المحور الرأسي (min / 0 / max). تسمية "0"
-  // بتتحط فوق خطها بمسافة (مش متمركزة عليه) عشان متتصادمش مع تسميات
-  // السنين تحت لما نقطة الصفر تكون قريبة من حافة الشارت السفلية.
-  const gridLines = [minV, 0, maxV].map((v) => {
+  // خطوط شبكة أفقية + قيم على المحور الرأسي. تسمية "0" بتتحط فوق خطها
+  // بمسافة (مش متمركزة عليه) عشان متتصادمش مع تسميات السنين تحت. تسمية
+  // أقل قيمة (-CAPEX عادة) بتتشال تمامًا لو قريبة جدًا من خط الصفر —
+  // ده اللي كان بيسبب تراكب الأرقام فوق بعض لما رأس المال يكون صغير
+  // نسبيًا مقارنة بأرباح 30 سنة (القيمة دي أصلاً موضّحة في الكروت فوق).
+  const minLabelGap = Math.abs(y(minV) - zeroY);
+  const gridValues = minLabelGap > 22 ? [minV, 0, maxV] : [0, maxV];
+  const gridLines = gridValues.map((v) => {
     const yy = y(v);
     const labelY = v === 0 ? yy - 6 : yy;
     const baseline = v === 0 ? "auto" : "middle";
