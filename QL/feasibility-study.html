@@ -35,23 +35,34 @@
       .print-footer { margin-top: 18px; font-size: 11px; color: #777; border-top: 1px solid #e4d8ca; padding-top: 8px; }
     }
 
-    .fs-layout { display: flex; flex-direction: column; gap: var(--space-4); max-width: 900px; margin: 0 auto; }
+    /* الصفحة مقسومة عمودين بنسبة القاعدة الذهبية: الافتراضات يمين
+       (~38.2%، الجزء الأصغر)، والنتائج شمال (~61.8%، الجزء الأكبر).
+       على الشاشات الضيقة تتحول لعمود واحد فوق بعض. */
+    .fs-page-grid { display: grid; grid-template-columns: 38.2fr 61.8fr; gap: var(--space-4); align-items: start; max-width: 1180px; margin: 0 auto; }
+    @media (max-width: 900px) { .fs-page-grid { grid-template-columns: 1fr; } }
+
+    .fs-layout { display: flex; flex-direction: column; gap: var(--space-4); }
 
     /* الفروض — تتحط في details قابلة للطي، تتقفل تلقائيًا بعد أول حساب
-       عشان العرض قدّام العميل يبقى نضيف من غير فورم ظاهر. */
-    .fs-assumptions { border: 1.5px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3); }
-    .fs-assumptions summary { cursor: pointer; font-weight: 700; font-size: 15px; list-style: none; display: flex; align-items: center; gap: 8px; }
+       عشان العرض قدّام العميل يبقى نضيف من غير فورم ظاهر. خلفية صريحة
+       (مش شفافة) زي باقي كروت الموقع، عشان النص يفضل واضح. */
+    .fs-assumptions {
+      position: sticky; top: var(--space-3);
+      border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,245,0.95));
+      box-shadow: var(--shadow);
+    }
+    @media (max-width: 900px) { .fs-assumptions { position: static; } }
+    .fs-assumptions summary { cursor: pointer; font-weight: 700; font-size: 15px; list-style: none; display: flex; align-items: center; gap: 8px; color: var(--ink); }
     .fs-assumptions summary::-webkit-details-marker { display: none; }
     .fs-assumptions summary::before { content: "▸"; transition: transform 0.15s; color: var(--brand); }
     .fs-assumptions[open] summary::before { transform: rotate(90deg); }
-    .fs-input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin-top: var(--space-3); }
-    @media (max-width: 720px) { .fs-input-grid { grid-template-columns: 1fr 1fr; } }
+    .fs-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
     .fs-input-grid label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    .fs-input-grid input { width: 100%; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: var(--radius); font-family: inherit; font-size: 13px; }
+    .fs-input-grid input { width: 100%; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: var(--radius); font-family: inherit; font-size: 13px; background: #fff; color: var(--ink); }
     .fs-input-grid .full { grid-column: 1 / -1; }
 
-    .toolbar-btns { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
-    .toolbar-btns .btn { flex: 1; min-width: 160px; }
+    .toolbar-btns { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
 
     /* الشريط الرئيسي — أول حاجة يشوفها العميل: رقمين كبار بس، مقابل
        ديزيل ومقابل الشبكة، من غير أي تفاصيل تانية تشتت الانتباه. */
@@ -64,7 +75,11 @@
     .fs-hero-card .fs-hero-value { font-size: 34px; font-weight: 800; line-height: 1.15; }
     .fs-hero-card .fs-hero-sub { font-size: 13px; opacity: 0.9; margin-top: var(--space-2); display: flex; gap: var(--space-3); }
 
-    .fs-result-card { border: 1.5px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3); }
+    .fs-result-card {
+      border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,245,0.95));
+      box-shadow: var(--shadow);
+    }
     .fs-result-card h3 { margin: 0 0 var(--space-2); font-size: 15px; }
     .fs-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     @media (max-width: 480px) { .fs-stat-row { grid-template-columns: repeat(2, 1fr); } }
@@ -124,7 +139,7 @@
 
     <p class="form-note" data-quote-link-note style="margin-bottom:var(--space-2)"></p>
 
-    <div class="fs-layout">
+    <div class="fs-page-grid">
 
       <details class="fs-assumptions" open data-assumptions-details>
         <summary>افتراضات دراسة الجدوى</summary>
