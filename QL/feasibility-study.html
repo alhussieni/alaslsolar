@@ -35,41 +35,62 @@
       .print-footer { margin-top: 18px; font-size: 11px; color: #777; border-top: 1px solid #e4d8ca; padding-top: 8px; }
     }
 
-    .fs-layout { display: grid; grid-template-columns: minmax(280px, 34%) minmax(0, 66%); gap: var(--space-4); align-items: start; }
-    @media (max-width: 1020px) { .fs-layout { grid-template-columns: 1fr; } }
-    .fs-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
-    .fs-input-grid label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 3px; }
-    .fs-input-grid input { width: 100%; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: var(--radius); font-family: inherit; font-size: 13.5px; }
+    .fs-layout { display: flex; flex-direction: column; gap: var(--space-4); max-width: 900px; margin: 0 auto; }
+
+    /* الفروض — تتحط في details قابلة للطي، تتقفل تلقائيًا بعد أول حساب
+       عشان العرض قدّام العميل يبقى نضيف من غير فورم ظاهر. */
+    .fs-assumptions { border: 1.5px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3); }
+    .fs-assumptions summary { cursor: pointer; font-weight: 700; font-size: 15px; list-style: none; display: flex; align-items: center; gap: 8px; }
+    .fs-assumptions summary::-webkit-details-marker { display: none; }
+    .fs-assumptions summary::before { content: "▸"; transition: transform 0.15s; color: var(--brand); }
+    .fs-assumptions[open] summary::before { transform: rotate(90deg); }
+    .fs-input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin-top: var(--space-3); }
+    @media (max-width: 720px) { .fs-input-grid { grid-template-columns: 1fr 1fr; } }
+    .fs-input-grid label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .fs-input-grid input { width: 100%; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: var(--radius); font-family: inherit; font-size: 13px; }
     .fs-input-grid .full { grid-column: 1 / -1; }
 
-    .toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-    .toolbar-btns .btn { flex: 1; min-width: 140px; }
+    .toolbar-btns { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
+    .toolbar-btns .btn { flex: 1; min-width: 160px; }
 
-    .fs-results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-    @media (max-width: 640px) { .fs-results-grid { grid-template-columns: 1fr; } }
-    .fs-results-col { display: flex; flex-direction: column; gap: var(--space-3); }
-    .fs-result-card { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 14px; }
-    .fs-result-card h3 { margin: 0 0 10px; font-size: 15px; }
-    .fs-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    /* الشريط الرئيسي — أول حاجة يشوفها العميل: رقمين كبار بس، مقابل
+       ديزيل ومقابل الشبكة، من غير أي تفاصيل تانية تشتت الانتباه. */
+    .fs-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    @media (max-width: 640px) { .fs-hero-grid { grid-template-columns: 1fr; } }
+    .fs-hero-card { border-radius: var(--radius-lg); padding: var(--space-4); color: #fff; }
+    .fs-hero-card.diesel { background: linear-gradient(155deg, #1f3a5f, #16283f); }
+    .fs-hero-card.grid { background: linear-gradient(155deg, #d98324, #b8691a); }
+    .fs-hero-card .fs-hero-label { font-size: 14px; opacity: 0.85; margin-bottom: 4px; }
+    .fs-hero-card .fs-hero-value { font-size: 34px; font-weight: 800; line-height: 1.15; }
+    .fs-hero-card .fs-hero-sub { font-size: 13px; opacity: 0.9; margin-top: var(--space-2); display: flex; gap: var(--space-3); }
+
+    .fs-result-card { border: 1.5px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3); }
+    .fs-result-card h3 { margin: 0 0 var(--space-2); font-size: 15px; }
+    .fs-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     @media (max-width: 480px) { .fs-stat-row { grid-template-columns: repeat(2, 1fr); } }
-    .fs-stat-box { background: #f6f1ea; border-radius: var(--radius); padding: 10px 6px; text-align: center; }
-    .fs-stat-box .val { font-weight: 800; font-size: 16px; color: var(--brand-dark); }
+    .fs-stat-box { background: #f6f1ea; border-radius: var(--radius); padding: var(--space-2) 6px; text-align: center; }
+    .fs-stat-box .val { font-weight: 800; font-size: 15px; color: var(--brand-dark); }
     .fs-stat-box .lbl { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
-    .fs-result-card.diesel { border-color: #1f3a5f; }
-    .fs-result-card.grid { border-color: #d98324; }
 
-    .fs-chart-wrap { margin-top: var(--space-3); }
-    .fs-chart-legend { display: flex; gap: var(--space-3); font-size: 12px; margin-bottom: 6px; }
+    .fs-chart-card { padding: var(--space-3); }
+    .fs-chart-legend { display: flex; gap: var(--space-3); font-size: 12px; margin-bottom: var(--space-2); }
     .fs-chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
     .fs-chart-legend i { width: 14px; height: 3px; display: inline-block; border-radius: 2px; }
+    /* نسبة الشارت 1.618:1 (القاعدة الذهبية) بدل ما يبقى ارتفاعه ثابت
+       بصرف النظر عن العرض المتاح — كده بيفضل متناسق على أي شاشة. */
+    .fs-chart-frame { width: 100%; aspect-ratio: 1.618 / 1; }
+    .fs-chart-frame svg { width: 100%; height: 100%; display: block; }
 
-    .fs-impact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
-    .fs-impact-box { border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px; text-align: center; }
-    .fs-impact-box .val { font-weight: 800; font-size: 18px; color: var(--forest); }
-    .fs-impact-box .lbl { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
-
-    .fs-bar-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+    .fs-bar-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
     @media (max-width: 640px) { .fs-bar-compare-grid { grid-template-columns: 1fr; } }
+    .fs-bar-frame { width: 100%; aspect-ratio: 1.618 / 1; }
+    .fs-bar-frame svg { width: 100%; height: 100%; display: block; }
+
+    .fs-quickstats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+    @media (max-width: 640px) { .fs-quickstats-grid { grid-template-columns: 1fr 1fr; } }
+    .fs-quickstats-box { border: 1.5px solid var(--line); border-radius: var(--radius); padding: var(--space-2); text-align: center; }
+    .fs-quickstats-box .val { font-weight: 800; font-size: 17px; color: var(--forest); }
+    .fs-quickstats-box .lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
   </style>
 </head>
 <body>
@@ -105,9 +126,8 @@
 
     <div class="fs-layout">
 
-      <!-- عمود الافتراضات (يمين) -->
-      <div class="card">
-        <h3 style="margin-top:0">افتراضات دراسة الجدوى</h3>
+      <details class="fs-assumptions" open data-assumptions-details>
+        <summary>افتراضات دراسة الجدوى</summary>
         <div class="fs-input-grid">
           <div class="full">
             <label for="fsSystemLabel">اسم المنظومة / العرض</label>
@@ -166,7 +186,7 @@
             <input type="number" id="fsDiscountRate" min="0" step="0.5" value="19.5">
           </div>
         </div>
-        <p class="form-note" style="color:var(--muted);margin-top:var(--space-2)">
+        <p class="form-note" style="color:var(--muted);margin-top:var(--space-3)">
           الحساب افتراضي لأغراض الإقناع الأولي — مش عرض مالي رسمي، ومبني على الفروض المدخلة هنا بس.
         </p>
         <div class="toolbar-btns">
@@ -174,69 +194,80 @@
           <button type="button" class="btn btn-secondary" id="fsSaveBtn">حفظ الدراسة</button>
         </div>
         <p class="form-note" data-fs-message></p>
-      </div>
+      </details>
 
-      <!-- عمود النتيجة (شمال) -->
-      <div class="fs-results-col" data-results-col hidden>
+      <div class="fs-layout" data-results-col hidden style="gap:var(--space-4)">
 
-        <div class="fs-results-grid">
-          <div class="fs-result-card diesel">
-            <h3>💧 مقابل مولد ديزيل</h3>
-            <div class="fs-stat-row">
-              <div class="fs-stat-box"><div class="val" data-diesel-savings>—</div><div class="lbl">صافي الربح (30 سنة)</div></div>
-              <div class="fs-stat-box"><div class="val" data-diesel-npv>—</div><div class="lbl">NPV (بمعدل الخصم)</div></div>
-              <div class="fs-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">معدل العائد IRR</div></div>
-              <div class="fs-stat-box"><div class="val" data-diesel-payback>—</div><div class="lbl">فترة الاسترداد</div></div>
+        <!-- الشريط الرئيسي: رقم واحد كبير لكل سيناريو، أول حاجة يشوفها العميل -->
+        <div class="fs-hero-grid">
+          <div class="fs-hero-card diesel">
+            <div class="fs-hero-label">💧 صافي الربح مقابل مولد ديزيل (30 سنة)</div>
+            <div class="fs-hero-value" data-diesel-hero>—</div>
+            <div class="fs-hero-sub">
+              <span>استرداد خلال <b data-diesel-payback-inline>—</b></span>
+              <span>عائد <b data-diesel-irr-inline>—</b></span>
             </div>
           </div>
-          <div class="fs-result-card grid">
-            <h3>⚡ مقابل شبكة الكهرباء</h3>
-            <div class="fs-stat-row">
-              <div class="fs-stat-box"><div class="val" data-grid-savings>—</div><div class="lbl">صافي الربح (30 سنة)</div></div>
-              <div class="fs-stat-box"><div class="val" data-grid-npv>—</div><div class="lbl">NPV (بمعدل الخصم)</div></div>
-              <div class="fs-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">معدل العائد IRR</div></div>
-              <div class="fs-stat-box"><div class="val" data-grid-payback>—</div><div class="lbl">فترة الاسترداد</div></div>
+          <div class="fs-hero-card grid">
+            <div class="fs-hero-label">⚡ صافي الربح مقابل شبكة الكهرباء (30 سنة)</div>
+            <div class="fs-hero-value" data-grid-hero>—</div>
+            <div class="fs-hero-sub">
+              <span>استرداد خلال <b data-grid-payback-inline>—</b></span>
+              <span>عائد <b data-grid-irr-inline>—</b></span>
             </div>
           </div>
         </div>
 
-        <div class="card fs-chart-wrap">
+        <!-- تفاصيل الأرقام لمن يريد التعمق -->
+        <div class="fs-hero-grid">
+          <div class="fs-result-card">
+            <h3>تفاصيل — مقابل ديزيل</h3>
+            <div class="fs-stat-row">
+              <div class="fs-stat-box"><div class="val" data-diesel-savings>—</div><div class="lbl">صافي الربح</div></div>
+              <div class="fs-stat-box"><div class="val" data-diesel-npv>—</div><div class="lbl">NPV</div></div>
+              <div class="fs-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">IRR</div></div>
+            </div>
+          </div>
+          <div class="fs-result-card">
+            <h3>تفاصيل — مقابل الشبكة</h3>
+            <div class="fs-stat-row">
+              <div class="fs-stat-box"><div class="val" data-grid-savings>—</div><div class="lbl">صافي الربح</div></div>
+              <div class="fs-stat-box"><div class="val" data-grid-npv>—</div><div class="lbl">NPV</div></div>
+              <div class="fs-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">IRR</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card fs-chart-card">
           <h3 style="margin-top:0">التدفق النقدي التراكمي — 30 سنة</h3>
           <div class="fs-chart-legend">
             <span><i style="background:#1f3a5f"></i> مقابل ديزيل</span>
             <span><i style="background:#d98324"></i> مقابل الشبكة</span>
           </div>
-          <div data-chart-holder></div>
-          <p class="form-note" style="color:var(--muted)">الخط الأفقي المنقّط = نقطة التعادل (CAPEX)، وتقاطع كل خط معاه = فترة الاسترداد.</p>
+          <div class="fs-chart-frame" data-chart-holder></div>
+          <p class="form-note" style="color:var(--muted);margin-bottom:0">الخط الأفقي المنقّط = نقطة التعادل، والدائرة = فترة الاسترداد.</p>
         </div>
 
         <div class="card">
           <h3 style="margin-top:0">مقارنة سريعة — التكلفة الكلية على 30 سنة</h3>
           <div class="fs-bar-compare-grid">
-            <div><div data-diesel-bar-holder></div></div>
-            <div><div data-grid-bar-holder></div></div>
+            <div class="fs-bar-frame" data-diesel-bar-holder></div>
+            <div class="fs-bar-frame" data-grid-bar-holder></div>
           </div>
         </div>
 
         <div class="card">
-          <h3 style="margin-top:0">الأثر البيئي (السنة الأولى، مقابل ديزيل)</h3>
-          <div class="fs-impact-grid">
-            <div class="fs-impact-box"><div class="val" data-co2-saved>—</div><div class="lbl">طن CO₂ موفّر / سنة</div></div>
-            <div class="fs-impact-box"><div class="val" data-diesel-liters-saved>—</div><div class="lbl">لتر ديزيل موفّر / سنة</div></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin-top:0">إحصائيات سريعة للإقناع</h3>
+          <h3 style="margin-top:0">لمحة سريعة</h3>
           <p class="form-note" style="color:var(--muted);margin-top:-6px">
             "المنازل" و"شحنات الموبايل" أرقام تقريبية لتوضيح حجم الطاقة المنتجة بمقياس مألوف للعميل — مش أرقام رسمية.
           </p>
-          <div class="fs-impact-grid">
-            <div class="fs-impact-box"><div class="val" data-annual-energy>—</div><div class="lbl">إجمالي الطاقة المنتجة سنويًا (MWh)</div></div>
-            <div class="fs-impact-box"><div class="val" data-households-equiv>—</div><div class="lbl">يكفي استهلاك ~ منزل / سنة</div></div>
-            <div class="fs-impact-box"><div class="val" data-phones-equiv>—</div><div class="lbl">يكفي شحن ~ موبايل / سنة</div></div>
-            <div class="fs-impact-box"><div class="val" data-diesel-monthly-saving>—</div><div class="lbl">توفير شهري تقريبي (مقابل ديزيل)</div></div>
-            <div class="fs-impact-box"><div class="val" data-grid-monthly-saving>—</div><div class="lbl">توفير شهري تقريبي (مقابل الشبكة)</div></div>
+          <div class="fs-quickstats-grid">
+            <div class="fs-quickstats-box"><div class="val" data-annual-energy>—</div><div class="lbl">الطاقة المنتجة سنويًا (MWh)</div></div>
+            <div class="fs-quickstats-box"><div class="val" data-co2-saved>—</div><div class="lbl">طن CO₂ موفّر / سنة</div></div>
+            <div class="fs-quickstats-box"><div class="val" data-diesel-liters-saved>—</div><div class="lbl">لتر ديزيل موفّر / سنة</div></div>
+            <div class="fs-quickstats-box"><div class="val" data-households-equiv>—</div><div class="lbl">يكفي ~ منزل / سنة</div></div>
+            <div class="fs-quickstats-box"><div class="val" data-phones-equiv>—</div><div class="lbl">يكفي شحن ~ موبايل / سنة</div></div>
+            <div class="fs-quickstats-box"><div class="val" data-diesel-monthly-saving>—</div><div class="lbl">توفير شهري (ديزيل)</div></div>
           </div>
         </div>
 
