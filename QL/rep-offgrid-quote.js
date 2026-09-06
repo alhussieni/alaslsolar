@@ -476,18 +476,49 @@ function renderQuoteTable() {
   quoteRows.forEach((r, idx) => {
     const lineTotal = r.qty * r.unitPrice * (1 - r.discountPct / 100);
     const tr = document.createElement("tr");
+    const isCustom = r.type === "custom";
     tr.innerHTML = `
-      <td style="text-align:right;">${r.label}</td>
-      <td>${fmt(r.qty)}</td>
-      <td>${fmt(r.unitPrice)}</td>
+      <td style="text-align:right;">${isCustom ? `<input type="text" value="${r.label}" data-label-idx="${idx}" style="width:160px">` : r.label}</td>
+      <td><input type="number" min="0" step="1" value="${r.qty}" data-qty-idx="${idx}" style="width:70px"></td>
+      <td>${isCustom ? `<input type="number" min="0" step="1" value="${r.unitPrice}" data-price-idx="${idx}" style="width:90px">` : fmt(r.unitPrice)}</td>
       <td><input type="number" min="0" max="100" value="${r.discountPct}" data-discount-idx="${idx}"></td>
-      <td>${fmt(lineTotal)}</td>`;
+      <td>${fmt(lineTotal)}</td>
+      <td><button type="button" class="rq-remove" data-remove-row-idx="${idx}">حذف</button></td>`;
     body.appendChild(tr);
+  });
+  document.querySelectorAll("[data-label-idx]").forEach((inp) => {
+    inp.addEventListener("input", (e) => {
+      quoteRows[parseInt(e.target.dataset.labelIdx, 10)].label = e.target.value;
+    });
+  });
+  document.querySelectorAll("[data-price-idx]").forEach((inp) => {
+    inp.addEventListener("input", (e) => {
+      const idx = parseInt(e.target.dataset.priceIdx, 10);
+      quoteRows[idx].unitPrice = Math.max(0, parseFloat(e.target.value) || 0);
+      renderQuoteTable();
+    });
   });
   document.querySelectorAll("[data-discount-idx]").forEach((inp) => {
     inp.addEventListener("input", (e) => {
       const idx = parseInt(e.target.dataset.discountIdx, 10);
       quoteRows[idx].discountPct = Math.max(0, Math.min(100, parseFloat(e.target.value) || 0));
+      renderQuoteTable();
+    });
+  });
+  document.querySelectorAll("[data-qty-idx]").forEach((inp) => {
+    inp.addEventListener("input", (e) => {
+      const idx = parseInt(e.target.dataset.qtyIdx, 10);
+      // الكمية بتتحرر من هنا — المندوب يقدر يزوّد لوح إضافي، أمتار كابل
+      // زيادة، أو أي بند لظروف الموقع، من غير ما يرجع يعدّل حجم النظام
+      // كله. مفيش أي إعادة حساب لباقي البنود لما بند واحد يتغيّر.
+      quoteRows[idx].qty = Math.max(0, parseFloat(e.target.value) || 0);
+      renderQuoteTable();
+    });
+  });
+  document.querySelectorAll("[data-remove-row-idx]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const idx = parseInt(e.target.dataset.removeRowIdx, 10);
+      quoteRows.splice(idx, 1);
       renderQuoteTable();
     });
   });
@@ -513,6 +544,7 @@ async function saveQuote() {
   const items = quoteRows.map((r) => {
     if (r.type === "panel") return { type: "panel", product_id: r.product_id, watt: r.watt, qty: r.qty, discount_pct: r.discountPct, label: r.label };
     if (r.type === "product") return { type: "product", product_id: r.product_id, qty: r.qty, discount_pct: r.discountPct, label: r.label };
+    if (r.type === "custom") return { type: "custom", qty: r.qty, unit_price: r.unitPrice, discount_pct: r.discountPct, label: r.label };
     return { type: "bom_fixed", key: r.bomKey, qty: r.qty, discount_pct: r.discountPct, label: r.label };
   });
 
@@ -710,6 +742,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#ogBattAh")?.addEventListener("change", recalcIfAlreadyCalculated);
   $("#ogPanelWatt")?.addEventListener("change", recalcIfAlreadyCalculated);
   $("#saveQuoteBtn").addEventListener("click", saveQuote);
+  $("#addCustomRowBtn")?.addEventListener("click", () => {
+    quoteRows.push({ key: `custom_${Date.now()}`, label: "بند جديد", type: "custom", qty: 1, unitPrice: 0, discountPct: 0 });
+    renderQuoteTable();
+  });
   $("#custName").addEventListener("input", updateBanner);
   $("#custPhone").addEventListener("input", updateBanner);
   document.querySelectorAll(".rq-type-btn").forEach((b) => b.addEventListener("click", () => {
