@@ -98,8 +98,13 @@
     .fs-chart-legend i { width: 14px; height: 3px; display: inline-block; border-radius: 2px; }
     /* نسبة الشارت 1.618:1 (القاعدة الذهبية) بدل ما يبقى ارتفاعه ثابت
        بصرف النظر عن العرض المتاح — كده بيفضل متناسق على أي شاشة. */
-    .fs-chart-frame { width: 100%; aspect-ratio: 1.618 / 1; }
+    .fs-chart-frame { width: 100%; aspect-ratio: 1.618 / 1; position: relative; }
     .fs-chart-frame svg { width: 100%; height: 100%; display: block; }
+    .fs-chart-tooltip {
+      display: none; position: absolute; z-index: 5; pointer-events: none;
+      background: #17120f; color: #fff; padding: 6px 10px; border-radius: 8px;
+      font-size: 11.5px; line-height: 1.5; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
 
     .fs-bar-frame { width: 100%; aspect-ratio: 1.618 / 1; }
     .fs-bar-frame svg { width: 100%; height: 100%; display: block; }
@@ -231,53 +236,51 @@
 
       <div class="fs-layout" data-results-col hidden style="gap:var(--space-4)">
 
-        <!-- الشريط الرئيسي: رقم واحد كبير لكل سيناريو، أول حاجة يشوفها العميل -->
+        <!-- الشريط الرئيسي: رقم واحد كبير لكل سيناريو + فترة الاسترداد بس -->
         <div class="fs-hero-grid">
           <div class="fs-hero-card diesel">
-            <div class="fs-hero-label">💧 صافي الربح مقابل مولد ديزيل (30 سنة)</div>
+            <div class="fs-hero-label">💧 صافي الربح (Net Profit) — مقابل مولد ديزيل، 30 سنة</div>
             <div class="fs-hero-value" data-diesel-hero>—</div>
             <div class="fs-hero-sub">
-              <span>استرداد خلال <b data-diesel-payback-inline>—</b></span>
-              <span>عائد <b data-diesel-irr-inline>—</b></span>
+              <span>فترة الاسترداد (PBP): <b data-diesel-payback-inline>—</b></span>
             </div>
           </div>
           <div class="fs-hero-card grid">
-            <div class="fs-hero-label">⚡ صافي الربح مقابل شبكة الكهرباء (30 سنة)</div>
+            <div class="fs-hero-label">⚡ صافي الربح (Net Profit) — مقابل شبكة الكهرباء، 30 سنة</div>
             <div class="fs-hero-value" data-grid-hero>—</div>
             <div class="fs-hero-sub">
-              <span>استرداد خلال <b data-grid-payback-inline>—</b></span>
-              <span>عائد <b data-grid-irr-inline>—</b></span>
+              <span>فترة الاسترداد (PBP): <b data-grid-payback-inline>—</b></span>
             </div>
           </div>
         </div>
 
-        <!-- تفاصيل الأرقام لمن يريد التعمق -->
+        <!-- تفاصيل مالية إضافية — من غير تكرار صافي الربح أو فترة الاسترداد اللي فوق -->
         <div class="fs-hero-grid">
           <div class="fs-result-card">
-            <h3>تفاصيل — مقابل ديزيل</h3>
-            <div class="fs-stat-row">
-              <div class="fs-stat-box"><div class="val" data-diesel-savings>—</div><div class="lbl">صافي الربح</div></div>
-              <div class="fs-stat-box"><div class="val" data-diesel-npv>—</div><div class="lbl">NPV</div></div>
-              <div class="fs-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">IRR</div></div>
+            <h3>تفاصيل مالية — مقابل ديزيل</h3>
+            <div class="fs-stat-row" style="grid-template-columns:1fr 1fr">
+              <div class="fs-stat-box"><div class="val" data-diesel-npv>—</div><div class="lbl">القيمة الحالية الصافية (NPV)</div></div>
+              <div class="fs-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">العائد الداخلي (IRR)</div></div>
             </div>
           </div>
           <div class="fs-result-card">
-            <h3>تفاصيل — مقابل الشبكة</h3>
-            <div class="fs-stat-row">
-              <div class="fs-stat-box"><div class="val" data-grid-savings>—</div><div class="lbl">صافي الربح</div></div>
-              <div class="fs-stat-box"><div class="val" data-grid-npv>—</div><div class="lbl">NPV</div></div>
-              <div class="fs-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">IRR</div></div>
+            <h3>تفاصيل مالية — مقابل الشبكة</h3>
+            <div class="fs-stat-row" style="grid-template-columns:1fr 1fr">
+              <div class="fs-stat-box"><div class="val" data-grid-npv>—</div><div class="lbl">القيمة الحالية الصافية (NPV)</div></div>
+              <div class="fs-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">العائد الداخلي (IRR)</div></div>
             </div>
           </div>
         </div>
+
 
         <div class="card fs-chart-card">
           <h3 style="margin-top:0">التدفق النقدي التراكمي — 30 سنة</h3>
           <div class="fs-chart-legend">
-            <span><i style="background:#1f3a5f"></i> مقابل ديزيل</span>
-            <span><i style="background:#d98324"></i> مقابل الشبكة</span>
+            <span><i style="background:#1f3a5f"></i> مقابل ديزيل — العائد (IRR): <b data-diesel-irr-legend>—</b></span>
+            <span><i style="background:#d98324"></i> مقابل الشبكة — العائد (IRR): <b data-grid-irr-legend>—</b></span>
           </div>
           <div class="fs-chart-frame" data-chart-holder></div>
+          <p class="form-note" style="color:var(--muted);margin-bottom:0">مرّر الماوس (أو المس على الموبايل) فوق الشارت لمعرفة التدفق النقدي عند أي سنة.</p>
           <p class="form-note" style="color:var(--muted);margin-bottom:0">الخط الأفقي المنقّط = نقطة التعادل، والدائرة = فترة الاسترداد.</p>
         </div>
 
