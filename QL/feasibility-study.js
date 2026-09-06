@@ -620,25 +620,23 @@ function printStudy() {
           <div class="row"><span>فترة الاسترداد (PBP)</span><span>${paybackLabel(r.gridPayback)}</span></div>
         </div>
       </div>
-      <div class="print-assumptions" style="margin-top:12px">
+      <div class="print-assumptions" style="margin-top:8px;margin-bottom:8px">
         <span>الطاقة المنتجة سنويًا: ${fmt1(r.annualEnergyMwh)} MWh</span>
         <span>يكفي استهلاك ~${fmt(r.householdsEquivalent)} منزل/سنة</span>
         <span>توفير شهري (ديزيل): ${fmt(r.dieselMonthlySaving)} ج.م</span>
         <span>توفير شهري (شبكة): ${fmt(r.gridMonthlySaving)} ج.م</span>
         <span>CO₂ موفّر: ${fmt1(r.co2TonsYear1)} طن/سنة</span>
       </div>
+
+      <h4 class="print-chart-heading">التدفق النقدي التراكمي — 30 سنة</h4>
+      ${buildChartSvg(r, 700, 130)}
+      <h4 class="print-chart-heading" style="margin-top:6px">مقارنة سريعة — التكلفة الكلية على 30 سنة</h4>
+      ${buildThreeWayBarSvg(r, 700, 150)}
     </div>
 
-    <!-- كل قسم تحته صفحة مستقلة بمساحة أمان كاملة فوق وتحت (نفس padding
-         الصفحة الأولى)، عشان محدش يتصادم مع اللوجو أو الفوتر في الليتر
-         هيد بغض النظر عن طول المحتوى في الصفحة اللي قبله. -->
-    <div class="print-body print-page-break" dir="rtl">
-      <h3 style="margin-top:0">التدفق النقدي التراكمي — 30 سنة</h3>
-      ${buildChartSvg(r, 700, 280)}
-      <h3 style="margin-top:18px">مقارنة سريعة — التكلفة الكلية على 30 سنة</h3>
-      ${buildThreeWayBarSvg(r, 700, 320)}
-    </div>
-
+    <!-- الجداول التفصيلية لسه كل واحد في صفحته المستقلة — دي جداول 30
+         صف مفيش طريقة تتكوّم في المساحة المتاحة أصلاً، فمحتاجة صفحة
+         كاملة لوحدها بمساحة أمان فوق وتحت. -->
     <div class="print-body print-page-break" dir="rtl">
       <h4 class="print-year-table-wrap">الجدول التفصيلي سنة بسنة — مقابل مولد ديزيل</h4>
       ${buildPrintYearTable(r.yearRows, "diesel")}
