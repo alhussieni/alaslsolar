@@ -78,7 +78,11 @@
     .fs-hero-card.grid { background: linear-gradient(155deg, #d98324, #b8691a); }
     .fs-hero-card .fs-hero-label { font-size: 14px; opacity: 0.85; margin-bottom: 4px; }
     .fs-hero-card .fs-hero-value { font-size: 34px; font-weight: 800; line-height: 1.15; }
-    .fs-hero-card .fs-hero-sub { font-size: 13px; opacity: 0.9; margin-top: var(--space-2); display: flex; gap: var(--space-3); }
+    .fs-hero-card .fs-hero-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: var(--space-3); }
+    .fs-hero-card .fs-hero-stat-box { background: rgba(255,255,255,0.14); border-radius: var(--radius); padding: var(--space-2) 6px; text-align: center; }
+    .fs-hero-card .fs-hero-stat-box .val { font-weight: 800; font-size: 16px; color: #fff; }
+    .fs-hero-card .fs-hero-stat-box .lbl { font-size: 10.5px; color: rgba(255,255,255,0.8); margin-top: 3px; }
+    @media (max-width: 420px) { .fs-hero-card .fs-hero-stat-row { grid-template-columns: 1fr; } }
 
     .fs-result-card {
       border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-3);
@@ -236,41 +240,28 @@
 
       <div class="fs-layout" data-results-col hidden style="gap:var(--space-4)">
 
-        <!-- الشريط الرئيسي: رقم واحد كبير لكل سيناريو + فترة الاسترداد بس -->
+        <!-- كارت واحد لكل سيناريو: الرقم الرئيسي فوق + تلات إحصائيات تحته -->
         <div class="fs-hero-grid">
           <div class="fs-hero-card diesel">
             <div class="fs-hero-label">💧 صافي الربح (Net Profit) — مقابل مولد ديزيل، 30 سنة</div>
             <div class="fs-hero-value" data-diesel-hero>—</div>
-            <div class="fs-hero-sub">
-              <span>فترة الاسترداد (PBP): <b data-diesel-payback-inline>—</b></span>
+            <div class="fs-hero-stat-row">
+              <div class="fs-hero-stat-box"><div class="val" data-diesel-payback-inline>—</div><div class="lbl">فترة الاسترداد (PBP)</div></div>
+              <div class="fs-hero-stat-box"><div class="val" data-diesel-npv>—</div><div class="lbl">القيمة الحالية (NPV)</div></div>
+              <div class="fs-hero-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">العائد الداخلي (IRR)</div></div>
             </div>
           </div>
           <div class="fs-hero-card grid">
             <div class="fs-hero-label">⚡ صافي الربح (Net Profit) — مقابل شبكة الكهرباء، 30 سنة</div>
             <div class="fs-hero-value" data-grid-hero>—</div>
-            <div class="fs-hero-sub">
-              <span>فترة الاسترداد (PBP): <b data-grid-payback-inline>—</b></span>
+            <div class="fs-hero-stat-row">
+              <div class="fs-hero-stat-box"><div class="val" data-grid-payback-inline>—</div><div class="lbl">فترة الاسترداد (PBP)</div></div>
+              <div class="fs-hero-stat-box"><div class="val" data-grid-npv>—</div><div class="lbl">القيمة الحالية (NPV)</div></div>
+              <div class="fs-hero-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">العائد الداخلي (IRR)</div></div>
             </div>
           </div>
         </div>
 
-        <!-- تفاصيل مالية إضافية — من غير تكرار صافي الربح أو فترة الاسترداد اللي فوق -->
-        <div class="fs-hero-grid">
-          <div class="fs-result-card">
-            <h3>تفاصيل مالية — مقابل ديزيل</h3>
-            <div class="fs-stat-row" style="grid-template-columns:1fr 1fr">
-              <div class="fs-stat-box"><div class="val" data-diesel-npv>—</div><div class="lbl">القيمة الحالية الصافية (NPV)</div></div>
-              <div class="fs-stat-box"><div class="val" data-diesel-irr>—</div><div class="lbl">العائد الداخلي (IRR)</div></div>
-            </div>
-          </div>
-          <div class="fs-result-card">
-            <h3>تفاصيل مالية — مقابل الشبكة</h3>
-            <div class="fs-stat-row" style="grid-template-columns:1fr 1fr">
-              <div class="fs-stat-box"><div class="val" data-grid-npv>—</div><div class="lbl">القيمة الحالية الصافية (NPV)</div></div>
-              <div class="fs-stat-box"><div class="val" data-grid-irr>—</div><div class="lbl">العائد الداخلي (IRR)</div></div>
-            </div>
-          </div>
-        </div>
 
 
         <div class="card fs-chart-card">
