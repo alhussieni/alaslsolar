@@ -277,19 +277,15 @@ function setText(sel, text) {
 }
 
 function renderResults(r) {
-  // الشريط الرئيسي — رقم واحد كبير لكل سيناريو
+  // الشريط الرئيسي — رقم واحد كبير لكل سيناريو + فترة الاسترداد بس
   setText("[data-diesel-hero]", fmt(r.dieselNetSavings30) + " ج.م");
   setText("[data-diesel-payback-inline]", paybackLabel(r.dieselPayback));
-  setText("[data-diesel-irr-inline]", irrLabel(r.dieselIRR));
   setText("[data-grid-hero]", fmt(r.gridNetSavings30) + " ج.م");
   setText("[data-grid-payback-inline]", paybackLabel(r.gridPayback));
-  setText("[data-grid-irr-inline]", irrLabel(r.gridIRR));
 
-  // تفاصيل الأرقام
-  setText("[data-diesel-savings]", fmt(r.dieselNetSavings30) + " ج.م");
+  // تفاصيل مالية إضافية (NPV + IRR بس، من غير تكرار)
   setText("[data-diesel-npv]", fmt(r.dieselNPV30) + " ج.م");
   setText("[data-diesel-irr]", irrLabel(r.dieselIRR));
-  setText("[data-grid-savings]", fmt(r.gridNetSavings30) + " ج.م");
   setText("[data-grid-npv]", fmt(r.gridNPV30) + " ج.م");
   setText("[data-grid-irr]", irrLabel(r.gridIRR));
 
@@ -334,7 +330,7 @@ function renderYearTables(r) {
 
 /* ---------------- رسوم SVG خام (من غير مكتبات خارجية) ---------------- */
 
-function buildChartSvg(r, width, height) {
+function makeChartScales(r, width, height) {
   const pad = { top: 36, right: 18, bottom: 34, left: 88 };
   const allVals = [...r.dieselCumulative, ...r.gridCumulative, 0];
   const minV = Math.min(...allVals);
@@ -343,17 +339,34 @@ function buildChartSvg(r, width, height) {
   const innerW = width - pad.left - pad.right;
   const innerH = height - pad.top - pad.bottom;
 
-  const x = (i) => pad.left + (i / YEARS) * innerW;
-  const y = (v) => pad.top + innerH - ((v - minV) / span) * innerH;
+  // محور أفقي مكسور عمدًا: أول 5 سنين تاخد 61.8% من العرض (القاعدة
+  // الذهبية) عشان تبان واسعة وواضحة، والـ 25 سنة الباقية تتضغط في
+  // الـ 38.2% الباقية. لازم علامة بصرية واضحة عند نقطة الكسر (splitYear)
+  // وإلا القارئ هيفتكر إن الميل في المنطقتين قابل للمقارنة مباشرة وهو مش كده.
+  const splitYear = 5;
+  const w1 = innerW * 0.618;
+  const w2 = innerW * 0.382;
 
+  function x(year) {
+    if (year <= splitYear) return pad.left + (year / splitYear) * w1;
+    return pad.left + w1 + ((year - splitYear) / (YEARS - splitYear)) * w2;
+  }
+  function invX(px) {
+    const rel = px - pad.left;
+    if (rel <= w1) return Math.max(0, (rel / w1) * splitYear);
+    return Math.min(YEARS, splitYear + ((rel - w1) / w2) * (YEARS - splitYear));
+  }
+  function y(v) { return pad.top + innerH - ((v - minV) / span) * innerH; }
+
+  return { pad, innerW, innerH, minV, maxV, span, x, y, invX, splitYear, width, height };
+}
+
+function buildChartSvg(r, width, height) {
+  const s = makeChartScales(r, width, height);
+  const { pad, minV, maxV, x, y, splitYear } = s;
   const toPath = (arr) => arr.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const zeroY = y(0);
 
-  // خطوط شبكة أفقية + قيم على المحور الرأسي. تسمية "0" بتتحط فوق خطها
-  // بمسافة (مش متمركزة عليه) عشان متتصادمش مع تسميات السنين تحت. تسمية
-  // أقل قيمة (-CAPEX عادة) بتتشال تمامًا لو قريبة جدًا من خط الصفر —
-  // ده اللي كان بيسبب تراكب الأرقام فوق بعض لما رأس المال يكون صغير
-  // نسبيًا مقارنة بأرباح 30 سنة (القيمة دي أصلاً موضّحة في الكروت فوق).
   const minLabelGap = Math.abs(y(minV) - zeroY);
   const gridValues = minLabelGap > 22 ? [minV, 0, maxV] : [0, maxV];
   const gridLines = gridValues.map((v) => {
@@ -366,16 +379,23 @@ function buildChartSvg(r, width, height) {
     `;
   }).join("");
 
-  // سنين على المحور الأفقي كل 5 سنين، ابتداءً من سنة 5 — شلنا تسمية
-  // "اليوم" عند سنة 0 لأنها كانت بتتصادم مع تسمية "0" على المحور الرأسي
-  // في نفس الركن لما تكون فترة الاسترداد قصيرة.
+  // تظليل خفيف على منطقة أول 5 سنين (المكبّرة) + خط فاصل صريح عند
+  // سنة 5 يوضح إن المقياس اتغيّر — الصدق البصري قبل أي حاجة.
+  const zoomBand = `<rect x="${x(0)}" y="${pad.top}" width="${(x(splitYear) - x(0)).toFixed(1)}" height="${s.innerH}" fill="#d98324" opacity="0.05"></rect>`;
+  const breakMarker = `
+    <line x1="${x(splitYear).toFixed(1)}" y1="${pad.top}" x2="${x(splitYear).toFixed(1)}" y2="${height - pad.bottom}" stroke="#b8a98f" stroke-width="1" stroke-dasharray="2,3"></line>
+    <text x="${x(splitYear).toFixed(1)}" y="${pad.top - 10}" text-anchor="middle" font-size="9.5" fill="#9c8f7a">مقياس مضغوط بعد سنة 5 ↦</text>
+  `;
+
+  // سنين على المحور: 1-5 كل سنة (المنطقة المكبّرة)، وبعدين كل 5 سنين
   const yearLabels = [];
-  for (let yr = 5; yr <= YEARS; yr += 5) {
+  for (let yr = 1; yr <= splitYear; yr++) {
+    yearLabels.push(`<text x="${x(yr).toFixed(1)}" y="${height - 10}" text-anchor="middle" font-size="10" fill="#7a6f5f">${yr}</text>`);
+  }
+  for (let yr = 10; yr <= YEARS; yr += 5) {
     yearLabels.push(`<text x="${x(yr).toFixed(1)}" y="${height - 10}" text-anchor="middle" font-size="10.5" fill="#7a6f5f">سنة ${yr}</text>`);
   }
 
-  // علامة نقطة الاسترداد — دايرة بس (القيمة بالسنين موضّحة أصلاً في كارت
-  // "فترة الاسترداد" فوق الشارت، فمفيش داعي نكررها هنا ونزوّد الزحمة).
   function breakevenMarker(payback, color) {
     if (payback == null) return "";
     const px = x(payback).toFixed(1);
@@ -386,15 +406,78 @@ function buildChartSvg(r, width, height) {
   }
 
   return `
-    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" data-chart-svg>
+      ${zoomBand}
       ${gridLines}
       ${yearLabels.join("")}
       <path d="${toPath(r.dieselCumulative)}" fill="none" stroke="#1f3a5f" stroke-width="2.5"></path>
       <path d="${toPath(r.gridCumulative)}" fill="none" stroke="#d98324" stroke-width="2.5"></path>
       ${breakevenMarker(r.dieselPayback, "#1f3a5f")}
       ${breakevenMarker(r.gridPayback, "#d98324")}
+      ${breakMarker}
+      <rect data-hover-capture x="${pad.left}" y="${pad.top}" width="${s.innerW}" height="${s.innerH}" fill="transparent"></rect>
+      <g data-hover-layer style="display:none">
+        <line data-hover-guide x1="0" y1="${pad.top}" x2="0" y2="${height - pad.bottom}" stroke="#7a6f5f" stroke-width="1" stroke-dasharray="2,2"></line>
+        <circle data-hover-dot-diesel r="4.5" fill="#1f3a5f"></circle>
+        <circle data-hover-dot-grid r="4.5" fill="#d98324"></circle>
+      </g>
     </svg>
+    <div class="fs-chart-tooltip" data-chart-tooltip></div>
   `;
+}
+
+// بتتنادى مرة واحدة بعد إدراج الشارت في الصفحة — بتحسب نفس المقاييس
+// تاني (رخيصة حسابيًا) وتربط حركة الماوس بتحديث خط الإرشاد ونقطتين
+// القيمة وصندوق الـ tooltip، من غير أي مكتبة خارجية.
+function attachChartHover(holder, r, width, height) {
+  const s = makeChartScales(r, width, height);
+  const svg = holder.querySelector("[data-chart-svg]");
+  const capture = holder.querySelector("[data-hover-capture]");
+  const layer = holder.querySelector("[data-hover-layer]");
+  const guide = holder.querySelector("[data-hover-guide]");
+  const dotDiesel = holder.querySelector("[data-hover-dot-diesel]");
+  const dotGrid = holder.querySelector("[data-hover-dot-grid]");
+  const tooltip = holder.querySelector("[data-chart-tooltip]");
+  if (!svg || !capture) return;
+
+  function yearValue(arr, year) {
+    const lo = Math.floor(year), hi = Math.ceil(year);
+    if (lo === hi) return arr[lo];
+    const frac = year - lo;
+    return arr[lo] + (arr[hi] - arr[lo]) * frac; // تقريب خطي بين السنتين الصحيحتين
+  }
+
+  function handleMove(clientX, clientY) {
+    const rect = svg.getBoundingClientRect();
+    const scaleX = width / rect.width;
+    const userX = (clientX - rect.left) * scaleX;
+    const year = Math.round(s.invX(userX));
+    const dieselV = yearValue(r.dieselCumulative, year);
+    const gridV = yearValue(r.gridCumulative, year);
+    const px = s.x(year);
+
+    layer.style.display = "block";
+    guide.setAttribute("x1", px); guide.setAttribute("x2", px);
+    dotDiesel.setAttribute("cx", px); dotDiesel.setAttribute("cy", s.y(dieselV));
+    dotGrid.setAttribute("cx", px); dotGrid.setAttribute("cy", s.y(gridV));
+
+    tooltip.style.display = "block";
+    tooltip.innerHTML = `<b>${year === 0 ? "اليوم" : "سنة " + year}</b><br>ديزيل: ${fmt(dieselV)} ج.م<br>شبكة: ${fmt(gridV)} ج.م`;
+    const rectHolder = holder.getBoundingClientRect();
+    let leftPx = ((clientX - rectHolder.left) + 14);
+    if (leftPx + 140 > rectHolder.width) leftPx = (clientX - rectHolder.left) - 154;
+    tooltip.style.left = leftPx + "px";
+    tooltip.style.top = Math.max(0, (clientY - rectHolder.top) - 50) + "px";
+  }
+
+  capture.addEventListener("mousemove", (e) => handleMove(e.clientX, e.clientY));
+  capture.addEventListener("mouseleave", () => {
+    layer.style.display = "none";
+    tooltip.style.display = "none";
+  });
+  capture.addEventListener("touchmove", (e) => {
+    if (e.touches[0]) { handleMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }
+  }, { passive: false });
 }
 
 // بار واحد بتلات أعمدة: ديزيل، شبكة، طاقة شمسية — مش بارين منفصلين.
@@ -439,7 +522,12 @@ function buildThreeWayBarSvg(r, width, height) {
 function renderChart(r) {
   const holder = $("[data-chart-holder]");
   const width = Math.max(320, holder.clientWidth || 600);
-  holder.innerHTML = buildChartSvg(r, width, Math.round(width / 1.618));
+  const height = Math.round(width / 1.618);
+  holder.innerHTML = buildChartSvg(r, width, height);
+  attachChartHover(holder, r, width, height);
+
+  setText("[data-diesel-irr-legend]", irrLabel(r.dieselIRR));
+  setText("[data-grid-irr-legend]", irrLabel(r.gridIRR));
 
   const barHolder = $("[data-cost-bar-holder]");
   if (barHolder) {
@@ -519,17 +607,17 @@ function printStudy() {
       <div class="print-results">
         <div class="print-result-box">
           <h4>💧 مقابل مولد ديزيل</h4>
-          <div class="row"><span>صافي الربح (30 سنة)</span><span>${fmt(r.dieselNetSavings30)} ج.م</span></div>
-          <div class="row"><span>NPV (بمعدل الخصم)</span><span>${fmt(r.dieselNPV30)} ج.م</span></div>
-          <div class="row"><span>معدل العائد IRR</span><span>${irrLabel(r.dieselIRR)}</span></div>
-          <div class="row"><span>فترة الاسترداد</span><span>${paybackLabel(r.dieselPayback)}</span></div>
+          <div class="row"><span>صافي الربح (Net Profit)</span><span>${fmt(r.dieselNetSavings30)} ج.م</span></div>
+          <div class="row"><span>القيمة الحالية الصافية (NPV)</span><span>${fmt(r.dieselNPV30)} ج.م</span></div>
+          <div class="row"><span>العائد الداخلي (IRR)</span><span>${irrLabel(r.dieselIRR)}</span></div>
+          <div class="row"><span>فترة الاسترداد (PBP)</span><span>${paybackLabel(r.dieselPayback)}</span></div>
         </div>
         <div class="print-result-box">
           <h4>⚡ مقابل شبكة الكهرباء</h4>
-          <div class="row"><span>صافي الربح (30 سنة)</span><span>${fmt(r.gridNetSavings30)} ج.م</span></div>
-          <div class="row"><span>NPV (بمعدل الخصم)</span><span>${fmt(r.gridNPV30)} ج.م</span></div>
-          <div class="row"><span>معدل العائد IRR</span><span>${irrLabel(r.gridIRR)}</span></div>
-          <div class="row"><span>فترة الاسترداد</span><span>${paybackLabel(r.gridPayback)}</span></div>
+          <div class="row"><span>صافي الربح (Net Profit)</span><span>${fmt(r.gridNetSavings30)} ج.م</span></div>
+          <div class="row"><span>القيمة الحالية الصافية (NPV)</span><span>${fmt(r.gridNPV30)} ج.م</span></div>
+          <div class="row"><span>العائد الداخلي (IRR)</span><span>${irrLabel(r.gridIRR)}</span></div>
+          <div class="row"><span>فترة الاسترداد (PBP)</span><span>${paybackLabel(r.gridPayback)}</span></div>
         </div>
       </div>
       <div class="print-assumptions" style="margin-top:12px">
