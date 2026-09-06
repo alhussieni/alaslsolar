@@ -185,6 +185,7 @@ async function updateAuthState(session) {
   userName.textContent = rep.display_name;
   await loadCatalog();
   buildLoadPicker();
+  buildPresets();
 }
 
 /* ---------------- الكتالوج ---------------- */
@@ -291,6 +292,35 @@ function refreshBatteryAhOptions() {
 
 function fillBrandSelect(sel, brands, preferred) {
   sel.innerHTML = brands.length ? brands.map((b) => `<option value="${b}" ${b === preferred ? "selected" : ""}>${b}</option>`).join("") : `<option value="">لا يوجد</option>`;
+}
+
+function clearAllLoadRows() {
+  [...addedLoadIdx].forEach((idx) => removeLoadRow(idx));
+}
+
+/* ---------- منظومات جاهزة ("Presets") — نفس الجدول اللي حاسبة الموقع
+   العام (offgrid-calculator.html) بتقراه، عشان الأدمن يدير قايمة واحدة
+   بس من لوحة التحكم وتنعكس في المكانين. ---------- */
+async function buildPresets() {
+  const wrap = $("#ogPresets");
+  if (!wrap || !client) return;
+  const { data, error } = await client.from("offgrid_presets").select("*").eq("is_active", true).order("sort_order");
+  if (error || !data || !data.length) { wrap.innerHTML = ""; return; }
+
+  wrap.innerHTML = data.map((p, i) => `<button type="button" class="preset-btn" data-preset="${i}" title="${(p.description || "").replace(/"/g, "&quot;")}">${p.name}</button>`).join("");
+  wrap.querySelectorAll(".preset-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const preset = data[btn.dataset.preset];
+      clearAllLoadRows();
+      (preset.items || []).forEach((item) => {
+        const idx = DEFAULT_LOADS.findIndex((l) => l.name === item.load);
+        if (idx < 0) return;
+        addLoadRow(idx);
+        const row = document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`);
+        if (row) row.querySelector('[data-field="count"]').value = item.count;
+      });
+    });
+  });
 }
 
 /* ---------------- الأحمال ---------------- */

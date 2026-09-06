@@ -18,6 +18,8 @@
   <script defer src="../offgrid-calc-engine.js"></script>
   <script defer src="rep-offgrid-quote.js"></script>
   <style>
+    .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+    .preset-btn:hover { border-color: var(--brand); color: var(--brand-dark); }
     #printArea { display: none; }
     @page { size: A4; margin: 0; }
     @media print {
@@ -100,6 +102,8 @@
 
         <div class="card">
           <div class="step-eyebrow"><span class="step-num">٣</span><span class="step-label">الأحمال المطلوب تشغيلها</span></div>
+          <label>منظومات جاهزة (اختياري — بتملا الأحمال تلقائيًا)</label>
+          <div class="presets-row" id="ogPresets" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
           <label>إضافة جهاز من القائمة</label>
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
             <select id="ogLoadPicker" style="flex:1"></select>
