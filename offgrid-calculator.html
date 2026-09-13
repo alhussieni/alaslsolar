@@ -189,6 +189,7 @@
                   <th>العدد</th>
                   <th>ساعات نهار</th>
                   <th>ساعات ليل</th>
+                  <th title="نسبة الوقت الفعلي اللي الجهاز شغال فيه فعليًا خلال الساعات المُدخّلة (1 = شغال طول الوقت، 0.5 = نص الوقت مثلًا)">معامل التشغيل</th>
                   <th></th>
                 </tr>
               </thead>
@@ -385,7 +386,7 @@
     };
 
     let catalog = { inverters: [], batteries: [], panels: [] };
-    let addedLoadIdx = []; // indices into DEFAULT_LOADS currently shown in the "added" list
+    let addedRows = []; // { rowId, idx } — idx = index into DEFAULT_LOADS, rowId = unique per row (allows same device added more than once)
 
     function egp(n) { return Math.round(n).toLocaleString('ar-EG') + ' ج.م'; }
     function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
@@ -394,29 +395,31 @@
 
     function buildLoadPicker() {
       const sel = document.getElementById('ogLoadPicker');
-      const available = DEFAULT_LOADS.map((l, i) => i).filter(i => !addedLoadIdx.includes(i));
-      sel.innerHTML = available.length
-        ? available.map(i => {
-            const l = DEFAULT_LOADS[i];
+      // القايمة بتفضل كاملة دايمًا — يسمح بإضافة نفس الجهاز أكتر من مرة (مثلًا:
+      // نفس الشفاط بعدد وساعات مختلفة بالنهار، وصف تاني منفصل بعدد وساعات مختلفة بالليل).
+      sel.innerHTML = DEFAULT_LOADS.length
+        ? DEFAULT_LOADS.map((l, i) => {
             const tag = (l.voltage === 380 || l.phase === 'three') ? ` — ${l.voltage || 380}V ثلاثي فاز` : '';
             return `<option value="${i}">${l.name} (${l.watt} وات${tag})</option>`;
           }).join('')
-        : `<option value="">كل الأجهزة اتضافت</option>`;
-      sel.disabled = available.length === 0;
+        : `<option value="">مفيش أجهزة متاحة</option>`;
+      sel.disabled = DEFAULT_LOADS.length === 0;
     }
 
     function refreshLoadsVisibility() {
-      const hasAny = addedLoadIdx.length > 0;
+      const hasAny = addedRows.length > 0;
       document.getElementById('ogAddedLoadsWrap').hidden = !hasAny;
       document.getElementById('ogNoLoadsHint').hidden = hasAny;
     }
 
     function addLoadRow(idx) {
-      if (addedLoadIdx.includes(idx)) return;
-      addedLoadIdx.push(idx);
       const l = DEFAULT_LOADS[idx];
+      if (!l) return;
+      const rowId = `${idx}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      addedRows.push({ rowId, idx });
       const body = document.getElementById('ogLoadsBody');
       const tr = document.createElement('tr');
+      tr.dataset.rowId = rowId;
       tr.dataset.idx = idx;
       tr.innerHTML = `
         <td class="load-name">${esc(l.name)}</td>
@@ -424,36 +427,36 @@
         <td><input type="number" min="1" value="1" data-field="count"></td>
         <td><input type="number" min="0" step="0.5" value="${l.dayHours}" data-field="dayHours"></td>
         <td><input type="number" min="0" step="0.5" value="${l.nightHours}" data-field="nightHours"></td>
-        <td><button type="button" class="load-remove-btn" aria-label="حذف" data-remove="${idx}"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
-      tr.querySelector('[data-remove]').addEventListener('click', () => removeLoadRow(idx));
+        <td><input type="number" min="0" max="1" step="0.05" value="${l.runningFactor ?? 1}" data-field="runningFactor"></td>
+        <td><button type="button" class="load-remove-btn" aria-label="حذف" data-remove="${rowId}"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
+      tr.querySelector('[data-remove]').addEventListener('click', () => removeLoadRow(rowId));
       body.appendChild(tr);
-      buildLoadPicker();
       refreshLoadsVisibility();
     }
 
-    function removeLoadRow(idx) {
-      addedLoadIdx = addedLoadIdx.filter(i => i !== idx);
-      const row = document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`);
+    function removeLoadRow(rowId) {
+      addedRows = addedRows.filter(r => r.rowId !== rowId);
+      const row = document.querySelector(`#ogLoadsBody tr[data-row-id="${rowId}"]`);
       if (row) row.remove();
-      buildLoadPicker();
       refreshLoadsVisibility();
     }
 
     function clearAllLoadRows() {
-      addedLoadIdx = [];
+      addedRows = [];
       document.getElementById('ogLoadsBody').innerHTML = '';
-      buildLoadPicker();
       refreshLoadsVisibility();
     }
 
     function readLoads() {
-      return addedLoadIdx.map(idx => {
-        const row = document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`);
+      return addedRows.map(({ rowId, idx }) => {
+        const row = document.querySelector(`#ogLoadsBody tr[data-row-id="${rowId}"]`);
         const l = DEFAULT_LOADS[idx];
         const count = Number(row.querySelector('[data-field="count"]').value) || 0;
         const dayHours = Number(row.querySelector('[data-field="dayHours"]').value) || 0;
         const nightHours = Number(row.querySelector('[data-field="nightHours"]').value) || 0;
-        return { name: l.name, watt: l.watt, runningFactor: l.runningFactor, surgeFactor: l.surgeFactor, count, dayHours, nightHours };
+        const rfRaw = row.querySelector('[data-field="runningFactor"]').value;
+        const runningFactor = rfRaw === '' ? (l.runningFactor ?? 1) : Number(rfRaw);
+        return { name: l.name, watt: l.watt, runningFactor, surgeFactor: l.surgeFactor, count, dayHours, nightHours };
       }).filter(l => l.count > 0);
     }
 
