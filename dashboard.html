@@ -908,6 +908,82 @@
             </form>
           </div>
         </article>
+
+        <article class="dashboard-card" id="offgridLoadsCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
+            <h3 style="margin:0">🔌 الأجهزة والأحمال (حاسبة الأوف جريد)</h3>
+            <button type="button" id="addOffgridLoadBtn"
+              style="padding:6px 14px;border-radius:var(--radius);border:1.5px solid var(--line);background:#fff;color:var(--brand-dark);font-size:13px;font-weight:700;cursor:pointer"
+              onclick="showOffgridLoadForm()">+ إضافة جهاز</button>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+            دي قايمة الأجهزة اللي بتظهر للزائر والمندوب في حاسبة الأوف جريد (نفس القايمة في المكانين). حدّد الفولت
+            والفاز الصح لأي جهاز جديد — أجهزة 380 فولت لازم تتحدد "ثلاثي" عشان تظهر بعلامة مميزة في الحاسبة.
+          </p>
+
+          <div id="offgridLoadsList"></div>
+
+          <div id="offgridLoadFormWrap" style="display:none;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--line)">
+            <form class="admin-form" id="offgridLoadForm">
+              <input type="hidden" id="offgridLoadId">
+              <div class="field-row">
+                <div style="flex:1">
+                  <label>اسم الجهاز *</label>
+                  <input type="text" id="offgridLoadName" required placeholder="مثال: شفاط 1.5 حصان (3 فاز 380V)">
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--space-2);margin-top:var(--space-2)">
+                <div>
+                  <label>القدرة (وات) *</label>
+                  <input type="number" step="1" min="1" id="offgridLoadWatt" required placeholder="1100">
+                </div>
+                <div>
+                  <label>الفولت *</label>
+                  <select id="offgridLoadVoltage">
+                    <option value="220">220 فولت (أحادي)</option>
+                    <option value="380">380 فولت (ثلاثي)</option>
+                  </select>
+                </div>
+                <div>
+                  <label>الفاز *</label>
+                  <select id="offgridLoadPhase">
+                    <option value="single">أحادي</option>
+                    <option value="three">ثلاثي</option>
+                  </select>
+                </div>
+                <div>
+                  <label>عامل التشغيل (0-1)</label>
+                  <input type="number" step="0.05" min="0" max="1" id="offgridLoadRunningFactor" placeholder="1">
+                </div>
+                <div>
+                  <label>مضاعف تيار البدء (Surge)</label>
+                  <input type="number" step="0.5" min="1" id="offgridLoadSurgeFactor" placeholder="1">
+                </div>
+                <div>
+                  <label>ساعات التشغيل نهارًا (افتراضي)</label>
+                  <input type="number" step="0.25" min="0" id="offgridLoadDayHours" placeholder="0">
+                </div>
+                <div>
+                  <label>ساعات التشغيل ليلًا (افتراضي)</label>
+                  <input type="number" step="0.25" min="0" id="offgridLoadNightHours" placeholder="0">
+                </div>
+              </div>
+              <p style="font-size:11.5px;color:var(--muted);margin-top:6px">
+                ملحوظة: الفولت/الفاز هنا بيان توضيحي وتنظيمي بس — مبيأثرش على حساب الطاقة (Wh) نفسه، لكنه بيوضّح
+                للمندوب إن الجهاز ده محتاج نظام "ثلاثي" (٣ إنفرترات) لو هيتضاف مع أجهزة تانية 220V في نفس العرض.
+              </p>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:var(--space-2)">
+                <input type="checkbox" id="offgridLoadActive" checked style="width:16px;height:16px;">
+                <label for="offgridLoadActive" style="margin:0">مفعّل (ظاهر للزوار والمناديب)</label>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:var(--space-3)">
+                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ الجهاز</button>
+                <button type="button" style="padding:6px 14px;border-radius:var(--radius);border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer" onclick="cancelOffgridLoadForm()">إلغاء</button>
+              </div>
+              <p class="form-note" id="offgridLoadMessage" style="margin-top:6px"></p>
+            </form>
+          </div>
+        </article>
       </div>
 
       <!-- ── Articles Management ── -->
