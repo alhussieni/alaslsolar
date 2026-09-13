@@ -79,14 +79,17 @@
     .footer-disclaimer strong { color: #fff; }
 
     /* Loads table */
-    .loads-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .loads-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 13px; }
     .loads-table th { text-align: right; padding: 6px 8px; font-size: 10px; font-weight: 800; color: var(--muted); border-bottom: 1.5px solid var(--line); }
     .loads-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); }
     .loads-table input[type="number"] { height: 32px; width: 100%; padding: 0 6px; border: 1.5px solid var(--line); border-radius: 6px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; text-align: center; }
+    .loads-table input[type="number"]::-webkit-outer-spin-button,
+    .loads-table input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .loads-table input[type="number"] { -moz-appearance: textfield; }
     .load-remove-btn { background: none; border: none; color: #c33; cursor: pointer; font-size: 15px; padding: 4px; }
     .load-remove-btn:hover { color: #a11; }
     .loads-table .load-name { font-weight: 700; font-size: 12px; }
-    .loads-scroll { max-height: 340px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+    .loads-scroll { max-height: 340px; overflow-y: auto; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: var(--radius); }
     .presets-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-3); }
     .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
     .preset-btn:hover { border-color: var(--brand); color: var(--brand-dark); }
