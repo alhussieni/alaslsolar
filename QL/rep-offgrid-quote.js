@@ -56,7 +56,7 @@ async function loadOffgridLoads() {
 let client = null;
 let catalog = { inverters: [], batteries: [], panels: [] };
 let bomSettings = null;
-let addedLoadIdx = [];
+let addedRows = []; // { rowId, idx } — idx = index into DEFAULT_LOADS, rowId = unique per row (allows same device added more than once)
 let quoteType = "supply_only";
 let lastResult = null;
 let catalogCablePricePerMeter = null;
@@ -321,7 +321,7 @@ function fillBrandSelect(sel, brands, preferred) {
 }
 
 function clearAllLoadRows() {
-  [...addedLoadIdx].forEach((idx) => removeLoadRow(idx));
+  [...addedRows].forEach(({ rowId }) => removeLoadRow(rowId));
 }
 
 /* ---------- منظومات جاهزة ("Presets") — نفس الجدول اللي حاسبة الموقع
@@ -353,46 +353,48 @@ async function buildPresets() {
 
 function buildLoadPicker() {
   const sel = $("#ogLoadPicker");
-  const available = DEFAULT_LOADS.map((l, i) => i).filter((i) => !addedLoadIdx.includes(i));
-  sel.innerHTML = available.length
-    ? available.map((i) => {
-        const l = DEFAULT_LOADS[i];
+  // القايمة كاملة دايمًا — بيسمح بإضافة نفس الجهاز أكتر من مرة (مثلًا نفس
+  // الشفاط: صف بعدد وساعات نهار، وصف تاني منفصل بعدد وساعات ليل مختلفة).
+  sel.innerHTML = DEFAULT_LOADS.length
+    ? DEFAULT_LOADS.map((l, i) => {
         const tag = (l.voltage === 380 || l.phase === "three") ? ` — ${l.voltage || 380}V ثلاثي فاز` : "";
         return `<option value="${i}">${l.name} (${l.watt} وات${tag})</option>`;
       }).join("")
-    : `<option value="">كل الأجهزة اتضافت</option>`;
+    : `<option value="">مفيش أجهزة متاحة</option>`;
 }
 
 function addLoadRow(idx) {
-  if (addedLoadIdx.includes(idx)) return;
-  addedLoadIdx.push(idx);
   const l = DEFAULT_LOADS[idx];
+  if (!l) return;
+  const rowId = `${idx}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  addedRows.push({ rowId, idx });
   const body = $("#ogLoadsBody");
   const tr = document.createElement("tr");
+  tr.dataset.rowId = rowId;
   tr.dataset.idx = idx;
   tr.innerHTML = `
     <td>${l.name}</td><td>${l.watt}</td>
     <td><input type="number" min="1" value="1" data-field="count"></td>
     <td><input type="number" min="0" step="0.5" value="${l.dayHours}" data-field="dayHours"></td>
     <td><input type="number" min="0" step="0.5" value="${l.nightHours}" data-field="nightHours"></td>
-    <td><button type="button" class="rq-remove" data-remove="${idx}">حذف</button></td>`;
-  tr.querySelector("[data-remove]").addEventListener("click", () => removeLoadRow(idx));
+    <td><input type="number" min="0" max="1" step="0.05" value="${l.runningFactor ?? 1}" data-field="runningFactor"></td>
+    <td><button type="button" class="rq-remove" data-remove="${rowId}">حذف</button></td>`;
+  tr.querySelector("[data-remove]").addEventListener("click", () => removeLoadRow(rowId));
   body.appendChild(tr);
-  buildLoadPicker();
 }
 
-function removeLoadRow(idx) {
-  addedLoadIdx = addedLoadIdx.filter((i) => i !== idx);
-  document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`)?.remove();
-  buildLoadPicker();
+function removeLoadRow(rowId) {
+  addedRows = addedRows.filter((r) => r.rowId !== rowId);
+  document.querySelector(`#ogLoadsBody tr[data-row-id="${rowId}"]`)?.remove();
 }
 
 function readLoads() {
-  return addedLoadIdx.map((idx) => {
-    const row = document.querySelector(`#ogLoadsBody tr[data-idx="${idx}"]`);
+  return addedRows.map(({ rowId, idx }) => {
+    const row = document.querySelector(`#ogLoadsBody tr[data-row-id="${rowId}"]`);
     const l = DEFAULT_LOADS[idx];
+    const rfRaw = row.querySelector('[data-field="runningFactor"]').value;
     return {
-      name: l.name, watt: l.watt, runningFactor: l.runningFactor, surgeFactor: l.surgeFactor,
+      name: l.name, watt: l.watt, runningFactor: rfRaw === "" ? (l.runningFactor ?? 1) : Number(rfRaw), surgeFactor: l.surgeFactor,
       count: Number(row.querySelector('[data-field="count"]').value) || 0,
       dayHours: Number(row.querySelector('[data-field="dayHours"]').value) || 0,
       nightHours: Number(row.querySelector('[data-field="nightHours"]').value) || 0,
