@@ -978,6 +978,7 @@ async function loadLists() {
   loadCalcSettings();
   loadOffgridSettings();
   loadOffgridBomSettings();
+  loadOffgridLoadsAdmin();
   loadOffgridPresets();
   loadReps();
 }
@@ -1925,13 +1926,121 @@ document.addEventListener('DOMContentLoaded', () => {
 // المفضلة، وإدارة عروض المنظومات الجاهزة (offgrid_presets)
 // ══════════════════════════════════════════════════════════════
 
-// لازم الأسماء دي تتطابق حرفيًا مع DEFAULT_LOADS في offgrid-calculator.html
-const OFFGRID_LOAD_NAMES = [
-  'لمبة - LED Light', 'DVR / NVR', 'راوتر / شاحن', 'كاميرا مراقبة', 'لابتوب', 'مروحة',
-  'شفاط مطبخ', 'تلفاز LCD / كاميرات CCTV', 'تلفاز LCD', 'ثلاجة', 'كشاف إنارة', 'فريزر',
-  'موتور 1 حصان', 'ميكروويف', 'موتور 1.5 حصان / غاطس', 'تكييف 1.5 حصان', 'غسالة',
-  'تكييف 2.5 حصان', 'تكييف 3 حصان', 'هيتر مياه',
-];
+// كان فيه هنا قايمة أسماء ثابتة (OFFGRID_LOAD_NAMES) لازم تتطابق يدويًا مع نسخة
+// تانية في offgrid-calculator.html — دلوقتي القايمة بتتحمّل مباشرة من جدول
+// offgrid_loads (نفس الجدول اللي الحاسبتين العامة والمندوب بيقروا منه)،
+// فمفيش نسخ متكررة محتاجة تتزامن يدويًا.
+let offgridLoadsCache = [];
+
+async function loadOffgridLoadsAdmin() {
+  if (!client) return;
+  const { data, error } = await client.from('offgrid_loads').select('*').order('sort_order');
+  if (error) {
+    const list = document.getElementById('offgridLoadsList');
+    if (list) list.innerHTML = `<p style="color:#c33;font-size:13px">خطأ في تحميل الأجهزة: ${error.message}</p>`;
+    return;
+  }
+  offgridLoadsCache = data || [];
+  renderOffgridLoadsList(offgridLoadsCache);
+}
+
+function renderOffgridLoadsList(rows) {
+  const list = document.getElementById('offgridLoadsList');
+  if (!list) return;
+  if (!rows.length) { list.innerHTML = `<p style="color:var(--muted);font-size:14px">مفيش أجهزة مضافة لسه.</p>`; return; }
+  list.innerHTML = rows.map(r => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;margin-bottom:8px">
+      <div style="flex:1;min-width:0">
+        <p style="margin:0;font-weight:700;font-size:14px">
+          ${escapeHtmlAttr(r.name)} ${r.is_active ? '' : '<span style="color:#c33;font-size:11px">(متوقف)</span>'}
+          ${r.voltage === 380 || r.phase === 'three' ? '<span style="background:#fdeee0;color:#a05a00;font-size:11px;padding:1px 6px;border-radius:6px;margin-inline-start:6px">380V ثلاثي فاز</span>' : ''}
+        </p>
+        <p style="margin:2px 0 0;font-size:12px;color:var(--muted)">
+          ${r.watt} وات — نهار ${r.day_hours} س / ليل ${r.night_hours} س — surge ×${r.surge_factor}
+        </p>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button type="button" onclick='editOffgridLoad(${JSON.stringify(r).replace(/'/g, "&#39;")})'
+          style="padding:4px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer">✏️ تعديل</button>
+        <button type="button" onclick="deleteOffgridLoad('${r.id}')"
+          style="padding:4px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;font-size:12px;cursor:pointer;color:#c33">🗑️ حذف</button>
+      </div>
+    </div>`).join('');
+}
+
+function showOffgridLoadForm() {
+  document.getElementById('offgridLoadFormWrap').style.display = 'block';
+  document.getElementById('offgridLoadForm').reset();
+  document.getElementById('offgridLoadId').value = '';
+  document.getElementById('offgridLoadActive').checked = true;
+  document.getElementById('offgridLoadVoltage').value = '220';
+  document.getElementById('offgridLoadPhase').value = 'single';
+  document.getElementById('offgridLoadFormWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelOffgridLoadForm() {
+  document.getElementById('offgridLoadFormWrap').style.display = 'none';
+  document.getElementById('offgridLoadForm').reset();
+}
+
+function editOffgridLoad(row) {
+  document.getElementById('offgridLoadFormWrap').style.display = 'block';
+  document.getElementById('offgridLoadId').value = row.id;
+  document.getElementById('offgridLoadName').value = row.name || '';
+  document.getElementById('offgridLoadWatt').value = row.watt ?? '';
+  document.getElementById('offgridLoadVoltage').value = String(row.voltage || 220);
+  document.getElementById('offgridLoadPhase').value = row.phase || 'single';
+  document.getElementById('offgridLoadRunningFactor').value = row.running_factor ?? 1;
+  document.getElementById('offgridLoadSurgeFactor').value = row.surge_factor ?? 1;
+  document.getElementById('offgridLoadDayHours').value = row.day_hours ?? 0;
+  document.getElementById('offgridLoadNightHours').value = row.night_hours ?? 0;
+  document.getElementById('offgridLoadActive').checked = !!row.is_active;
+  document.getElementById('offgridLoadFormWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function deleteOffgridLoad(id) {
+  if (!confirm('هل أنت متأكد من حذف الجهاز ده؟ لو مستخدم في منظومة جاهزة، هيختفي من فيها كمان.')) return;
+  if (!client) return;
+  await client.from('offgrid_loads').delete().eq('id', id);
+  loadOffgridLoadsAdmin();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const loadForm = document.getElementById('offgridLoadForm');
+  if (loadForm) {
+    loadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('offgridLoadMessage');
+      const name = document.getElementById('offgridLoadName').value.trim();
+      const watt = Number(document.getElementById('offgridLoadWatt').value);
+      if (!name) { msg.textContent = 'اسم الجهاز مطلوب.'; msg.style.color = '#c33'; return; }
+      if (!watt || watt <= 0) { msg.textContent = 'القدرة (وات) مطلوبة وأكبر من صفر.'; msg.style.color = '#c33'; return; }
+      const id = document.getElementById('offgridLoadId').value;
+      const payload = {
+        name,
+        watt,
+        voltage: Number(document.getElementById('offgridLoadVoltage').value),
+        phase: document.getElementById('offgridLoadPhase').value,
+        running_factor: Number(document.getElementById('offgridLoadRunningFactor').value) || 1,
+        surge_factor: Number(document.getElementById('offgridLoadSurgeFactor').value) || 1,
+        day_hours: Number(document.getElementById('offgridLoadDayHours').value) || 0,
+        night_hours: Number(document.getElementById('offgridLoadNightHours').value) || 0,
+        is_active: document.getElementById('offgridLoadActive').checked,
+        updated_at: new Date().toISOString(),
+      };
+      msg.textContent = 'جاري الحفظ...'; msg.style.color = 'var(--muted)';
+      const { error } = id
+        ? await client.from('offgrid_loads').update(payload).eq('id', id)
+        : await client.from('offgrid_loads').insert(payload);
+      if (error) { msg.textContent = 'خطأ: ' + error.message; msg.style.color = '#c33'; return; }
+      msg.style.color = '#2a7a2a';
+      msg.textContent = '✅ تم الحفظ!';
+      setTimeout(() => { msg.textContent = ''; }, 2500);
+      cancelOffgridLoadForm();
+      loadOffgridLoadsAdmin();
+    });
+  }
+});
 
 const OFFGRID_BRAND_SELECTS = [
   { cat: 'offgrid',   selectId: 'offgridBrandInverter' },
@@ -2044,7 +2153,8 @@ function buildOffgridPresetItemsPicker(selectedItems) {
   const picker = document.getElementById('offgridPresetItemsPicker');
   const selMap = {};
   (selectedItems || []).forEach(it => { selMap[it.load] = it.count; });
-  picker.innerHTML = OFFGRID_LOAD_NAMES.map((name, i) => `
+  const names = offgridLoadsCache.map(r => r.name);
+  picker.innerHTML = names.map((name, i) => `
     <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
       <input type="number" min="0" value="${selMap[name] || 0}" data-load="${escapeHtmlAttr(name)}" style="width:52px;height:28px;padding:0 4px;border:1px solid var(--line);border-radius:6px;font-size:12px">
       <span>${name}</span>
