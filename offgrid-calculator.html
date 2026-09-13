@@ -40,7 +40,10 @@
     .field-group.g2 { grid-template-columns: 1fr 1fr; }
     .field-group.g3 { grid-template-columns: 1fr 1fr 1fr; }
     .field-group.g1 { grid-template-columns: 1fr; }
+    .field-group.g4 { grid-template-columns: repeat(4, 1fr); }
     @media(max-width:520px){ .field-group.g2, .field-group.g3 { grid-template-columns: 1fr; } }
+    @media(max-width:760px){ .field-group.g4 { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:520px){ .field-group.g4 { grid-template-columns: 1fr; } }
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
     .field input, .field select { height: 42px; padding: 0 var(--space-2); border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink); font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 600; width: 100%; transition: border-color 0.18s, box-shadow 0.18s; }
@@ -180,7 +183,7 @@
       <h1>حاسبة أنظمة الطاقة الشمسية بالبطاريات (Off-Grid)</h1>
       <p class="hero-slogan">حجم الانفرتر · البطاريات · الألواح — من واقع أحمالك الفعلية</p>
       <p style="color:rgba(255,255,255,0.72);font-size:15px;max-width:680px;margin-top:var(--space-2);">
-        أدخل الأجهزة اللي هتشغّلها وساعات تشغيلها، واختار الماركات، وهتطلع لك تكلفة الخامات فقط (من غير تركيب أو نقل).
+        أدخل الأجهزة التي ستقوم بتشغيلها وساعات تشغيلها، واختر العلامات التجارية المناسبة، لتحصل على تقدير لتكلفة الخامات فقط (دون تركيب أو نقل).
       </p>
     </section>
 
@@ -197,7 +200,7 @@
 
       <div class="calc-empty" id="ogDisabledState" hidden>
         <i class="fa fa-screwdriver-wrench" aria-hidden="true"></i>
-        <p>حاسبة الأوف جريد قيد التطوير حاليًا وهترجع تشتغل قريبًا. تواصل معنا مباشرة في الوقت ده لحساب منظومتك.</p>
+        <p>حاسبة الأوف جريد قيد التطوير حاليًا وستعمل من جديد قريبًا. يُرجى التواصل معنا مباشرة في الوقت الحالي لحساب منظومتكم.</p>
       </div>
 
       <div id="ogCalcWrapOuter">
@@ -211,7 +214,7 @@
             <div class="og-step-num">١</div>
             <div>
               <h2 class="og-step-title">الأحمال المطلوب تشغيلها</h2>
-              <p class="og-step-sub">اختار الأجهزة وحدد عددها وساعات تشغيلها</p>
+              <p class="og-step-sub">اختر الأجهزة وحدد عددها وساعات تشغيلها</p>
             </div>
           </div>
 
@@ -219,7 +222,7 @@
 
           <div class="field-group g2" style="align-items:flex-end;">
             <div class="field">
-              <label for="ogLoadPicker">اختار جهاز تضيفه</label>
+              <label for="ogLoadPicker">اختر جهازًا لإضافته</label>
               <select id="ogLoadPicker"></select>
             </div>
             <button type="button" class="btn-light" id="ogAddLoadBtn" style="height:42px;">
@@ -227,7 +230,7 @@
             </button>
           </div>
 
-          <p class="field-hint" id="ogNoLoadsHint">لسه ماضفتش أي جهاز — اختار من القايمة فوق، أو دوس على إحدى المنظومات الجاهزة.</p>
+          <p class="field-hint" id="ogNoLoadsHint">لم تتم إضافة أي جهاز بعد — اختر جهازًا من القائمة أعلاه، أو اختر أحد الأنظمة الجاهزة.</p>
 
           <div class="loads-scroll" id="ogAddedLoadsWrap" hidden>
             <table class="loads-table">
@@ -258,11 +261,11 @@
             <div class="og-step-num">٢</div>
             <div>
               <h2 class="og-step-title">إعدادات النظام والماركات</h2>
-              <p class="og-step-sub" id="ogStep2Sub">ضيف جهاز واحد على الأقل الأول عشان الخطوة دي تتفعّل</p>
+              <p class="og-step-sub" id="ogStep2Sub">أضف جهازًا واحدًا على الأقل لتفعيل هذه الخطوة</p>
             </div>
           </div>
 
-          <div class="field-group g2">
+          <div class="field-group g4">
             <div class="field">
               <label for="ogPsh">متوسط ساعات الشمس (PSH)</label>
               <input type="number" id="ogPsh" value="6" min="1" step="0.5">
@@ -271,12 +274,9 @@
               <label for="ogSafety">معامل الأمان</label>
               <input type="number" id="ogSafety" value="1.1" min="1" step="0.05">
             </div>
-          </div>
-          <div class="field-group g2">
             <div class="field">
-              <label for="ogAutonomy">أيام الاستقلالية (بدون شمس)</label>
+              <label for="ogAutonomy">أيام الاستقلالية (دون شمس)</label>
               <input type="number" id="ogAutonomy" value="0" min="0" step="1">
-              <p class="field-hint">0 = تغطية ليلة تشغيل عادية بس</p>
             </div>
             <div class="field">
               <label for="ogPhase">عدد الفازات</label>
@@ -286,20 +286,21 @@
               </select>
             </div>
           </div>
+          <p class="field-hint" style="margin-top:-8px;">القيمة 0 في أيام الاستقلالية تعني تغطية ليلة تشغيل عادية فقط، دون احتياطي إضافي لأيام غائمة متتالية.</p>
 
           <div class="calc-divider"></div>
 
-          <div class="field-group g1">
+          <div class="field-group g4">
             <div class="field">
-              <label for="ogInvBrand">ماركة الانفرتر</label>
+              <label for="ogInvBrand">العلامة التجارية للانفرتر</label>
               <select id="ogInvBrand"></select>
             </div>
             <div class="field">
-              <label for="ogBattBrand">ماركة البطارية</label>
+              <label for="ogBattBrand">العلامة التجارية للبطارية</label>
               <select id="ogBattBrand"></select>
             </div>
             <div class="field">
-              <label for="ogPanelBrand">ماركة الألواح</label>
+              <label for="ogPanelBrand">العلامة التجارية للألواح</label>
               <select id="ogPanelBrand"></select>
             </div>
             <div class="field">
@@ -333,14 +334,14 @@
 
           <div class="footer-disclaimer">
             <i class="fa fa-circle-info" aria-hidden="true"></i>
-            <p><strong>الأسعار مش ظاهرة هنا</strong> — دوس على "اعرف السعر" أمام كل بند عشان تشوف سعره بالتفصيل في صفحة المنتج.
-              الكميات دي بتغطي الخامات بس — <strong>مش شامل تركيب ولا نقل ولا أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</p>
+            <p><strong>الأسعار غير ظاهرة هنا</strong> — انقر على "اعرف السعر" أمام كل بند لعرض سعره بالتفصيل في صفحة المنتج.
+              هذه الكميات تغطي الخامات فقط، و<strong>لا تشمل التركيب أو النقل أو أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</p>
           </div>
         </div>
 
         <div class="calc-empty og-section" id="ogEmpty">
           <i class="fa fa-solar-panel" aria-hidden="true"></i>
-          <p>اختار الأحمال والماركات واضغط "احسب النظام" لعرض النتيجة</p>
+          <p>اختر الأحمال والعلامات التجارية ثم اضغط "احسب النظام" لعرض النتيجة</p>
         </div>
 
       </div>
@@ -351,7 +352,7 @@
         <div id="ogSidebarPre">
           <div class="og-sidebar-row"><span class="lbl">عدد الأجهزة المضافة</span><span class="val" id="ogSideCount">0</span></div>
           <div class="og-sidebar-row"><span class="lbl">إجمالي القدرة</span><span class="val" id="ogSideWatt">0 وات</span></div>
-          <p class="og-sidebar-hint">الرقمين دول تقريبيين وقت الإدخال — التفاصيل الدقيقة (سعة البطارية، عدد الألواح) بتظهر بعد "احسب النظام".</p>
+          <p class="og-sidebar-hint">هذان الرقمان تقديريان أثناء الإدخال — التفاصيل الدقيقة (سعة البطارية، عدد الألواح) تظهر بعد الضغط على "احسب النظام".</p>
         </div>
         <div id="ogSidebarPost" hidden></div>
       </aside>
@@ -468,7 +469,7 @@
             const tag = (l.voltage === 380 || l.phase === 'three') ? ` — ${l.voltage || 380}V ثلاثي فاز` : '';
             return `<option value="${i}">${l.name} (${l.watt} وات${tag})</option>`;
           }).join('')
-        : `<option value="">مفيش أجهزة متاحة</option>`;
+        : `<option value="">لا توجد أجهزة متاحة</option>`;
       sel.disabled = DEFAULT_LOADS.length === 0;
     }
 
@@ -478,8 +479,8 @@
       document.getElementById('ogNoLoadsHint').hidden = hasAny;
       document.getElementById('ogStep2').classList.toggle('is-locked', !hasAny);
       document.getElementById('ogStep2Sub').textContent = hasAny
-        ? 'اختار الماركات واحسب النظام'
-        : 'ضيف جهاز واحد على الأقل الأول عشان الخطوة دي تتفعّل';
+        ? 'اختر العلامات التجارية ثم اضغط على "احسب النظام"'
+        : 'أضف جهازًا واحدًا على الأقل لتفعيل هذه الخطوة';
       updateLiveSummary();
     }
 
@@ -692,7 +693,7 @@
         <div class="og-sidebar-row"><span class="lbl">سعة التخزين</span><span class="val">${result.storedKWh.toFixed(1)} kWh</span></div>
         <div class="og-sidebar-row"><span class="lbl">عدد الألواح</span><span class="val">${result.panelCount} لوح</span></div>
         <div class="og-sidebar-row"><span class="lbl">عدد البطاريات</span><span class="val">${result.batteryCount}</span></div>
-        <p class="og-sidebar-hint">التفاصيل والأسعار الكاملة في الجدول تحت.</p>`;
+        <p class="og-sidebar-hint">التفاصيل والأسعار الكاملة موضحة في الجدول أدناه.</p>`;
 
       const notesHtml = (result.errors || []).map(e =>
         `<div class="calc-note warn"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i><p>${e}</p></div>`).join('');
@@ -727,7 +728,7 @@
         panelWatt: document.getElementById('ogPanelWatt').value,
       };
       if (!inputs.loads.length) {
-        renderResults({ errors: ['اختار جهاز واحد على الأقل وحدد عدده، أو اضغط على أحد النماذج الجاهزة فوق.'] });
+        renderResults({ errors: ['اختر جهازًا واحدًا على الأقل وحدد عدده، أو اضغط على أحد الأنظمة الجاهزة أعلاه.'] });
         return;
       }
       const result = window.computeOffgridMaterials(catalog, GENERIC_PRICES, inputs);
