@@ -113,8 +113,17 @@
     /* ---------- إعادة التخطيط: محتوى رئيسي + سايدبار ملخص، إفصاح تدريجي، بدون صناديق كتير ----------
        كل المسافات هنا مضاعفات 8px (شبكة 8pt)، منعزلة في الصفحة دي بس — مفيش تعديل على
        متغيرات --space-* المشتركة في styles.css عشان الفرق ما يأثرش على باقي الموقع. */
-    .og-layout { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 32px; align-items: start; }
-    .og-main { display: flex; flex-direction: column; }
+    .og-layout { display: flex; flex-direction: column; gap: 32px; }
+    .og-split { display: grid; grid-template-columns: 1fr 2fr; gap: 32px; align-items: start; }
+    .og-col-settings { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 24px; }
+    .og-col-results { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+    /* عمود الإعدادات أضيق دلوقتي (تلت الصفحة) — أعمدة الـ4 (g4) متسعّش فيه، فبنجبرها
+       تبقى عمودين دايمًا جوه العمود ده، بغض النظر عن عرض الشاشة الكلي. */
+    .og-col-settings .field-group.g4 { grid-template-columns: 1fr 1fr; }
+    @media(max-width:900px) {
+      .og-split { grid-template-columns: 1fr; }
+      .og-col-settings { position: static; }
+    }
     .og-section { padding: 24px 0; border-bottom: 1px solid var(--line); transition: opacity .2s; }
     .og-section:first-child { padding-top: 0; }
     .og-section:last-of-type { border-bottom: none; }
@@ -132,7 +141,7 @@
     #ogCalcWrapOuter .calc-panel { background: transparent; border: none; box-shadow: none; padding: 0; border-radius: 0; }
     #ogCalcWrapOuter .calc-panel-title { display: none; } /* استبدلناه بعنوان الخطوة (.og-step-title) فوق */
 
-    .og-sidebar { position: sticky; top: 16px; background: #fff; border-radius: 16px; padding: 24px;
+    .og-sidebar { background: #fff; border-radius: 16px; padding: 24px;
       border: 1px solid var(--line); display: flex; flex-direction: column; gap: 16px; }
     .og-sidebar-title { font-size: 12px; font-weight: 800; color: var(--muted); margin: 0; }
     .og-sidebar-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
@@ -142,11 +151,6 @@
     .og-sidebar-row .val { font-weight: 800; color: var(--ink); }
     .og-sidebar-hint { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0; }
     .og-sidebar .btn { width: 100%; }
-
-    @media (max-width: 860px) {
-      .og-layout { grid-template-columns: 1fr; }
-      .og-sidebar { position: static; order: -1; }
-    }
   </style>
 </head>
 <body>
@@ -205,10 +209,9 @@
 
       <div id="ogCalcWrapOuter">
       <div class="og-layout">
-      <div class="og-main">
       <div class="calc-wrap">
 
-        <!-- Step 1: Loads -->
+        <!-- Step 1: Loads (full width — the loads table needs the room) -->
         <div class="calc-panel og-section" id="ogStep1">
           <div class="og-section-head">
             <div class="og-step-num">١</div>
@@ -254,6 +257,18 @@
             <label class="toggle-chip"><input type="checkbox" id="ogNight" checked> تشغيل فترة الليل</label>
           </div>
         </div>
+
+        <div class="og-split">
+          <div class="og-col-settings">
+            <div class="og-sidebar" id="ogSidebar">
+              <p class="og-sidebar-title">ملخص سريع</p>
+              <div id="ogSidebarPre">
+                <div class="og-sidebar-row"><span class="lbl">عدد الأجهزة المضافة</span><span class="val" id="ogSideCount">0</span></div>
+                <div class="og-sidebar-row"><span class="lbl">إجمالي القدرة</span><span class="val" id="ogSideWatt">0 وات</span></div>
+                <p class="og-sidebar-hint">هذان الرقمان تقديريان أثناء الإدخال — التفاصيل الدقيقة (سعة البطارية، عدد الألواح) تظهر بعد الضغط على "احسب النظام".</p>
+              </div>
+              <div id="ogSidebarPost" hidden></div>
+            </div>
 
         <!-- Step 2: System settings + brands (revealed once at least one load is added) -->
         <div class="calc-panel og-section is-locked" id="ogStep2">
@@ -312,7 +327,9 @@
             <i class="fa fa-calculator" aria-hidden="true"></i> احسب النظام
           </button>
         </div>
+          </div>
 
+          <div class="og-col-results">
         <!-- Results -->
         <div class="results-panel og-section" id="ogResults" hidden>
           <div class="results-header">
@@ -343,19 +360,10 @@
           <i class="fa fa-solar-panel" aria-hidden="true"></i>
           <p>اختر الأحمال والعلامات التجارية ثم اضغط "احسب النظام" لعرض النتيجة</p>
         </div>
-
-      </div>
-      </div>
-
-      <aside class="og-sidebar" id="ogSidebar">
-        <p class="og-sidebar-title">ملخص سريع</p>
-        <div id="ogSidebarPre">
-          <div class="og-sidebar-row"><span class="lbl">عدد الأجهزة المضافة</span><span class="val" id="ogSideCount">0</span></div>
-          <div class="og-sidebar-row"><span class="lbl">إجمالي القدرة</span><span class="val" id="ogSideWatt">0 وات</span></div>
-          <p class="og-sidebar-hint">هذان الرقمان تقديريان أثناء الإدخال — التفاصيل الدقيقة (سعة البطارية، عدد الألواح) تظهر بعد الضغط على "احسب النظام".</p>
+          </div>
         </div>
-        <div id="ogSidebarPost" hidden></div>
-      </aside>
+
+      </div>
       </div>
       </div>
     </section>
