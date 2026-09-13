@@ -5,28 +5,53 @@
    عبر rep_create_offgrid_quote() اللي بتحسب التكلفة/الربح على السيرفر.
    ============================================================ */
 
-const DEFAULT_LOADS = [
-  { name: "لمبة - LED Light", watt: 10, runningFactor: 0.5, nightHours: 19, dayHours: 5, surgeFactor: 1 },
-  { name: "DVR / NVR", watt: 25, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1 },
-  { name: "راوتر / شاحن", watt: 15, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1 },
-  { name: "كاميرا مراقبة", watt: 10, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1 },
-  { name: "لابتوب", watt: 65, runningFactor: 1, nightHours: 0, dayHours: 8, surgeFactor: 1 },
-  { name: "مروحة", watt: 70, runningFactor: 0.5, nightHours: 6, dayHours: 4, surgeFactor: 3 },
-  { name: "شفاط مطبخ", watt: 75, runningFactor: 1, nightHours: 0, dayHours: 2, surgeFactor: 3 },
-  { name: "تلفاز LCD / كاميرات CCTV", watt: 60, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1 },
-  { name: "تلفاز LCD", watt: 80, runningFactor: 1, nightHours: 3, dayHours: 3, surgeFactor: 1 },
-  { name: "ثلاجة", watt: 175, runningFactor: 0.8, nightHours: 18, dayHours: 6, surgeFactor: 7 },
-  { name: "كشاف إنارة", watt: 200, runningFactor: 1, nightHours: 12, dayHours: 0, surgeFactor: 1 },
-  { name: "فريزر", watt: 300, runningFactor: 0.8, nightHours: 18, dayHours: 6, surgeFactor: 7 },
-  { name: "موتور 1 حصان", watt: 740, runningFactor: 1, nightHours: 2, dayHours: 0.25, surgeFactor: 7 },
-  { name: "ميكروويف", watt: 1000, runningFactor: 1, nightHours: 1, dayHours: 1, surgeFactor: 1 },
-  { name: "موتور 1.5 حصان / غاطس", watt: 1100, runningFactor: 1, nightHours: 0.5, dayHours: 2, surgeFactor: 7 },
-  { name: "تكييف 1.5 حصان", watt: 1100, runningFactor: 0.75, nightHours: 8, dayHours: 8, surgeFactor: 7 },
-  { name: "غسالة", watt: 1500, runningFactor: 1, nightHours: 0, dayHours: 2, surgeFactor: 7 },
-  { name: "تكييف 2.5 حصان", watt: 1800, runningFactor: 0.5, nightHours: 8, dayHours: 8, surgeFactor: 7 },
-  { name: "تكييف 3 حصان", watt: 2200, runningFactor: 0.5, nightHours: 8, dayHours: 8, surgeFactor: 7 },
-  { name: "هيتر مياه", watt: 9000, runningFactor: 1, nightHours: 0, dayHours: 2, surgeFactor: 1 },
+/* نسخة احتياطية بس — بتتستخدم لو تحميل جدول offgrid_loads من الداتابيز فشل،
+   عشان حاسبة المندوب متقفش تمامًا. القايمة الحقيقية اللي بتتعدّل من الأدمن
+   (تاب "إعدادات الحاسبة" -> "الأجهزة والأحمال") بتتحمّل في loadOffgridLoads(). */
+const FALLBACK_LOADS = [
+  { name: "لمبة - LED Light", watt: 10, runningFactor: 0.5, nightHours: 19, dayHours: 5, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "DVR / NVR", watt: 25, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "راوتر / شاحن", watt: 15, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "كاميرا مراقبة", watt: 10, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "لابتوب", watt: 65, runningFactor: 1, nightHours: 0, dayHours: 8, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "مروحة", watt: 70, runningFactor: 0.5, nightHours: 6, dayHours: 4, surgeFactor: 3, voltage: 220, phase: "single" },
+  { name: "شفاط مطبخ", watt: 75, runningFactor: 1, nightHours: 0, dayHours: 2, surgeFactor: 3, voltage: 220, phase: "single" },
+  { name: "تلفاز LCD / كاميرات CCTV", watt: 60, runningFactor: 1, nightHours: 19, dayHours: 5, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "تلفاز LCD", watt: 80, runningFactor: 1, nightHours: 3, dayHours: 3, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "ثلاجة", watt: 175, runningFactor: 0.8, nightHours: 18, dayHours: 6, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "كشاف إنارة", watt: 200, runningFactor: 1, nightHours: 12, dayHours: 0, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "فريزر", watt: 300, runningFactor: 0.8, nightHours: 18, dayHours: 6, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "موتور 1 حصان", watt: 740, runningFactor: 1, nightHours: 2, dayHours: 0.25, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "ميكروويف", watt: 1000, runningFactor: 1, nightHours: 1, dayHours: 1, surgeFactor: 1, voltage: 220, phase: "single" },
+  { name: "موتور 1.5 حصان / غاطس", watt: 1100, runningFactor: 1, nightHours: 0.5, dayHours: 2, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "تكييف 1.5 حصان", watt: 1100, runningFactor: 0.75, nightHours: 8, dayHours: 8, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "غسالة", watt: 1500, runningFactor: 1, nightHours: 0, dayHours: 2, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "تكييف 2.5 حصان", watt: 1800, runningFactor: 0.5, nightHours: 8, dayHours: 8, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "تكييف 3 حصان", watt: 2200, runningFactor: 0.5, nightHours: 8, dayHours: 8, surgeFactor: 7, voltage: 220, phase: "single" },
+  { name: "هيتر مياه", watt: 9000, runningFactor: 1, nightHours: 0, dayHours: 2, surgeFactor: 1, voltage: 220, phase: "single" },
 ];
+
+// بتتملى فعليًا من جدول offgrid_loads في loadOffgridLoads(). لحد ما التحميل
+// يخلص، بتفضل = FALLBACK_LOADS عشان أي استدعاء مبكر مايكسرش الصفحة.
+let DEFAULT_LOADS = FALLBACK_LOADS;
+
+// بيقرأ الأجهزة الفعّالة من الداتابيز (بيتعدّلوا من الأدمن). لو فشل الاتصال
+// أو الجدول فاضي، بيسيب DEFAULT_LOADS على FALLBACK_LOADS بدل ما يوقف الصفحة.
+async function loadOffgridLoads() {
+  if (!client) return;
+  const { data, error } = await client.from("offgrid_loads").select("*").eq("is_active", true).order("sort_order");
+  if (error || !data || !data.length) return;
+  DEFAULT_LOADS = data.map((r) => ({
+    name: r.name,
+    watt: Number(r.watt),
+    runningFactor: Number(r.running_factor),
+    dayHours: Number(r.day_hours),
+    nightHours: Number(r.night_hours),
+    surgeFactor: Number(r.surge_factor),
+    voltage: Number(r.voltage),
+    phase: r.phase,
+  }));
+}
 
 let client = null;
 let catalog = { inverters: [], batteries: [], panels: [] };
@@ -184,6 +209,7 @@ async function updateAuthState(session) {
   repPanel.hidden = false;
   userName.textContent = rep.display_name;
   await loadCatalog();
+  await loadOffgridLoads();   // لازم يخلص قبل buildPresets عشان يلاقي الأجهزة بالاسم
   buildLoadPicker();
   buildPresets();
 }
@@ -328,7 +354,13 @@ async function buildPresets() {
 function buildLoadPicker() {
   const sel = $("#ogLoadPicker");
   const available = DEFAULT_LOADS.map((l, i) => i).filter((i) => !addedLoadIdx.includes(i));
-  sel.innerHTML = available.length ? available.map((i) => `<option value="${i}">${DEFAULT_LOADS[i].name} (${DEFAULT_LOADS[i].watt} وات)</option>`).join("") : `<option value="">كل الأجهزة اتضافت</option>`;
+  sel.innerHTML = available.length
+    ? available.map((i) => {
+        const l = DEFAULT_LOADS[i];
+        const tag = (l.voltage === 380 || l.phase === "three") ? ` — ${l.voltage || 380}V ثلاثي فاز` : "";
+        return `<option value="${i}">${l.name} (${l.watt} وات${tag})</option>`;
+      }).join("")
+    : `<option value="">كل الأجهزة اتضافت</option>`;
 }
 
 function addLoadRow(idx) {
