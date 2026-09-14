@@ -363,6 +363,16 @@ function buildLoadPicker() {
     : `<option value="">مفيش أجهزة متاحة</option>`;
 }
 
+// إفصاح تدريجي: خطوة "إعدادات النظام" بتتقفل/تتفعّل حسب وجود حمل واحد على الأقل.
+function updateSystemLock() {
+  const card = $("#ogSystemCard");
+  const note = $("#ogSystemLockedNote");
+  if (!card) return;
+  const hasAny = addedRows.length > 0;
+  card.classList.toggle("is-locked", !hasAny);
+  if (note) note.hidden = hasAny;
+}
+
 function addLoadRow(idx) {
   const l = DEFAULT_LOADS[idx];
   if (!l) return;
@@ -381,11 +391,13 @@ function addLoadRow(idx) {
     <td><button type="button" class="rq-remove" data-remove="${rowId}">حذف</button></td>`;
   tr.querySelector("[data-remove]").addEventListener("click", () => removeLoadRow(rowId));
   body.appendChild(tr);
+  updateSystemLock();
 }
 
 function removeLoadRow(rowId) {
   addedRows = addedRows.filter((r) => r.rowId !== rowId);
   document.querySelector(`#ogLoadsBody tr[data-row-id="${rowId}"]`)?.remove();
+  updateSystemLock();
 }
 
 function readLoads() {

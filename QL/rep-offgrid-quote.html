@@ -20,6 +20,25 @@
   <style>
     .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
     .preset-btn:hover { border-color: var(--brand); color: var(--brand-dark); }
+
+    /* ---------- Minimal premium: .card أصلها بورد + ظل + hover-lift مشترك مع كروت
+       الموقع التسويقي (styles.css). هنا بنلغي الظل والحركة بس على كروت الصفحة دي،
+       من غير ما نلمس تعريف .card نفسه عشان مايأثرش على صفحات تانية. */
+    .input-rail .card, #quoteShell .card {
+      box-shadow: none;
+      transition: none;
+      background: #fff;
+    }
+    .input-rail .card:hover, #quoteShell .card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* إفصاح تدريجي: خطوة إعدادات النظام مقفولة/باهتة لحد ما يتضاف حمل واحد على الأقل،
+       لأن الحساب أصلًا مش هيشتغل من غيرها. */
+    #ogSystemCard.is-locked { opacity: .45; pointer-events: none; }
+    #ogSystemCard.is-locked .step-num { background: transparent; border: 1.5px solid var(--muted); color: var(--muted); }
+
     /* الجدول كان بيتكسر على الموبايل (الأعمدة الرقمية بتتدايق لحد ما سهم الزيادة/النقصان
        الافتراضي ياكل مساحة الرقم كله). السكرول الأفقي فوق بيدّي كل عمود مساحته، وده بيلغي
        الحاجة للأسهم أصلًا. */
@@ -28,6 +47,7 @@
     #ogLoadsBody input[type="number"]::-webkit-outer-spin-button,
     #ogLoadsBody input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #ogLoadsBody input[type="number"] { -moz-appearance: textfield; }
+
     #printArea { display: none; }
     @page { size: A4; margin: 0; }
     @media print {
@@ -125,8 +145,9 @@
           </div>
         </div>
 
-        <div class="card" id="ogSystemCard">
+        <div class="card is-locked" id="ogSystemCard">
           <div class="step-eyebrow"><span class="step-num">٤</span><span class="step-label">إعدادات النظام</span></div>
+          <p class="form-note" id="ogSystemLockedNote">أضف جهازًا واحدًا على الأقل في الخطوة اللي فاتت عشان الخطوة دي تتفعّل.</p>
 
           <div class="subsection-label"><i class="fa-solid fa-plug-circle-bolt"></i> الإنفرتر</div>
           <div class="row2">
