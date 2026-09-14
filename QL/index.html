@@ -17,9 +17,21 @@
   <script defer src="../supabase-config.js"></script>
   <script defer src="index.js"></script>
   <style>
-    .ql-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--space-3); }
-    .ql-card { text-align: center; text-decoration: none; color: inherit; display: block; }
-    .ql-card i { font-size: 30px; }
+    /* ---------- إعادة تصميم بوابة المناديب: مجموعات + كروت أخف (بدون
+       الظل وحركة hover-lift الموروثة من .card في styles.css المشترك).
+       التعديل مقصور على الصفحة دي بس، مفيش لمس لتعريف .card الأصلي. */
+    .ql-group { margin-top: 32px; }
+    .ql-group:first-of-type { margin-top: 0; }
+    .ql-group-title { font-size: 13px; font-weight: 800; color: var(--muted); margin: 0 0 16px; }
+    .ql-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .ql-card.card {
+      text-align: center; text-decoration: none; color: inherit; display: block;
+      box-shadow: none; transition: border-color .15s, background .15s; padding: 24px;
+    }
+    .ql-card.card:hover { transform: none; box-shadow: none; border-color: var(--brand); background: var(--brand-soft); }
+    .ql-card i { font-size: 28px; color: var(--brand); margin-bottom: 8px; }
+    .ql-card h3 { margin: 8px 0 4px; }
+    .ql-card p { font-size: 13px; color: var(--muted); margin: 0; }
   </style>
 </head>
 <body>
@@ -53,17 +65,46 @@
         <button class="btn btn-secondary dark" type="button" data-logout>تسجيل خروج</button>
       </div>
 
-      <div class="ql-cards">
-        <a class="card ql-card" href="rep-offgrid-quote.html">
-          <i class="fa-solid fa-car-battery" aria-hidden="true"></i>
-          <h3>حاسبة أوف جريد</h3>
-          <p>صمّم منظومة أوف جريد كاملة (ألواح، إنفرتر، بطاريات) وقدّم عرض سعر بالخصم</p>
-        </a>
-        <a class="card ql-card" href="rep-quotes.html">
-          <i class="fa-solid fa-file-invoice" aria-hidden="true"></i>
-          <h3>تقديم عروض أسعار منتجات</h3>
-          <p>اختار من كتالوج المنتجات مباشرة وجهّز عرض سعر توريد فقط أو توريد وتركيب</p>
-        </a>
+      <div class="ql-group">
+        <p class="ql-group-title">التسعير والتصميم</p>
+        <div class="ql-cards">
+          <a class="card ql-card" href="rep-offgrid-quote.html">
+            <i class="fa-solid fa-car-battery" aria-hidden="true"></i>
+            <h3>حاسبة أوف جريد</h3>
+            <p>صمّم منظومة أوف جريد كاملة (ألواح، إنفرتر، بطاريات) وقدّم عرض سعر بالخصم</p>
+          </a>
+          <a class="card ql-card" href="rep-quotes.html">
+            <i class="fa-solid fa-file-invoice" aria-hidden="true"></i>
+            <h3>تقديم عروض أسعار منتجات</h3>
+            <p>اختار من كتالوج المنتجات مباشرة وجهّز عرض سعر توريد فقط أو توريد وتركيب</p>
+          </a>
+          <a class="card ql-card" href="solar-pump-station.html">
+            <i class="fa-solid fa-water" aria-hidden="true"></i>
+            <h3>محطة ري بالطاقة الشمسية</h3>
+            <p>حجّم محطة ضخ مياه بالطاقة الشمسية وقدّم عرض سعرها</p>
+          </a>
+          <a class="card ql-card" href="feasibility-study.html">
+            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+            <h3>دراسة جدوى</h3>
+            <p>جهّز دراسة جدوى مبسّطة توضح للعميل عائد الاستثمار في المنظومة</p>
+          </a>
+        </div>
+      </div>
+
+      <div class="ql-group">
+        <p class="ql-group-title">الإدارة</p>
+        <div class="ql-cards">
+          <a class="card ql-card" href="rep-crm.html">
+            <i class="fa-solid fa-users" aria-hidden="true"></i>
+            <h3>CRM — عروض الأسعار</h3>
+            <p>تابع عروض الأسعار اللي أصدرتها وحالة كل عميل</p>
+          </a>
+          <a class="card ql-card" href="rep-settings.html">
+            <i class="fa-solid fa-gear" aria-hidden="true"></i>
+            <h3>الإعدادات</h3>
+            <p>بيانات حسابك ككل وتفضيلاتك الشخصية</p>
+          </a>
+        </div>
       </div>
     </section>
   </main>
