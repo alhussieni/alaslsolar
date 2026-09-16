@@ -1,0 +1,158 @@
+diff -ruN orig/QL/quote-item-utils.js alaslsolar-main/QL/quote-item-utils.js
+--- a/QL/quote-item-utils.js	1970-01-01 00:00:00.000000000 +0000
++++ b/QL/quote-item-utils.js	2026-09-14 22:57:22.043786432 +0000
+@@ -0,0 +1,44 @@
++/* quote-item-utils.js
++   مصدر واحد لقراءة بنود العرض (quotes.items) بشكل موحّد في كل الصفحات
++   (rep-crm.js / rep-quotes.js / rep-offgrid-quote.js).
++
++   ليه محتاجين الملف ده:
++   solar-pump-quote.edge-function.ts بيحفظ كل بند بالشكل ده:
++     { key, label, type, qty: "#12#", warranty, sell }
++   - qty نص مزخرف بعلامات # (لغرض العرض في الطباعة القديمة)، مش رقم.
++   - مفيش unit_price ولا line_total محفوظين — "sell" هو إجمالي السطر بالفعل.
++   أي كود بيحاول يقرأ it.qty كرقم مباشرة أو it.unit_price / it.line_total
++   هيرجعله NaN أو undefined. الدوال دي بتقرا الشكل ده صح، وبرضه بتفضل شغالة
++   لو بند قديم/يدوي (type: "custom") كان محفوظ فعلاً بـ unit_price/line_total صريحين. */
++
++function parseQuoteItemQty(rawQty) {
++  const m = String(rawQty ?? "").match(/-?\d+(\.\d+)?/);
++  return m ? Number(m[0]) : 0;
++}
++
++function getQuoteItemLineTotal(it) {
++  if (it.line_total != null) return Number(it.line_total);
++  if (it.sell != null) return Number(it.sell);
++  const qty = parseQuoteItemQty(it.qty);
++  const unit = Number(it.unit_price ?? it.unitPrice ?? 0);
++  return qty * unit;
++}
++
++function getQuoteItemUnitPrice(it) {
++  if (it.unit_price != null) return Number(it.unit_price);
++  if (it.unitPrice != null) return Number(it.unitPrice);
++  const qty = parseQuoteItemQty(it.qty);
++  const lineTotal = getQuoteItemLineTotal(it);
++  return qty ? lineTotal / qty : lineTotal;
++}
++
++function getQuoteItemLabel(it) {
++  return it.label || it.name || "—";
++}
++
++window.QuoteItemUtils = {
++  parseQuoteItemQty,
++  getQuoteItemLineTotal,
++  getQuoteItemUnitPrice,
++  getQuoteItemLabel,
++};
+diff -ruN orig/QL/rep-crm.html alaslsolar-main/QL/rep-crm.html
+--- a/QL/rep-crm.html	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-crm.html	2026-09-14 22:58:10.437892368 +0000
+@@ -15,6 +15,7 @@
+   <script defer src="rep-header.js"></script>
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="../supabase-config.js"></script>
++  <script defer src="quote-item-utils.js"></script>
+   <script defer src="rep-crm.js"></script>
+   <style>
+     .crm-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-3); }
+diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
+--- a/QL/rep-crm.js	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-crm.js	2026-09-14 22:57:31.983883026 +0000
+@@ -240,10 +240,10 @@
+   const items = Array.isArray(q.items) ? q.items : [];
+   const rowsHtml = items.map((it) => `
+     <tr>
+-      <td class="dtd">${it.label || it.name || "—"}</td>
+-      <td class="dtd">${fmt(it.qty)}</td>
+-      <td class="dtd">${fmt(it.unit_price)}</td>
+-      <td class="dtd">${fmt(it.line_total ?? (it.unit_price || 0) * (it.qty || 0))}</td>
++      <td class="dtd">${QuoteItemUtils.getQuoteItemLabel(it)}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
+     </tr>
+   `).join("");
+ 
+@@ -265,7 +265,7 @@
+   const dateStr = new Date(q.created_at).toLocaleDateString("ar-EG-u-nu-latn");
+   const items = Array.isArray(q.items) ? q.items : [];
+   const rows = items.map((it) => `
+-    <tr><td>${it.label || it.name || "—"}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${fmt(it.line_total ?? (it.unit_price || 0) * (it.qty || 0))}</td></tr>
++    <tr><td>${QuoteItemUtils.getQuoteItemLabel(it)}</td><td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>
+   `).join("");
+ 
+   area.innerHTML = `
+diff -ruN orig/QL/rep-offgrid-quote.html alaslsolar-main/QL/rep-offgrid-quote.html
+--- a/QL/rep-offgrid-quote.html	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-offgrid-quote.html	2026-09-14 22:58:12.668959220 +0000
+@@ -16,6 +16,7 @@
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="../supabase-config.js"></script>
+   <script defer src="../offgrid-calc-engine.js"></script>
++  <script defer src="quote-item-utils.js"></script>
+   <script defer src="rep-offgrid-quote.js"></script>
+   <style>
+     .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+diff -ruN orig/QL/rep-offgrid-quote.js alaslsolar-main/QL/rep-offgrid-quote.js
+--- a/QL/rep-offgrid-quote.js	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-offgrid-quote.js	2026-09-14 22:57:36.170315848 +0000
+@@ -686,7 +686,7 @@
+   const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr>`;
+   const rowUnits = (q.items || []).map((it) => ({
+     type: "row",
+-    html: `<tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>`,
++    html: `<tr><td>${QuoteItemUtils.getQuoteItemLabel(it)}</td><td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${it.discount_pct || 0}%</td><td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>`,
+   }));
+ 
+   const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
+diff -ruN orig/QL/rep-quotes.html alaslsolar-main/QL/rep-quotes.html
+--- a/QL/rep-quotes.html	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-quotes.html	2026-09-14 22:58:14.849404202 +0000
+@@ -15,6 +15,7 @@
+   <script defer src="rep-header.js"></script>
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="../supabase-config.js"></script>
++  <script defer src="quote-item-utils.js"></script>
+   <script defer src="rep-quotes.js"></script>
+   <style>
+     #printArea { display: none; }
+diff -ruN orig/QL/rep-quotes.js alaslsolar-main/QL/rep-quotes.js
+--- a/QL/rep-quotes.js	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-quotes.js	2026-09-14 22:58:08.046348576 +0000
+@@ -302,10 +302,10 @@
+ 
+   const rows = q.items.map((it) => `
+     <tr>
+-      <td>${it.name}</td>
+-      <td>${it.qty}</td>
+-      <td>${fmt(it.unit_price ?? it.unitPrice)}</td>
+-      <td>${fmt((it.unit_price ?? it.unitPrice) * it.qty)}</td>
++      <td>${QuoteItemUtils.getQuoteItemLabel(it)}</td>
++      <td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
++      <td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
++      <td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
+     </tr>
+   `).join("");
+ 
+@@ -375,8 +375,8 @@
+         customer: q.customers || {},
+         quoteType: q.quote_type,
+         items: q.items || [],
+-        subtotal: q.items ? q.items.reduce((s, it) => s + (it.unit_price ?? it.unitPrice) * it.qty, 0) : 0,
+-        installCost: q.total - (q.items ? q.items.reduce((s, it) => s + (it.unit_price ?? it.unitPrice) * it.qty, 0) : 0),
++        subtotal: q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0,
++        installCost: q.total - (q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0),
+         grand: q.total,
+         createdAt: q.created_at,
+       });
+@@ -418,7 +418,7 @@
+             productId: null,
+             name: it.name,
+             unitPrice: parseFloat(it.price) || 0,
+-            qty: parseInt(it.qty, 10) || 1,
++            qty: QuoteItemUtils.parseQuoteItemQty(it.qty) || 1,
+           });
+         });
+         renderCart();

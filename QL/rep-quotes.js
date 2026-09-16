@@ -302,10 +302,10 @@ function printQuote(q) {
 
   const rows = q.items.map((it) => `
     <tr>
-      <td>${it.name}</td>
-      <td>${it.qty}</td>
-      <td>${fmt(it.unit_price ?? it.unitPrice)}</td>
-      <td>${fmt((it.unit_price ?? it.unitPrice) * it.qty)}</td>
+      <td>${QuoteItemUtils.getQuoteItemLabel(it)}</td>
+      <td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
+      <td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
+      <td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
     </tr>
   `).join("");
 
@@ -375,8 +375,8 @@ async function loadMyQuotes() {
         customer: q.customers || {},
         quoteType: q.quote_type,
         items: q.items || [],
-        subtotal: q.items ? q.items.reduce((s, it) => s + (it.unit_price ?? it.unitPrice) * it.qty, 0) : 0,
-        installCost: q.total - (q.items ? q.items.reduce((s, it) => s + (it.unit_price ?? it.unitPrice) * it.qty, 0) : 0),
+        subtotal: q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0,
+        installCost: q.total - (q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0),
         grand: q.total,
         createdAt: q.created_at,
       });
@@ -418,7 +418,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             productId: null,
             name: it.name,
             unitPrice: parseFloat(it.price) || 0,
-            qty: parseInt(it.qty, 10) || 1,
+            qty: QuoteItemUtils.parseQuoteItemQty(it.qty) || 1,
           });
         });
         renderCart();

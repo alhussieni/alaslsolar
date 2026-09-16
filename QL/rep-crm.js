@@ -240,10 +240,10 @@ function toggleDetail(q) {
   const items = Array.isArray(q.items) ? q.items : [];
   const rowsHtml = items.map((it) => `
     <tr>
-      <td class="dtd">${it.label || it.name || "—"}</td>
-      <td class="dtd">${fmt(it.qty)}</td>
-      <td class="dtd">${fmt(it.unit_price)}</td>
-      <td class="dtd">${fmt(it.line_total ?? (it.unit_price || 0) * (it.qty || 0))}</td>
+      <td class="dtd">${QuoteItemUtils.getQuoteItemLabel(it)}</td>
+      <td class="dtd">${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
+      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
+      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
     </tr>
   `).join("");
 
@@ -265,7 +265,7 @@ function quickPrint(q) {
   const dateStr = new Date(q.created_at).toLocaleDateString("ar-EG-u-nu-latn");
   const items = Array.isArray(q.items) ? q.items : [];
   const rows = items.map((it) => `
-    <tr><td>${it.label || it.name || "—"}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${fmt(it.line_total ?? (it.unit_price || 0) * (it.qty || 0))}</td></tr>
+    <tr><td>${QuoteItemUtils.getQuoteItemLabel(it)}</td><td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>
   `).join("");
 
   area.innerHTML = `

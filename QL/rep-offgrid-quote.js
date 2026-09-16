@@ -686,7 +686,7 @@ async function printQuote(q) {
   const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr>`;
   const rowUnits = (q.items || []).map((it) => ({
     type: "row",
-    html: `<tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>`,
+    html: `<tr><td>${QuoteItemUtils.getQuoteItemLabel(it)}</td><td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${it.discount_pct || 0}%</td><td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>`,
   }));
 
   const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
