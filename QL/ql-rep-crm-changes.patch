@@ -48,7 +48,7 @@ diff -ruN orig/QL/quote-item-utils.js alaslsolar-main/QL/quote-item-utils.js
 +};
 diff -ruN orig/QL/rep-crm.html alaslsolar-main/QL/rep-crm.html
 --- a/QL/rep-crm.html	2026-09-14 06:09:56.000000000 +0000
-+++ b/QL/rep-crm.html	2026-09-16 09:39:38.750024496 +0000
++++ b/QL/rep-crm.html	2026-09-16 09:56:56.993893746 +0000
 @@ -15,6 +15,7 @@
    <script defer src="rep-header.js"></script>
    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -57,7 +57,34 @@ diff -ruN orig/QL/rep-crm.html alaslsolar-main/QL/rep-crm.html
    <script defer src="rep-crm.js"></script>
    <style>
      .crm-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-3); }
-@@ -101,12 +102,16 @@
+@@ -28,6 +29,10 @@
+     .crm-rep-table tbody tr:hover { background: #faf7f2; cursor: pointer; }
+     .crm-rep-table tbody tr.active-filter { background: var(--brand-soft); }
+ 
++    .crm-live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 5px; vertical-align: middle; }
++    .crm-live-dot.live { background: #2e9e4a; }
++    .crm-live-dot.stale { background: #b7b0a6; }
++
+     .crm-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--space-2); }
+     .crm-filters input, .crm-filters select { flex: 1; min-width: 140px; }
+ 
+@@ -89,6 +94,15 @@
+ 
+     <div class="crm-stats" id="crmStats"></div>
+ 
++    <div class="card" id="crmActiveDraftsCard" hidden>
++      <h3>المناديب شغالين دلوقتي</h3>
++      <table class="crm-rep-table" id="crmActiveDraftsTable">
++        <thead><tr><th>المندوب</th><th>العميل</th><th>النوع</th><th>الإجمالي الحالي</th><th>الحالة</th><th></th></tr></thead>
++        <tbody id="crmActiveDraftsBody"></tbody>
++      </table>
++      <p class="form-note" id="crmActiveDraftsEmpty" style="margin:0">مفيش مناديب شغالين على عرض دلوقتي.</p>
++    </div>
++
+     <div class="card" id="crmRepBreakdownCard" hidden>
+       <h3>عدد العروض لكل مندوب</h3>
+       <table class="crm-rep-table" id="crmRepTable">
+@@ -101,12 +115,16 @@
      <div class="card">
        <h3>العروض</h3>
        <div class="crm-filters">
@@ -77,8 +104,14 @@ diff -ruN orig/QL/rep-crm.html alaslsolar-main/QL/rep-crm.html
        <table class="crm-quote-table" id="crmQuoteTable">
 diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
 --- a/QL/rep-crm.js	2026-09-14 06:09:56.000000000 +0000
-+++ b/QL/rep-crm.js	2026-09-16 09:39:58.678091957 +0000
-@@ -14,6 +14,19 @@
++++ b/QL/rep-crm.js	2026-09-16 09:57:48.528385263 +0000
+@@ -10,10 +10,25 @@
+ let isAdmin = false;
+ let allQuotes = []; // كل العروض اللي رجعت من الاستعلام (متفلترة أصلًا حسب الصلاحيات)
+ let repFilterId = null; // null = من غير فلتر مندوب (أدمن بس)
++let activeDrafts = []; // مسودّات العروض الحالية (أدمن بس)
++let draftsPollTimer = null;
+ 
  function $(sel) { return document.querySelector(sel); }
  function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
  
@@ -98,7 +131,133 @@ diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
  async function initClient() {
    for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) {
      await new Promise((r) => setTimeout(r, 50));
-@@ -160,17 +173,34 @@
+@@ -56,6 +71,7 @@
+     repPanel.hidden = true;
+     logoutBtn.hidden = true;
+     userName.textContent = "";
++    stopDraftsPolling();
+     return;
+   }
+ 
+@@ -69,6 +85,7 @@
+     authPanel.hidden = false;
+     repPanel.hidden = true;
+     logoutBtn.hidden = true;
++    stopDraftsPolling();
+     return;
+   }
+ 
+@@ -88,6 +105,8 @@
+   document.querySelectorAll(".crm-col-rep").forEach((el) => { el.hidden = !isAdmin; });
+   $("#crmRepBreakdownCard").hidden = !isAdmin;
+ 
++  if (isAdmin) startDraftsPolling(); else stopDraftsPolling();
++
+   await loadQuotes();
+ }
+ 
+@@ -157,20 +176,135 @@
+   });
+ }
+ 
++/* ---------------- المناديب شغالين دلوقتي (أدمن بس) ----------------
++   بتقرأ من quote_drafts (مسودّات بتتحدّث تلقائي من rep-offgrid-quote.js
++   و rep-quotes.js كل ما المندوب يعدّل حاجة، وبتتمسح لما يحفظ نهائي).
++   الصف بيتحدّث كل ٢٠ ثانية طول ما الأدمن فاتح الصفحة. */
++
++function timeAgoAr(dateStr) {
++  const diffSec = Math.max(0, Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000));
++  if (diffSec < 60) return "من لحظات";
++  const diffMin = Math.floor(diffSec / 60);
++  if (diffMin < 60) return `من ${diffMin} دقيقة`;
++  const diffHr = Math.floor(diffMin / 60);
++  return `من ${diffHr} ساعة`;
++}
++
++async function loadActiveDrafts() {
++  if (!isAdmin) return;
++  const { data, error } = await client
++    .from("quote_drafts")
++    .select("rep_id, customer_name, customer_phone, quote_type, items, total, last_active_at, reps(display_name)")
++    .order("last_active_at", { ascending: false });
++  if (error) return; // فشل تحديث دوري مايوقفش باقي الصفحة، هيتحاول تاني بعد ٢٠ ثانية
++  activeDrafts = data || [];
++  renderActiveDrafts();
++}
++
++function startDraftsPolling() {
++  stopDraftsPolling();
++  loadActiveDrafts();
++  draftsPollTimer = setInterval(loadActiveDrafts, 20000);
++}
++
++function stopDraftsPolling() {
++  if (draftsPollTimer) { clearInterval(draftsPollTimer); draftsPollTimer = null; }
++  activeDrafts = [];
++}
++
++function renderActiveDrafts() {
++  const card = $("#crmActiveDraftsCard");
++  if (!isAdmin) { card.hidden = true; return; }
++  card.hidden = false;
++
++  const tbody = $("#crmActiveDraftsBody");
++  const emptyNote = $("#crmActiveDraftsEmpty");
++
++  if (!activeDrafts.length) {
++    tbody.innerHTML = "";
++    emptyNote.hidden = false;
++    return;
++  }
++  emptyNote.hidden = true;
++
++  const typeLabel = (t) => t === "supply_install" ? "توريد وتركيب" : t === "supply_only" ? "توريد فقط" : (t || "—");
++
++  tbody.innerHTML = activeDrafts.map((d, idx) => {
++    const isLive = (Date.now() - new Date(d.last_active_at).getTime()) <= 90000;
++    return `
++      <tr>
++        <td>${d.reps?.display_name || "—"}</td>
++        <td>${d.customer_name || "بدون اسم"}${d.customer_phone ? `<br><span style="color:var(--muted);font-size:11.5px">${d.customer_phone}</span>` : ""}</td>
++        <td>${typeLabel(d.quote_type)}</td>
++        <td>${fmt(d.total)} ج.م</td>
++        <td><span class="crm-live-dot ${isLive ? "live" : "stale"}"></span>${isLive ? "شغال دلوقتي" : timeAgoAr(d.last_active_at)}</td>
++        <td><button type="button" class="btn" data-toggle-draft="${idx}" style="font-size:12px">التفاصيل</button></td>
++      </tr>
++      <tr class="crm-quote-detail-row" id="draft-detail-${idx}" hidden><td colspan="6"></td></tr>
++    `;
++  }).join("");
++
++  activeDrafts.forEach((d, idx) => {
++    tbody.querySelector(`[data-toggle-draft="${idx}"]`).addEventListener("click", () => toggleDraftDetail(d, idx));
++  });
++}
++
++function toggleDraftDetail(d, idx) {
++  const row = $(`#draft-detail-${idx}`);
++  const willShow = row.hidden;
++  document.querySelectorAll("#crmActiveDraftsBody .crm-quote-detail-row").forEach((r) => { r.hidden = true; });
++  if (!willShow) return;
++
++  const items = Array.isArray(d.items) ? d.items : [];
++  const rowsHtml = items.map((it) => `
++    <tr>
++      <td class="dtd">${QuoteItemUtils.getQuoteItemLabel(it)}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
++    </tr>
++  `).join("");
++
++  row.querySelector("td").innerHTML = items.length ? `
++    <strong>بنود مسودّة ${d.reps?.display_name || ""}</strong>
++    <table>
++      <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead>
++      <tbody>${rowsHtml}</tbody>
++    </table>` : `<span style="color:var(--muted)">لسه مفيش بنود متضافة.</span>`;
++  row.hidden = false;
++}
++
  /* ---------------- قائمة العروض (مع البحث والفلترة) ---------------- */
  
  function getFilteredQuotes() {
@@ -119,14 +278,14 @@ diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
 -      const phone = (q.customers?.phone || "").toLowerCase();
 -      if (!name.includes(search) && !phone.includes(search)) return false;
 +      if (!name.includes(nameSearch)) return false;
-+    }
+     }
 +
 +    // الفلتر الأساسي والأكثر ثقة: رقم الموبايل، بعد التطبيع، بغض النظر عن
 +    // الصيغة اللي اتسجل بيها (0.../+20.../ مسافات/شرطات).
 +    if (phoneSearch) {
 +      const phone = normalizePhone(q.customers?.phone);
 +      if (!phone.includes(phoneSearch)) return false;
-     }
++    }
 +
 +    if (dateFrom || dateTo) {
 +      const createdDate = q.created_at ? q.created_at.slice(0, 10) : "";
@@ -137,7 +296,7 @@ diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
      return true;
    });
  }
-@@ -240,10 +270,10 @@
+@@ -240,10 +374,10 @@
    const items = Array.isArray(q.items) ? q.items : [];
    const rowsHtml = items.map((it) => `
      <tr>
@@ -152,7 +311,7 @@ diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
      </tr>
    `).join("");
  
-@@ -265,7 +295,7 @@
+@@ -265,7 +399,7 @@
    const dateStr = new Date(q.created_at).toLocaleDateString("ar-EG-u-nu-latn");
    const items = Array.isArray(q.items) ? q.items : [];
    const rows = items.map((it) => `
@@ -161,7 +320,7 @@ diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
    `).join("");
  
    area.innerHTML = `
-@@ -317,8 +347,19 @@
+@@ -317,8 +451,19 @@
  
    $("[data-login-form]").addEventListener("submit", handleLogin);
    $("[data-logout]").addEventListener("click", handleLogout);
@@ -195,8 +354,87 @@ diff -ruN orig/QL/rep-offgrid-quote.html alaslsolar-main/QL/rep-offgrid-quote.ht
      .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
 diff -ruN orig/QL/rep-offgrid-quote.js alaslsolar-main/QL/rep-offgrid-quote.js
 --- a/QL/rep-offgrid-quote.js	2026-09-14 06:09:56.000000000 +0000
-+++ b/QL/rep-offgrid-quote.js	2026-09-14 22:57:36.170315848 +0000
-@@ -686,7 +686,7 @@
++++ b/QL/rep-offgrid-quote.js	2026-09-16 09:55:51.194803622 +0000
+@@ -61,6 +61,7 @@
+ let lastResult = null;
+ let catalogCablePricePerMeter = null;
+ let quoteRows = []; // { key, label, type, product_id, watt, qty, unitPrice, discountPct }
++let draftSaveTimer = null; // مؤقّت الحفظ التلقائي للمسودّة (debounce)
+ 
+ function $(sel) { return document.querySelector(sel); }
+ function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
+@@ -475,6 +476,7 @@
+   $("#bannerName").textContent = name || "—";
+   $("#bannerPhone").textContent = phone || "—";
+   $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG-u-nu-latn");
++  scheduleDraftAutosave();
+ }
+ 
+ function buildQuoteRows(result) {
+@@ -575,6 +577,52 @@
+     $("#stickyTotalDisplay").textContent = fmt(grand);
+     stickyBar.hidden = false;
+   }
++  scheduleDraftAutosave();
++}
++
++/* ---------------- مسودّة تلقائية (عشان الأدمن يشوف المناديب شغالين على إيه دلوقتي) ----------------
++   بتتسجّل بعد ١٥ ثانية من آخر تعديل (اسم/تليفون/كمية/سعر/خصم)، من غير ما توقف
++   المندوب أو تظهرله أي رسالة — لو فشلت مفيش أي تأثير على شغله. بتتمسح فورًا
++   لما يحفظ العرض نهائي في saveQuote(). */
++function scheduleDraftAutosave() {
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  draftSaveTimer = setTimeout(saveDraftNow, 15000);
++}
++
++async function saveDraftNow() {
++  if (!client) return;
++  const name = $("#custName")?.value.trim() || "";
++  const phone = $("#custPhone")?.value.trim() || "";
++  if (!name && !phone && !quoteRows.length) return; // لسه مفيش حاجة تستاهل تتسجل كمسودّة
++
++  const items = quoteRows.map((r) => ({
++    label: r.label,
++    qty: r.qty,
++    unit_price: r.unitPrice,
++    line_total: r.qty * r.unitPrice * (1 - r.discountPct / 100),
++  }));
++  const subtotal = items.reduce((s, it) => s + it.line_total, 0);
++
++  try {
++    await client.rpc("rep_upsert_quote_draft", {
++      p_customer_name: name || null,
++      p_customer_phone: phone || null,
++      p_quote_type: quoteType,
++      p_items: items,
++      p_subtotal: subtotal,
++      p_installation_cost: 0,
++      p_total: subtotal,
++      p_page: "offgrid",
++    });
++  } catch (e) {
++    // بنتجاهل أي خطأ هنا عمدًا — المسودّة ميزة إضافية، مش لازم توقف المندوب
++    // عن شغله لو فشلت لأي سبب (شبكة ضعيفة مثلًا).
++  }
++}
++
++async function clearDraftNow() {
++  if (!client) return;
++  try { await client.rpc("rep_clear_quote_draft"); } catch (e) { /* تجاهل، نفس السبب أعلاه */ }
+ }
+ 
+ /* ---------------- الحفظ ---------------- */
+@@ -603,6 +651,9 @@
+ 
+   if (error) { showMsg(msgEl, "خطأ أثناء الحفظ: " + error.message, "error"); return; }
+ 
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  await clearDraftNow();
++
+   const { data: saved } = await client.from("quotes").select("id, items, total, created_at").eq("id", quoteId).maybeSingle();
+   showMsg(msgEl, "تم حفظ العرض بنجاح.", "ok");
+ 
+@@ -686,7 +737,7 @@
    const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr>`;
    const rowUnits = (q.items || []).map((it) => ({
      type: "row",
@@ -218,8 +456,80 @@ diff -ruN orig/QL/rep-quotes.html alaslsolar-main/QL/rep-quotes.html
      #printArea { display: none; }
 diff -ruN orig/QL/rep-quotes.js alaslsolar-main/QL/rep-quotes.js
 --- a/QL/rep-quotes.js	2026-09-14 06:09:56.000000000 +0000
-+++ b/QL/rep-quotes.js	2026-09-14 22:58:08.046348576 +0000
-@@ -302,10 +302,10 @@
++++ b/QL/rep-quotes.js	2026-09-16 09:56:34.310453031 +0000
+@@ -27,6 +27,7 @@
+ let currentSession = null;
+ let cart = []; // { productId, name, unitPrice, qty }
+ let quoteType = "supply_only";
++let draftSaveTimer = null; // مؤقّت الحفظ التلقائي للمسودّة (debounce)
+ 
+ function $(sel) { return document.querySelector(sel); }
+ function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
+@@ -222,6 +223,7 @@
+   $("#installTotalDisplay").textContent = fmt(installCost);
+   $("#grandTotalDisplay").textContent = fmt(grand);
+   $("[data-install-total-row]").hidden = quoteType !== "supply_install";
++  scheduleDraftAutosave();
+   return { subtotal, installCost, grand };
+ }
+ 
+@@ -234,6 +236,45 @@
+   updateTotals();
+ }
+ 
++/* ---------------- مسودّة تلقائية (عشان الأدمن يشوف المناديب شغالين على إيه دلوقتي) ----------------
++   نفس الفكرة المستخدمة في rep-offgrid-quote.js: تسجيل بعد ١٥ ثانية من آخر
++   تعديل، من غير رسائل أو توقف لشغل المندوب، وبتتمسح فورًا عند الحفظ النهائي. */
++function scheduleDraftAutosave() {
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  draftSaveTimer = setTimeout(saveDraftNow, 15000);
++}
++
++async function saveDraftNow() {
++  if (!client) return;
++  const name = $("#custName")?.value.trim() || "";
++  const phone = $("#custPhone")?.value.trim() || "";
++  if (!name && !phone && !cart.length) return;
++
++  const subtotal = cart.reduce((s, c) => s + c.unitPrice * c.qty, 0);
++  const installCost = quoteType === "supply_install" ? (parseFloat($("#installCost")?.value) || 0) : 0;
++  const total = subtotal + installCost;
++
++  try {
++    await client.rpc("rep_upsert_quote_draft", {
++      p_customer_name: name || null,
++      p_customer_phone: phone || null,
++      p_quote_type: quoteType,
++      p_items: cart.map((c) => ({ label: c.name, qty: c.qty, unit_price: c.unitPrice, line_total: c.unitPrice * c.qty })),
++      p_subtotal: subtotal,
++      p_installation_cost: installCost,
++      p_total: total,
++      p_page: "rep-quotes",
++    });
++  } catch (e) {
++    // تجاهل عمدًا — الأولوية لشغل المندوب، مش للمسودّة.
++  }
++}
++
++async function clearDraftNow() {
++  if (!client) return;
++  try { await client.rpc("rep_clear_quote_draft"); } catch (e) { /* تجاهل */ }
++}
++
+ /* ---------------- حفظ العرض ---------------- */
+ 
+ async function saveQuote() {
+@@ -279,6 +320,9 @@
+   msg.textContent = "تم حفظ العرض بنجاح.";
+   msg.className = "rq-msg ok";
+ 
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  await clearDraftNow();
++
+   printQuote({
+     id: data,
+     customer: { name, phone, city },
+@@ -302,10 +346,10 @@
  
    const rows = q.items.map((it) => `
      <tr>
@@ -234,7 +544,7 @@ diff -ruN orig/QL/rep-quotes.js alaslsolar-main/QL/rep-quotes.js
      </tr>
    `).join("");
  
-@@ -375,8 +375,8 @@
+@@ -375,8 +419,8 @@
          customer: q.customers || {},
          quoteType: q.quote_type,
          items: q.items || [],
@@ -245,7 +555,16 @@ diff -ruN orig/QL/rep-quotes.js alaslsolar-main/QL/rep-quotes.js
          grand: q.total,
          createdAt: q.created_at,
        });
-@@ -418,7 +418,7 @@
+@@ -398,6 +442,8 @@
+   $("#addProductBtn").addEventListener("click", addProductToCart);
+   $("#saveQuoteBtn").addEventListener("click", saveQuote);
+   $("#installCost").addEventListener("input", updateTotals);
++  $("#custName").addEventListener("input", scheduleDraftAutosave);
++  $("#custPhone").addEventListener("input", scheduleDraftAutosave);
+   $$(".rq-type-btn").forEach((b) => b.addEventListener("click", () => setQuoteType(b.dataset.quoteType)));
+ 
+   client.auth.onAuthStateChange((_event, session) => {
+@@ -418,7 +464,7 @@
              productId: null,
              name: it.name,
              unitPrice: parseFloat(it.price) || 0,

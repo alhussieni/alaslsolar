@@ -10,6 +10,8 @@ let currentSession = null;
 let isAdmin = false;
 let allQuotes = []; // كل العروض اللي رجعت من الاستعلام (متفلترة أصلًا حسب الصلاحيات)
 let repFilterId = null; // null = من غير فلتر مندوب (أدمن بس)
+let activeDrafts = []; // مسودّات العروض الحالية (أدمن بس)
+let draftsPollTimer = null;
 
 function $(sel) { return document.querySelector(sel); }
 function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
@@ -69,6 +71,7 @@ async function updateAuthState(session) {
     repPanel.hidden = true;
     logoutBtn.hidden = true;
     userName.textContent = "";
+    stopDraftsPolling();
     return;
   }
 
@@ -82,6 +85,7 @@ async function updateAuthState(session) {
     authPanel.hidden = false;
     repPanel.hidden = true;
     logoutBtn.hidden = true;
+    stopDraftsPolling();
     return;
   }
 
@@ -100,6 +104,8 @@ async function updateAuthState(session) {
 
   document.querySelectorAll(".crm-col-rep").forEach((el) => { el.hidden = !isAdmin; });
   $("#crmRepBreakdownCard").hidden = !isAdmin;
+
+  if (isAdmin) startDraftsPolling(); else stopDraftsPolling();
 
   await loadQuotes();
 }
@@ -168,6 +174,104 @@ function renderRepBreakdown() {
       renderQuoteList();
     });
   });
+}
+
+/* ---------------- المناديب شغالين دلوقتي (أدمن بس) ----------------
+   بتقرأ من quote_drafts (مسودّات بتتحدّث تلقائي من rep-offgrid-quote.js
+   و rep-quotes.js كل ما المندوب يعدّل حاجة، وبتتمسح لما يحفظ نهائي).
+   الصف بيتحدّث كل ٢٠ ثانية طول ما الأدمن فاتح الصفحة. */
+
+function timeAgoAr(dateStr) {
+  const diffSec = Math.max(0, Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000));
+  if (diffSec < 60) return "من لحظات";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `من ${diffMin} دقيقة`;
+  const diffHr = Math.floor(diffMin / 60);
+  return `من ${diffHr} ساعة`;
+}
+
+async function loadActiveDrafts() {
+  if (!isAdmin) return;
+  const { data, error } = await client
+    .from("quote_drafts")
+    .select("rep_id, customer_name, customer_phone, quote_type, items, total, last_active_at, reps(display_name)")
+    .order("last_active_at", { ascending: false });
+  if (error) return; // فشل تحديث دوري مايوقفش باقي الصفحة، هيتحاول تاني بعد ٢٠ ثانية
+  activeDrafts = data || [];
+  renderActiveDrafts();
+}
+
+function startDraftsPolling() {
+  stopDraftsPolling();
+  loadActiveDrafts();
+  draftsPollTimer = setInterval(loadActiveDrafts, 20000);
+}
+
+function stopDraftsPolling() {
+  if (draftsPollTimer) { clearInterval(draftsPollTimer); draftsPollTimer = null; }
+  activeDrafts = [];
+}
+
+function renderActiveDrafts() {
+  const card = $("#crmActiveDraftsCard");
+  if (!isAdmin) { card.hidden = true; return; }
+  card.hidden = false;
+
+  const tbody = $("#crmActiveDraftsBody");
+  const emptyNote = $("#crmActiveDraftsEmpty");
+
+  if (!activeDrafts.length) {
+    tbody.innerHTML = "";
+    emptyNote.hidden = false;
+    return;
+  }
+  emptyNote.hidden = true;
+
+  const typeLabel = (t) => t === "supply_install" ? "توريد وتركيب" : t === "supply_only" ? "توريد فقط" : (t || "—");
+
+  tbody.innerHTML = activeDrafts.map((d, idx) => {
+    const isLive = (Date.now() - new Date(d.last_active_at).getTime()) <= 90000;
+    return `
+      <tr>
+        <td>${d.reps?.display_name || "—"}</td>
+        <td>${d.customer_name || "بدون اسم"}${d.customer_phone ? `<br><span style="color:var(--muted);font-size:11.5px">${d.customer_phone}</span>` : ""}</td>
+        <td>${typeLabel(d.quote_type)}</td>
+        <td>${fmt(d.total)} ج.م</td>
+        <td><span class="crm-live-dot ${isLive ? "live" : "stale"}"></span>${isLive ? "شغال دلوقتي" : timeAgoAr(d.last_active_at)}</td>
+        <td><button type="button" class="btn" data-toggle-draft="${idx}" style="font-size:12px">التفاصيل</button></td>
+      </tr>
+      <tr class="crm-quote-detail-row" id="draft-detail-${idx}" hidden><td colspan="6"></td></tr>
+    `;
+  }).join("");
+
+  activeDrafts.forEach((d, idx) => {
+    tbody.querySelector(`[data-toggle-draft="${idx}"]`).addEventListener("click", () => toggleDraftDetail(d, idx));
+  });
+}
+
+function toggleDraftDetail(d, idx) {
+  const row = $(`#draft-detail-${idx}`);
+  const willShow = row.hidden;
+  document.querySelectorAll("#crmActiveDraftsBody .crm-quote-detail-row").forEach((r) => { r.hidden = true; });
+  if (!willShow) return;
+
+  const items = Array.isArray(d.items) ? d.items : [];
+  const rowsHtml = items.map((it) => `
+    <tr>
+      <td class="dtd">${QuoteItemUtils.getQuoteItemLabel(it)}</td>
+      <td class="dtd">${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
+      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
+      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
+    </tr>
+  `).join("");
+
+  row.querySelector("td").innerHTML = items.length ? `
+    <strong>بنود مسودّة ${d.reps?.display_name || ""}</strong>
+    <table>
+      <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>` : `<span style="color:var(--muted)">لسه مفيش بنود متضافة.</span>`;
+  row.hidden = false;
 }
 
 /* ---------------- قائمة العروض (مع البحث والفلترة) ---------------- */

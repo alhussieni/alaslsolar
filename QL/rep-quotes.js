@@ -27,6 +27,7 @@ let client = null;
 let currentSession = null;
 let cart = []; // { productId, name, unitPrice, qty }
 let quoteType = "supply_only";
+let draftSaveTimer = null; // مؤقّت الحفظ التلقائي للمسودّة (debounce)
 
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
@@ -222,6 +223,7 @@ function updateTotals() {
   $("#installTotalDisplay").textContent = fmt(installCost);
   $("#grandTotalDisplay").textContent = fmt(grand);
   $("[data-install-total-row]").hidden = quoteType !== "supply_install";
+  scheduleDraftAutosave();
   return { subtotal, installCost, grand };
 }
 
@@ -232,6 +234,45 @@ function setQuoteType(type) {
   $$(".rq-type-btn").forEach((b) => b.classList.toggle("active", b.dataset.quoteType === type));
   $("[data-install-cost-wrap]").hidden = type !== "supply_install";
   updateTotals();
+}
+
+/* ---------------- مسودّة تلقائية (عشان الأدمن يشوف المناديب شغالين على إيه دلوقتي) ----------------
+   نفس الفكرة المستخدمة في rep-offgrid-quote.js: تسجيل بعد ١٥ ثانية من آخر
+   تعديل، من غير رسائل أو توقف لشغل المندوب، وبتتمسح فورًا عند الحفظ النهائي. */
+function scheduleDraftAutosave() {
+  if (draftSaveTimer) clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(saveDraftNow, 15000);
+}
+
+async function saveDraftNow() {
+  if (!client) return;
+  const name = $("#custName")?.value.trim() || "";
+  const phone = $("#custPhone")?.value.trim() || "";
+  if (!name && !phone && !cart.length) return;
+
+  const subtotal = cart.reduce((s, c) => s + c.unitPrice * c.qty, 0);
+  const installCost = quoteType === "supply_install" ? (parseFloat($("#installCost")?.value) || 0) : 0;
+  const total = subtotal + installCost;
+
+  try {
+    await client.rpc("rep_upsert_quote_draft", {
+      p_customer_name: name || null,
+      p_customer_phone: phone || null,
+      p_quote_type: quoteType,
+      p_items: cart.map((c) => ({ label: c.name, qty: c.qty, unit_price: c.unitPrice, line_total: c.unitPrice * c.qty })),
+      p_subtotal: subtotal,
+      p_installation_cost: installCost,
+      p_total: total,
+      p_page: "rep-quotes",
+    });
+  } catch (e) {
+    // تجاهل عمدًا — الأولوية لشغل المندوب، مش للمسودّة.
+  }
+}
+
+async function clearDraftNow() {
+  if (!client) return;
+  try { await client.rpc("rep_clear_quote_draft"); } catch (e) { /* تجاهل */ }
 }
 
 /* ---------------- حفظ العرض ---------------- */
@@ -278,6 +319,9 @@ async function saveQuote() {
 
   msg.textContent = "تم حفظ العرض بنجاح.";
   msg.className = "rq-msg ok";
+
+  if (draftSaveTimer) clearTimeout(draftSaveTimer);
+  await clearDraftNow();
 
   printQuote({
     id: data,
@@ -398,6 +442,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#addProductBtn").addEventListener("click", addProductToCart);
   $("#saveQuoteBtn").addEventListener("click", saveQuote);
   $("#installCost").addEventListener("input", updateTotals);
+  $("#custName").addEventListener("input", scheduleDraftAutosave);
+  $("#custPhone").addEventListener("input", scheduleDraftAutosave);
   $$(".rq-type-btn").forEach((b) => b.addEventListener("click", () => setQuoteType(b.dataset.quoteType)));
 
   client.auth.onAuthStateChange((_event, session) => {

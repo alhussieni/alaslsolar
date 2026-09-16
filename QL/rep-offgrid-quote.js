@@ -61,6 +61,7 @@ let quoteType = "supply_only";
 let lastResult = null;
 let catalogCablePricePerMeter = null;
 let quoteRows = []; // { key, label, type, product_id, watt, qty, unitPrice, discountPct }
+let draftSaveTimer = null; // مؤقّت الحفظ التلقائي للمسودّة (debounce)
 
 function $(sel) { return document.querySelector(sel); }
 function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
@@ -475,6 +476,7 @@ function updateBanner() {
   $("#bannerName").textContent = name || "—";
   $("#bannerPhone").textContent = phone || "—";
   $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG-u-nu-latn");
+  scheduleDraftAutosave();
 }
 
 function buildQuoteRows(result) {
@@ -575,6 +577,52 @@ function renderQuoteTable() {
     $("#stickyTotalDisplay").textContent = fmt(grand);
     stickyBar.hidden = false;
   }
+  scheduleDraftAutosave();
+}
+
+/* ---------------- مسودّة تلقائية (عشان الأدمن يشوف المناديب شغالين على إيه دلوقتي) ----------------
+   بتتسجّل بعد ١٥ ثانية من آخر تعديل (اسم/تليفون/كمية/سعر/خصم)، من غير ما توقف
+   المندوب أو تظهرله أي رسالة — لو فشلت مفيش أي تأثير على شغله. بتتمسح فورًا
+   لما يحفظ العرض نهائي في saveQuote(). */
+function scheduleDraftAutosave() {
+  if (draftSaveTimer) clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(saveDraftNow, 15000);
+}
+
+async function saveDraftNow() {
+  if (!client) return;
+  const name = $("#custName")?.value.trim() || "";
+  const phone = $("#custPhone")?.value.trim() || "";
+  if (!name && !phone && !quoteRows.length) return; // لسه مفيش حاجة تستاهل تتسجل كمسودّة
+
+  const items = quoteRows.map((r) => ({
+    label: r.label,
+    qty: r.qty,
+    unit_price: r.unitPrice,
+    line_total: r.qty * r.unitPrice * (1 - r.discountPct / 100),
+  }));
+  const subtotal = items.reduce((s, it) => s + it.line_total, 0);
+
+  try {
+    await client.rpc("rep_upsert_quote_draft", {
+      p_customer_name: name || null,
+      p_customer_phone: phone || null,
+      p_quote_type: quoteType,
+      p_items: items,
+      p_subtotal: subtotal,
+      p_installation_cost: 0,
+      p_total: subtotal,
+      p_page: "offgrid",
+    });
+  } catch (e) {
+    // بنتجاهل أي خطأ هنا عمدًا — المسودّة ميزة إضافية، مش لازم توقف المندوب
+    // عن شغله لو فشلت لأي سبب (شبكة ضعيفة مثلًا).
+  }
+}
+
+async function clearDraftNow() {
+  if (!client) return;
+  try { await client.rpc("rep_clear_quote_draft"); } catch (e) { /* تجاهل، نفس السبب أعلاه */ }
 }
 
 /* ---------------- الحفظ ---------------- */
@@ -602,6 +650,9 @@ async function saveQuote() {
   });
 
   if (error) { showMsg(msgEl, "خطأ أثناء الحفظ: " + error.message, "error"); return; }
+
+  if (draftSaveTimer) clearTimeout(draftSaveTimer);
+  await clearDraftNow();
 
   const { data: saved } = await client.from("quotes").select("id, items, total, created_at").eq("id", quoteId).maybeSingle();
   showMsg(msgEl, "تم حفظ العرض بنجاح.", "ok");

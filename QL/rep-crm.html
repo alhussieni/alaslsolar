@@ -29,6 +29,10 @@
     .crm-rep-table tbody tr:hover { background: #faf7f2; cursor: pointer; }
     .crm-rep-table tbody tr.active-filter { background: var(--brand-soft); }
 
+    .crm-live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 5px; vertical-align: middle; }
+    .crm-live-dot.live { background: #2e9e4a; }
+    .crm-live-dot.stale { background: #b7b0a6; }
+
     .crm-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--space-2); }
     .crm-filters input, .crm-filters select { flex: 1; min-width: 140px; }
 
@@ -89,6 +93,15 @@
     </div>
 
     <div class="crm-stats" id="crmStats"></div>
+
+    <div class="card" id="crmActiveDraftsCard" hidden>
+      <h3>المناديب شغالين دلوقتي</h3>
+      <table class="crm-rep-table" id="crmActiveDraftsTable">
+        <thead><tr><th>المندوب</th><th>العميل</th><th>النوع</th><th>الإجمالي الحالي</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="crmActiveDraftsBody"></tbody>
+      </table>
+      <p class="form-note" id="crmActiveDraftsEmpty" style="margin:0">مفيش مناديب شغالين على عرض دلوقتي.</p>
+    </div>
 
     <div class="card" id="crmRepBreakdownCard" hidden>
       <h3>عدد العروض لكل مندوب</h3>
