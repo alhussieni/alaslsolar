@@ -102,12 +102,16 @@
     <div class="card">
       <h3>العروض</h3>
       <div class="crm-filters">
-        <input type="text" id="crmSearch" placeholder="دور بالاسم أو رقم التليفون...">
+        <input type="text" id="crmSearchName" placeholder="دور بالاسم...">
+        <input type="tel" id="crmSearchPhone" placeholder="دور برقم الموبايل...">
+        <input type="date" id="crmDateFrom" aria-label="من تاريخ" title="من تاريخ">
+        <input type="date" id="crmDateTo" aria-label="إلى تاريخ" title="إلى تاريخ">
         <select id="crmTypeFilter">
           <option value="">كل الأنواع</option>
           <option value="supply_only">توريد فقط</option>
           <option value="supply_install">توريد وتركيب</option>
         </select>
+        <button type="button" class="btn btn-secondary" id="crmClearFilters" style="flex:0;white-space:nowrap">مسح الفلاتر</button>
       </div>
       <p class="form-note" data-crm-message></p>
       <table class="crm-quote-table" id="crmQuoteTable">

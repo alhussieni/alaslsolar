@@ -14,6 +14,19 @@ let repFilterId = null; // null = من غير فلتر مندوب (أدمن بس
 function $(sel) { return document.querySelector(sel); }
 function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
 
+/* بيرجّع رقم الموبايل لصورته الأساسية (10 أرقام تبدأ بـ 1) بعد ما يشيل أي
+   شكل تسجيل مختلف: مسافات/شرطات، الصفر الأول، أو كود مصر الدولي (+20 / 0020).
+   ده اللي بيخلي البحث برقم الموبايل يلاقي الرقم صح حتى لو اتسجل بصيغة مختلفة
+   عن اللي المستخدم بيدور بيها دلوقتي. */
+function normalizePhone(raw) {
+  let d = String(raw || "").replace(/\D/g, "");
+  if (d.startsWith("0020")) d = d.slice(4);
+  if (d.startsWith("20") && d.length > 10) d = d.slice(2);
+  if (d.startsWith("0") && d.length > 10) d = d.slice(1);
+  if (d.startsWith("0")) d = d.slice(1);
+  return d;
+}
+
 async function initClient() {
   for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) {
     await new Promise((r) => setTimeout(r, 50));
@@ -160,17 +173,34 @@ function renderRepBreakdown() {
 /* ---------------- قائمة العروض (مع البحث والفلترة) ---------------- */
 
 function getFilteredQuotes() {
-  const search = ($("#crmSearch").value || "").trim().toLowerCase();
+  const nameSearch = ($("#crmSearchName").value || "").trim().toLowerCase();
+  const phoneSearch = normalizePhone($("#crmSearchPhone").value);
+  const dateFrom = $("#crmDateFrom").value; // "YYYY-MM-DD" أو ""
+  const dateTo = $("#crmDateTo").value;
   const typeFilter = $("#crmTypeFilter").value;
 
   return allQuotes.filter((q) => {
     if (repFilterId && q.rep_id !== repFilterId) return false;
     if (typeFilter && q.quote_type !== typeFilter) return false;
-    if (search) {
+
+    if (nameSearch) {
       const name = (q.customers?.name || "").toLowerCase();
-      const phone = (q.customers?.phone || "").toLowerCase();
-      if (!name.includes(search) && !phone.includes(search)) return false;
+      if (!name.includes(nameSearch)) return false;
     }
+
+    // الفلتر الأساسي والأكثر ثقة: رقم الموبايل، بعد التطبيع، بغض النظر عن
+    // الصيغة اللي اتسجل بيها (0.../+20.../ مسافات/شرطات).
+    if (phoneSearch) {
+      const phone = normalizePhone(q.customers?.phone);
+      if (!phone.includes(phoneSearch)) return false;
+    }
+
+    if (dateFrom || dateTo) {
+      const createdDate = q.created_at ? q.created_at.slice(0, 10) : "";
+      if (dateFrom && createdDate < dateFrom) return false;
+      if (dateTo && createdDate > dateTo) return false;
+    }
+
     return true;
   });
 }
@@ -317,8 +347,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $("[data-login-form]").addEventListener("submit", handleLogin);
   $("[data-logout]").addEventListener("click", handleLogout);
-  $("#crmSearch").addEventListener("input", renderQuoteList);
+  $("#crmSearchName").addEventListener("input", renderQuoteList);
+  $("#crmSearchPhone").addEventListener("input", renderQuoteList);
+  $("#crmDateFrom").addEventListener("change", renderQuoteList);
+  $("#crmDateTo").addEventListener("change", renderQuoteList);
   $("#crmTypeFilter").addEventListener("change", renderQuoteList);
+  $("#crmClearFilters").addEventListener("click", () => {
+    $("#crmSearchName").value = "";
+    $("#crmSearchPhone").value = "";
+    $("#crmDateFrom").value = "";
+    $("#crmDateTo").value = "";
+    $("#crmTypeFilter").value = "";
+    renderQuoteList();
+  });
 
   client.auth.onAuthStateChange((_e, session) => updateAuthState(session));
   const { data } = await client.auth.getSession();
