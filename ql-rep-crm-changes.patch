@@ -1,0 +1,604 @@
+diff -ruN orig/QL/quote-item-utils.js alaslsolar-main/QL/quote-item-utils.js
+--- a/QL/quote-item-utils.js	1970-01-01 00:00:00.000000000 +0000
++++ b/QL/quote-item-utils.js	2026-09-14 22:57:22.043786432 +0000
+@@ -0,0 +1,44 @@
++/* quote-item-utils.js
++   مصدر واحد لقراءة بنود العرض (quotes.items) بشكل موحّد في كل الصفحات
++   (rep-crm.js / rep-quotes.js / rep-offgrid-quote.js).
++
++   ليه محتاجين الملف ده:
++   solar-pump-quote.edge-function.ts بيحفظ كل بند بالشكل ده:
++     { key, label, type, qty: "#12#", warranty, sell }
++   - qty نص مزخرف بعلامات # (لغرض العرض في الطباعة القديمة)، مش رقم.
++   - مفيش unit_price ولا line_total محفوظين — "sell" هو إجمالي السطر بالفعل.
++   أي كود بيحاول يقرأ it.qty كرقم مباشرة أو it.unit_price / it.line_total
++   هيرجعله NaN أو undefined. الدوال دي بتقرا الشكل ده صح، وبرضه بتفضل شغالة
++   لو بند قديم/يدوي (type: "custom") كان محفوظ فعلاً بـ unit_price/line_total صريحين. */
++
++function parseQuoteItemQty(rawQty) {
++  const m = String(rawQty ?? "").match(/-?\d+(\.\d+)?/);
++  return m ? Number(m[0]) : 0;
++}
++
++function getQuoteItemLineTotal(it) {
++  if (it.line_total != null) return Number(it.line_total);
++  if (it.sell != null) return Number(it.sell);
++  const qty = parseQuoteItemQty(it.qty);
++  const unit = Number(it.unit_price ?? it.unitPrice ?? 0);
++  return qty * unit;
++}
++
++function getQuoteItemUnitPrice(it) {
++  if (it.unit_price != null) return Number(it.unit_price);
++  if (it.unitPrice != null) return Number(it.unitPrice);
++  const qty = parseQuoteItemQty(it.qty);
++  const lineTotal = getQuoteItemLineTotal(it);
++  return qty ? lineTotal / qty : lineTotal;
++}
++
++function getQuoteItemLabel(it) {
++  return it.label || it.name || "—";
++}
++
++window.QuoteItemUtils = {
++  parseQuoteItemQty,
++  getQuoteItemLineTotal,
++  getQuoteItemUnitPrice,
++  getQuoteItemLabel,
++};
+diff -ruN orig/QL/rep-crm.html alaslsolar-main/QL/rep-crm.html
+--- a/QL/rep-crm.html	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-crm.html	2026-09-16 10:17:29.058425792 +0000
+@@ -15,6 +15,7 @@
+   <script defer src="rep-header.js"></script>
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="../supabase-config.js"></script>
++  <script defer src="quote-item-utils.js"></script>
+   <script defer src="rep-crm.js"></script>
+   <style>
+     .crm-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-3); }
+@@ -28,6 +29,10 @@
+     .crm-rep-table tbody tr:hover { background: #faf7f2; cursor: pointer; }
+     .crm-rep-table tbody tr.active-filter { background: var(--brand-soft); }
+ 
++    .crm-live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 5px; vertical-align: middle; }
++    .crm-live-dot.live { background: #2e9e4a; }
++    .crm-live-dot.stale { background: #b7b0a6; }
++
+     .crm-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--space-2); }
+     .crm-filters input, .crm-filters select { flex: 1; min-width: 140px; }
+ 
+@@ -89,6 +94,15 @@
+ 
+     <div class="crm-stats" id="crmStats"></div>
+ 
++    <div class="card" id="crmActiveDraftsCard" hidden>
++      <h3>المناديب شغالين دلوقتي</h3>
++      <table class="crm-rep-table" id="crmActiveDraftsTable">
++        <thead><tr><th>المندوب</th><th>العميل</th><th>النوع</th><th>الإجمالي الحالي</th><th>الحالة</th><th></th></tr></thead>
++        <tbody id="crmActiveDraftsBody"></tbody>
++      </table>
++      <p class="form-note" id="crmActiveDraftsEmpty" style="margin:0">مفيش مناديب شغالين على عرض دلوقتي.</p>
++    </div>
++
+     <div class="card" id="crmRepBreakdownCard" hidden>
+       <h3>عدد العروض لكل مندوب</h3>
+       <table class="crm-rep-table" id="crmRepTable">
+@@ -101,12 +115,19 @@
+     <div class="card">
+       <h3>العروض</h3>
+       <div class="crm-filters">
+-        <input type="text" id="crmSearch" placeholder="دور بالاسم أو رقم التليفون...">
++        <input type="text" id="crmSearchName" placeholder="دور بالاسم...">
++        <input type="tel" id="crmSearchPhone" placeholder="دور برقم الموبايل...">
++        <input type="date" id="crmDateFrom" aria-label="من تاريخ" title="من تاريخ">
++        <input type="date" id="crmDateTo" aria-label="إلى تاريخ" title="إلى تاريخ">
++        <select id="crmRepFilter" class="crm-col-rep" hidden>
++          <option value="">كل المناديب</option>
++        </select>
+         <select id="crmTypeFilter">
+           <option value="">كل الأنواع</option>
+           <option value="supply_only">توريد فقط</option>
+           <option value="supply_install">توريد وتركيب</option>
+         </select>
++        <button type="button" class="btn btn-secondary" id="crmClearFilters" style="flex:0;white-space:nowrap">مسح الفلاتر</button>
+       </div>
+       <p class="form-note" data-crm-message></p>
+       <table class="crm-quote-table" id="crmQuoteTable">
+diff -ruN orig/QL/rep-crm.js alaslsolar-main/QL/rep-crm.js
+--- a/QL/rep-crm.js	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-crm.js	2026-09-16 10:17:45.916101274 +0000
+@@ -10,10 +10,25 @@
+ let isAdmin = false;
+ let allQuotes = []; // كل العروض اللي رجعت من الاستعلام (متفلترة أصلًا حسب الصلاحيات)
+ let repFilterId = null; // null = من غير فلتر مندوب (أدمن بس)
++let activeDrafts = []; // مسودّات العروض الحالية (أدمن بس)
++let draftsPollTimer = null;
+ 
+ function $(sel) { return document.querySelector(sel); }
+ function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
+ 
++/* بيرجّع رقم الموبايل لصورته الأساسية (10 أرقام تبدأ بـ 1) بعد ما يشيل أي
++   شكل تسجيل مختلف: مسافات/شرطات، الصفر الأول، أو كود مصر الدولي (+20 / 0020).
++   ده اللي بيخلي البحث برقم الموبايل يلاقي الرقم صح حتى لو اتسجل بصيغة مختلفة
++   عن اللي المستخدم بيدور بيها دلوقتي. */
++function normalizePhone(raw) {
++  let d = String(raw || "").replace(/\D/g, "");
++  if (d.startsWith("0020")) d = d.slice(4);
++  if (d.startsWith("20") && d.length > 10) d = d.slice(2);
++  if (d.startsWith("0") && d.length > 10) d = d.slice(1);
++  if (d.startsWith("0")) d = d.slice(1);
++  return d;
++}
++
+ async function initClient() {
+   for (let i = 0; i < 50 && !window.getAlaslSupabase; i++) {
+     await new Promise((r) => setTimeout(r, 50));
+@@ -56,6 +71,7 @@
+     repPanel.hidden = true;
+     logoutBtn.hidden = true;
+     userName.textContent = "";
++    stopDraftsPolling();
+     return;
+   }
+ 
+@@ -69,6 +85,7 @@
+     authPanel.hidden = false;
+     repPanel.hidden = true;
+     logoutBtn.hidden = true;
++    stopDraftsPolling();
+     return;
+   }
+ 
+@@ -88,6 +105,8 @@
+   document.querySelectorAll(".crm-col-rep").forEach((el) => { el.hidden = !isAdmin; });
+   $("#crmRepBreakdownCard").hidden = !isAdmin;
+ 
++  if (isAdmin) startDraftsPolling(); else stopDraftsPolling();
++
+   await loadQuotes();
+ }
+ 
+@@ -151,26 +170,153 @@
+     row.addEventListener("click", () => {
+       const id = row.dataset.repRow;
+       repFilterId = repFilterId === id ? null : id;
++      const select = $("#crmRepFilter");
++      if (select) select.value = repFilterId || "";
+       renderRepBreakdown();
+       renderQuoteList();
+     });
+   });
++
++  // بنبني قائمة الفلتر من نفس بيانات الجدول، وبنحافظ على اختيار الأدمن الحالي
++  // (بما إنها بتتعاد بناها كل ما العروض تتحمّل من جديد).
++  const repSelect = $("#crmRepFilter");
++  if (repSelect) {
++    const currentValue = repFilterId || "";
++    repSelect.innerHTML = `<option value="">كل المناديب</option>` +
++      rows.map(([repId, r]) => `<option value="${repId}">${r.name}</option>`).join("");
++    repSelect.value = currentValue;
++  }
++}
++
++/* ---------------- المناديب شغالين دلوقتي (أدمن بس) ----------------
++   بتقرأ من quote_drafts (مسودّات بتتحدّث تلقائي من rep-offgrid-quote.js
++   و rep-quotes.js كل ما المندوب يعدّل حاجة، وبتتمسح لما يحفظ نهائي).
++   الصف بيتحدّث كل ٢٠ ثانية طول ما الأدمن فاتح الصفحة. */
++
++function timeAgoAr(dateStr) {
++  const diffSec = Math.max(0, Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000));
++  if (diffSec < 60) return "من لحظات";
++  const diffMin = Math.floor(diffSec / 60);
++  if (diffMin < 60) return `من ${diffMin} دقيقة`;
++  const diffHr = Math.floor(diffMin / 60);
++  return `من ${diffHr} ساعة`;
++}
++
++async function loadActiveDrafts() {
++  if (!isAdmin) return;
++  const { data, error } = await client
++    .from("quote_drafts")
++    .select("rep_id, customer_name, customer_phone, quote_type, items, total, last_active_at, reps(display_name)")
++    .order("last_active_at", { ascending: false });
++  if (error) return; // فشل تحديث دوري مايوقفش باقي الصفحة، هيتحاول تاني بعد ٢٠ ثانية
++  activeDrafts = data || [];
++  renderActiveDrafts();
++}
++
++function startDraftsPolling() {
++  stopDraftsPolling();
++  loadActiveDrafts();
++  draftsPollTimer = setInterval(loadActiveDrafts, 20000);
++}
++
++function stopDraftsPolling() {
++  if (draftsPollTimer) { clearInterval(draftsPollTimer); draftsPollTimer = null; }
++  activeDrafts = [];
++}
++
++function renderActiveDrafts() {
++  const card = $("#crmActiveDraftsCard");
++  if (!isAdmin) { card.hidden = true; return; }
++  card.hidden = false;
++
++  const tbody = $("#crmActiveDraftsBody");
++  const emptyNote = $("#crmActiveDraftsEmpty");
++
++  if (!activeDrafts.length) {
++    tbody.innerHTML = "";
++    emptyNote.hidden = false;
++    return;
++  }
++  emptyNote.hidden = true;
++
++  const typeLabel = (t) => t === "supply_install" ? "توريد وتركيب" : t === "supply_only" ? "توريد فقط" : (t || "—");
++
++  tbody.innerHTML = activeDrafts.map((d, idx) => {
++    const isLive = (Date.now() - new Date(d.last_active_at).getTime()) <= 90000;
++    return `
++      <tr>
++        <td>${d.reps?.display_name || "—"}</td>
++        <td>${d.customer_name || "بدون اسم"}${d.customer_phone ? `<br><span style="color:var(--muted);font-size:11.5px">${d.customer_phone}</span>` : ""}</td>
++        <td>${typeLabel(d.quote_type)}</td>
++        <td>${fmt(d.total)} ج.م</td>
++        <td><span class="crm-live-dot ${isLive ? "live" : "stale"}"></span>${isLive ? "شغال دلوقتي" : timeAgoAr(d.last_active_at)}</td>
++        <td><button type="button" class="btn" data-toggle-draft="${idx}" style="font-size:12px">التفاصيل</button></td>
++      </tr>
++      <tr class="crm-quote-detail-row" id="draft-detail-${idx}" hidden><td colspan="6"></td></tr>
++    `;
++  }).join("");
++
++  activeDrafts.forEach((d, idx) => {
++    tbody.querySelector(`[data-toggle-draft="${idx}"]`).addEventListener("click", () => toggleDraftDetail(d, idx));
++  });
++}
++
++function toggleDraftDetail(d, idx) {
++  const row = $(`#draft-detail-${idx}`);
++  const willShow = row.hidden;
++  document.querySelectorAll("#crmActiveDraftsBody .crm-quote-detail-row").forEach((r) => { r.hidden = true; });
++  if (!willShow) return;
++
++  const items = Array.isArray(d.items) ? d.items : [];
++  const rowsHtml = items.map((it) => `
++    <tr>
++      <td class="dtd">${QuoteItemUtils.getQuoteItemLabel(it)}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
++    </tr>
++  `).join("");
++
++  row.querySelector("td").innerHTML = items.length ? `
++    <strong>بنود مسودّة ${d.reps?.display_name || ""}</strong>
++    <table>
++      <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead>
++      <tbody>${rowsHtml}</tbody>
++    </table>` : `<span style="color:var(--muted)">لسه مفيش بنود متضافة.</span>`;
++  row.hidden = false;
+ }
+ 
+ /* ---------------- قائمة العروض (مع البحث والفلترة) ---------------- */
+ 
+ function getFilteredQuotes() {
+-  const search = ($("#crmSearch").value || "").trim().toLowerCase();
++  const nameSearch = ($("#crmSearchName").value || "").trim().toLowerCase();
++  const phoneSearch = normalizePhone($("#crmSearchPhone").value);
++  const dateFrom = $("#crmDateFrom").value; // "YYYY-MM-DD" أو ""
++  const dateTo = $("#crmDateTo").value;
+   const typeFilter = $("#crmTypeFilter").value;
+ 
+   return allQuotes.filter((q) => {
+     if (repFilterId && q.rep_id !== repFilterId) return false;
+     if (typeFilter && q.quote_type !== typeFilter) return false;
+-    if (search) {
++
++    if (nameSearch) {
+       const name = (q.customers?.name || "").toLowerCase();
+-      const phone = (q.customers?.phone || "").toLowerCase();
+-      if (!name.includes(search) && !phone.includes(search)) return false;
++      if (!name.includes(nameSearch)) return false;
++    }
++
++    // الفلتر الأساسي والأكثر ثقة: رقم الموبايل، بعد التطبيع، بغض النظر عن
++    // الصيغة اللي اتسجل بيها (0.../+20.../ مسافات/شرطات).
++    if (phoneSearch) {
++      const phone = normalizePhone(q.customers?.phone);
++      if (!phone.includes(phoneSearch)) return false;
++    }
++
++    if (dateFrom || dateTo) {
++      const createdDate = q.created_at ? q.created_at.slice(0, 10) : "";
++      if (dateFrom && createdDate < dateFrom) return false;
++      if (dateTo && createdDate > dateTo) return false;
+     }
++
+     return true;
+   });
+ }
+@@ -240,10 +386,10 @@
+   const items = Array.isArray(q.items) ? q.items : [];
+   const rowsHtml = items.map((it) => `
+     <tr>
+-      <td class="dtd">${it.label || it.name || "—"}</td>
+-      <td class="dtd">${fmt(it.qty)}</td>
+-      <td class="dtd">${fmt(it.unit_price)}</td>
+-      <td class="dtd">${fmt(it.line_total ?? (it.unit_price || 0) * (it.qty || 0))}</td>
++      <td class="dtd">${QuoteItemUtils.getQuoteItemLabel(it)}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
++      <td class="dtd">${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
+     </tr>
+   `).join("");
+ 
+@@ -265,7 +411,7 @@
+   const dateStr = new Date(q.created_at).toLocaleDateString("ar-EG-u-nu-latn");
+   const items = Array.isArray(q.items) ? q.items : [];
+   const rows = items.map((it) => `
+-    <tr><td>${it.label || it.name || "—"}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${fmt(it.line_total ?? (it.unit_price || 0) * (it.qty || 0))}</td></tr>
++    <tr><td>${QuoteItemUtils.getQuoteItemLabel(it)}</td><td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>
+   `).join("");
+ 
+   area.innerHTML = `
+@@ -317,8 +463,27 @@
+ 
+   $("[data-login-form]").addEventListener("submit", handleLogin);
+   $("[data-logout]").addEventListener("click", handleLogout);
+-  $("#crmSearch").addEventListener("input", renderQuoteList);
++  $("#crmSearchName").addEventListener("input", renderQuoteList);
++  $("#crmSearchPhone").addEventListener("input", renderQuoteList);
++  $("#crmDateFrom").addEventListener("change", renderQuoteList);
++  $("#crmDateTo").addEventListener("change", renderQuoteList);
+   $("#crmTypeFilter").addEventListener("change", renderQuoteList);
++  $("#crmRepFilter").addEventListener("change", (e) => {
++    repFilterId = e.target.value || null;
++    renderRepBreakdown();
++    renderQuoteList();
++  });
++  $("#crmClearFilters").addEventListener("click", () => {
++    $("#crmSearchName").value = "";
++    $("#crmSearchPhone").value = "";
++    $("#crmDateFrom").value = "";
++    $("#crmDateTo").value = "";
++    $("#crmTypeFilter").value = "";
++    $("#crmRepFilter").value = "";
++    repFilterId = null;
++    renderRepBreakdown();
++    renderQuoteList();
++  });
+ 
+   client.auth.onAuthStateChange((_e, session) => updateAuthState(session));
+   const { data } = await client.auth.getSession();
+diff -ruN orig/QL/rep-offgrid-quote.html alaslsolar-main/QL/rep-offgrid-quote.html
+--- a/QL/rep-offgrid-quote.html	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-offgrid-quote.html	2026-09-14 22:58:12.668959220 +0000
+@@ -16,6 +16,7 @@
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="../supabase-config.js"></script>
+   <script defer src="../offgrid-calc-engine.js"></script>
++  <script defer src="quote-item-utils.js"></script>
+   <script defer src="rep-offgrid-quote.js"></script>
+   <style>
+     .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+diff -ruN orig/QL/rep-offgrid-quote.js alaslsolar-main/QL/rep-offgrid-quote.js
+--- a/QL/rep-offgrid-quote.js	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-offgrid-quote.js	2026-09-16 09:55:51.194803622 +0000
+@@ -61,6 +61,7 @@
+ let lastResult = null;
+ let catalogCablePricePerMeter = null;
+ let quoteRows = []; // { key, label, type, product_id, watt, qty, unitPrice, discountPct }
++let draftSaveTimer = null; // مؤقّت الحفظ التلقائي للمسودّة (debounce)
+ 
+ function $(sel) { return document.querySelector(sel); }
+ function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
+@@ -475,6 +476,7 @@
+   $("#bannerName").textContent = name || "—";
+   $("#bannerPhone").textContent = phone || "—";
+   $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG-u-nu-latn");
++  scheduleDraftAutosave();
+ }
+ 
+ function buildQuoteRows(result) {
+@@ -575,6 +577,52 @@
+     $("#stickyTotalDisplay").textContent = fmt(grand);
+     stickyBar.hidden = false;
+   }
++  scheduleDraftAutosave();
++}
++
++/* ---------------- مسودّة تلقائية (عشان الأدمن يشوف المناديب شغالين على إيه دلوقتي) ----------------
++   بتتسجّل بعد ١٥ ثانية من آخر تعديل (اسم/تليفون/كمية/سعر/خصم)، من غير ما توقف
++   المندوب أو تظهرله أي رسالة — لو فشلت مفيش أي تأثير على شغله. بتتمسح فورًا
++   لما يحفظ العرض نهائي في saveQuote(). */
++function scheduleDraftAutosave() {
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  draftSaveTimer = setTimeout(saveDraftNow, 15000);
++}
++
++async function saveDraftNow() {
++  if (!client) return;
++  const name = $("#custName")?.value.trim() || "";
++  const phone = $("#custPhone")?.value.trim() || "";
++  if (!name && !phone && !quoteRows.length) return; // لسه مفيش حاجة تستاهل تتسجل كمسودّة
++
++  const items = quoteRows.map((r) => ({
++    label: r.label,
++    qty: r.qty,
++    unit_price: r.unitPrice,
++    line_total: r.qty * r.unitPrice * (1 - r.discountPct / 100),
++  }));
++  const subtotal = items.reduce((s, it) => s + it.line_total, 0);
++
++  try {
++    await client.rpc("rep_upsert_quote_draft", {
++      p_customer_name: name || null,
++      p_customer_phone: phone || null,
++      p_quote_type: quoteType,
++      p_items: items,
++      p_subtotal: subtotal,
++      p_installation_cost: 0,
++      p_total: subtotal,
++      p_page: "offgrid",
++    });
++  } catch (e) {
++    // بنتجاهل أي خطأ هنا عمدًا — المسودّة ميزة إضافية، مش لازم توقف المندوب
++    // عن شغله لو فشلت لأي سبب (شبكة ضعيفة مثلًا).
++  }
++}
++
++async function clearDraftNow() {
++  if (!client) return;
++  try { await client.rpc("rep_clear_quote_draft"); } catch (e) { /* تجاهل، نفس السبب أعلاه */ }
+ }
+ 
+ /* ---------------- الحفظ ---------------- */
+@@ -603,6 +651,9 @@
+ 
+   if (error) { showMsg(msgEl, "خطأ أثناء الحفظ: " + error.message, "error"); return; }
+ 
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  await clearDraftNow();
++
+   const { data: saved } = await client.from("quotes").select("id, items, total, created_at").eq("id", quoteId).maybeSingle();
+   showMsg(msgEl, "تم حفظ العرض بنجاح.", "ok");
+ 
+@@ -686,7 +737,7 @@
+   const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>خصم</th><th>الإجمالي</th></tr>`;
+   const rowUnits = (q.items || []).map((it) => ({
+     type: "row",
+-    html: `<tr><td>${it.label}</td><td>${fmt(it.qty)}</td><td>${fmt(it.unit_price)}</td><td>${it.discount_pct || 0}%</td><td>${fmt(it.line_total)}</td></tr>`,
++    html: `<tr><td>${QuoteItemUtils.getQuoteItemLabel(it)}</td><td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${it.discount_pct || 0}%</td><td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>`,
+   }));
+ 
+   const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
+diff -ruN orig/QL/rep-quotes.html alaslsolar-main/QL/rep-quotes.html
+--- a/QL/rep-quotes.html	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-quotes.html	2026-09-14 22:58:14.849404202 +0000
+@@ -15,6 +15,7 @@
+   <script defer src="rep-header.js"></script>
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="../supabase-config.js"></script>
++  <script defer src="quote-item-utils.js"></script>
+   <script defer src="rep-quotes.js"></script>
+   <style>
+     #printArea { display: none; }
+diff -ruN orig/QL/rep-quotes.js alaslsolar-main/QL/rep-quotes.js
+--- a/QL/rep-quotes.js	2026-09-14 06:09:56.000000000 +0000
++++ b/QL/rep-quotes.js	2026-09-16 09:56:34.310453031 +0000
+@@ -27,6 +27,7 @@
+ let currentSession = null;
+ let cart = []; // { productId, name, unitPrice, qty }
+ let quoteType = "supply_only";
++let draftSaveTimer = null; // مؤقّت الحفظ التلقائي للمسودّة (debounce)
+ 
+ function $(sel) { return document.querySelector(sel); }
+ function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
+@@ -222,6 +223,7 @@
+   $("#installTotalDisplay").textContent = fmt(installCost);
+   $("#grandTotalDisplay").textContent = fmt(grand);
+   $("[data-install-total-row]").hidden = quoteType !== "supply_install";
++  scheduleDraftAutosave();
+   return { subtotal, installCost, grand };
+ }
+ 
+@@ -234,6 +236,45 @@
+   updateTotals();
+ }
+ 
++/* ---------------- مسودّة تلقائية (عشان الأدمن يشوف المناديب شغالين على إيه دلوقتي) ----------------
++   نفس الفكرة المستخدمة في rep-offgrid-quote.js: تسجيل بعد ١٥ ثانية من آخر
++   تعديل، من غير رسائل أو توقف لشغل المندوب، وبتتمسح فورًا عند الحفظ النهائي. */
++function scheduleDraftAutosave() {
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  draftSaveTimer = setTimeout(saveDraftNow, 15000);
++}
++
++async function saveDraftNow() {
++  if (!client) return;
++  const name = $("#custName")?.value.trim() || "";
++  const phone = $("#custPhone")?.value.trim() || "";
++  if (!name && !phone && !cart.length) return;
++
++  const subtotal = cart.reduce((s, c) => s + c.unitPrice * c.qty, 0);
++  const installCost = quoteType === "supply_install" ? (parseFloat($("#installCost")?.value) || 0) : 0;
++  const total = subtotal + installCost;
++
++  try {
++    await client.rpc("rep_upsert_quote_draft", {
++      p_customer_name: name || null,
++      p_customer_phone: phone || null,
++      p_quote_type: quoteType,
++      p_items: cart.map((c) => ({ label: c.name, qty: c.qty, unit_price: c.unitPrice, line_total: c.unitPrice * c.qty })),
++      p_subtotal: subtotal,
++      p_installation_cost: installCost,
++      p_total: total,
++      p_page: "rep-quotes",
++    });
++  } catch (e) {
++    // تجاهل عمدًا — الأولوية لشغل المندوب، مش للمسودّة.
++  }
++}
++
++async function clearDraftNow() {
++  if (!client) return;
++  try { await client.rpc("rep_clear_quote_draft"); } catch (e) { /* تجاهل */ }
++}
++
+ /* ---------------- حفظ العرض ---------------- */
+ 
+ async function saveQuote() {
+@@ -279,6 +320,9 @@
+   msg.textContent = "تم حفظ العرض بنجاح.";
+   msg.className = "rq-msg ok";
+ 
++  if (draftSaveTimer) clearTimeout(draftSaveTimer);
++  await clearDraftNow();
++
+   printQuote({
+     id: data,
+     customer: { name, phone, city },
+@@ -302,10 +346,10 @@
+ 
+   const rows = q.items.map((it) => `
+     <tr>
+-      <td>${it.name}</td>
+-      <td>${it.qty}</td>
+-      <td>${fmt(it.unit_price ?? it.unitPrice)}</td>
+-      <td>${fmt((it.unit_price ?? it.unitPrice) * it.qty)}</td>
++      <td>${QuoteItemUtils.getQuoteItemLabel(it)}</td>
++      <td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
++      <td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
++      <td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
+     </tr>
+   `).join("");
+ 
+@@ -375,8 +419,8 @@
+         customer: q.customers || {},
+         quoteType: q.quote_type,
+         items: q.items || [],
+-        subtotal: q.items ? q.items.reduce((s, it) => s + (it.unit_price ?? it.unitPrice) * it.qty, 0) : 0,
+-        installCost: q.total - (q.items ? q.items.reduce((s, it) => s + (it.unit_price ?? it.unitPrice) * it.qty, 0) : 0),
++        subtotal: q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0,
++        installCost: q.total - (q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0),
+         grand: q.total,
+         createdAt: q.created_at,
+       });
+@@ -398,6 +442,8 @@
+   $("#addProductBtn").addEventListener("click", addProductToCart);
+   $("#saveQuoteBtn").addEventListener("click", saveQuote);
+   $("#installCost").addEventListener("input", updateTotals);
++  $("#custName").addEventListener("input", scheduleDraftAutosave);
++  $("#custPhone").addEventListener("input", scheduleDraftAutosave);
+   $$(".rq-type-btn").forEach((b) => b.addEventListener("click", () => setQuoteType(b.dataset.quoteType)));
+ 
+   client.auth.onAuthStateChange((_event, session) => {
+@@ -418,7 +464,7 @@
+             productId: null,
+             name: it.name,
+             unitPrice: parseFloat(it.price) || 0,
+-            qty: parseInt(it.qty, 10) || 1,
++            qty: QuoteItemUtils.parseQuoteItemQty(it.qty) || 1,
+           });
+         });
+         renderCart();
