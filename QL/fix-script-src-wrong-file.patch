@@ -1,0 +1,11 @@
+--- a/QL/rep-offgrid-quote.html
++++ b/QL/rep-offgrid-quote.html
+@@ -15,7 +15,7 @@
+   <script defer src="rep-header.js"></script>
+   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script defer src="../supabase-config.js"></script>
+-  <script defer src="../offgrid-calc-engine.js"></script>
++  <script defer src="offgrid-calc-engine.js"></script>
+   <script defer src="quote-item-utils.js"></script>
+   <script defer src="rep-offgrid-quote.js"></script>
+   <style>
