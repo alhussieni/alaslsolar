@@ -190,11 +190,13 @@ function showMsg(el, text, kind) {
   el.style.color = kind === "error" ? "#b23b23" : kind === "ok" ? "var(--forest)" : "var(--muted)";
 }
 
+let initializedRepId = null; // بنمنع بيه تكرار تحميل الكتالوج لنفس المندوب
+
 async function updateAuthState(session) {
   const authPanel = $("[data-auth-panel]");
   const repPanel = $("[data-rep-panel]");
   const userName = $("[data-user-name]");
-  if (!session) { authPanel.hidden = false; repPanel.hidden = true; return; }
+  if (!session) { authPanel.hidden = false; repPanel.hidden = true; initializedRepId = null; return; }
   const rep = await checkRepStatus(session.user.id);
   if (!rep) { authPanel.hidden = false; repPanel.hidden = true; return; }
   if (!rep.can_access_offgrid) {
@@ -209,6 +211,14 @@ async function updateAuthState(session) {
   authPanel.hidden = true;
   repPanel.hidden = false;
   userName.textContent = rep.display_name;
+
+  /* Supabase بيبعت onAuthStateChange تاني (تجديد توكين تلقائي، رجوع فوكس التاب، إلخ)
+     مش بس أول تسجيل دخول. من غير الحارس ده، كل مرة الحدث ده يتبعت، loadCatalog()
+     بتتنفذ تاني وترجّع كل الـ selects (القدرة/النوع/الفولت/الماركة) لقيمها الافتراضية
+     "تلقائي" وتمسح أي اختيار يدوي عمله المندوب، حتى لو عرض السعر كان محسوب بالفعل. */
+  if (initializedRepId === rep.id) return;
+  initializedRepId = rep.id;
+
   await loadCatalog();
   await loadOffgridLoads();   // لازم يخلص قبل buildPresets عشان يلاقي الأجهزة بالاسم
   buildLoadPicker();
@@ -830,10 +840,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (v !== "") addLoadRow(Number(v));
   });
   $("#ogCalcBtn").addEventListener("click", runCalc);
-  $("#ogPanelBrand").addEventListener("change", buildPanelWattOptions);
-  $("#ogInvBrand").addEventListener("change", buildInvPowerOptions);
+  $("#ogPanelBrand").addEventListener("change", () => { buildPanelWattOptions(); recalcIfAlreadyCalculated(); });
+  $("#ogInvBrand").addEventListener("change", () => { buildInvPowerOptions(); recalcIfAlreadyCalculated(); });
   $("#ogInvPowerKW")?.addEventListener("change", recalcIfAlreadyCalculated);
-  $("#ogBattBrand").addEventListener("change", buildBatteryOptions);
+  $("#ogBattBrand").addEventListener("change", () => { buildBatteryOptions(); recalcIfAlreadyCalculated(); });
   $("#ogBattType")?.addEventListener("change", () => { refreshBatteryVoltageOptions(); recalcIfAlreadyCalculated(); });
   $("#ogBattVoltage")?.addEventListener("change", () => { refreshBatteryAhOptions(); recalcIfAlreadyCalculated(); });
   $("#ogBattAh")?.addEventListener("change", recalcIfAlreadyCalculated);
