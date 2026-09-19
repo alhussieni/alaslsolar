@@ -1,0 +1,125 @@
+name: Daily Backup (GitHub code + Supabase DB + Storage)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 1 * * *'  # 01:00 UTC يوميًا (≈ 3 أو 4 صباحًا بتوقيت مصر حسب التوقيت الصيفي)
+
+jobs:
+  # ---------------------------------------------------------------
+  # 1) باك أب الكود: تاج يومي على main، بيتصلح تلقائيًا لو نفس اليوم
+  # ---------------------------------------------------------------
+  tag-code-backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create/replace today's backup tag
+        run: |
+          TAG="backup-$(date -u +%Y-%m-%d)"
+          git config user.name "alasl-backup-bot"
+          git config user.email "backup-bot@users.noreply.github.com"
+          git tag -f "$TAG"
+          git push origin "$TAG" --force
+
+      - name: Prune code backup tags older than retention
+        env:
+          RETENTION_DAYS: 90
+        run: |
+          CUTOFF=$(date -u -d "-${RETENTION_DAYS} days" +%Y-%m-%d)
+          for tag in $(git tag -l 'backup-*'); do
+            tag_date="${tag#backup-}"
+            if [[ "$tag_date" < "$CUTOFF" ]]; then
+              echo "Deleting old tag: $tag"
+              git push origin --delete "$tag" || true
+              git tag -d "$tag" || true
+            fi
+          done
+
+  # ---------------------------------------------------------------
+  # 2) باك أب Supabase: قاعدة البيانات كاملة (schema + data) + كل
+  #    ملفات Storage، كل يوم في مجلد بتاريخه، على فرع db-backups
+  #    منفصل عن main عشان مايبوظش تاريخ الكود.
+  # ---------------------------------------------------------------
+  backup-supabase:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main (for scripts)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install script dependencies
+        run: npm install --omit=dev
+
+      - name: Install postgresql-client (for pg_dump)
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Checkout or create db-backups branch (separate worktree)
+        run: |
+          git config user.name "alasl-backup-bot"
+          git config user.email "backup-bot@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin db-backups; then
+            git worktree add -b db-backups ../db-backups-wt origin/db-backups
+          else
+            git worktree add ../db-backups-wt --detach
+            cd ../db-backups-wt
+            git checkout --orphan db-backups
+            git rm -rf . --quiet || true
+            cd -
+          fi
+
+      - name: Dump database (schema + data)
+        env:
+          PGCONNECT_TIMEOUT: 30
+        run: |
+          mkdir -p ../db-backups-wt/backups/db
+          TODAY=$(date -u +%Y-%m-%d)
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
+            --no-owner --no-privileges --format=plain \
+            --file="../db-backups-wt/backups/db/${TODAY}.sql"
+          echo "Dump size: $(du -h ../db-backups-wt/backups/db/${TODAY}.sql)"
+
+      - name: Download all Storage files
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BACKUP_OUT_DIR: ../db-backups-wt/backups/storage/${{ github.run_id }}-tmp
+        run: node scripts/backup/backup-storage.mjs
+
+      - name: Move today's storage snapshot into place
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+          rm -rf "../db-backups-wt/backups/storage/${TODAY}"
+          mv "../db-backups-wt/backups/storage/${{ github.run_id }}-tmp" \
+             "../db-backups-wt/backups/storage/${TODAY}"
+
+      - name: Prune old DB dumps and storage snapshots
+        env:
+          RETENTION_DAYS: 90
+        run: |
+          node scripts/backup/prune-old-backups.mjs ../db-backups-wt/backups/db file
+          node scripts/backup/prune-old-backups.mjs ../db-backups-wt/backups/storage folder
+
+      - name: Commit and push db-backups branch
+        run: |
+          cd ../db-backups-wt
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "backup: $(date -u +%Y-%m-%d) db dump + storage snapshot"
+            git push origin db-backups
+          fi
