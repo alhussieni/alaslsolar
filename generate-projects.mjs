@@ -75,7 +75,8 @@ function renderBody(raw = "") {
   return trimmed.startsWith("<") ? trimmed : marked.parse(trimmed);
 }
 
-function nav(lang) {
+function nav(lang, depth = 1) {
+  const prefix = depth === 1 ? "../" : "";
   const t = {
     ar: { skip: "تخطي إلى المحتوى", menu: "فتح القائمة", nav: "التنقل الرئيسي" },
     en: { skip: "Skip to content", menu: "Open menu", nav: "Main navigation" },
@@ -84,24 +85,24 @@ function nav(lang) {
   }[lang];
 
   return `
-  <a class="skip-link" href="#main">${t.skip}</a>
+  <a class="skip-link" href="#main" data-i18n="skip_link">${t.skip}</a>
   <header class="site-header">
-    <a class="brand" href="../index.html" aria-label="Al Asl Solar home">
-      <img src="../logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
+    <a class="brand" href="${prefix}index.html" aria-label="Al Asl Solar home">
+      <img src="${prefix}logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
     </a>
     <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
       <i class="fa fa-bars" aria-hidden="true"></i>
-      <span class="sr-only">${t.menu}</span>
+      <span class="sr-only" data-i18n="menu_open">${t.menu}</span>
     </button>
     <nav class="site-menu" id="siteMenu" aria-label="${t.nav}">
-      <a href="../index.html" data-i18n="nav_home">Home</a>
-      <a href="../about.html" data-i18n="nav_about">About Us</a>
-      <a href="../services.html" data-i18n="nav_services">Services</a>
-      <a href="../products.html" data-i18n="nav_products">Products</a>
-      <a href="../projects.html" data-i18n="nav_projects">Projects</a>
-      <a href="../articles.html" data-i18n="nav_articles">Articles</a>
-      <a href="../calculators.html" data-i18n="nav_calculators">Calculators</a>
-      <a href="../contact.html" data-i18n="nav_contact">Contact</a>
+      <a href="${prefix}index.html" data-i18n="nav_home">Home</a>
+      <a href="${prefix}about.html" data-i18n="nav_about">About Us</a>
+      <a href="${prefix}services.html" data-i18n="nav_services">Services</a>
+      <a href="${prefix}products.html" data-i18n="nav_products">Products</a>
+      <a href="${prefix}projects.html" data-i18n="nav_projects">Projects</a>
+      <a href="${prefix}articles.html" data-i18n="nav_articles">Articles</a>
+      <a href="${prefix}calculators.html" data-i18n="nav_calculators">Calculators</a>
+      <a href="${prefix}contact.html" data-i18n="nav_contact">Contact</a>
       <div class="lang-switcher" role="group" aria-label="Language">
         <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
           <i class="ti ti-world" aria-hidden="true"></i>
@@ -391,40 +392,7 @@ function buildProjectsPage(projects) {
   <script type="application/ld+json">${jsonLd}</script>
   <script defer src="app.js"></script>
 </head>
-<body>
-  <a class="skip-link" href="#main" data-i18n="skip_link">Skip to content</a>
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Al Asl Solar home">
-      <img src="logo-white.png" alt="Al Asl Solar logo" width="120" height="70" loading="eager">
-    </a>
-    <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
-      <i class="fa fa-bars" aria-hidden="true"></i>
-      <span class="sr-only" data-i18n="menu_open">Open menu</span>
-    </button>
-    <nav class="site-menu" id="siteMenu" aria-label="Main navigation">
-      <a href="index.html" data-i18n="nav_home">Home</a>
-      <a href="about.html" data-i18n="nav_about">About Us</a>
-      <a href="services.html" data-i18n="nav_services">Services</a>
-      <a href="products.html" data-i18n="nav_products">Products</a>
-      <a href="projects.html" data-i18n="nav_projects">Projects</a>
-      <a href="articles.html" data-i18n="nav_articles">Articles</a>
-      <a href="calculators.html" data-i18n="nav_calculators">Calculators</a>
-      <a href="contact.html" data-i18n="nav_contact">Contact</a>
-      <div class="lang-switcher" role="group" aria-label="Language">
-        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
-          <i class="ti ti-world" aria-hidden="true"></i>
-          <span id="langLabel" data-i18n="language">Language</span>
-          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
-        </button>
-        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
-          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
-          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
-          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
-          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
-        </ul>
-      </div>
-    </nav>
-  </header>
+<body>${nav("en", 0)}
 
   <main id="main">
     <section class="page-hero">
