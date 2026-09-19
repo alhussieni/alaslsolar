@@ -236,16 +236,16 @@
           <p style="color:var(--muted);font-size:14px;margin-bottom:var(--space-3)">
             Edit the three numbers shown on the homepage. Changes go live immediately after saving.
           </p>
-          <div id="statsList" style="display:grid;gap:var(--space-2)">
-            <p style="color:var(--muted);font-size:14px">Loading stats...</p>
+          <div id="statsList" class="dash-grid-gap-2">
+            <p class="dash-muted-14">Loading stats...</p>
           </div>
-          <p class="form-note" id="statsMessage" style="margin-top:var(--space-2)"></p>
+          <p class="form-note dash-mt-2" id="statsMessage"></p>
         </article>
       </div>
 
 
                   <!-- FAQ Management -->
-      <div class="dashboard-grid" id="section-faq" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-faq">
         <article class="dashboard-card" id="faqCard">
           <h3>❓ إدارة الأسئلة الشائعة</h3>
           <p style="color:var(--muted);font-size:14px;margin:0 0 var(--space-3)">
@@ -292,7 +292,7 @@
           </div>
 
           <!-- Page questions panel (hidden until page selected) -->
-          <div id="faqPagePanel" style="display:none">
+          <div id="faqPagePanel" class="dash-hidden">
 
             <!-- Panel header -->
             <div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--brand-soft);border-radius:var(--radius);margin-bottom:var(--space-3)">
@@ -303,17 +303,16 @@
                 </button>
                 <strong id="faqPanelTitle" style="font-size:16px"></strong>
               </div>
-              <button type="button" onclick="toggleFaqAddForm()"
-                style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+              <button type="button" onclick="toggleFaqAddForm()" class="dash-btn-primary">
                 + إضافة سؤال
               </button>
             </div>
 
             <!-- Add form (hidden by default) -->
-            <div id="faqAddFormWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+            <div id="faqAddFormWrap" class="dash-panel-hidden">
               <p style="font-weight:700;font-size:14px;margin:0 0 var(--space-2);color:var(--brand-dark)">إضافة سؤال جديد</p>
               <form class="admin-form" id="faqAddForm">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+                <div class="dash-grid-2col">
                   <div>
                     <label>السؤال بالعربية *</label>
                     <input id="faq_new_q_ar" placeholder="اكتب السؤال..." dir="rtl" required>
@@ -330,32 +329,31 @@
                   </div>
                 </div>
                 <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;align-items:center">
-                  <button class="btn btn-secondary" type="button" id="faqTranslateBtn" onclick="translateNewFaq()"
-                    style="min-height:38px;font-size:13px">✨ ترجمة تلقائية</button>
-                  <button class="btn btn-primary" type="submit" style="min-height:38px;font-size:13px">💾 حفظ السؤال</button>
+                  <button class="btn btn-secondary dash-select-38" type="button" id="faqTranslateBtn" onclick="translateNewFaq()">✨ ترجمة تلقائية</button>
+                  <button class="btn btn-primary dash-select-38" type="submit">💾 حفظ السؤال</button>
                   <button type="button" onclick="toggleFaqAddForm()"
                     style="padding:6px 14px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
                 </div>
-                <p class="form-note" id="faqAddMessage" style="margin-top:6px"></p>
+                <p class="form-note dash-mt-6" id="faqAddMessage"></p>
 
                 <!-- Translation review (shown after translate) -->
                 <div id="faqTranslationPreview" style="display:none;margin-top:var(--space-3);padding:var(--space-2);background:#fff;border-radius:var(--radius);border:1px solid var(--line)">
                   <p style="font-weight:700;font-size:12px;color:var(--brand);margin:0 0 var(--space-2)">راجع الترجمة وعدّل إن احتجت:</p>
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-1)">
-                    <div><label style="font-size:11px">Q — English</label><input id="faq_new_q_en" placeholder="English question..."></div>
-                    <div><label style="font-size:11px">A — English</label><textarea id="faq_new_a_en" rows="2"></textarea></div>
-                    <div><label style="font-size:11px">Q — Español</label><input id="faq_new_q_es"></div>
-                    <div><label style="font-size:11px">A — Español</label><textarea id="faq_new_a_es" rows="2"></textarea></div>
-                    <div><label style="font-size:11px">Q — 中文</label><input id="faq_new_q_zh"></div>
-                    <div><label style="font-size:11px">A — 中文</label><textarea id="faq_new_a_zh" rows="2"></textarea></div>
+                    <div><label class="dash-fs-11">Q — English</label><input id="faq_new_q_en" placeholder="English question..."></div>
+                    <div><label class="dash-fs-11">A — English</label><textarea id="faq_new_a_en" rows="2"></textarea></div>
+                    <div><label class="dash-fs-11">Q — Español</label><input id="faq_new_q_es"></div>
+                    <div><label class="dash-fs-11">A — Español</label><textarea id="faq_new_a_es" rows="2"></textarea></div>
+                    <div><label class="dash-fs-11">Q — 中文</label><input id="faq_new_q_zh"></div>
+                    <div><label class="dash-fs-11">A — 中文</label><textarea id="faq_new_a_zh" rows="2"></textarea></div>
                   </div>
                 </div>
               </form>
             </div>
 
             <!-- Questions list -->
-            <div id="faqList" style="display:grid;gap:var(--space-2)">
-              <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+            <div id="faqList" class="dash-grid-gap-2">
+              <p class="dash-muted-14">جاري التحميل…</p>
             </div>
             <p class="form-note" id="faqMessage"></p>
           </div>
@@ -364,20 +362,19 @@
       </div>
 
       <!-- ── Projects Management ── -->
-      <div class="dashboard-grid" id="section-projects" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-projects">
         <article class="dashboard-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">📁 إدارة المشاريع</h3>
-            <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn');openNewProjectEditor()" id="addProjectBtn"
-              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">📁 إدارة المشاريع</h3>
+            <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn');openNewProjectEditor()" id="addProjectBtn" class="dash-btn-primary">
               + إضافة مشروع
             </button>
           </div>
 
           <!-- Add form -->
-          <div id="projectAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+          <div id="projectAddWrap" class="dash-panel-hidden">
             <form class="admin-form" id="projectForm">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+              <div class="dash-grid-2col">
                 <div>
                   <label>عنوان المشروع *</label>
                   <input id="projectTitle" name="title" required placeholder="اسم المشروع..." oninput="autoSlugProject()">
@@ -412,77 +409,72 @@
                 </div>
               </div>
               <div>
-                <label>ملخص المشروع * <span style="font-weight:400;color:var(--muted)">(يظهر في الكارت وفي نتائج جوجل — يفضّل 150-160 حرف)</span></label>
+                <label>ملخص المشروع * <span class="dash-normal-muted">(يظهر في الكارت وفي نتائج جوجل — يفضّل 150-160 حرف)</span></label>
                 <textarea id="projectSummary" name="summary" rows="3" required placeholder="وصف مختصر للمشروع..."></textarea>
               </div>
               <div>
-                <label>الرابط الدائم (Slug) <span style="font-weight:400;color:var(--muted)">— يتولّد تلقائيًا، وتقدر تعدّله</span></label>
+                <label>الرابط الدائم (Slug) <span class="dash-normal-muted">— يتولّد تلقائيًا، وتقدر تعدّله</span></label>
                 <input id="projectSlug" name="slug" placeholder="مثال: alwadi-group-poultry-farm-solar" oninput="this.dataset.userEdited='true'">
               </div>
               <div>
                 <label>قصة المشروع الكاملة (تظهر في صفحة المشروع المستقلة على جوجل)</label>
                 <div class="rte-toolbar" data-rte-toolbar="proj_new"></div>
                 <div class="rte-editor" id="projectContentEditor_proj_new"></div>
-                <textarea id="projectContent" name="content_ar" style="display:none"></textarea>
+                <textarea id="projectContent" name="content_ar" class="dash-hidden"></textarea>
               </div>
 
               <!-- Multi-image uploader -->
-              <div style="margin-top:var(--space-2)">
-                <label style="font-weight:700;display:block;margin-bottom:6px">الصور</label>
-                <div id="projectImagesWrap" style="display:grid;gap:var(--space-2)"></div>
-                <div style="display:flex;gap:8px;margin-top:8px">
-                  <button type="button" onclick="addImageRow('projectImagesWrap','project')"
-                    style="flex:1;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer">
+              <div class="dash-mt-2">
+                <label class="dash-block-label-bold">الصور</label>
+                <div id="projectImagesWrap" class="dash-grid-gap-2"></div>
+                <div class="dash-flex-gap8-mt8">
+                  <button type="button" onclick="addImageRow('projectImagesWrap','project')" class="dash-btn-outline-dashed">
                     + إضافة صورة واحدة
                   </button>
-                  <button type="button" onclick="document.getElementById('projectBulkImages').click()"
-                    style="flex:1;padding:6px 12px;border-radius:var(--radius);border:1.5px solid var(--brand);background:var(--brand);color:#fff;font-size:13px;font-weight:700;cursor:pointer">
+                  <button type="button" onclick="document.getElementById('projectBulkImages').click()" class="dash-btn-brand-flex">
                     📁 رفع مجموعة صور دفعة واحدة
                   </button>
-                  <input type="file" id="projectBulkImages" accept="image/*" multiple style="display:none"
-                    onchange="handleBulkImageUpload('projectImagesWrap','project', this)">
+                  <input type="file" id="projectBulkImages" accept="image/*" onchange="handleBulkImageUpload('projectImagesWrap','project', this)" class="dash-hidden">
                 </div>
               </div>
 
-              <label class="check-row" style="margin-top:var(--space-2)">
+              <label class="check-row dash-mt-2">
                 <input name="published" type="checkbox" checked>
-                <span style="font-weight:700">نشر المشروع</span>
+                <span class="dash-bold">نشر المشروع</span>
               </label>
               <p class="form-note" style="margin-top:6px;color:var(--muted)">
                 ℹ️ صفحة المشروع المستقلة على جوجل بتتحدث تلقائيًا يوم الاثنين كل أسبوع، أو يدويًا من GitHub Actions → Generate Articles → Run workflow.
               </p>
-              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
-                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المشروع</button>
-                <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')"
-                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              <div class="dash-flex-gap-mt-2">
+                <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ المشروع</button>
+                <button type="button" onclick="toggleSection('projectAddWrap','addProjectBtn')" class="dash-btn-secondary">إلغاء</button>
               </div>
               <p class="form-note" data-project-message></p>
             </form>
           </div>
 
           <!-- Projects list -->
-          <div id="projectsList" style="display:grid;gap:var(--space-2)">
-            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          <div id="projectsList" class="dash-grid-gap-2">
+            <p class="dash-muted-14">جاري التحميل…</p>
           </div>
         </article>
       </div>
 
       <!-- ── Products Management ── -->
-      <div class="dashboard-grid" id="section-products" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-products">
         <article class="dashboard-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">🛒 إدارة المنتجات</h3>
-            <button type="button" onclick="toggleSection('productAddWrap','addProductBtn')" id="addProductBtn"
-              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🛒 إدارة المنتجات</h3>
+            <button type="button" onclick="toggleSection('productAddWrap','addProductBtn')" id="addProductBtn" class="dash-btn-primary">
               + إضافة منتج
             </button>
           </div>
 
           <!-- Add / Edit form -->
-          <div id="productAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+          <div id="productAddWrap" class="dash-panel-hidden">
             <form class="admin-form" id="productForm">
               <input type="hidden" id="productEditId">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)">
+              <div class="dash-grid-2col">
                 <div>
                   <label>التصنيف *</label>
                   <select id="productCategory" name="category" required>
@@ -516,8 +508,8 @@
                   <label>المواصفات</label>
                   <input id="productSpecs" name="specs" placeholder="مثال: 5.5 HP - 4 KW">
                 </div>
-                <div id="powerFieldsWrap" style="display:none;grid-column:1/-1;grid-template-columns:1fr 1fr;gap:var(--space-2)">
-                  <p style="grid-column:1/-1;margin:0 0 2px;font-size:11px;color:var(--muted)">
+                <div id="powerFieldsWrap" class="dash-grid-2col-hidden">
+                  <p class="dash-full-col-caption">
                     ⚡ إنفرتر: اسم المنتج بيتولد تلقائيًا من الماركة (متكتبش "إنفرتر" — التصنيف نفسه بيوضحها). سجّل القدرة هنا بدل خانة المواصفات:
                   </p>
                   <div>
@@ -548,8 +540,8 @@
                     <input id="invMpptMax" type="number" min="0" step="1" placeholder="مثال: 430">
                   </div>
                 </div>
-                <div id="offgridFieldsWrap" style="display:none;grid-column:1/-1;grid-template-columns:1fr 1fr;gap:var(--space-2)">
-                  <p style="grid-column:1/-1;margin:0 0 2px;font-size:11px;color:var(--muted)">
+                <div id="offgridFieldsWrap" class="dash-grid-2col-hidden">
+                  <p class="dash-full-col-caption">
                     🔆 إنفرتر أوف جريد: البيانات دي بتستخدمها حاسبة الأوف جريد لاختيار الموديل المناسب تلقائيًا للزائر.
                   </p>
                   <div><label>القدرة بالكيلووات (KW) *</label><input id="ogPowerKw" type="number" min="0" step="0.1" placeholder="مثال: 5"></div>
@@ -559,16 +551,16 @@
                   <div><label>أقل فولت MPPT (اختياري)</label><input id="ogMpptMin" type="number" min="0" step="1" placeholder="مثال: 120"></div>
                   <div><label>أقصى فولت MPPT (اختياري)</label><input id="ogMpptMax" type="number" min="0" step="1" placeholder="مثال: 430"></div>
                 </div>
-                <div id="battFieldsWrap" style="display:none;grid-column:1/-1;grid-template-columns:1fr 1fr 1fr;gap:var(--space-2)">
-                  <p style="grid-column:1/-1;margin:0 0 2px;font-size:11px;color:var(--muted)">
+                <div id="battFieldsWrap" class="dash-grid-3col-hidden">
+                  <p class="dash-full-col-caption">
                     🔋 بطارية: البيانات دي بتستخدمها حاسبة الأوف جريد لحساب عدد البطاريات المطلوب.
                   </p>
                   <div><label>الفولت (V) *</label><input id="battVoltage" type="number" min="0" step="1" placeholder="مثال: 12"></div>
                   <div><label>السعة Ah *</label><input id="battAh" type="number" min="0" step="1" placeholder="مثال: 200"></div>
                   <div><label>عمق التفريغ DoD (اختياري، 0-1)</label><input id="battDod" type="number" min="0" max="1" step="0.05" placeholder="مثال: 0.8"></div>
                 </div>
-                <div id="panelFieldsWrap" style="display:none;grid-column:1/-1;grid-template-columns:1fr 1fr 1fr;gap:var(--space-2)">
-                  <p style="grid-column:1/-1;margin:0 0 2px;font-size:11px;color:var(--muted)">
+                <div id="panelFieldsWrap" class="dash-grid-3col-hidden">
+                  <p class="dash-full-col-caption">
                     ☀️ لوح شمسي: سجّل كل قدرة (وات) كمنتج منفصل عشان الزائر في حاسبة الأوف جريد يقدر يختار القدرة اللي متاحة فعليًا. السعر هنا لكل وات.
                   </p>
                   <div><label>القدرة بالوات *</label><input id="panelWatt" type="number" min="0" step="1" placeholder="مثال: 550"></div>
@@ -596,41 +588,40 @@
                   <label>الموديل المتاح</label>
                   <input id="productModel" name="model_available" placeholder="مثال: SI-5K, SUN2000-5KTL...">
                 </div>
-                <div style="grid-column:1/-1">
+                <div class="dash-full-col">
                   <label>رابط الداتا شيت (PDF)</label>
                   <input id="productDatasheet" name="datasheet_url" type="url" placeholder="https://..." style="width:100%">
                 </div>
-                <div style="grid-column:1/-1">
-                  <label style="font-weight:700;display:block;margin-bottom:6px">صورة المنتج</label>
-                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-                    <div id="productImagePreview" style="width:64px;height:64px;border-radius:var(--radius);background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
-                      <span style="color:var(--muted);font-size:10px">بدون صورة</span>
+                <div class="dash-full-col">
+                  <label class="dash-block-label-bold">صورة المنتج</label>
+                  <div class="dash-flex-wrap-12">
+                    <div id="productImagePreview" class="dash-thumb-64">
+                      <span class="dash-muted-10">بدون صورة</span>
                     </div>
-                    <input type="file" id="productImageFile" accept="image/*" style="font-size:13px;flex:1;min-width:180px">
+                    <input type="file" id="productImageFile" accept="image/*" class="dash-flex-min180">
                     <button type="button" onclick="removeProductImage()" id="removeProductImageBtn" style="display:none;padding:6px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;color:#c33;font-size:12px;cursor:pointer">إزالة الصورة</button>
                   </div>
                   <input type="hidden" id="productImageUrl">
-                  <p style="margin:6px 0 0;font-size:11px;color:var(--muted)">اختر صورة جديدة لرفعها، أو سيبها فاضية للاحتفاظ بالصورة الحالية لو كنت بتعدّل منتج موجود.</p>
+                  <p class="dash-caption-mt6">اختر صورة جديدة لرفعها، أو سيبها فاضية للاحتفاظ بالصورة الحالية لو كنت بتعدّل منتج موجود.</p>
                 </div>
                 <div>
                   <label>الترتيب</label>
                   <input id="productSort" name="sort_order" type="number" value="100" placeholder="100">
                 </div>
               </div>
-              <label class="check-row" style="margin-top:var(--space-2)">
+              <label class="check-row dash-mt-2">
                 <input name="published" id="productPublished" type="checkbox" checked>
-                <span style="font-weight:700">نشر المنتج</span>
+                <span class="dash-bold">نشر المنتج</span>
               </label>
-              <label class="check-row" style="margin-top:6px">
+              <label class="check-row dash-mt-6">
                 <input name="in_stock" id="productInStock" type="checkbox" checked>
-                <span style="font-weight:700">متاح حاليًا (لو مطفي، المنتج يفضل ظاهر على الموقع لكن يوضح "غير متاح حاليًا")</span>
+                <span class="dash-bold">متاح حاليًا (لو مطفي، المنتج يفضل ظاهر على الموقع لكن يوضح "غير متاح حاليًا")</span>
               </label>
-              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
-                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المنتج</button>
-                <button type="button" onclick="cancelProductForm()"
-                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              <div class="dash-flex-gap-mt-2">
+                <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ المنتج</button>
+                <button type="button" onclick="cancelProductForm()" class="dash-btn-secondary">إلغاء</button>
               </div>
-              <p class="form-note" id="productMessage" style="margin-top:6px"></p>
+              <p class="form-note dash-mt-6" id="productMessage"></p>
             </form>
           </div>
 
@@ -716,8 +707,8 @@
               </div>
 
               <!-- Products list -->
-              <div id="productsList" style="display:grid;gap:var(--space-2)">
-                <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+              <div id="productsList" class="dash-grid-gap-2">
+                <p class="dash-muted-14">جاري التحميل…</p>
               </div>
             </div>
           </div>
@@ -725,72 +716,70 @@
       </div>
 
       <!-- ── Brand Logos Management ── -->
-      <div class="dashboard-grid" id="section-brands" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-brands">
         <article class="dashboard-card" id="brandLogosCard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">🏷️ شعارات الشركات (البراندات)</h3>
-            <button type="button" onclick="toggleSection('brandLogoAddWrap','addBrandLogoBtn')" id="addBrandLogoBtn"
-              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🏷️ شعارات الشركات (البراندات)</h3>
+            <button type="button" onclick="toggleSection('brandLogoAddWrap','addBrandLogoBtn')" id="addBrandLogoBtn" class="dash-btn-primary">
               + إضافة / تعديل شعار
             </button>
           </div>
-          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+          <p class="dash-muted-13-mb3">
             شعار واحد لكل شركة/براند — بيظهر تلقائيًا مع كل منتجات نفس البراند اللي مالهاش صورة خاصة بيها.
             لو منتج معين له صورة مرفوعة في فورم "إدارة المنتجات"، الصورة الخاصة دي بتفضل الأولوية دايمًا على شعار الشركة.
           </p>
 
           <!-- Add / Edit form -->
-          <div id="brandLogoAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+          <div id="brandLogoAddWrap" class="dash-panel-hidden">
             <form class="admin-form" id="brandLogoForm">
               <div>
                 <label>اسم البراند *</label>
                 <input id="brandLogoName" name="brand" required placeholder="مثال: VEICHI, Sinopoly, Deye...">
-                <p style="font-size:11px;color:var(--muted);margin-top:4px">لازم يتطابق حرفيًا مع اسم "الماركة" المكتوب في فورم المنتجات — لو الاسم فيه اختلاف بسيط (مسافة زيادة، حروف كبيرة/صغيرة) الشعار مش هيظهر تلقائيًا.</p>
+                <p class="dash-caption-mt4">لازم يتطابق حرفيًا مع اسم "الماركة" المكتوب في فورم المنتجات — لو الاسم فيه اختلاف بسيط (مسافة زيادة، حروف كبيرة/صغيرة) الشعار مش هيظهر تلقائيًا.</p>
               </div>
-              <div style="margin-top:var(--space-2)">
-                <label style="font-weight:700;display:block;margin-bottom:6px">شعار الشركة</label>
-                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-                  <div id="brandLogoPreview" style="width:64px;height:64px;border-radius:var(--radius);background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
-                    <span style="color:var(--muted);font-size:10px">بدون شعار</span>
+              <div class="dash-mt-2">
+                <label class="dash-block-label-bold">شعار الشركة</label>
+                <div class="dash-flex-wrap-12">
+                  <div id="brandLogoPreview" class="dash-thumb-64">
+                    <span class="dash-muted-10">بدون شعار</span>
                   </div>
-                  <input type="file" id="brandLogoFile" accept="image/*" style="font-size:13px;flex:1;min-width:180px">
+                  <input type="file" id="brandLogoFile" accept="image/*" class="dash-flex-min180">
                 </div>
-                <p style="margin:6px 0 0;font-size:11px;color:var(--muted)">اختر صورة جديدة لرفعها، أو سيبها فاضية للاحتفاظ بالشعار الحالي لو كنت بتعدّل براند موجود.</p>
+                <p class="dash-caption-mt6">اختر صورة جديدة لرفعها، أو سيبها فاضية للاحتفاظ بالشعار الحالي لو كنت بتعدّل براند موجود.</p>
               </div>
-              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
-                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ الشعار</button>
-                <button type="button" onclick="cancelBrandLogoForm()"
-                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              <div class="dash-flex-gap-mt-2">
+                <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ الشعار</button>
+                <button type="button" onclick="cancelBrandLogoForm()" class="dash-btn-secondary">إلغاء</button>
               </div>
-              <p class="form-note" id="brandLogoMessage" style="margin-top:6px"></p>
+              <p class="form-note dash-mt-6" id="brandLogoMessage"></p>
             </form>
           </div>
 
           <!-- Brand logos list -->
-          <div id="brandLogosList" style="display:grid;gap:var(--space-2)">
-            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          <div id="brandLogosList" class="dash-grid-gap-2">
+            <p class="dash-muted-14">جاري التحميل…</p>
           </div>
         </article>
       </div>
 
       <!-- ── Calculator Suggestions Settings ── -->
-      <div class="dashboard-grid" id="section-calc" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-calc">
         <article class="dashboard-card" id="calcSettingsCard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">🧮 إعدادات اقتراحات حاسبة الضخ</h3>
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🧮 إعدادات اقتراحات حاسبة الضخ</h3>
           </div>
-          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+          <p class="dash-muted-13-mb3">
             تحكّم في ظهور قسم "المنتجات الموصى بها" في حاسبة الضخ، واختر الماركة الافتراضية (الاختيار رقم 1) لكل فئة —
             الزائر يقدر يغيّرها بنفسه من القائمة المنسدلة، لكن اختيارك هنا هو اللي هيظهر أولًا.
           </p>
 
           <form class="admin-form" id="calcSettingsForm">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-2);padding:10px;background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
-              <input type="checkbox" id="calcSuggestionsEnabled" style="width:18px;height:18px;">
-              <label for="calcSuggestionsEnabled" style="margin:0;font-weight:700;cursor:pointer">تفعيل قسم "المنتجات الموصى بها" في الحاسبة</label>
+            <div class="dash-info-row">
+              <input type="checkbox" id="calcSuggestionsEnabled" class="dash-icon-18">
+              <label for="calcSuggestionsEnabled" class="dash-m0-bold-pointer">تفعيل قسم "المنتجات الموصى بها" في الحاسبة</label>
             </div>
 
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-2)">
+            <div class="dash-grid-auto-200">
               <div>
                 <label>الماركة الافتراضية — موتور غاطس</label>
                 <select id="calcBrandWellMotors"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
@@ -809,25 +798,25 @@
               </div>
             </div>
 
-            <div style="margin-top:var(--space-2)">
-              <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ إعدادات الحاسبة</button>
+            <div class="dash-mt-2">
+              <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ إعدادات الحاسبة</button>
             </div>
-            <p class="form-note" id="calcSettingsMessage" style="margin-top:6px"></p>
+            <p class="form-note dash-mt-6" id="calcSettingsMessage"></p>
           </form>
         </article>
 
         <article class="dashboard-card" id="offgridSettingsCard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">🔋 إعدادات حاسبة الأوف جريد</h3>
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🔋 إعدادات حاسبة الأوف جريد</h3>
           </div>
 
           <form class="admin-form" id="offgridSettingsForm">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-2);padding:10px;background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
-              <input type="checkbox" id="offgridEnabled" style="width:18px;height:18px;">
-              <label for="offgridEnabled" style="margin:0;font-weight:700;cursor:pointer">تفعيل حاسبة الأوف جريد على الموقع (إلغاء التفعيل بيعرض "قيد التطوير" للزوار)</label>
+            <div class="dash-info-row">
+              <input type="checkbox" id="offgridEnabled" class="dash-icon-18">
+              <label for="offgridEnabled" class="dash-m0-bold-pointer">تفعيل حاسبة الأوف جريد على الموقع (إلغاء التفعيل بيعرض "قيد التطوير" للزوار)</label>
             </div>
 
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-2)">
+            <div class="dash-grid-auto-200">
               <div>
                 <label>الماركة المفضلة — الانفرتر</label>
                 <select id="offgridBrandInverter"><option value="">— بدون تفضيل (أي ماركة) —</option></select>
@@ -856,35 +845,35 @@
                 <div><label>نقل — سعر ثابت</label><input type="number" step="0.01" id="bomTransportFixed" placeholder="0"></div>
                 <div><label>تركيب — سعر لكل وحدة شاسيه</label><input type="number" step="0.01" id="bomInstallPerUnit" placeholder="0"></div>
               </div>
-              <div style="margin-top:var(--space-2)">
-                <button class="btn btn-primary" type="button" id="bomSettingsSaveBtn" style="font-size:13px">💾 حفظ أسعار البنود</button>
+              <div class="dash-mt-2">
+                <button class="btn btn-primary dash-fs-13" type="button" id="bomSettingsSaveBtn">💾 حفظ أسعار البنود</button>
               </div>
-              <p class="form-note" id="bomSettingsMessage" style="margin-top:6px"></p>
+              <p class="form-note dash-mt-6" id="bomSettingsMessage"></p>
             </div>
 
-            <div style="margin-top:var(--space-2)">
-              <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ إعدادات الأوف جريد</button>
+            <div class="dash-mt-2">
+              <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ إعدادات الأوف جريد</button>
             </div>
-            <p class="form-note" id="offgridSettingsMessage" style="margin-top:6px"></p>
+            <p class="form-note dash-mt-6" id="offgridSettingsMessage"></p>
           </form>
         </article>
 
         <article class="dashboard-card" id="offgridPresetsCard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">🏠 منظومات جاهزة (عروض سريعة للزائر)</h3>
-            <button type="button" id="addOffgridPresetBtn" style="padding:6px 14px;border-radius:var(--radius);border:1.5px solid var(--line);background:#fff;color:var(--brand-dark);font-size:13px;font-weight:700;cursor:pointer" onclick="showOffgridPresetForm()">+ إضافة منظومة</button>
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🏠 منظومات جاهزة (عروض سريعة للزائر)</h3>
+            <button type="button" id="addOffgridPresetBtn" onclick="showOffgridPresetForm()" class="dash-btn-outline-brand">+ إضافة منظومة</button>
           </div>
-          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+          <p class="dash-muted-13-mb3">
             دي الأزرار الجاهزة ("منزل مزرعة صغيرة"، "استراحة مهندس"، إلخ) اللي الزائر يضغط عليها فتتملى الأحمال تلقائيًا في حاسبة الأوف جريد.
           </p>
 
           <div id="offgridPresetsList"></div>
 
-          <div id="offgridPresetFormWrap" style="display:none;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--line)">
+          <div id="offgridPresetFormWrap" class="dash-divider-hidden">
             <form class="admin-form" id="offgridPresetForm">
               <input type="hidden" id="offgridPresetId">
               <div class="field-row">
-                <div style="flex:1">
+                <div class="dash-flex-1">
                   <label>اسم المنظومة</label>
                   <input type="text" id="offgridPresetName" required placeholder="مثال: منزل مزرعة صغيرة - فردين">
                 </div>
@@ -893,42 +882,40 @@
                 <label>وصف مختصر (اختياري)</label>
                 <input type="text" id="offgridPresetDesc" placeholder="مثال: إضاءة أساسية + ثلاجة + راوتر + مروحة">
               </div>
-              <div style="margin-top:var(--space-2)">
+              <div class="dash-mt-2">
                 <label>الأجهزة وعددها</label>
                 <div id="offgridPresetItemsPicker" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px;max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:var(--radius);padding:10px;background:#fff"></div>
               </div>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:var(--space-2)">
-                <input type="checkbox" id="offgridPresetActive" checked style="width:16px;height:16px;">
-                <label for="offgridPresetActive" style="margin:0">مفعّلة (ظاهرة للزوار)</label>
+              <div class="dash-flex-gap8-mt2">
+                <input type="checkbox" id="offgridPresetActive" class="dash-icon-16">
+                <label for="offgridPresetActive" class="dash-m0">مفعّلة (ظاهرة للزوار)</label>
               </div>
-              <div style="display:flex;gap:8px;margin-top:var(--space-3)">
-                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المنظومة</button>
-                <button type="button" style="padding:6px 14px;border-radius:var(--radius);border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer" onclick="cancelOffgridPresetForm()">إلغاء</button>
+              <div class="dash-flex-gap8-mt3">
+                <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ المنظومة</button>
+                <button type="button" onclick="cancelOffgridPresetForm()" class="dash-btn-outline-ink">إلغاء</button>
               </div>
-              <p class="form-note" id="offgridPresetMessage" style="margin-top:6px"></p>
+              <p class="form-note dash-mt-6" id="offgridPresetMessage"></p>
             </form>
           </div>
         </article>
 
         <article class="dashboard-card" id="offgridLoadsCard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">🔌 الأجهزة والأحمال (حاسبة الأوف جريد)</h3>
-            <button type="button" id="addOffgridLoadBtn"
-              style="padding:6px 14px;border-radius:var(--radius);border:1.5px solid var(--line);background:#fff;color:var(--brand-dark);font-size:13px;font-weight:700;cursor:pointer"
-              onclick="showOffgridLoadForm()">+ إضافة جهاز</button>
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🔌 الأجهزة والأحمال (حاسبة الأوف جريد)</h3>
+            <button type="button" id="addOffgridLoadBtn" onclick="showOffgridLoadForm()" class="dash-btn-outline-brand">+ إضافة جهاز</button>
           </div>
-          <p style="color:var(--muted);font-size:13px;margin:0 0 var(--space-3)">
+          <p class="dash-muted-13-mb3">
             دي قايمة الأجهزة اللي بتظهر للزائر والمندوب في حاسبة الأوف جريد (نفس القايمة في المكانين). حدّد الفولت
             والفاز الصح لأي جهاز جديد — أجهزة 380 فولت لازم تتحدد "ثلاثي" عشان تظهر بعلامة مميزة في الحاسبة.
           </p>
 
           <div id="offgridLoadsList"></div>
 
-          <div id="offgridLoadFormWrap" style="display:none;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--line)">
+          <div id="offgridLoadFormWrap" class="dash-divider-hidden">
             <form class="admin-form" id="offgridLoadForm">
               <input type="hidden" id="offgridLoadId">
               <div class="field-row">
-                <div style="flex:1">
+                <div class="dash-flex-1">
                   <label>اسم الجهاز *</label>
                   <input type="text" id="offgridLoadName" required placeholder="مثال: شفاط 1.5 حصان (3 فاز 380V)">
                 </div>
@@ -973,33 +960,32 @@
                 ملحوظة: الفولت/الفاز هنا بيان توضيحي وتنظيمي بس — مبيأثرش على حساب الطاقة (Wh) نفسه، لكنه بيوضّح
                 للمندوب إن الجهاز ده محتاج نظام "ثلاثي" (٣ إنفرترات) لو هيتضاف مع أجهزة تانية 220V في نفس العرض.
               </p>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:var(--space-2)">
-                <input type="checkbox" id="offgridLoadActive" checked style="width:16px;height:16px;">
-                <label for="offgridLoadActive" style="margin:0">مفعّل (ظاهر للزوار والمناديب)</label>
+              <div class="dash-flex-gap8-mt2">
+                <input type="checkbox" id="offgridLoadActive" class="dash-icon-16">
+                <label for="offgridLoadActive" class="dash-m0">مفعّل (ظاهر للزوار والمناديب)</label>
               </div>
-              <div style="display:flex;gap:8px;margin-top:var(--space-3)">
-                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ الجهاز</button>
-                <button type="button" style="padding:6px 14px;border-radius:var(--radius);border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer" onclick="cancelOffgridLoadForm()">إلغاء</button>
+              <div class="dash-flex-gap8-mt3">
+                <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ الجهاز</button>
+                <button type="button" onclick="cancelOffgridLoadForm()" class="dash-btn-outline-ink">إلغاء</button>
               </div>
-              <p class="form-note" id="offgridLoadMessage" style="margin-top:6px"></p>
+              <p class="form-note dash-mt-6" id="offgridLoadMessage"></p>
             </form>
           </div>
         </article>
       </div>
 
       <!-- ── Articles Management ── -->
-      <div class="dashboard-grid" id="section-articles" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-articles">
         <article class="dashboard-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3)">
-            <h3 style="margin:0">📝 إدارة المقالات</h3>
-            <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn');openNewArticleEditor()" id="addArticleBtn"
-              style="padding:6px 14px;border-radius:var(--radius);background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">📝 إدارة المقالات</h3>
+            <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn');openNewArticleEditor()" id="addArticleBtn" class="dash-btn-primary">
               + إضافة مقال
             </button>
           </div>
 
           <!-- Add form -->
-          <div id="articleAddWrap" style="display:none;margin-bottom:var(--space-3);padding:var(--space-3);background:#f9f6f2;border-radius:var(--radius);border:1px solid var(--line)">
+          <div id="articleAddWrap" class="dash-panel-hidden">
             <form class="admin-form" id="articleForm">
               <div>
                 <label>التصنيف *</label>
@@ -1010,89 +996,80 @@
                   <option value="applications">تطبيقات معينة</option>
                 </select>
               </div>
-              <div style="margin-top:var(--space-2)">
+              <div class="dash-mt-2">
                 <label>عنوان المقال *</label>
                 <input id="articleTitle_ar" name="title_ar" required placeholder="عنوان المقال...">
               </div>
-              <div style="margin-top:var(--space-2)">
-                <label style="display:flex;align-items:center;gap:6px">
+              <div class="dash-mt-2">
+                <label class="dash-flex-gap6">
                   رابط المقال (URL Slug) — بالإنجليزي *
                   <span style="font-size:11px;color:var(--muted);font-weight:400">(حروف صغيرة وشرطة فقط، بدون مسافات)</span>
                 </label>
-                <div style="display:flex;align-items:center;gap:6px">
+                <div class="dash-flex-gap6">
                   <span style="font-size:12px;color:var(--muted);white-space:nowrap">alaslsolar.com/articles/</span>
-                  <input id="articleSlug" name="slug_custom" required
-                    placeholder="solar-energy-guide"
-                    pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-                    title="حروف إنجليزية صغيرة وأرقام وشرطة فقط"
-                    style="flex:1"
-                    oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/--+/g,'-')">
+                  <input id="articleSlug" name="slug_custom" placeholder="solar-energy-guide" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" title="حروف إنجليزية صغيرة وأرقام وشرطة فقط" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/--+/g,'-')" class="dash-flex-1">
                 </div>
-                <p style="font-size:11px;color:var(--muted);margin-top:4px">مثال: <code>solar-energy-basics</code> أو <code>pv-diesel-hybrid-guide</code></p>
+                <p class="dash-caption-mt4">مثال: <code>solar-energy-basics</code> أو <code>pv-diesel-hybrid-guide</code></p>
               </div>
-              <div style="margin-top:var(--space-2)">
+              <div class="dash-mt-2">
                 <label>ملخص *</label>
                 <textarea id="articleSummary_ar" name="summary_ar" rows="3" required placeholder="ملخص يظهر في القائمة..."></textarea>
               </div>
-              <div style="margin-top:var(--space-2)">
+              <div class="dash-mt-2">
                 <label>المحتوى الكامل *</label>
                 <div class="rte-toolbar" data-rte-toolbar="new"></div>
                 <div class="rte-editor" id="articleContentEditor_new"></div>
-                <textarea id="articleContent_ar" name="content_ar" style="display:none"></textarea>
+                <textarea id="articleContent_ar" name="content_ar" class="dash-hidden"></textarea>
               </div>
-              <p class="form-note" style="margin-top:6px">🌐 اكتب المقال بالعربي فقط — هيتم ترجمته تلقائيًا للإنجليزي والإسباني والصيني بعد الحفظ.</p>
+              <p class="form-note dash-mt-6">🌐 اكتب المقال بالعربي فقط — هيتم ترجمته تلقائيًا للإنجليزي والإسباني والصيني بعد الحفظ.</p>
 
               <!-- Hero / cover image -->
-              <div style="margin-top:var(--space-2)">
-                <label style="font-weight:700;display:block;margin-bottom:6px">صورة الغلاف (تظهر في كارت المقال)</label>
-                <div id="articleImagesWrap" style="display:grid;gap:var(--space-2)"></div>
-                <div style="display:flex;gap:8px;margin-top:8px">
-                  <button type="button" onclick="addImageRow('articleImagesWrap','article')"
-                    style="flex:1;padding:6px 12px;border-radius:var(--radius);border:1.5px dashed var(--brand);background:var(--brand-soft);color:var(--brand-dark);font-size:13px;font-weight:600;cursor:pointer">
+              <div class="dash-mt-2">
+                <label class="dash-block-label-bold">صورة الغلاف (تظهر في كارت المقال)</label>
+                <div id="articleImagesWrap" class="dash-grid-gap-2"></div>
+                <div class="dash-flex-gap8-mt8">
+                  <button type="button" onclick="addImageRow('articleImagesWrap','article')" class="dash-btn-outline-dashed">
                     + إضافة صورة غلاف
                   </button>
-                  <button type="button" onclick="document.getElementById('articleBulkImages').click()"
-                    style="flex:1;padding:6px 12px;border-radius:var(--radius);border:1.5px solid var(--brand);background:var(--brand);color:#fff;font-size:13px;font-weight:700;cursor:pointer">
+                  <button type="button" onclick="document.getElementById('articleBulkImages').click()" class="dash-btn-brand-flex">
                     📁 رفع مجموعة صور دفعة واحدة
                   </button>
-                  <input type="file" id="articleBulkImages" accept="image/*" multiple style="display:none"
-                    onchange="handleBulkImageUpload('articleImagesWrap','article', this)">
+                  <input type="file" id="articleBulkImages" accept="image/*" onchange="handleBulkImageUpload('articleImagesWrap','article', this)" class="dash-hidden">
                 </div>
               </div>
 
-              <label class="check-row" style="margin-top:var(--space-2)">
+              <label class="check-row dash-mt-2">
                 <input name="published" type="checkbox" checked>
-                <span style="font-weight:700">نشر المقال</span>
+                <span class="dash-bold">نشر المقال</span>
               </label>
-              <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2)">
-                <button class="btn btn-primary" type="submit" style="font-size:13px">💾 حفظ المقال</button>
-                <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')"
-                  style="padding:8px 16px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer">إلغاء</button>
+              <div class="dash-flex-gap-mt-2">
+                <button class="btn btn-primary dash-fs-13" type="submit">💾 حفظ المقال</button>
+                <button type="button" onclick="toggleSection('articleAddWrap','addArticleBtn')" class="dash-btn-secondary">إلغاء</button>
               </div>
               <p class="form-note" data-article-message></p>
             </form>
           </div>
 
           <!-- Articles list -->
-          <div id="articlesList" style="display:grid;gap:var(--space-2)">
-            <p style="color:var(--muted);font-size:14px">جاري التحميل…</p>
+          <div id="articlesList" class="dash-grid-gap-2">
+            <p class="dash-muted-14">جاري التحميل…</p>
           </div>
         </article>
       </div>
 
       <!-- Supplier discounts section -->
-      <div class="dashboard-grid" id="section-supplier-discounts" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-supplier-discounts">
         <article class="dash-card">
-          <h2 style="margin-top:0">💸 خصومات الموردين</h2>
-          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+          <h2 class="dash-mt-0">💸 خصومات الموردين</h2>
+          <p class="dash-muted-13-mt-neg8">
             الخصم مسجّل على مستوى (الفئة + الماركة) — يعني بيغطي كل موديلات نفس الماركة تلقائيًا،
             من غير ما تحتاج تسجّل كل موديل لوحده. بيتحسب على سعر البيع المعروض على الموقع، وبيُستخدم بس داخليًا
             لحساب هامش الربح في عروض أسعار المناديب — مش ظاهر للعميل ولا للمندوب أبدًا.
           </p>
           <div style="display:flex;gap:var(--space-2);margin:var(--space-2) 0;flex-wrap:wrap;align-items:flex-end">
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">الفئة</label>
-              <select id="sdCategory" style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">الفئة</label>
+              <select id="sdCategory" class="dash-input-nowidth">
                 <option value="offgrid">أوف جريد (انفرترات)</option>
                 <option value="batteries">بطاريات</option>
                 <option value="panels">ألواح</option>
@@ -1105,148 +1082,148 @@
               </select>
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">الماركة</label>
+              <label class="dash-field-label">الماركة</label>
               <select id="sdBrand" style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px;min-width:180px">
                 <option value="">اختر الفئة الأول</option>
               </select>
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">خصم المورد % (تكلفة الشركة)</label>
-              <input type="number" id="sdPct" min="0" max="100" step="0.5" value="0" style="width:110px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">خصم المورد % (تكلفة الشركة)</label>
+              <input type="number" id="sdPct" min="0" max="100" step="0.5" value="0" class="dash-input-110">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">خصم البيع % (للعميل)</label>
-              <input type="number" id="sdSalePct" min="0" max="100" step="0.5" value="0" style="width:110px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">خصم البيع % (للعميل)</label>
+              <input type="number" id="sdSalePct" min="0" max="100" step="0.5" value="0" class="dash-input-110">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">خصم ترويجي % (صفحة المنتجات فقط)</label>
-              <input type="number" id="sdPromoPct" min="0" max="100" step="0.5" value="0" style="width:110px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">خصم ترويجي % (صفحة المنتجات فقط)</label>
+              <input type="number" id="sdPromoPct" min="0" max="100" step="0.5" value="0" class="dash-input-110">
             </div>
             <div>
               <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);padding-bottom:10px">
                 <input type="checkbox" id="sdPromoActive"> الترويجي شغّال
               </label>
             </div>
-            <button type="button" class="btn btn-primary" id="sdSaveBtn" style="font-size:13px">حفظ الخصومات</button>
+            <button type="button" class="btn btn-primary dash-fs-13" id="sdSaveBtn">حفظ الخصومات</button>
           </div>
           <p class="form-note" data-sd-message></p>
           <p class="form-note" style="color:var(--muted)">خصم البيع لازم يكون أقل من أو يساوي خصم المورد دايمًا (عشان الشركة متبيعش بخسارة) — القاعدة نفسها بترفض أي قيمة مخالفة. الخصم الترويجي مستقل تمامًا وبيأثر بس على السعر الظاهر في صفحة المنتجات لنفس الفئة والماركة المختارة فوق — مبيلمسش خصم المورد ولا خصم البيع ولا عروض أسعار المناديب.</p>
 
           <h3 style="margin-top:var(--space-3);font-size:15px">الخصومات المسجّلة حاليًا</h3>
-          <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <table class="dash-table">
             <thead>
-              <tr style="text-align:right;color:var(--muted);font-size:12px">
-                <th style="padding:8px">الفئة</th><th style="padding:8px">الماركة</th><th style="padding:8px">خصم المورد</th><th style="padding:8px">خصم البيع</th><th style="padding:8px">خصم ترويجي</th><th style="padding:8px"></th>
+              <tr class="dash-right-muted-12">
+                <th class="dash-p-8">الفئة</th><th class="dash-p-8">الماركة</th><th class="dash-p-8">خصم المورد</th><th class="dash-p-8">خصم البيع</th><th class="dash-p-8">خصم ترويجي</th><th class="dash-p-8"></th>
               </tr>
             </thead>
-            <tbody id="sdListBody"><tr><td colspan="6" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+            <tbody id="sdListBody"><tr><td colspan="6" class="dash-p12-muted">جاري التحميل...</td></tr></tbody>
           </table>
         </article>
 
         <article class="dash-card">
-          <h2 style="margin-top:0">🏗️ تكاليف تركيب محطات الري الشمسية</h2>
-          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+          <h2 class="dash-mt-0">🏗️ تكاليف تركيب محطات الري الشمسية</h2>
+          <p class="dash-muted-13-mt-neg8">
             الأسعار دي مش منتج له كارت في الكتالوج (خرسانة، تأريض، تركيب، نقل) — بتتحسب لوحدها
             جوه عرض سعر "محطة ري بالطاقة الشمسية" اللي المندوب بيقدمها للعميل. عدّلها هنا وقت ما الأسعار تتغير.
           </p>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-2)">
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">الخرسانة (جنيه/وحدة)</label>
-              <input type="number" id="bomConcretePerUnit" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">الخرسانة (جنيه/وحدة)</label>
+              <input type="number" id="bomConcretePerUnit" min="0" step="1" class="dash-input">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">التأريض (جنيه/بئر)</label>
-              <input type="number" id="bomEarthingPerUnit" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">التأريض (جنيه/بئر)</label>
+              <input type="number" id="bomEarthingPerUnit" min="0" step="1" class="dash-input">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">تركيب ميكانيكي (جنيه/لوح)</label>
-              <input type="number" id="bomMechInstallPerPanel" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">تركيب ميكانيكي (جنيه/لوح)</label>
+              <input type="number" id="bomMechInstallPerPanel" min="0" step="1" class="dash-input">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">تركيب كهربائي (جنيه/لوح)</label>
-              <input type="number" id="bomElecInstallPerPanel" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">تركيب كهربائي (جنيه/لوح)</label>
+              <input type="number" id="bomElecInstallPerPanel" min="0" step="1" class="dash-input">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">النقل (جنيه/رحلة)</label>
-              <input type="number" id="bomTransportPerTrip" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">النقل (جنيه/رحلة)</label>
+              <input type="number" id="bomTransportPerTrip" min="0" step="1" class="dash-input">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">حد أدنى للنقل (جنيه)</label>
-              <input type="number" id="bomTransportMinimum" min="0" step="1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">حد أدنى للنقل (جنيه)</label>
+              <input type="number" id="bomTransportMinimum" min="0" step="1" class="dash-input">
             </div>
           </div>
-          <button type="button" class="btn btn-primary" id="bomSaveBtn" style="font-size:13px;margin-top:var(--space-2)">حفظ التكاليف</button>
+          <button type="button" class="btn btn-primary dash-fs13-mt2" id="bomSaveBtn">حفظ التكاليف</button>
           <p class="form-note" data-bom-message></p>
         </article>
 
         <article class="dash-card">
-          <h2 style="margin-top:0">🔌 إعدادات حساب ROI</h2>
-          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+          <h2 class="dash-mt-0">🔌 إعدادات حساب ROI</h2>
+          <p class="dash-muted-13-mt-neg8">
             سعري الكهرباء والديزيل دول مش مرتبطين بأي منتج أو عرض سعر لحد دلوقتي — بيتخزّنوا هنا
             عشان يتستخدموا مستقبلًا في حساب مدة استرداد رأس المال (ROI) للعروض. عدّلهم هنا وقت ما الأسعار تتغير.
           </p>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-2)">
+          <div class="dash-grid-auto-200">
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">سعر الكهرباء (جنيه/كيلوواط ساعة)</label>
-              <input type="number" id="roiElectricityPrice" min="0" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">سعر الكهرباء (جنيه/كيلوواط ساعة)</label>
+              <input type="number" id="roiElectricityPrice" min="0" step="0.01" class="dash-input">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">سعر الديزيل (جنيه/لتر)</label>
-              <input type="number" id="roiDieselPrice" min="0" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">سعر الديزيل (جنيه/لتر)</label>
+              <input type="number" id="roiDieselPrice" min="0" step="0.01" class="dash-input">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">معدل الخصم الافتراضي لحساب NPV (%)</label>
-              <input type="number" id="roiDiscountRate" min="0" step="0.1" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">معدل الخصم الافتراضي لحساب NPV (%)</label>
+              <input type="number" id="roiDiscountRate" min="0" step="0.1" class="dash-input">
             </div>
           </div>
-          <button type="button" class="btn btn-primary" id="roiSaveBtn" style="font-size:13px;margin-top:var(--space-2)">حفظ إعدادات ROI</button>
+          <button type="button" class="btn btn-primary dash-fs13-mt2" id="roiSaveBtn">حفظ إعدادات ROI</button>
           <p class="form-note" data-roi-message></p>
         </article>
       </div>
 
       <!-- Reps Management -->
-      <div class="dashboard-grid" id="section-reps" style="grid-template-columns:1fr;margin-bottom:0;display:none">
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-reps">
         <article class="dash-card">
-          <h2 style="margin-top:0">👥 إضافة مندوب جديد</h2>
-          <p style="color:var(--muted);font-size:13px;margin-top:-8px">
+          <h2 class="dash-mt-0">👥 إضافة مندوب جديد</h2>
+          <p class="dash-muted-13-mt-neg8">
             بندي المندوب دعوة بالإيميل عشان يحدد كلمة المرور بنفسه — محدش هنا هيشوفها.
           </p>
           <form id="repInviteForm" style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:flex-end">
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">الاسم الظاهر</label>
-              <input type="text" id="repNewName" required style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px">
+              <label class="dash-field-label">الاسم الظاهر</label>
+              <input type="text" id="repNewName" class="dash-input-nowidth">
             </div>
             <div>
-              <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px">البريد الإلكتروني</label>
+              <label class="dash-field-label">البريد الإلكتروني</label>
               <input type="email" id="repNewEmail" required style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px;min-width:220px">
             </div>
-            <button type="submit" class="btn btn-primary" id="repInviteBtn" style="font-size:13px">إرسال الدعوة</button>
+            <button type="submit" class="btn btn-primary dash-fs-13" id="repInviteBtn">إرسال الدعوة</button>
           </form>
           <div style="display:flex;gap:16px;margin-top:var(--space-2);flex-wrap:wrap">
-            <label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer">
-              <input type="checkbox" id="repNewPermOffgrid" checked style="width:auto"> حاسبة أوف جريد
+            <label class="dash-check-row">
+              <input type="checkbox" id="repNewPermOffgrid" class="dash-w-auto"> حاسبة أوف جريد
             </label>
-            <label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer">
-              <input type="checkbox" id="repNewPermProducts" checked style="width:auto"> عروض المنتجات
+            <label class="dash-check-row">
+              <input type="checkbox" id="repNewPermProducts" class="dash-w-auto"> عروض المنتجات
             </label>
-            <label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer">
-              <input type="checkbox" id="repNewPermCrm" checked style="width:auto"> CRM
+            <label class="dash-check-row">
+              <input type="checkbox" id="repNewPermCrm" class="dash-w-auto"> CRM
             </label>
           </div>
           <p class="form-note" data-rep-invite-message></p>
         </article>
 
         <article class="dash-card">
-          <h2 style="margin-top:0">المناديب الحاليين</h2>
-          <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <h2 class="dash-mt-0">المناديب الحاليين</h2>
+          <table class="dash-table">
             <thead>
-              <tr style="text-align:right;color:var(--muted);font-size:12px">
-                <th style="padding:8px">الاسم</th><th style="padding:8px">الإيميل</th>
-                <th style="padding:8px">أوف جريد</th><th style="padding:8px">منتجات</th><th style="padding:8px">CRM</th>
-                <th style="padding:8px">عدد العروض</th><th style="padding:8px">نشط</th><th style="padding:8px"></th>
+              <tr class="dash-right-muted-12">
+                <th class="dash-p-8">الاسم</th><th class="dash-p-8">الإيميل</th>
+                <th class="dash-p-8">أوف جريد</th><th class="dash-p-8">منتجات</th><th class="dash-p-8">CRM</th>
+                <th class="dash-p-8">عدد العروض</th><th class="dash-p-8">نشط</th><th class="dash-p-8"></th>
               </tr>
             </thead>
-            <tbody id="repsListBody"><tr><td colspan="8" style="padding:12px;color:var(--muted)">جاري التحميل...</td></tr></tbody>
+            <tbody id="repsListBody"><tr><td colspan="8" class="dash-p12-muted">جاري التحميل...</td></tr></tbody>
           </table>
         </article>
       </div>
