@@ -84,25 +84,31 @@ jobs:
           fi
 
       - name: Test DB connection (diagnostic, password redacted)
+        env:
+          PGHOST: aws-1-ap-southeast-2.pooler.supabase.com
+          PGPORT: 5432
+          PGUSER: postgres.nymkmrdbicfuniobunth
+          PGDATABASE: postgres
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          HOST_PORT=$(echo "${{ secrets.SUPABASE_DB_URL }}" | sed -E 's#.*@([^/]+)/.*#\1#')
-          echo "Connecting to host:port -> $HOST_PORT"
-          pg_isready -d "${{ secrets.SUPABASE_DB_URL }}" || echo "pg_isready failed (see exit code above)"
-          psql "${{ secrets.SUPABASE_DB_URL }}" -c "select version();" 2>&1 \
-            | sed -E 's#(://[^:]+:)[^@]+(@)#\1[REDACTED]\2#g'
+          echo "Connecting to host:port -> $PGHOST:$PGPORT as $PGUSER"
+          pg_isready || echo "pg_isready failed (see exit code above)"
+          psql -c "select version();"
 
       - name: Dump database (schema + data)
         env:
           PGCONNECT_TIMEOUT: 30
+          PGHOST: aws-1-ap-southeast-2.pooler.supabase.com
+          PGPORT: 5432
+          PGUSER: postgres.nymkmrdbicfuniobunth
+          PGDATABASE: postgres
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           mkdir -p ../db-backups-wt/backups/db
           TODAY=$(date -u +%Y-%m-%d)
           DUMP_FILE="../db-backups-wt/backups/db/${TODAY}.sql"
-          pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
-            --no-owner --no-privileges --format=plain \
-            --file="$DUMP_FILE" 2>&1 \
-            | sed -E 's#(://[^:]+:)[^@]+(@)#\1[REDACTED]\2#g'
-          echo "pg_dump exit status of the pipeline: $?"
+          pg_dump --no-owner --no-privileges --format=plain --file="$DUMP_FILE"
+          echo "pg_dump exit status: $?"
           ls -la "$DUMP_FILE" || echo "FILE DOES NOT EXIST: $DUMP_FILE"
           if [ ! -s "$DUMP_FILE" ]; then
             echo "::error::Dump file missing or empty at $DUMP_FILE - failing step explicitly"

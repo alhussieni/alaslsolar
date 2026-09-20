@@ -48,14 +48,19 @@ ls backups/db/          # شوف التواريخ المتاحة
 **⚠️ قبل الاسترجاع — الأهم:**
 استرجاع dump كامل بيمسح البيانات الحالية ويحطها بدل منها. **اعمل dump للحالة الحالية الأول** عشان لو حصل غلط تقدر ترجع:
 ```bash
-pg_dump "$SUPABASE_DB_URL" --no-owner --no-privileges --format=plain --file="before-restore-$(date +%Y%m%d-%H%M).sql"
+export PGHOST=aws-1-ap-southeast-2.pooler.supabase.com
+export PGPORT=5432
+export PGUSER=postgres.nymkmrdbicfuniobunth
+export PGDATABASE=postgres
+export PGPASSWORD='...'   # نفس باسورد قاعدة البيانات، من Supabase Dashboard -> Database -> Reset/Reveal password
+pg_dump --no-owner --no-privileges --format=plain --file="before-restore-$(date +%Y%m%d-%H%M).sql"
 ```
 
 **تنفيذ الاسترجاع الفعلي (على نسخة تجريبية الأول لو ينفع، مش مباشرة على الإنتاج):**
 ```bash
-psql "$SUPABASE_DB_URL" < backups/db/2026-09-15.sql
+psql < backups/db/2026-09-15.sql
 ```
-`$SUPABASE_DB_URL` هو نفس الـconnection string المستخدم في الـworkflow (من Supabase Dashboard → Project Settings → Database → Connection string).
+(نفس متغيرات `PG*` اللي فوق لازم تكون معمولة `export` في نفس الجلسة.)
 
 **لو عايز تسترجع جدول واحد بس** (مش قاعدة البيانات كلها)، افتح ملف الـdump ودور على السطر `COPY public.products_ar` (أو اسم الجدول)، وانسخ بس الجزء ده في ملف منفصل وشغّله — أسلم من استرجاع كل حاجة.
 
