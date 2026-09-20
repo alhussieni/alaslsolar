@@ -81,6 +81,14 @@ jobs:
             cd -
           fi
 
+      - name: Test DB connection (diagnostic, password redacted)
+        run: |
+          HOST_PORT=$(echo "${{ secrets.SUPABASE_DB_URL }}" | sed -E 's#.*@([^/]+)/.*#\1#')
+          echo "Connecting to host:port -> $HOST_PORT"
+          pg_isready -d "${{ secrets.SUPABASE_DB_URL }}" || echo "pg_isready failed (see exit code above)"
+          psql "${{ secrets.SUPABASE_DB_URL }}" -c "select version();" 2>&1 \
+            | sed -E 's#(://[^:]+:)[^@]+(@)#\1[REDACTED]\2#g'
+
       - name: Dump database (schema + data)
         env:
           PGCONNECT_TIMEOUT: 30
@@ -89,8 +97,9 @@ jobs:
           TODAY=$(date -u +%Y-%m-%d)
           pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
             --no-owner --no-privileges --format=plain \
-            --file="../db-backups-wt/backups/db/${TODAY}.sql"
-          echo "Dump size: $(du -h ../db-backups-wt/backups/db/${TODAY}.sql)"
+            --file="../db-backups-wt/backups/db/${TODAY}.sql" 2>&1 \
+            | sed -E 's#(://[^:]+:)[^@]+(@)#\1[REDACTED]\2#g'
+          echo "Dump size: $(du -h ../db-backups-wt/backups/db/${TODAY}.sql 2>/dev/null || echo 'FILE NOT CREATED')"
 
       - name: Download all Storage files
         env:
