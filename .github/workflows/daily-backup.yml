@@ -96,11 +96,18 @@ jobs:
         run: |
           mkdir -p ../db-backups-wt/backups/db
           TODAY=$(date -u +%Y-%m-%d)
+          DUMP_FILE="../db-backups-wt/backups/db/${TODAY}.sql"
           pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
             --no-owner --no-privileges --format=plain \
-            --file="../db-backups-wt/backups/db/${TODAY}.sql" 2>&1 \
+            --file="$DUMP_FILE" 2>&1 \
             | sed -E 's#(://[^:]+:)[^@]+(@)#\1[REDACTED]\2#g'
-          echo "Dump size: $(du -h ../db-backups-wt/backups/db/${TODAY}.sql 2>/dev/null || echo 'FILE NOT CREATED')"
+          echo "pg_dump exit status of the pipeline: $?"
+          ls -la "$DUMP_FILE" || echo "FILE DOES NOT EXIST: $DUMP_FILE"
+          if [ ! -s "$DUMP_FILE" ]; then
+            echo "::error::Dump file missing or empty at $DUMP_FILE - failing step explicitly"
+            exit 1
+          fi
+          echo "Dump size: $(du -h "$DUMP_FILE")"
 
       - name: Download all Storage files
         env:
