@@ -65,8 +65,14 @@ jobs:
       - name: Install script dependencies
         run: npm install --omit=dev
 
-      - name: Install postgresql-client (for pg_dump)
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Install postgresql-client 17 (must match Supabase server version)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          yes '' | sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+          sudo apt-get install -y postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+          /usr/lib/postgresql/17/bin/pg_dump --version
 
       - name: Checkout or create db-backups branch (separate worktree)
         run: |
