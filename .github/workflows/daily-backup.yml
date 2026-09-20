@@ -73,6 +73,7 @@ jobs:
           git config user.name "alasl-backup-bot"
           git config user.email "backup-bot@users.noreply.github.com"
           if git ls-remote --exit-code --heads origin db-backups; then
+            git fetch origin db-backups
             git worktree add -b db-backups ../db-backups-wt origin/db-backups
           else
             git worktree add ../db-backups-wt --detach
