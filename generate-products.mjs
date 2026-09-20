@@ -387,15 +387,29 @@ async function main() {
   const productsDir = path.join(__dir, "products");
   if (!fs.existsSync(productsDir)) fs.mkdirSync(productsDir);
 
+  const expectedProductFilenames = new Set();
   for (const family of families) {
     for (const lang of Object.keys(LANGS)) {
       const { suffix } = LANGS[lang];
       const html = buildFamilyPage(family.category, family.brand, family.rows, lang, families, brandLogos);
       const filename = `${family.category}-${slugify(family.brand)}${suffix}.html`;
+      expectedProductFilenames.add(filename);
       fs.writeFileSync(path.join(productsDir, filename), html, "utf8");
     }
   }
   console.log(`   📄  products/  (${families.length * 4} files written)`);
+
+  // Clean up stale family pages: a (category, brand) combo that no longer
+  // has any products (deleted, recategorized, or rebranded) otherwise
+  // leaves its old HTML file behind forever - same class of bug found
+  // and fixed in generate-projects.mjs and generate-articles.mjs.
+  const existingProductFiles = fs.readdirSync(productsDir).filter((f) => f.endsWith(".html"));
+  for (const file of existingProductFiles) {
+    if (!expectedProductFilenames.has(file)) {
+      fs.unlinkSync(path.join(productsDir, file));
+      console.log(`   🗑️   removed stale products/${file} (family no longer exists)`);
+    }
+  }
 
   const sitemapPath = path.join(__dir, "sitemap.xml");
   const previousSitemap = fs.existsSync(sitemapPath) ? fs.readFileSync(sitemapPath, "utf8") : "";

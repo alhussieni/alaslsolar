@@ -444,13 +444,29 @@ async function main() {
   const projectsDir = path.join(__dir, "projects");
   if (!fs.existsSync(projectsDir)) fs.mkdirSync(projectsDir);
 
+  const expectedFilenames = new Set();
   for (const project of projects) {
     for (const lang of Object.keys(LANGS)) {
       const { suffix } = LANGS[lang];
       const html = buildProjectPage(project, lang);
       const filename = `${project.slug}${suffix}.html`;
+      expectedFilenames.add(filename);
       fs.writeFileSync(path.join(projectsDir, filename), html, "utf8");
       console.log(`   📄  projects/${filename}`);
+    }
+  }
+
+  // Clean up stale files: a project that was unpublished or deleted from
+  // Supabase leaves its old HTML files behind forever otherwise, because
+  // the loop above only writes/overwrites - it never removes anything.
+  // This caused real orphaned/duplicate-content pages in the past
+  // (e.g. a project whose slug changed left the old slug's files in
+  // place alongside the new ones).
+  const existingFiles = fs.readdirSync(projectsDir).filter((f) => f.endsWith(".html"));
+  for (const file of existingFiles) {
+    if (!expectedFilenames.has(file)) {
+      fs.unlinkSync(path.join(projectsDir, file));
+      console.log(`   🗑️   removed stale projects/${file} (no longer published)`);
     }
   }
 

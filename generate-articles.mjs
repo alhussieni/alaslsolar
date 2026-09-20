@@ -455,14 +455,29 @@ async function main() {
   if (!fs.existsSync(articlesDir)) fs.mkdirSync(articlesDir);
 
   // 1. Generate all language variants for each article
+  const expectedFilenames = new Set();
   for (const article of articles) {
     const slug = article.slug || String(article.id);
     for (const lang of Object.keys(LANGS)) {
       const { suffix } = LANGS[lang];
       const html     = buildArticlePage(article, lang);
       const filename = `${slug}${suffix}.html`;
+      expectedFilenames.add(filename);
       fs.writeFileSync(path.join(articlesDir, filename), html, "utf8");
       console.log(`   📄  articles/${filename}`);
+    }
+  }
+
+  // Clean up stale files left behind by unpublished/deleted/renamed
+  // articles - the loop above only writes, it never removes anything on
+  // its own, which orphans old files (found this exact bug in
+  // generate-projects.mjs first: a renamed slug left duplicate content
+  // behind under the old filename).
+  const existingArticleFiles = fs.readdirSync(articlesDir).filter((f) => f.endsWith(".html"));
+  for (const file of existingArticleFiles) {
+    if (!expectedFilenames.has(file)) {
+      fs.unlinkSync(path.join(articlesDir, file));
+      console.log(`   🗑️   removed stale articles/${file} (no longer published)`);
     }
   }
 
