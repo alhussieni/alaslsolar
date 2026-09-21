@@ -175,7 +175,11 @@ function buildProjectPage(project, lang) {
 
   const hreflangLinks = Object.entries(LANGS)
     .map(([, { suffix: s, hreflang: h }]) => `  <link rel="alternate" hreflang="${h}" href="${SITE_URL}/projects/${slug}${s}.html">`)
-    .join("\n");
+    .join("\n") +
+    // x-default points at English, not the Arabic canonical, to match the
+    // rest of the site (articles/products both default to English for
+    // unmatched visitors) even though Arabic is this page's own canonical.
+    `\n  <link rel="alternate" hreflang="x-default" href="${SITE_URL}/projects/${slug}-en.html">`;
 
   const langLinks = Object.entries(LANGS)
     .map(([l, { label, suffix: s }]) => {
@@ -329,7 +333,8 @@ function buildSitemapProjectEntries(projects) {
         : new Date().toISOString().split("T")[0];
       const hreflangs = Object.entries(LANGS)
         .map(([, { hreflang, suffix }]) => `      <xhtml:link rel="alternate" hreflang="${hreflang}" href="${SITE_URL}/projects/${p.slug}${suffix}.html"/>`)
-        .join("\n");
+        .join("\n") +
+        `\n      <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/projects/${p.slug}-en.html"/>`;
       return `  <url>
     <loc>${SITE_URL}/projects/${p.slug}.html</loc>
     <lastmod>${lastmod}</lastmod>

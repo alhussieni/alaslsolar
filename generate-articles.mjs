@@ -190,11 +190,13 @@ function buildArticlePage(article, lang) {
                                  // language is declared instead via the
                                  // hreflang alternates below.
 
-  // hreflang links for all variants
+  // hreflang links for all variants + x-default (Google's recommended
+  // fallback for visitors whose language doesn't match any variant above)
   const hreflangLinks = Object.entries(LANGS)
     .map(([l, { suffix: s, hreflang: h }]) =>
       `  <link rel="alternate" hreflang="${h}" href="${SITE_URL}/articles/${slug}${s}.html">`)
-    .join("\n");
+    .join("\n") +
+    `\n  <link rel="alternate" hreflang="x-default" href="${SITE_URL}/articles/${slug}.html">`;
 
   // Language switcher links (shown as static links so Google can follow them)
   const langLinks = Object.entries(LANGS)
@@ -427,7 +429,8 @@ function buildSitemap(articles) {
     const hreflangs = Object.entries(LANGS)
       .map(([l, { hreflang, suffix }]) =>
         `      <xhtml:link rel="alternate" hreflang="${hreflang}" href="${SITE_URL}/articles/${slug}${suffix}.html"/>`)
-      .join("\n");
+      .join("\n") +
+      `\n      <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/articles/${slug}.html"/>`;
 
     // Only include the canonical (EN) URL in sitemap with hreflang annotations
     return `  <url>
