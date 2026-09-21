@@ -66,6 +66,17 @@ function esc(str = "") {
     .replace(/"/g, "&quot;");
 }
 
+// Truncate at a word boundary for meta tags only (title/description) so
+// Google doesn't cut it off mid-word in search results. Same helper as
+// generate-articles.mjs / generate-products.mjs.
+function truncateForMeta(str = "", maxLen = 155) {
+  const s = String(str).trim();
+  if (s.length <= maxLen) return s;
+  const cut = s.slice(0, maxLen - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > maxLen * 0.6 ? cut.slice(0, lastSpace) : cut).trim() + "…";
+}
+
 function getField(project, field, lang) {
   return project[`${field}_${lang}`] || project[`${field}_ar`] || project[field] || "";
 }
@@ -145,6 +156,8 @@ function buildProjectPage(project, lang) {
   const slug = project.slug;
   const title = getField(project, "title", lang);
   const summary = project.meta_description || getField(project, "summary", lang);
+  const metaTitle = truncateForMeta(title, 60);
+  const metaSummary = truncateForMeta(summary, 155);
   const rawBody = getField(project, "content", lang) || summary;
   const body = renderBody(rawBody);
   const catLabel = CATEGORY_LABEL_AR[project.category] || project.category || "";
@@ -232,10 +245,10 @@ function buildProjectPage(project, lang) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
   <link rel="stylesheet" href="../styles.css">
-  <title>${esc(title)} | Al Asl Solar</title>
-  <meta name="description" content="${esc(summary)}">
-  <meta property="og:title" content="${esc(title)} | Al Asl Solar">
-  <meta property="og:description" content="${esc(summary)}">
+  <title>${esc(metaTitle)} | Al Asl Solar</title>
+  <meta name="description" content="${esc(metaSummary)}">
+  <meta property="og:title" content="${esc(metaTitle)} | Al Asl Solar">
+  <meta property="og:description" content="${esc(metaSummary)}">
   <meta property="og:type" content="article">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:image" content="${esc(absoluteImage)}">

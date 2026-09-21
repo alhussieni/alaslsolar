@@ -92,6 +92,17 @@ function esc(str = "") {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+// Truncate at a word boundary for meta tags only (title/description) so
+// Google doesn't cut it off mid-word in search results. Same helper as
+// generate-articles.mjs / generate-projects.mjs.
+function truncateForMeta(str = "", maxLen = 155) {
+  const s = String(str).trim();
+  if (s.length <= maxLen) return s;
+  const cut = s.slice(0, maxLen - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > maxLen * 0.6 ? cut.slice(0, lastSpace) : cut).trim() + "…";
+}
+
 function slugify(str = "") {
   return String(str)
     .toLowerCase()
@@ -183,6 +194,8 @@ function buildFamilyPage(category, brand, rows, lang, allFamilies, brandLogos) {
   const priceRange = minPrice === maxPrice ? `${fmtPrice(minPrice)} EGP` : `${fmtPrice(minPrice)}–${fmtPrice(maxPrice)} EGP`;
 
   const description = `${title} — ${INTRO_TEXT[lang] ? INTRO_TEXT[lang](rows.length) : INTRO_TEXT.en(rows.length)} ${priceRange}.`;
+  const metaTitleText = truncateForMeta(`${title} — ${priceRange}`, 60);
+  const metaDescription = truncateForMeta(description, 155);
 
   // Real product photo when available; fall back to the brand's logo
   // (same fallback rule already used on the main site's gallery and
@@ -284,10 +297,10 @@ ${siblings.map((f) => `        <li><a href="${category}-${slugify(f.brand)}${suf
   <meta name="format-detection" content="telephone=no">
   ${CSS_LINKS}
   <link rel="stylesheet" href="../styles.css">
-  <title>${esc(title)} — ${esc(priceRange)} | Al Asl Solar</title>
-  <meta name="description" content="${esc(description)}">
-  <meta property="og:title" content="${esc(title)} | Al Asl Solar">
-  <meta property="og:description" content="${esc(description)}">
+  <title>${esc(metaTitleText)} | Al Asl Solar</title>
+  <meta name="description" content="${esc(metaDescription)}">
+  <meta property="og:title" content="${esc(metaTitleText)} | Al Asl Solar">
+  <meta property="og:description" content="${esc(metaDescription)}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:image" content="${esc(heroImage)}">

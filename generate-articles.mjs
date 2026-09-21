@@ -57,6 +57,18 @@ function esc(str = "") {
     .replace(/"/g, "&quot;");
 }
 
+// Truncate at a word boundary for meta tags (title/description) so Google
+// doesn't cut it off mid-word in search results. Does NOT touch the source
+// field itself - only used for the meta/og tags, the full text still shows
+// wherever it's meant to be read (article body, listing excerpt, etc).
+function truncateForMeta(str = "", maxLen = 155) {
+  const s = String(str).trim();
+  if (s.length <= maxLen) return s;
+  const cut = s.slice(0, maxLen - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > maxLen * 0.6 ? cut.slice(0, lastSpace) : cut).trim() + "…";
+}
+
 // Get the best available field for a language, falling back to Arabic then English
 function getField(article, field, lang) {
   return (
@@ -162,6 +174,8 @@ function buildArticlePage(article, lang) {
   const slug    = article.slug || String(article.id);
   const title   = getField(article, "title",   lang);
   const summary = getField(article, "summary", lang);
+  const metaTitle   = truncateForMeta(title, 60);
+  const metaSummary = truncateForMeta(summary, 155);
   const rawBody = getField(article, "content", lang) || getField(article, "body", lang) || summary;
   const body    = renderBody(rawBody);
   const image   = article.image_url || `${SITE_URL}/solar.jpg`;
@@ -227,10 +241,10 @@ function buildArticlePage(article, lang) {
   <meta name="format-detection" content="telephone=no">
   ${CSS_LINKS}
   <link rel="stylesheet" href="../styles.css">
-  <title>${esc(title)} | Al Asl Solar</title>
-  <meta name="description" content="${esc(summary)}">
-  <meta property="og:title" content="${esc(title)} | Al Asl Solar">
-  <meta property="og:description" content="${esc(summary)}">
+  <title>${esc(metaTitle)} | Al Asl Solar</title>
+  <meta name="description" content="${esc(metaSummary)}">
+  <meta property="og:title" content="${esc(metaTitle)} | Al Asl Solar">
+  <meta property="og:description" content="${esc(metaSummary)}">
   <meta property="og:type" content="article">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:image" content="${esc(image)}">
