@@ -215,7 +215,7 @@ function buildFamilyPage(category, brand, rows, lang, allFamilies, brandLogos) {
   const hreflangLinks = Object.entries(LANGS)
     .map(([, { suffix: s, hreflang: h }]) => `  <link rel="alternate" hreflang="${h}" href="${SITE_URL}/products/${slug}${s}.html">`)
     .join("\n") +
-    `\n  <link rel="alternate" hreflang="x-default" href="${SITE_URL}/products/${slug}.html">`;
+    `\n  <link rel="alternate" hreflang="x-default" href="${SITE_URL}/products/${slug}-ar.html">`;
 
   const langLinks = Object.entries(LANGS)
     .map(([l, { label, suffix: s }]) => {
@@ -359,7 +359,7 @@ function buildProductsSitemapBlock(families) {
     const hreflangs = Object.entries(LANGS)
       .map(([, { hreflang, suffix }]) => `      <xhtml:link rel="alternate" hreflang="${hreflang}" href="${SITE_URL}/products/${slug}${suffix}.html"/>`)
       .join("\n") +
-      `\n      <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/products/${slug}.html"/>`;
+      `\n      <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/products/${slug}-ar.html"/>`;
     return `  <url>
     <loc>${SITE_URL}/products/${slug}.html</loc>
     <lastmod>${today}</lastmod>
