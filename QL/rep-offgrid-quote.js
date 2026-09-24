@@ -441,7 +441,7 @@ function runCalc() {
     morningEnabled: $("#ogMorning").checked,
     nightEnabled: $("#ogNight").checked,
     psh: $("#ogPsh").value,
-    safetyFactor: 1.1,
+    safetyFactor: $("#ogSafety").value,
     autonomyDays: $("#ogAutonomy").value,
     phase: $("#ogPhase").value,
     invBrand: $("#ogInvBrand").value,

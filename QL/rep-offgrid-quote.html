@@ -15,7 +15,7 @@
   <script defer src="rep-header.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="../supabase-config.js"></script>
-  <script defer src="offgrid-calc-engine.js"></script>
+  <script defer src="../offgrid-calc-engine.js"></script>
   <script defer src="quote-item-utils.js"></script>
   <script defer src="rep-offgrid-quote.js"></script>
   <style>
@@ -181,6 +181,9 @@
           <div class="row2">
             <div><label>ساعات الشمس (PSH)</label><input type="number" id="ogPsh" value="6" step="0.1"></div>
             <div><label>أيام الاستقلالية</label><input type="number" id="ogAutonomy" value="0" step="1"></div>
+          </div>
+          <div class="row2">
+            <div><label>معامل الأمان</label><input type="number" id="ogSafety" value="1.1" min="1" step="0.05"></div>
           </div>
           <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
             <label style="display:flex;gap:6px;align-items:center;margin:0;font-size:13px;cursor:pointer">

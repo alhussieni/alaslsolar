@@ -13,14 +13,35 @@ function roundUpTo(value, decimals) {
   return Math.ceil(value * f) / f;
 }
 
-function pickInverterForBrand(catalog, brand, requiredKW, peakInstantaneousW, defaultSurgePct) {
+function pickInverterForBrand(catalog, brand, requiredKW, peakInstantaneousW, defaultSurgePct, requestedKW) {
   const options = catalog.inverters.filter(m => m.brand === brand).sort((a, b) => a.powerKW - b.powerKW);
-  if (!options.length) return { model: null, undersized: false, surgeUndersized: false };
+  if (!options.length) return { model: null, undersized: false, surgeUndersized: false, requestedNotFound: false };
   const surgeCapOf = m => m.powerKW * 1000 * (m.surgeCapacityPct || defaultSurgePct || 1);
+
+  // لو المندوب حدد قدرة معينة يدويًا: نستخدمها بالظبط لو موجودة لنفس الماركة،
+  // حتى لو أصغر أو أكبر من القدرة المحسوبة تلقائيًا من الأحمال (زي ما بيحصل
+  // بالظبط مع قدرة الألواح وفولت/سعة البطارية أعلاه).
+  if (requestedKW) {
+    const exact = options.find(m => m.powerKW === requestedKW);
+    if (exact) {
+      return {
+        model: exact,
+        undersized: exact.powerKW < requiredKW,
+        surgeUndersized: peakInstantaneousW > surgeCapOf(exact),
+        requestedNotFound: false,
+      };
+    }
+  }
+
   const fit = options.find(m => m.powerKW >= requiredKW && peakInstantaneousW <= surgeCapOf(m));
-  if (fit) return { model: fit, undersized: false, surgeUndersized: false };
+  if (fit) return { model: fit, undersized: false, surgeUndersized: false, requestedNotFound: !!requestedKW };
   const largest = options[options.length - 1];
-  return { model: largest, undersized: largest.powerKW < requiredKW, surgeUndersized: peakInstantaneousW > surgeCapOf(largest) };
+  return {
+    model: largest,
+    undersized: largest.powerKW < requiredKW,
+    surgeUndersized: peakInstantaneousW > surgeCapOf(largest),
+    requestedNotFound: !!requestedKW,
+  };
 }
 
 function pickBatteryForBrand(catalog, brand, inverterVoltage, requestedVoltage, requestedAh, requestedType) {
@@ -117,9 +138,11 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   /* ---- 2) اختيار الانفرتر تلقائيًا ---- */
   const requiredKW = roundUpTo(R2 / 1000, 1);
   const surgePctDefault = gp.defaultSurgeCapacityPct || 1.5;
-  const { model: inv, undersized: invUndersized, surgeUndersized } =
-    pickInverterForBrand(catalog, inputs.invBrand, requiredKW, peakInstantaneousW, surgePctDefault);
+  const requestedInvKW = inputs.invPowerKW ? Number(inputs.invPowerKW) : null;
+  const { model: inv, undersized: invUndersized, surgeUndersized, requestedNotFound: invRequestedNotFound } =
+    pickInverterForBrand(catalog, inputs.invBrand, requiredKW, peakInstantaneousW, surgePctDefault, requestedInvKW);
   if (!inv) { errors.push(`مفيش موديلات انفرتر مسجلة لماركة "${inputs.invBrand}".`); return { errors }; }
+  if (invRequestedNotFound) errors.push(`⚠ القدرة المختارة (${requestedInvKW} كيلوواط) مش مسجلة لماركة "${inputs.invBrand}" — تم استخدام أقرب قدرة متاحة بدلًا منها.`);
   if (invUndersized) errors.push(`⚠ أكبر انفرتر متاح من ماركة ${inv.brand} (${inv.powerKW} كيلوواط) لسه أصغر من القدرة اللحظية المطلوبة (${requiredKW} كيلوواط) — قلل الأحمال أو جرّب ماركة تانية.`);
   const inverterVoltage = inv.voltage;
 
