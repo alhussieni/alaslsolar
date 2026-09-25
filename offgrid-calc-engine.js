@@ -44,7 +44,7 @@ function pickInverterForBrand(catalog, brand, requiredKW, peakInstantaneousW, de
   };
 }
 
-function pickBatteryForBrand(catalog, brand, inverterVoltage, requestedVoltage, requestedAh, requestedType) {
+function pickBatteryForBrand(catalog, brand, inverterVoltage, requestedVoltage, requestedAh, requestedType, autonomyEnergyWh, safetyFactor) {
   let brandOptions = catalog.batteries.filter(b => b.brand === brand);
   if (!brandOptions.length) return { batt: null, reason: 'no_brand' };
 
@@ -77,9 +77,30 @@ function pickBatteryForBrand(catalog, brand, inverterVoltage, requestedVoltage, 
     return { batt: atAh.sort((a, b) => (a.unitPrice || 0) - (b.unitPrice || 0))[0], reason: null };
   }
 
-  // مفيش سعة محددة: نفس السلوك التلقائي القديم — أعلى فولت متاح ثم أكبر AH
+  // مفيش سعة محددة: نختار الفولت الأعلى المتاح (زي الأول — أقل عدد بطاريات
+  // على التوالي)، وبعدين من بين كل أحجام الـAh المتاحة بنفس الفولت، نختار
+  // اللي بيدّي أقل تكلفة إجمالية فعليًا (عدد الوحدات المطلوبة × سعر الوحدة)
+  // مش أكبر سعة دايمًا — عشان العميل غالبًا بيهتم بالتكلفة قبل أي حاجة.
   const bestVoltage = Math.max(...brandOptions.map(b => b.voltage));
   const atBestVoltage = brandOptions.filter(b => b.voltage === bestVoltage);
+
+  if (autonomyEnergyWh != null && safetyFactor != null && inverterVoltage) {
+    let best = null;
+    for (const candidate of atBestVoltage) {
+      if (!candidate.ah || !candidate.dod) continue;
+      const requiredAh = (autonomyEnergyWh * safetyFactor) / (candidate.dod * inverterVoltage);
+      const units = Math.max(1, Math.ceil(requiredAh / candidate.ah));
+      const totalCost = units * (candidate.unitPrice || 0);
+      const isBetter = !best
+        || totalCost < best.totalCost
+        || (totalCost === best.totalCost && units < best.units);
+      if (isBetter) best = { candidate, units, totalCost };
+    }
+    if (best) return { batt: best.candidate, reason: null };
+  }
+
+  // احتياطي لو مفيش بيانات كافية لحساب التكلفة (مثلاً autonomyEnergyWh مش
+  // متاح من الاستدعاء) — نرجع للسلوك القديم: أعلى فولت ثم أكبر AH.
   return { batt: atBestVoltage.sort((a, b) => b.ah - a.ah)[0], reason: null };
 }
 
@@ -151,11 +172,13 @@ function computeOffgridMaterials(catalog, gp, inputs) {
     errors.push(`⚠ أكبر انفرتر متاح من ماركة ${inv.brand} لسه مش هيتحمّل تيار بدء "${worstSurgeLoad}" (${basis}) — جرّب ماركة تانية أو شغّل الأجهزة الكبيرة منفصلة.`);
   }
 
-  /* ---- 3) اختيار البطارية (يدويًا لو المستخدم حدد فولت/سعة/نوع، وإلا تلقائيًا) ---- */
+  /* ---- 3) اختيار البطارية (يدويًا لو المستخدم حدد فولت/سعة/نوع، وإلا تلقائيًا
+     بأقل تكلفة فعلية — مش أكبر سعة متاحة، زي ما كان قبل كده) ---- */
+  const autonomyEnergyWh = R4 + (autonomyDays * R5);
   const requestedBattVoltage = inputs.battVoltage ? Number(inputs.battVoltage) : null;
   const requestedBattAh = inputs.battAh ? Number(inputs.battAh) : null;
   const requestedBattType = inputs.battType || null;
-  const battPick = pickBatteryForBrand(catalog, inputs.battBrand, inverterVoltage, requestedBattVoltage, requestedBattAh, requestedBattType);
+  const battPick = pickBatteryForBrand(catalog, inputs.battBrand, inverterVoltage, requestedBattVoltage, requestedBattAh, requestedBattType, autonomyEnergyWh, safetyFactor);
   const batt = battPick.batt;
   if (!batt) {
     const msgs = {
@@ -173,7 +196,6 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const designOkay = inverterVoltage >= batteryVoltage;
 
   /* ---- 4) بنك البطاريات ---- */
-  const autonomyEnergyWh = R4 + (autonomyDays * R5);
   const R7 = (batt.dod && inverterVoltage) ? (autonomyEnergyWh * safetyFactor) / (batt.dod * inverterVoltage) : 0;
   const O7 = designOkay ? inverterVoltage / batteryVoltage : 0; // عدد البطاريات في السلسلة
   const O8 = batt.ah ? Math.ceil(R7 / batt.ah) : 0;              // عدد السلاسل
