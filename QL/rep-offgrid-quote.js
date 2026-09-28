@@ -233,7 +233,7 @@ async function loadCatalog() {
   bomSettings = bom;
 
   const { data, error } = await client.from("products")
-    .select("id,category,brand,model_available,price,voltage_v,power_kw,surge_capacity_pct,pv_voc_max,pv_mppt_min,pv_mppt_max,capacity_ah,dod,power_watt,vimp,voc,in_stock,published,name_ar")
+    .select("id,category,brand,model_available,price,voltage_v,power_kw,surge_capacity_pct,pv_voc_max,pv_mppt_min,pv_mppt_max,pv_max_power_w,capacity_ah,dod,power_watt,vimp,voc,in_stock,published,name_ar")
     .in("category", ["offgrid", "batteries", "panels", "cables"]);
   if (error || !data) { $("[data-calc-message]").textContent = "تعذر تحميل الكتالوج."; return; }
 
@@ -243,7 +243,8 @@ async function loadCatalog() {
     .map((r) => ({ id: r.id, brand: r.brand, type: r.model_available || "", voltage: Number(r.voltage_v), powerKW: Number(r.power_kw),
       surgeCapacityPct: r.surge_capacity_pct ? Number(r.surge_capacity_pct) : null,
       pvVocMax: r.pv_voc_max ? Number(r.pv_voc_max) : null, pvMpptMin: r.pv_mppt_min ? Number(r.pv_mppt_min) : null,
-      pvMpptMax: r.pv_mppt_max ? Number(r.pv_mppt_max) : null, unitPrice: Number(r.price) }))
+      pvMpptMax: r.pv_mppt_max ? Number(r.pv_mppt_max) : null,
+      pvMaxPowerW: r.pv_max_power_w ? Number(r.pv_max_power_w) : null, unitPrice: Number(r.price) }))
     .filter((r) => r.powerKW && r.voltage);
 
   catalog.batteries = data.filter((r) => r.category === "batteries" && r.in_stock !== false && r.published !== false && hasPrice(r))

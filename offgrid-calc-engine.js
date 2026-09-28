@@ -105,7 +105,7 @@ function pickBatteryForBrand(catalog, brand, inverterVoltage, requestedVoltage, 
 }
 
 /**
- * catalog = { inverters:[{brand,type,voltage,powerKW,surgeCapacityPct,pvVocMax,pvMpptMin,pvMpptMax,unitPrice}],
+ * catalog = { inverters:[{brand,type,voltage,powerKW,surgeCapacityPct,pvVocMax,pvMpptMin,pvMpptMax,pvMaxPowerW,unitPrice}],
  *             batteries:[{brand,voltage,ah,dod,unitPrice}],
  *             panels:[{brand,power,voc,vimp,pricePerWatt}] }
  * genericPrices = { steelPerUnit, cablesPerMeter, cableMetersPerSteelUnit, accessoriesFixed,
@@ -247,6 +247,14 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   }
   const O2 = pvLimitVerified ? panelsPerString * stringCount : O2min;
 
+  /* فحص أقصى قدرة PV يقبلها الانفرتر (من الداتا شيت) — لو الحقل فاضي في الكتالوج
+     الفحص بيتخطى تلقائيًا (pvPowerOk = null) ومفيش تحذير، لحد ما البيانات تتضاف. */
+  const installedPvW = O2 * panelWatt;
+  const pvPowerChecked = !!inv.pvMaxPowerW;
+  if (pvPowerChecked && installedPvW > inv.pvMaxPowerW) {
+    errors.push(`⚠ قدرة الألواح المركّبة (${Math.round(installedPvW)}W) أعلى من أقصى قدرة PV يقبلها انفرتر ${inv.brand} (${inv.pvMaxPowerW}W) — الزيادة هتتهدر (clipping)، قلل عدد الألواح أو اختار انفرتر أكبر.`);
+  }
+
   /* ---- 6) بنود الخامات (بدون تركيب أو نقل) ---- */
   const phaseQty = inputs.phase === 'three' ? 3 : 1;
   const steelQty = Math.max(Math.ceil(O2 / 2), 1);
@@ -302,6 +310,8 @@ function computeOffgridMaterials(catalog, gp, inputs) {
       stringVimp, invMpptMin: inv.pvMpptMin || null, invMpptMax: inv.pvMpptMax || null,
       mpptOk: pvLimitVerified ? !((inv.pvMpptMin && stringVimp < inv.pvMpptMin) || (inv.pvMpptMax && stringVimp > inv.pvMpptMax)) : null,
       autonomyDays,
+      pvMaxPowerW: inv.pvMaxPowerW || null,
+      pvPowerOk: pvPowerChecked ? installedPvW <= inv.pvMaxPowerW : null,
     },
   };
 }
