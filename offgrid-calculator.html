@@ -166,6 +166,16 @@
     .og-sidebar-row .val { font-weight: 800; color: var(--ink); }
     .og-sidebar-hint { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0; }
     .og-sidebar .btn { width: 100%; }
+
+    /* نتائج الحساب + الملخص السريع: كل الأسطر في المنتصف (الصفحة RTL).
+       .og-section بتصفّر الحشو الأفقي (padding:24px 0) فكان محتوى لوحة النتيجة لازق في حافتها. */
+    .results-panel.og-section { padding: 24px; }
+    @media(max-width:520px){ .results-panel.og-section { padding: 16px; } }
+    .results-panel, .og-sidebar { text-align: center; }
+    .results-header { justify-content: center; }
+    .og-table th, .og-table td { text-align: center; vertical-align: middle; }
+    .og-sidebar-row { justify-content: center; flex-wrap: wrap; gap: 4px 12px; text-align: center; }
+    .results-panel .calc-note, .results-panel .footer-disclaimer { justify-content: center; text-align: center; }
   </style>
 </head>
 <body>
@@ -696,6 +706,8 @@
 
     function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
     function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 1 }); }
+    // عزل اتجاه القيمة (رقم + وحدة) عن باقي الجملة العربية — بدونه الوحدة الإنجليزية بتظهر قبل الرقم (kWh 19.2).
+    function bi(s) { return '<bdi>' + s + '</bdi>'; }
 
     /* رسم بياني أعمدة بسيط بصيغة SVG — نفس الدالة المستخدمة في أداة المندوب
        (QL/rep-offgrid-quote.js)، منقولة هنا زي ما هي عشان تفضل النتيجة متطابقة. */
@@ -721,7 +733,7 @@
       return `
         <div style="margin-top:14px;">
           <div style="font-size:13px; font-weight:700; margin-bottom:6px;">${title}</div>
-          <svg viewBox="0 0 ${width} 178" width="100%" style="max-width:${maxWidthPx || 380}px; display:block;" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 ${width} 178" width="100%" style="max-width:${maxWidthPx || 380}px; display:block; margin-inline:auto;" xmlns="http://www.w3.org/2000/svg">
             <line x1="0" y1="${baseY}" x2="${width}" y2="${baseY}" stroke="#ddd" stroke-width="1"></line>
             ${barsSvg}
           </svg>
@@ -744,26 +756,26 @@
         ? { label: "الفائض", value: prodDelta, color: "#3b6e52" }
         : { label: "⚠ عجز", value: Math.abs(prodDelta), color: "#b23b3b" };
       const prodCaption = prodDelta >= 0
-        ? `فائض إنتاج يومي ~${fmt1(prodDelta)} kWh فوق احتياجك اليومي`
-        : `⚠ الإنتاج المتوقع أقل من احتياجك اليومي بـ ~${fmt1(Math.abs(prodDelta))} kWh — راجعنا لمراجعة التصميم`;
+        ? `فائض إنتاج يومي ${bi('~' + fmt1(prodDelta) + ' kWh')} فوق احتياجك اليومي`
+        : `⚠ الإنتاج المتوقع أقل من احتياجك اليومي بـ ${bi('~' + fmt1(Math.abs(prodDelta)) + ' kWh')} — راجعنا لمراجعة التصميم`;
 
       const storageDelta = b.storedKWh - b.nightLoadKWh;
       const storageSurplusBar = storageDelta >= 0
         ? { label: "الفائض", value: storageDelta, color: "#3b6e52" }
         : { label: "⚠ عجز", value: Math.abs(storageDelta), color: "#b23b3b" };
       const storageCaption = storageDelta >= 0
-        ? `فائض تخزين ~${fmt1(storageDelta)} kWh فوق استهلاكك الليلي`
-        : `⚠ سعة البطاريات أقل من استهلاكك الليلي بـ ~${fmt1(Math.abs(storageDelta))} kWh`;
+        ? `فائض تخزين ${bi('~' + fmt1(storageDelta) + ' kWh')} فوق استهلاكك الليلي`
+        : `⚠ سعة البطاريات أقل من استهلاكك الليلي بـ ${bi('~' + fmt1(Math.abs(storageDelta)) + ' kWh')}`;
 
       const statsBlock = `
         <div style="font-size:15px; font-weight:800; margin:18px 0 10px;">ملخص سريع لأداء نظامك</div>
         <div class="og-table-wrap"><table class="og-table" style="font-size:13px;">
           <tbody>
-            <tr><td>إجمالي قدرة الألواح / الإنتاجية اليومية المتوقعة</td><td>${fmt1(b.panelKWp)} kWp — ${fmt1(b.dailyProductionKWh)} kWh/يوم</td></tr>
-            <tr><td>إجمالي استهلاكك النهاري / الليلي</td><td>${fmt1(b.dayLoadKWh)} kWh نهار — ${fmt1(b.nightLoadKWh)} kWh ليل</td></tr>
-            <tr><td>سعة التخزين بالبطاريات${b.batteryUsagePct != null ? " (نسبة الاستخدام)" : ""}</td><td>${fmt1(b.storedKWh)} kWh${b.batteryUsagePct != null ? ` (~${b.batteryUsagePct}% من السعة الكاملة عند أقصى تفريغ)` : ""}</td></tr>
-            <tr><td>هل الإنفرتر يكفي كل أجهزتك مع بعض؟</td><td>${fmt1(b.peakInstantaneousKW)} kW أقصى تشغيل — الإنفرتر: ${fmt1(b.invRatedKW)} kW مستمر / ${fmt1(b.invSurgeKW)} kW إقلاع ${invOk ? "— كافٍ ✓" : "— ⚠ راجعنا لمراجعة الأحمال"}</td></tr>
-            <tr><td>أيام الاستقلالية المصمم عليها</td><td>${fmt(b.autonomyDays)} يوم بدون شحن</td></tr>
+            <tr><td>إجمالي قدرة الألواح / الإنتاجية اليومية المتوقعة</td><td>${bi(fmt1(b.panelKWp) + ' kWp')} — ${bi(fmt1(b.dailyProductionKWh) + ' kWh')}/يوم</td></tr>
+            <tr><td>إجمالي استهلاكك النهاري / الليلي</td><td>${bi(fmt1(b.dayLoadKWh) + ' kWh')} نهار — ${bi(fmt1(b.nightLoadKWh) + ' kWh')} ليل</td></tr>
+            <tr><td>سعة التخزين بالبطاريات${b.batteryUsagePct != null ? " (نسبة الاستخدام)" : ""}</td><td>${bi(fmt1(b.storedKWh) + ' kWh')}${b.batteryUsagePct != null ? ` (${bi('~' + b.batteryUsagePct + '%')} من السعة الكاملة عند أقصى تفريغ)` : ""}</td></tr>
+            <tr><td>هل الإنفرتر يكفي كل أجهزتك مع بعض؟</td><td>${bi(fmt1(b.peakInstantaneousKW) + ' kW')} أقصى تشغيل — الإنفرتر: ${bi(fmt1(b.invRatedKW) + ' kW')} مستمر / ${bi(fmt1(b.invSurgeKW) + ' kW')} إقلاع ${invOk ? "— كافٍ ✓" : "— ⚠ راجعنا لمراجعة الأحمال"}</td></tr>
+            <tr><td>أيام الاستقلالية المصمم عليها</td><td>${bi(fmt(b.autonomyDays))} يوم بدون شحن</td></tr>
           </tbody>
         </table></div>`;
 
@@ -815,9 +827,9 @@
       const post = document.getElementById('ogSidebarPost');
       post.hidden = false;
       post.innerHTML = `
-        <div class="og-sidebar-row"><span class="lbl">قدرة الانفرتر</span><span class="val">${result.inv.powerKW} كيلوواط</span></div>
-        <div class="og-sidebar-row"><span class="lbl">سعة التخزين</span><span class="val">${result.storedKWh.toFixed(1)} kWh</span></div>
-        <div class="og-sidebar-row"><span class="lbl">عدد الألواح</span><span class="val">${result.panelCount} لوح</span></div>
+        <div class="og-sidebar-row"><span class="lbl">قدرة الانفرتر</span><span class="val">${bi(result.inv.powerKW + ' كيلوواط')}</span></div>
+        <div class="og-sidebar-row"><span class="lbl">سعة التخزين</span><span class="val">${bi(result.storedKWh.toFixed(1) + ' kWh')}</span></div>
+        <div class="og-sidebar-row"><span class="lbl">عدد الألواح</span><span class="val">${bi(result.panelCount + ' لوح')}</span></div>
         <div class="og-sidebar-row"><span class="lbl">عدد البطاريات</span><span class="val">${result.batteryCount}</span></div>
         <p class="og-sidebar-hint">التفاصيل والأسعار الكاملة موضحة في الجدول أدناه.</p>`;
 
