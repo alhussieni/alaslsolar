@@ -176,6 +176,33 @@
     .og-table th, .og-table td { text-align: center; vertical-align: middle; }
     .og-sidebar-row { justify-content: center; flex-wrap: wrap; gap: 4px 12px; text-align: center; }
     .results-panel .calc-note, .results-panel .footer-disclaimer { justify-content: center; text-align: center; }
+
+    /* ===== Hint: الرسائل الإرشادية/التحذيرية داخل أيقونة (hover / click / tap) ===== */
+    .hint { position: relative; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+      width: 20px; height: 20px; padding: 0; margin-inline: 4px; border: 0; background: none; border-radius: 50%;
+      font: inherit; font-size: 16px; line-height: 1; cursor: pointer; vertical-align: middle; }
+    .hint::after { content: ""; position: absolute; inset: -10px; }            /* مساحة لمس ~40px */
+    .hint:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+    .hint[aria-expanded="true"] { background: rgba(200,117,45,.16); }
+    .hint-info { color: var(--brand-dark); }
+    .hint-warn { color: #c8860a; }
+    .footer-disclaimer .hint { color: var(--brand); }
+    .calc-disclaimer .hint i, .footer-disclaimer .hint i { font-size: 16px; margin-top: 0; color: inherit; }
+    .hint-pill { width: auto; height: auto; gap: 6px; padding: 5px 12px; margin: 0; border-radius: 999px;
+      border: 1px solid #f5c842; background: #fffbf2; color: #7a4f0a; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .hint-pill i { font-size: 15px; color: #c8860a; }
+    .hint-pill::after { inset: -6px; }
+    .hint-body { display: none; }
+    .field label:has(.hint) { display: flex; align-items: center; gap: 2px; }   /* الأيقونة جنب النص مش سطر لوحدها */
+    .hint-row { display: flex; justify-content: center; margin-top: 6px; }
+    .hint-item + .hint-item { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.12); }
+    #ogHintPop { position: fixed; left: 0; top: 0; z-index: 1000; box-sizing: border-box; width: max-content;
+      max-width: min(320px, calc(100vw - 16px)); padding: 10px 12px; border-radius: 10px; direction: rtl; text-align: right;
+      background: #fffaf3; color: var(--ink); border: 1px solid #e8c49a; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      font-size: 13px; font-weight: 500; line-height: 1.75; }
+    #ogHintPop[data-kind="warn"] { background: #fffbf2; border-color: #f5c842; }
+    #ogHintPop[hidden] { display: none; }
+    #ogHintPop strong { color: #7a4f0a; }
   </style>
 </head>
 <body>
@@ -221,9 +248,10 @@
       <div class="calc-disclaimer">
         <i class="fa fa-triangle-exclamation" aria-hidden="true"></i>
         <p>
-          <strong>تنويه هام:</strong> النتائج هنا <strong>تقديرية للتخطيط الأولي</strong> وتشمل
+          <strong>تنويه هام:</strong> النتائج <strong>تقديرية للتخطيط الأولي</strong> وتشمل <strong>الخامات فقط</strong> — <strong>بدون تركيب أو نقل</strong>.
+          <button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden><strong>تنويه هام:</strong> النتائج هنا <strong>تقديرية للتخطيط الأولي</strong> وتشمل
           <strong>تكلفة الخامات فقط</strong> (الألواح، الانفرتر، البطاريات، الشاسيه، الكابلات، الإكسسوارات) —
-          <strong>بدون تركيب أو نقل</strong>. للتسعير النهائي الدقيق تواصل مباشرة مع مهندسي الشركة.
+          <strong>بدون تركيب أو نقل</strong>. للتسعير النهائي الدقيق تواصل مباشرة مع مهندسي الشركة.</span>
         </p>
       </div>
 
@@ -290,7 +318,7 @@
               <div id="ogSidebarPre">
                 <div class="og-sidebar-row"><span class="lbl">عدد الأجهزة المضافة</span><span class="val" id="ogSideCount">0</span></div>
                 <div class="og-sidebar-row"><span class="lbl">إجمالي القدرة</span><span class="val" id="ogSideWatt">0 وات</span></div>
-                <p class="og-sidebar-hint">هذان الرقمان تقديريان أثناء الإدخال — التفاصيل الدقيقة (سعة البطارية، عدد الألواح) تظهر بعد الضغط على "احسب النظام".</p>
+                <div class="hint-row"><button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden>هذان الرقمان تقديريان أثناء الإدخال — التفاصيل الدقيقة (سعة البطارية، عدد الألواح) تظهر بعد الضغط على "احسب النظام".</span></div>
               </div>
               <div id="ogSidebarPost" hidden></div>
             </div>
@@ -315,7 +343,7 @@
               <input type="number" id="ogSafety" value="1.1" min="1" step="0.05">
             </div>
             <div class="field">
-              <label for="ogAutonomy">أيام الاستقلالية (دون شمس)</label>
+              <label for="ogAutonomy">أيام الاستقلالية (دون شمس)<button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden>القيمة 0 في أيام الاستقلالية تعني تغطية ليلة تشغيل عادية فقط، دون احتياطي إضافي لأيام غائمة متتالية.</span></label>
               <input type="number" id="ogAutonomy" value="0" min="0" step="1">
             </div>
             <div class="field">
@@ -326,7 +354,6 @@
               </select>
             </div>
           </div>
-          <p class="field-hint" style="margin-top:-8px;">القيمة 0 في أيام الاستقلالية تعني تغطية ليلة تشغيل عادية فقط، دون احتياطي إضافي لأيام غائمة متتالية.</p>
 
           <div class="calc-divider"></div>
 
@@ -379,9 +406,9 @@
           <div id="ogTechBrief"></div>
 
           <div class="footer-disclaimer">
-            <i class="fa fa-circle-info" aria-hidden="true"></i>
-            <p><strong>الأسعار غير ظاهرة هنا</strong> — انقر على "اعرف السعر" أمام كل بند لعرض سعره بالتفصيل في صفحة المنتج.
-              هذه الكميات تغطي الخامات فقط، و<strong>لا تشمل التركيب أو النقل أو أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</p>
+            <p><strong>الأسعار غير ظاهرة هنا</strong> — الكميات تغطي الخامات فقط و<strong>لا تشمل التركيب أو النقل</strong>.
+              <button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden><strong>الأسعار غير ظاهرة هنا</strong> — انقر على "اعرف السعر" أمام كل بند لعرض سعره بالتفصيل في صفحة المنتج.
+              هذه الكميات تغطي الخامات فقط، و<strong>لا تشمل التركيب أو النقل أو أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</span></p>
           </div>
         </div>
 
@@ -420,6 +447,80 @@
   <script src="supabase-config.js"></script>
   <script src="offgrid-calc-engine.js"></script>
   <script>
+/* Hint popover — مكوّن عام: أي زر .hint يليه عنصر .hint-body مخفي. نافذة واحدة على <body> (عشان الحاويات اللي overflow ما تقصّهاش).
+   ماوس: hover/focus، وضغطة بتثبّتها. لمس: ضغطة تفتح/تقفل. Esc أو ضغطة برّه أو scroll/resize بتقفل. */
+(function () {
+  var pop = document.createElement('div');
+  pop.id = 'ogHintPop'; pop.setAttribute('role', 'tooltip'); pop.hidden = true;
+  document.body.appendChild(pop);
+  var cur = null, pinned = false, timer = null;
+  var hoverMQ = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+  function hintOf(el) { return el && el.closest ? el.closest('.hint') : null; }
+  function bodyOf(btn) { var n = btn.nextElementSibling; return n && n.classList.contains('hint-body') ? n : null; }
+  function place(btn) {
+    pop.style.left = '0px'; pop.style.top = '0px';
+    var r = btn.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, m = 8, gap = 8;
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var left = Math.max(m, Math.min(r.left + r.width / 2 - pw / 2, vw - pw - m));
+    var top = r.bottom + gap;
+    if (top + ph > vh - m && r.top - gap - ph >= m) top = r.top - gap - ph;
+    pop.style.left = Math.round(left) + 'px'; pop.style.top = Math.round(Math.max(m, top)) + 'px';
+  }
+  function open(btn, pin) {
+    var b = bodyOf(btn); if (!b) return;
+    clearTimeout(timer);
+    if (cur && cur !== btn) { cur.setAttribute('aria-expanded', 'false'); cur.removeAttribute('aria-describedby'); }
+    cur = btn; pinned = !!pin;
+    pop.innerHTML = b.innerHTML;
+    pop.dataset.kind = btn.classList.contains('hint-warn') ? 'warn' : 'info';
+    pop.hidden = false; place(btn);
+    btn.setAttribute('aria-expanded', 'true'); btn.setAttribute('aria-describedby', 'ogHintPop');
+  }
+  function close() {
+    clearTimeout(timer);
+    if (cur) { cur.setAttribute('aria-expanded', 'false'); cur.removeAttribute('aria-describedby'); }
+    cur = null; pinned = false; pop.hidden = true;
+  }
+  function closeSoon() { clearTimeout(timer); timer = setTimeout(function () { if (!pinned) close(); }, 150); }
+
+  document.addEventListener('click', function (e) {
+    if (cur && !cur.isConnected) close();                       // الزر اتمسح بإعادة رسم النتائج
+    var btn = hintOf(e.target);
+    if (btn) {
+      e.preventDefault();                                       // عشان الـlabel ما يحوّلش الضغطة للـinput
+      if (cur === btn && (pinned || !hoverMQ.matches)) close(); else open(btn, true);
+      return;
+    }
+    if (cur && !pop.contains(e.target)) close();
+  });
+  document.addEventListener('mouseover', function (e) {
+    if (!hoverMQ.matches) return;
+    var btn = hintOf(e.target);
+    if (btn) { if (cur !== btn) open(btn, false); else clearTimeout(timer); }
+    else if (cur && pop.contains(e.target)) clearTimeout(timer);
+  });
+  document.addEventListener('mouseout', function (e) {
+    if (!hoverMQ.matches || !cur || pinned) return;
+    var to = e.relatedTarget;
+    if (to && (hintOf(to) === cur || pop.contains(to))) return;
+    if (hintOf(e.target) === cur || pop.contains(e.target)) closeSoon();
+  });
+  document.addEventListener('focusin', function (e) {
+    var btn = hintOf(e.target);
+    if (btn && cur !== btn && btn.matches(':focus-visible')) open(btn, true);   // كيبورد فقط
+  });
+  document.addEventListener('focusout', function (e) {
+    if (cur && e.target === cur && !pop.contains(e.relatedTarget)) close();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && cur) { var b = cur; close(); b.focus(); }
+  });
+  window.addEventListener('scroll', function () { if (cur) close(); }, true);
+  window.addEventListener('resize', function () { if (cur) close(); });
+})();
+</script>
+<script>
   (function () {
     /* ============================================================
        Default load catalogue (device power draw + typical duty
@@ -708,6 +809,18 @@
     function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 1 }); }
     // عزل اتجاه القيمة (رقم + وحدة) عن باقي الجملة العربية — بدونه الوحدة الإنجليزية بتظهر قبل الرقم (kWh 19.2).
     function bi(s) { return '<bdi>' + s + '</bdi>'; }
+    // أيقونة رسالة (info | warn): الزر + نص الرسالة المخفي بعده. العرض يتم بواسطة مكوّن #ogHintPop.
+    function hintIcon(html, kind) {
+      kind = kind === 'warn' ? 'warn' : 'info';
+      const icon = kind === 'warn' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+      return `<button type="button" class="hint hint-${kind}" aria-label="${kind === 'warn' ? 'تنبيه' : 'معلومة'}" aria-expanded="false"><i class="fa ${icon}" aria-hidden="true"></i></button><span class="hint-body" hidden>${html}</span>`;
+    }
+    // تنبيهات الحساب: زر ظاهر بلون تحذيري (مش أيقونة صامتة) وتفاصيله جوه النافذة.
+    function hintPill(items) {
+      const n = items.length;
+      const label = n === 1 ? 'تنبيه' : n + ' تنبيهات';
+      return `<button type="button" class="hint hint-warn hint-pill" aria-expanded="false"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i>${label}</button><span class="hint-body" hidden>${items.map(t => `<div class="hint-item">${t}</div>`).join('')}</span>`;
+    }
 
     /* رسم بياني أعمدة بسيط بصيغة SVG — نفس الدالة المستخدمة في أداة المندوب
        (QL/rep-offgrid-quote.js)، منقولة هنا زي ما هي عشان تفضل النتيجة متطابقة. */
@@ -788,7 +901,7 @@
               { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
               prodSurplusBar,
             ], 380)}
-            <div style="font-size:11px; color:#666; margin-top:6px;">${prodCaption}</div>
+            <div class="hint-row">${hintIcon(prodCaption, prodDelta >= 0 ? 'info' : 'warn')}</div>
           </div>
           <div style="flex:1; min-width:260px;">
             ${svgBarCompare("سعة البطاريات مقابل استهلاكك الليلي (kWh)", [
@@ -796,10 +909,10 @@
               { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
               storageSurplusBar,
             ], 380)}
-            <div style="font-size:11px; color:#666; margin-top:6px;">${storageCaption}</div>
+            <div class="hint-row">${hintIcon(storageCaption, storageDelta >= 0 ? 'info' : 'warn')}</div>
           </div>
         </div>
-        <div style="font-size:11px; color:#888; margin-top:10px;">الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.</div>`;
+        <div class="hint-row" style="margin-top:10px;">${hintIcon('الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.', 'info')}</div>`;
 
       return statsBlock + chartsRowBlock;
     }
@@ -831,10 +944,10 @@
         <div class="og-sidebar-row"><span class="lbl">سعة التخزين</span><span class="val">${bi(result.storedKWh.toFixed(1) + ' kWh')}</span></div>
         <div class="og-sidebar-row"><span class="lbl">عدد الألواح</span><span class="val">${bi(result.panelCount + ' لوح')}</span></div>
         <div class="og-sidebar-row"><span class="lbl">عدد البطاريات</span><span class="val">${result.batteryCount}</span></div>
-        <p class="og-sidebar-hint">التفاصيل والأسعار الكاملة موضحة في الجدول أدناه.</p>`;
+        <div class="hint-row">${hintIcon('التفاصيل والأسعار الكاملة موضحة في الجدول أدناه.', 'info')}</div>`;
 
-      const notesHtml = (result.errors || []).map(e =>
-        `<div class="calc-note warn"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i><p>${e}</p></div>`).join('');
+      const noteItems = result.errors || [];
+      const notesHtml = noteItems.length ? `<div class="hint-row">${hintPill(noteItems)}</div>` : '';
       document.getElementById('ogNotes').innerHTML = notesHtml;
 
       const linkFor = {
