@@ -156,25 +156,14 @@
     #ogCalcWrapOuter .calc-panel { background: transparent; border: none; box-shadow: none; padding: 0; border-radius: 0; }
     #ogCalcWrapOuter .calc-panel-title { display: none; } /* استبدلناه بعنوان الخطوة (.og-step-title) فوق */
 
-    .og-sidebar { background: #fff; border-radius: 16px; padding: 24px;
-      border: 1px solid var(--line); display: flex; flex-direction: column; gap: 16px; }
-    .og-sidebar-title { font-size: 12px; font-weight: 800; color: var(--muted); margin: 0; }
-    .og-sidebar-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
-      font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--brand-soft); }
-    .og-sidebar-row:last-child { border-bottom: none; }
-    .og-sidebar-row .lbl { color: var(--muted); }
-    .og-sidebar-row .val { font-weight: 800; color: var(--ink); }
-    .og-sidebar-hint { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0; }
-    .og-sidebar .btn { width: 100%; }
 
-    /* نتائج الحساب + الملخص السريع: كل الأسطر في المنتصف (الصفحة RTL).
+    /* نتائج الحساب: كل الأسطر في المنتصف (الصفحة RTL).
        .og-section بتصفّر الحشو الأفقي (padding:24px 0) فكان محتوى لوحة النتيجة لازق في حافتها. */
     .results-panel.og-section { padding: 24px; }
     @media(max-width:520px){ .results-panel.og-section { padding: 16px; } }
-    .results-panel, .og-sidebar { text-align: center; }
+    .results-panel { text-align: center; }
     .results-header { justify-content: center; }
     .og-table th, .og-table td { text-align: center; vertical-align: middle; }
-    .og-sidebar-row { justify-content: center; flex-wrap: wrap; gap: 4px 12px; text-align: center; }
     .results-panel .calc-note, .results-panel .footer-disclaimer { justify-content: center; text-align: center; }
 
     /* ===== Hint: الرسائل الإرشادية/التحذيرية داخل أيقونة (hover / click / tap) ===== */
@@ -313,16 +302,6 @@
 
         <div class="og-split">
           <div class="og-col-settings">
-            <div class="og-sidebar" id="ogSidebar">
-              <p class="og-sidebar-title">ملخص سريع</p>
-              <div id="ogSidebarPre">
-                <div class="og-sidebar-row"><span class="lbl">عدد الأجهزة المضافة</span><span class="val" id="ogSideCount">0</span></div>
-                <div class="og-sidebar-row"><span class="lbl">إجمالي القدرة</span><span class="val" id="ogSideWatt">0 وات</span></div>
-                <div class="hint-row"><button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden>هذان الرقمان تقديريان أثناء الإدخال — التفاصيل الدقيقة (سعة البطارية، عدد الألواح) تظهر بعد الضغط على "احسب النظام".</span></div>
-              </div>
-              <div id="ogSidebarPost" hidden></div>
-            </div>
-
         <!-- Step 2: System settings + brands (revealed once at least one load is added) -->
         <div class="calc-panel og-section is-locked" id="ogStep2">
           <div class="og-section-head">
@@ -619,29 +598,7 @@
       document.getElementById('ogStep2Sub').textContent = hasAny
         ? 'اختر العلامات التجارية ثم اضغط على "احسب النظام"'
         : 'أضف جهازًا واحدًا على الأقل لتفعيل هذه الخطوة';
-      updateLiveSummary();
     }
-
-    // ملخص سريع في السايدبار — بيتحدث لحظيًا من غير ما يستنى المستخدم يدوس "احسب النظام".
-    // بيحسب بس مجموع بسيط (عدد × وات)، مش نفس معادلة الطاقة الكاملة في offgrid-calc-engine.js،
-    // عشان ما نكررش منطق الحساب في مكانين وممكن يحصل تعارض بينهم لو اتعدل واحد وما اتعدلش التاني.
-    function updateLiveSummary() {
-      const rows = document.querySelectorAll('#ogLoadsBody tr');
-      let count = 0, totalWatt = 0;
-      rows.forEach(row => {
-        const idx = Number(row.dataset.idx);
-        const l = DEFAULT_LOADS[idx];
-        const c = Number(row.querySelector('[data-field="count"]')?.value) || 0;
-        count += c;
-        totalWatt += c * (l ? l.watt : 0);
-      });
-      document.getElementById('ogSideCount').textContent = count;
-      document.getElementById('ogSideWatt').textContent = totalWatt.toLocaleString('ar-EG') + ' وات';
-    }
-
-    document.getElementById('ogLoadsBody').addEventListener('input', (e) => {
-      if (e.target.dataset.field === 'count') updateLiveSummary();
-    });
 
     function addLoadRow(idx) {
       const l = DEFAULT_LOADS[idx];
@@ -935,16 +892,6 @@
         <div class="metric-card"><div class="metric-label">عدد الألواح</div><div class="metric-value">${result.panelCount}</div><div class="metric-unit">لوح</div></div>
         <div class="metric-card"><div class="metric-label">عدد البطاريات</div><div class="metric-value">${result.batteryCount}</div><div class="metric-unit">بطارية</div></div>
       `;
-
-      document.getElementById('ogSidebarPre').hidden = true;
-      const post = document.getElementById('ogSidebarPost');
-      post.hidden = false;
-      post.innerHTML = `
-        <div class="og-sidebar-row"><span class="lbl">قدرة الانفرتر</span><span class="val">${bi(result.inv.powerKW + ' كيلوواط')}</span></div>
-        <div class="og-sidebar-row"><span class="lbl">سعة التخزين</span><span class="val">${bi(result.storedKWh.toFixed(1) + ' kWh')}</span></div>
-        <div class="og-sidebar-row"><span class="lbl">عدد الألواح</span><span class="val">${bi(result.panelCount + ' لوح')}</span></div>
-        <div class="og-sidebar-row"><span class="lbl">عدد البطاريات</span><span class="val">${result.batteryCount}</span></div>
-        <div class="hint-row">${hintIcon('التفاصيل والأسعار الكاملة موضحة في الجدول أدناه.', 'info')}</div>`;
 
       const noteItems = result.errors || [];
       const notesHtml = noteItems.length ? `<div class="hint-row">${hintPill(noteItems)}</div>` : '';
