@@ -766,6 +766,11 @@
     function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 1 }); }
     // عزل اتجاه القيمة (رقم + وحدة) عن باقي الجملة العربية — بدونه الوحدة الإنجليزية بتظهر قبل الرقم (kWh 19.2).
     function bi(s) { return '<bdi>' + s + '</bdi>'; }
+    // قدرة: أقل من 1 كيلوواط تتعرض بالوات (عشان 0.04 kW ما تتقرّبش لـ "0 kW")، من 1 كيلوواط فأكثر بالكيلوواط.
+    function fmtPower(kw) {
+      const w = Math.round(Number(kw || 0) * 1000);
+      return w < 1000 ? fmt(w) + ' W' : fmt1(kw) + ' kW';
+    }
     // أيقونة رسالة (info | warn): الزر + نص الرسالة المخفي بعده. العرض يتم بواسطة مكوّن #ogHintPop.
     function hintIcon(html, kind) {
       kind = kind === 'warn' ? 'warn' : 'info';
@@ -844,7 +849,7 @@
             <tr><td>إجمالي قدرة الألواح / الإنتاجية اليومية المتوقعة</td><td>${bi(fmt1(b.panelKWp) + ' kWp')} — ${bi(fmt1(b.dailyProductionKWh) + ' kWh')}/يوم</td></tr>
             <tr><td>إجمالي استهلاكك النهاري / الليلي</td><td>${bi(fmt1(b.dayLoadKWh) + ' kWh')} نهار — ${bi(fmt1(b.nightLoadKWh) + ' kWh')} ليل</td></tr>
             <tr><td>سعة التخزين بالبطاريات${b.batteryUsagePct != null ? " (نسبة الاستخدام)" : ""}</td><td>${bi(fmt1(b.storedKWh) + ' kWh')}${b.batteryUsagePct != null ? ` (${bi('~' + b.batteryUsagePct + '%')} من السعة الكاملة عند أقصى تفريغ)` : ""}</td></tr>
-            <tr><td>هل الإنفرتر يكفي كل أجهزتك مع بعض؟</td><td>${bi(fmt1(b.peakInstantaneousKW) + ' kW')} أقصى تشغيل — الإنفرتر: ${bi(fmt1(b.invRatedKW) + ' kW')} مستمر / ${bi(fmt1(b.invSurgeKW) + ' kW')} إقلاع ${invOk ? "— كافٍ ✓" : "— ⚠ راجعنا لمراجعة الأحمال"}</td></tr>
+            <tr><td>هل الإنفرتر يكفي كل أجهزتك مع بعض؟</td><td>${bi(fmtPower(b.peakInstantaneousKW))} أقصى تشغيل — الإنفرتر: ${bi(fmtPower(b.invRatedKW))} مستمر / ${bi(fmtPower(b.invSurgeKW))} إقلاع ${invOk ? "— كافٍ ✓" : "— ⚠ راجعنا لمراجعة الأحمال"}</td></tr>
             <tr><td>أيام الاستقلالية المصمم عليها</td><td>${bi(fmt(b.autonomyDays))} يوم بدون شحن</td></tr>
           </tbody>
         </table></div>`;
