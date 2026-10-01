@@ -849,6 +849,13 @@
           </tbody>
         </table></div>`;
 
+      // تعليق واحد تحت الرسمين (بدل 3): الإنتاج + التخزين + تنويه التقدير. عنبري لو فيه عجز في أي منهما.
+      const chartsNote = hintIcon(
+        [prodCaption, storageCaption,
+         'الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.'
+        ].map(t => `<div class="hint-item">${t}</div>`).join(''),
+        (prodDelta < 0 || storageDelta < 0) ? 'warn' : 'info');
+
       const chartsRowBlock = `
         <div style="display:flex; gap:14px; margin-top:14px; flex-wrap:wrap;">
           <div style="flex:1; min-width:260px;">
@@ -858,7 +865,6 @@
               { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
               prodSurplusBar,
             ], 380)}
-            <div class="hint-row">${hintIcon(prodCaption, prodDelta >= 0 ? 'info' : 'warn')}</div>
           </div>
           <div style="flex:1; min-width:260px;">
             ${svgBarCompare("سعة البطاريات مقابل استهلاكك الليلي (kWh)", [
@@ -866,10 +872,9 @@
               { label: "استهلاك ليلي", value: b.nightLoadKWh, unit: "" },
               storageSurplusBar,
             ], 380)}
-            <div class="hint-row">${hintIcon(storageCaption, storageDelta >= 0 ? 'info' : 'warn')}</div>
           </div>
         </div>
-        <div class="hint-row" style="margin-top:10px;">${hintIcon('الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.', 'info')}</div>`;
+        <div class="hint-row" style="margin-top:10px;">${chartsNote}</div>`;
 
       return statsBlock + chartsRowBlock;
     }
