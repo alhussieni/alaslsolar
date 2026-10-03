@@ -115,18 +115,22 @@ function pickBatteryForBrand(catalog, brand, inverterVoltage, requestedVoltage, 
  */
 function computeOffgridMaterials(catalog, gp, inputs) {
   const errors = [];
+  // رسائل لغوية موازية لـ errors (نفس الترتيب): { code, params } — للعرض بلغات تانية في الصفحات العامة.
+  // errors نفسها (النص العربي) متتغيّرش لأن أداة المندوب (QL/rep-offgrid-quote.js) بتعرضها زي ما هي.
+  const messages = [];
+  function note(code, params, text) { errors.push(text); messages.push({ code, params: params || {} }); }
 
   const panelOptions = catalog.panels.filter(p => p.brand === inputs.panelBrand);
-  if (!panelOptions.length) { errors.push('لا توجد ألواح منشورة لهذه الماركة.'); return { errors }; }
+  if (!panelOptions.length) { note('no_panels', {}, 'لا توجد ألواح منشورة لهذه الماركة.'); return { errors, messages }; }
   const requestedWatt = inputs.panelWatt ? Number(inputs.panelWatt) : null;
   const wattMatches = requestedWatt ? panelOptions.filter(p => Number(p.power) === requestedWatt) : [];
   const panelPool = wattMatches.length ? wattMatches : panelOptions;
   if (requestedWatt && !wattMatches.length) {
-    errors.push(`⚠ القدرة المختارة (${requestedWatt} وات) مش مسجلة لماركة "${inputs.panelBrand}" — تم استخدام أقرب قدرة متاحة بدلًا منها.`);
+    note('panel_watt_fallback', { watt: requestedWatt, brand: inputs.panelBrand }, `⚠ القدرة المختارة (${requestedWatt} وات) مش مسجلة لماركة "${inputs.panelBrand}" — تم استخدام أقرب قدرة متاحة بدلًا منها.`);
   }
   const panel = panelPool.slice().sort((a, b) => (a.pricePerWatt || 0) - (b.pricePerWatt || 0))[0];
-  if (!inputs.invBrand) { errors.push('اختار ماركة الانفرتر.'); return { errors }; }
-  if (!inputs.battBrand) { errors.push('اختار ماركة البطارية.'); return { errors }; }
+  if (!inputs.invBrand) { note('pick_inv_brand', {}, 'اختار ماركة الانفرتر.'); return { errors, messages }; }
+  if (!inputs.battBrand) { note('pick_batt_brand', {}, 'اختار ماركة البطارية.'); return { errors, messages }; }
 
   const psh = Number(inputs.psh) || 6;
   const safetyFactor = (inputs.safetyFactor === undefined || inputs.safetyFactor === null || inputs.safetyFactor === '')
@@ -162,14 +166,14 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const requestedInvKW = inputs.invPowerKW ? Number(inputs.invPowerKW) : null;
   const { model: inv, undersized: invUndersized, surgeUndersized, requestedNotFound: invRequestedNotFound } =
     pickInverterForBrand(catalog, inputs.invBrand, requiredKW, peakInstantaneousW, surgePctDefault, requestedInvKW);
-  if (!inv) { errors.push(`مفيش موديلات انفرتر مسجلة لماركة "${inputs.invBrand}".`); return { errors }; }
-  if (invRequestedNotFound) errors.push(`⚠ القدرة المختارة (${requestedInvKW} كيلوواط) مش مسجلة لماركة "${inputs.invBrand}" — تم استخدام أقرب قدرة متاحة بدلًا منها.`);
-  if (invUndersized) errors.push(`⚠ أكبر انفرتر متاح من ماركة ${inv.brand} (${inv.powerKW} كيلوواط) لسه أصغر من القدرة اللحظية المطلوبة (${requiredKW} كيلوواط) — قلل الأحمال أو جرّب ماركة تانية.`);
+  if (!inv) { note('no_inverter', { brand: inputs.invBrand }, `مفيش موديلات انفرتر مسجلة لماركة "${inputs.invBrand}".`); return { errors, messages }; }
+  if (invRequestedNotFound) note('inv_watt_fallback', { kw: requestedInvKW, brand: inputs.invBrand }, `⚠ القدرة المختارة (${requestedInvKW} كيلوواط) مش مسجلة لماركة "${inputs.invBrand}" — تم استخدام أقرب قدرة متاحة بدلًا منها.`);
+  if (invUndersized) note('inv_undersized', { brand: inv.brand, kw: inv.powerKW, requiredKW }, `⚠ أكبر انفرتر متاح من ماركة ${inv.brand} (${inv.powerKW} كيلوواط) لسه أصغر من القدرة اللحظية المطلوبة (${requiredKW} كيلوواط) — قلل الأحمال أو جرّب ماركة تانية.`);
   const inverterVoltage = inv.voltage;
 
   if (surgeUndersized && peakSurgeAddOn > 0) {
     const basis = inv.surgeCapacityPct ? 'من الداتا شيت' : 'افتراض عام تقريبي 150% (سجّل النسبة الحقيقية من الداتا شيت لدقة أعلى)';
-    errors.push(`⚠ أكبر انفرتر متاح من ماركة ${inv.brand} لسه مش هيتحمّل تيار بدء "${worstSurgeLoad}" (${basis}) — جرّب ماركة تانية أو شغّل الأجهزة الكبيرة منفصلة.`);
+    note('inv_surge', { brand: inv.brand, load: worstSurgeLoad, basis: inv.surgeCapacityPct ? 'datasheet' : 'assumed' }, `⚠ أكبر انفرتر متاح من ماركة ${inv.brand} لسه مش هيتحمّل تيار بدء "${worstSurgeLoad}" (${basis}) — جرّب ماركة تانية أو شغّل الأجهزة الكبيرة منفصلة.`);
   }
 
   /* ---- 3) اختيار البطارية (يدويًا لو المستخدم حدد فولت/سعة/نوع، وإلا تلقائيًا
@@ -189,8 +193,10 @@ function computeOffgridMaterials(catalog, gp, inputs) {
       no_compatible_voltage: `مفيش بطاريات من ماركة "${inputs.battBrand}" بجهد متوافق مع الانفرتر (${inverterVoltage}V) — جرّب ماركة تانية.`,
       no_ah: `مفيش بطارية من ماركة "${inputs.battBrand}" بفولت ${requestedBattVoltage || ''}V وسعة ${requestedBattAh}AH.`,
     };
-    errors.push(msgs[battPick.reason] || `تعذر اختيار بطارية مناسبة من ماركة "${inputs.battBrand}".`);
-    return { errors };
+    note(msgs[battPick.reason] ? 'batt_' + battPick.reason : 'batt_fail',
+      { brand: inputs.battBrand, volt: requestedBattVoltage, invVolt: inverterVoltage, ah: requestedBattAh },
+      msgs[battPick.reason] || `تعذر اختيار بطارية مناسبة من ماركة "${inputs.battBrand}".`);
+    return { errors, messages };
   }
   const batteryVoltage = batt.voltage;
   const designOkay = inverterVoltage >= batteryVoltage;
@@ -202,7 +208,7 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const O6 = Math.round(O7 * O8);                                // إجمالي عدد البطاريات
   const O9 = O7 * O8 * batt.ah * batteryVoltage;                 // إجمالي الطاقة المخزنة Wh
   if (autonomyEnergyWh <= 0) {
-    errors.push('⚠ سعة البطاريات المحسوبة تقريبًا صفر — راجع الأحمال الليلية أو أيام الاستقلالية قبل التنفيذ الفعلي.');
+    note('batt_zero', {}, '⚠ سعة البطاريات المحسوبة تقريبًا صفر — راجع الأحمال الليلية أو أيام الاستقلالية قبل التنفيذ الفعلي.');
   }
 
   /* ---- 5) تصميم مصفوفة الألواح ---- */
@@ -232,7 +238,7 @@ function computeOffgridMaterials(catalog, gp, inputs) {
       ) best = candidate;
     }
     if (!best) {
-      errors.push(`مفيش تركيبة سلسلة ممكنة بالانفرتر ${inv.brand} ${inv.type} مع اللوح ده — جرّب لوح بفولت أقل أو انفرتر تاني.`);
+      note('no_string', { brand: inv.brand, type: inv.type }, `مفيش تركيبة سلسلة ممكنة بالانفرتر ${inv.brand} ${inv.type} مع اللوح ده — جرّب لوح بفولت أقل أو انفرتر تاني.`);
       panelsPerString = maxPanelsPerString;
       stringCount = Math.max(Math.ceil(O2min / panelsPerString), 1);
       stringVimp = panelsPerString * panel.vimp;
@@ -240,10 +246,10 @@ function computeOffgridMaterials(catalog, gp, inputs) {
       panelsPerString = best.panelsPerString; stringCount = best.stringCount; stringVimp = panelsPerString * panel.vimp;
     }
     pvLimitVerified = true;
-    if (inv.pvMpptMin && stringVimp < inv.pvMpptMin) errors.push(`⚠ فولت تشغيل سلسلة الألواح (${Math.round(stringVimp)}V) أقل من الحد الأدنى لنطاق MPPT لانفرتر ${inv.brand} (${inv.pvMpptMin}V) — كفاءة الشحن هتقل.`);
-    if (inv.pvMpptMax && stringVimp > inv.pvMpptMax) errors.push(`⚠ فولت تشغيل سلسلة الألواح (${Math.round(stringVimp)}V) أعلى من الحد الأقصى لنطاق MPPT لانفرتر ${inv.brand} (${inv.pvMpptMax}V) — قلل عدد الألواح بالسلسلة.`);
+    if (inv.pvMpptMin && stringVimp < inv.pvMpptMin) note('mppt_low', { v: Math.round(stringVimp), brand: inv.brand, min: inv.pvMpptMin }, `⚠ فولت تشغيل سلسلة الألواح (${Math.round(stringVimp)}V) أقل من الحد الأدنى لنطاق MPPT لانفرتر ${inv.brand} (${inv.pvMpptMin}V) — كفاءة الشحن هتقل.`);
+    if (inv.pvMpptMax && stringVimp > inv.pvMpptMax) note('mppt_high', { v: Math.round(stringVimp), brand: inv.brand, max: inv.pvMpptMax }, `⚠ فولت تشغيل سلسلة الألواح (${Math.round(stringVimp)}V) أعلى من الحد الأقصى لنطاق MPPT لانفرتر ${inv.brand} (${inv.pvMpptMax}V) — قلل عدد الألواح بالسلسلة.`);
   } else {
-    errors.push(`⚠ مفيش بيانات فنية كافية (Voc/Vimp) لماركة الألواح "${panel.brand}" أو انفرتر "${inv.brand}" — عدد الألواح محسوب من موازنة الطاقة بس، من غير تأكيد إن التوصيل الفعلي في سلاسل متوافق مع مدخل الانفرتر. راجع مع المهندس قبل التنفيذ.`);
+    note('no_voc_data', { panel: panel.brand, inv: inv.brand }, `⚠ مفيش بيانات فنية كافية (Voc/Vimp) لماركة الألواح "${panel.brand}" أو انفرتر "${inv.brand}" — عدد الألواح محسوب من موازنة الطاقة بس، من غير تأكيد إن التوصيل الفعلي في سلاسل متوافق مع مدخل الانفرتر. راجع مع المهندس قبل التنفيذ.`);
   }
   const O2 = pvLimitVerified ? panelsPerString * stringCount : O2min;
 
@@ -252,7 +258,7 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const installedPvW = O2 * panelWatt;
   const pvPowerChecked = !!inv.pvMaxPowerW;
   if (pvPowerChecked && installedPvW > inv.pvMaxPowerW) {
-    errors.push(`⚠ قدرة الألواح المركّبة (${Math.round(installedPvW)}W) أعلى من أقصى قدرة PV يقبلها انفرتر ${inv.brand} (${inv.pvMaxPowerW}W) — الزيادة هتتهدر (clipping)، قلل عدد الألواح أو اختار انفرتر أكبر.`);
+    note('pv_clipping', { w: Math.round(installedPvW), brand: inv.brand, max: inv.pvMaxPowerW }, `⚠ قدرة الألواح المركّبة (${Math.round(installedPvW)}W) أعلى من أقصى قدرة PV يقبلها انفرتر ${inv.brand} (${inv.pvMaxPowerW}W) — الزيادة هتتهدر (clipping)، قلل عدد الألواح أو اختار انفرتر أكبر.`);
   }
 
   /* ---- 6) بنود الخامات (بدون تركيب أو نقل) ---- */
@@ -263,23 +269,23 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const rows = [];
   if (panelWatt && panel.pricePerWatt) {
     const panelUnit = panel.pricePerWatt * panelWatt;
-    rows.push({ name: 'الألواح', type: panel.brand, qty: O2, unitPrice: panelUnit, total: O2 * panelUnit });
+    rows.push({ name: 'الألواح', key: 'panels', type: panel.brand, qty: O2, unitPrice: panelUnit, total: O2 * panelUnit });
     // panels are sold by this brand at a per-watt price with no fixed model/SKU,
     // so the ${panelWatt}W used for the electrical string design is an engineering
     // assumption (typical panel spec), not a real product listing — say so explicitly
     // instead of implying "JA Solar 550W" is an actual purchasable model.
     if (!requestedWatt || !wattMatches.length) {
-      errors.push(`ℹ️ عدد الألواح محسوب على أساس لوح نموذجي ~${panelWatt} وات لماركة ${panel.brand} (لتصميم التوصيل الكهربائي فقط) — ده أقرب قدرة مسجلة فعليًا، فلو فيه قدرة تانية دقيقة أكتر لازم تتسجل في المنتجات.`);
+      note('panel_typical', { watt: panelWatt, brand: panel.brand }, `ℹ️ عدد الألواح محسوب على أساس لوح نموذجي ~${panelWatt} وات لماركة ${panel.brand} (لتصميم التوصيل الكهربائي فقط) — ده أقرب قدرة مسجلة فعليًا، فلو فيه قدرة تانية دقيقة أكتر لازم تتسجل في المنتجات.`);
     }
   } else {
-    rows.push({ name: 'الألواح', type: panel.brand, qty: O2, unitPrice: 0, total: 0 });
-    errors.push('⚠ سعر الألواح لهذه الماركة غير مكتمل في الموقع — القيمة غير محسوبة بدقة في الإجمالي.');
+    rows.push({ name: 'الألواح', key: 'panels', type: panel.brand, qty: O2, unitPrice: 0, total: 0 });
+    note('panel_price_missing', {}, '⚠ سعر الألواح لهذه الماركة غير مكتمل في الموقع — القيمة غير محسوبة بدقة في الإجمالي.');
   }
-  rows.push({ name: 'انفرتر', type: `${inv.brand} ${inv.type}`, qty: phaseQty, unitPrice: inv.unitPrice, total: phaseQty * inv.unitPrice });
-  rows.push({ name: 'شاسيه', type: 'حديد مجلفن', qty: steelQty, unitPrice: gp.steelPerUnit, total: steelQty * gp.steelPerUnit });
-  rows.push({ name: 'كابلات', type: '6 مم', qty: cablesQty, unitPrice: gp.cablesPerMeter, total: cablesQty * gp.cablesPerMeter });
-  rows.push({ name: 'بطاريات', type: `${batt.brand} ${batt.ah}AH-${batt.voltage}V`, qty: O6, unitPrice: batt.unitPrice, total: O6 * batt.unitPrice });
-  rows.push({ name: 'إكسسوارات', type: 'لوحة تجميع / MC4 / فيوز / قواطع', qty: 1, unitPrice: gp.accessoriesFixed, total: gp.accessoriesFixed });
+  rows.push({ name: 'انفرتر', key: 'inverter', type: `${inv.brand} ${inv.type}`, qty: phaseQty, unitPrice: inv.unitPrice, total: phaseQty * inv.unitPrice });
+  rows.push({ name: 'شاسيه', key: 'chassis', typeKey: 'steel', type: 'حديد مجلفن', qty: steelQty, unitPrice: gp.steelPerUnit, total: steelQty * gp.steelPerUnit });
+  rows.push({ name: 'كابلات', key: 'cables', typeKey: 'cable6', type: '6 مم', qty: cablesQty, unitPrice: gp.cablesPerMeter, total: cablesQty * gp.cablesPerMeter });
+  rows.push({ name: 'بطاريات', key: 'batteries', type: `${batt.brand} ${batt.ah}AH-${batt.voltage}V`, qty: O6, unitPrice: batt.unitPrice, total: O6 * batt.unitPrice });
+  rows.push({ name: 'إكسسوارات', key: 'accessories', typeKey: 'accset', type: 'لوحة تجميع / MC4 / فيوز / قواطع', qty: 1, unitPrice: gp.accessoriesFixed, total: gp.accessoriesFixed });
 
   const grandTotal = rows.reduce((s, r) => s + r.total, 0);
 
@@ -291,7 +297,7 @@ function computeOffgridMaterials(catalog, gp, inputs) {
   const batteryUsagePct = O9 ? Math.round((autonomyEnergyWh / O9) * 100) : null;
 
   return {
-    errors, inv, batt, panel,
+    errors, messages, inv, batt, panel,
     panelCount: O2, batteryCount: O6, storedKWh: O9 / 1000,
     rows, grandTotal, offer: true,
     /* بيانات إضافية للبريف الفني عند الطباعة */

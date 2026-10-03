@@ -15,6 +15,21 @@
   <meta name="description" content="حاسبة نظام الطاقة الشمسية بالبطاريات (أوف جريد) — احسب حجم الانفرتر والبطاريات والألواح المطلوبة من واقع أحمالك">
   <meta name="theme-color" content="#0d0b0a">
   <title>حاسبة أنظمة الأوف جريد | الأصل للطاقة الشمسية</title>
+  <script>
+    /* لغة الزائر بدري (قبل أول رسم) — نفس منطق app.js — عشان الصفحة ما تفتحش بالعربي/RTL وبعدين تقلب. */
+    (function () {
+      try {
+        var S = ['ar', 'en', 'es', 'zh'], l = localStorage.getItem('alasl-lang');
+        if (S.indexOf(l) < 0) {
+          l = 'en';
+          var nl = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+          for (var i = 0; i < nl.length; i++) { var c = String(nl[i]).toLowerCase().split('-')[0]; if (S.indexOf(c) >= 0) { l = c; break; } }
+        }
+        document.documentElement.lang = l;
+        document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      } catch (e) {}
+    })();
+  </script>
   <link rel="canonical" href="https://alaslsolar.com/offgrid-calculator.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,7 +91,7 @@
       .og-table th, .og-table td { padding-inline: 4px; }
       .og-price-btn { padding: 4px 6px; font-size: 11px; }
     }
-    .og-table th { text-align: right; padding: 9px 12px; background: #f7f3ee; border-bottom: 2px solid var(--line); font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.05em; }
+    .og-table th { text-align: start; padding: 9px 12px; background: #f7f3ee; border-bottom: 2px solid var(--line); font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.05em; }
     .og-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--ink); font-weight: 600; }
     .og-table tbody tr:last-child td { border-bottom: none; }
     .og-table tfoot td { font-weight: 800; background: var(--brand-soft); color: var(--brand-dark); font-size: 14px; }
@@ -94,7 +109,7 @@
 
     /* Loads table */
     .loads-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 13px; }
-    .loads-table th { text-align: right; padding: 6px 8px; font-size: 10px; font-weight: 800; color: var(--muted); border-bottom: 1.5px solid var(--line); }
+    .loads-table th { text-align: start; padding: 6px 8px; font-size: 10px; font-weight: 800; color: var(--muted); border-bottom: 1.5px solid var(--line); }
     .loads-table td { padding: 5px 8px; border-bottom: 1px solid var(--line); }
     .loads-table input[type="number"] { height: 32px; width: 100%; padding: 0 6px; border: 1.5px solid var(--line); border-radius: 6px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; text-align: center; }
     .loads-table input[type="number"]::-webkit-outer-spin-button,
@@ -182,11 +197,19 @@
     .hint-pill i { font-size: 15px; color: #c8860a; }
     .hint-pill::after { inset: -6px; }
     .hint-body { display: none; }
+    .field select { padding-inline-start: 12px; }                 /* "Single-phase" كان بيتقص بـ1px */
+    /* هيدر الموقع المشترك بيعرض قايمة سطح المكتب كاملة من 861px، وبالإسباني/الإنجليزي أطول من العرض (حتى الرئيسية).
+       تعديل محلي لصفحتي بس لحد ما تتظبط في styles.css. */
+    @media (min-width: 861px) and (max-width: 1000px) {
+      .site-menu a, .site-menu button { padding-inline: 6px; font-size: 13.5px; }
+    }
+    html:lang(zh) body { font-family: "Cairo", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif; }
+    html[dir="ltr"] .page-hero .eyebrow .ti-chevron-left { display: inline-block; transform: scaleX(-1); }   /* سهم الـbreadcrumb يتعكس في LTR */
     .field label:has(.hint) { display: flex; align-items: center; gap: 2px; }   /* الأيقونة جنب النص مش سطر لوحدها */
     .hint-row { display: flex; justify-content: center; margin-top: 6px; }
     .hint-item + .hint-item { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.12); }
     #ogHintPop { position: fixed; left: 0; top: 0; z-index: 1000; box-sizing: border-box; width: max-content;
-      max-width: min(320px, calc(100vw - 16px)); padding: 10px 12px; border-radius: 10px; direction: rtl; text-align: right;
+      max-width: min(320px, calc(100vw - 16px)); padding: 10px 12px; border-radius: 10px; text-align: start;
       background: #fffaf3; color: var(--ink); border: 1px solid #e8c49a; box-shadow: 0 8px 24px rgba(0,0,0,.2);
       font-size: 13px; font-weight: 500; line-height: 1.75; }
     #ogHintPop[data-kind="warn"] { background: #fffbf2; border-color: #f5c842; }
@@ -197,23 +220,37 @@
 <body>
   <a class="skip-link" href="#main">تخطي إلى المحتوى</a>
 
+  <a class="skip-link" href="#main" data-i18n="skip_link">تخطي إلى المحتوى</a>
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="الأصل للطاقة الشمسية">
-      <img src="logo-white.png" alt="شعار الأصل للطاقة الشمسية" width="120" height="70" loading="eager">
+    <a class="brand" href="index.html" aria-label="الأصل للطاقة الشمسية" data-og-attr="aria-label:aria_brand">
+      <img src="logo-white.png" alt="شعار الأصل للطاقة الشمسية" data-og-attr="alt:logo_alt" width="120" height="70" loading="eager">
     </a>
     <button class="menu-toggle" type="button" aria-controls="siteMenu" aria-expanded="false" data-menu-toggle>
       <i class="fa fa-bars" aria-hidden="true"></i>
-      <span class="sr-only">فتح القائمة</span>
+      <span class="sr-only" data-i18n="menu_open">فتح القائمة</span>
     </button>
-    <nav class="site-menu" id="siteMenu" aria-label="التنقل الرئيسي">
-      <a href="index.html">الرئيسية</a>
-      <a href="about.html">من نحن</a>
-      <a href="services.html">الخدمات</a>
-      <a href="products.html">المنتجات</a>
-      <a href="projects.html">المشاريع</a>
-      <a href="articles.html">المقالات</a>
-      <a href="calculators.html" aria-current="page" style="color:#e8954a;">الحاسبات</a>
-      <a href="contact.html">تواصل معنا</a>
+    <nav class="site-menu" id="siteMenu" aria-label="التنقل الرئيسي" data-og-attr="aria-label:aria_nav">
+      <a href="index.html" data-i18n="nav_home">الرئيسية</a>
+      <a href="about.html" data-i18n="nav_about">من نحن</a>
+      <a href="services.html" data-i18n="nav_services">الخدمات</a>
+      <a href="products.html" data-i18n="nav_products">المنتجات</a>
+      <a href="projects.html" data-i18n="nav_projects">المشاريع</a>
+      <a href="articles.html" data-i18n="nav_articles">المقالات</a>
+      <a href="calculators.html" aria-current="page" style="color:#e8954a;" data-i18n="nav_calculators">الحاسبات</a>
+      <a href="contact.html" data-i18n="nav_contact">اتصل بنا</a>
+      <div class="lang-switcher" role="group" aria-label="Language">
+        <button class="lang-globe-btn" id="langToggle" aria-expanded="false" aria-haspopup="listbox" type="button">
+          <i class="ti ti-world" aria-hidden="true"></i>
+          <span id="langLabel" data-i18n="language">اللغة</span>
+          <i class="ti ti-chevron-down lang-arrow" aria-hidden="true"></i>
+        </button>
+        <ul class="lang-dropdown" id="langDropdown" role="listbox" aria-label="Select language">
+          <li><button type="button" data-lang="en" role="option">🇺🇸 English</button></li>
+          <li><button type="button" data-lang="ar" role="option">🇸🇦 العربية</button></li>
+          <li><button type="button" data-lang="es" role="option">🇪🇸 Español</button></li>
+          <li><button type="button" data-lang="zh" role="option">🇨🇳 中文</button></li>
+        </ul>
+      </div>
     </nav>
   </header>
 
@@ -221,13 +258,13 @@
 
     <section class="page-hero">
       <p class="eyebrow">
-        <a href="calculators.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-weight:700;">الحاسبات</a>
+        <a href="calculators.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-weight:700;" data-i18n="nav_calculators">الحاسبات</a>
         <i class="ti ti-chevron-left" style="font-size:11px;margin:0 4px;color:rgba(255,255,255,.4);"></i>
-        <span style="color:#e8954a;">أوف جريد</span>
+        <span style="color:#e8954a;" data-og="bc_offgrid">أوف جريد</span>
       </p>
-      <h1>حاسبة أنظمة الطاقة الشمسية بالبطاريات (Off-Grid)</h1>
-      <p class="hero-slogan">حجم الانفرتر · البطاريات · الألواح — من واقع أحمالك الفعلية</p>
-      <p style="color:rgba(255,255,255,0.72);font-size:15px;max-width:680px;margin-top:var(--space-2);">
+      <h1 data-og="h1">حاسبة أنظمة الطاقة الشمسية بالبطاريات (Off-Grid)</h1>
+      <p class="hero-slogan" data-og="slogan">حجم الانفرتر · البطاريات · الألواح — من واقع أحمالك الفعلية</p>
+      <p style="color:rgba(255,255,255,0.72);font-size:15px;max-width:680px;margin-top:var(--space-2);" data-og="intro">
         أدخل الأجهزة التي ستقوم بتشغيلها وساعات تشغيلها، واختر العلامات التجارية المناسبة، لتحصل على تقدير لتكلفة الخامات فقط (دون تركيب أو نقل).
       </p>
     </section>
@@ -237,16 +274,14 @@
       <div class="calc-disclaimer">
         <i class="fa fa-triangle-exclamation" aria-hidden="true"></i>
         <p>
-          <strong>تنويه هام:</strong> النتائج <strong>تقديرية للتخطيط الأولي</strong> وتشمل <strong>الخامات فقط</strong> — <strong>بدون تركيب أو نقل</strong>.
-          <button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden><strong>تنويه هام:</strong> النتائج هنا <strong>تقديرية للتخطيط الأولي</strong> وتشمل
-          <strong>تكلفة الخامات فقط</strong> (الألواح، الانفرتر، البطاريات، الشاسيه، الكابلات، الإكسسوارات) —
-          <strong>بدون تركيب أو نقل</strong>. للتسعير النهائي الدقيق تواصل مباشرة مع مهندسي الشركة.</span>
+          <span data-og-html="disc_short_html"><strong>تنويه هام:</strong> النتائج <strong>تقديرية للتخطيط الأولي</strong> وتشمل <strong>الخامات فقط</strong> — <strong>بدون تركيب أو نقل</strong>.</span>
+          <button type="button" class="hint hint-info" aria-label="معلومة" data-og-attr="aria-label:aria_info" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden data-og-html="disc_full_html"><strong>تنويه هام:</strong> النتائج هنا <strong>تقديرية للتخطيط الأولي</strong> وتشمل <strong>تكلفة الخامات فقط</strong> (الألواح، الانفرتر، البطاريات، الشاسيه، الكابلات، الإكسسوارات) — <strong>بدون تركيب أو نقل</strong>. للتسعير النهائي الدقيق تواصل مباشرة مع مهندسي الشركة.</span>
         </p>
       </div>
 
       <div class="calc-empty" id="ogDisabledState" hidden>
         <i class="fa fa-screwdriver-wrench" aria-hidden="true"></i>
-        <p>حاسبة الأوف جريد قيد التطوير حاليًا وستعمل من جديد قريبًا. يُرجى التواصل معنا مباشرة في الوقت الحالي لحساب منظومتكم.</p>
+        <p data-og="disabled">حاسبة الأوف جريد قيد التطوير حاليًا وستعمل من جديد قريبًا. يُرجى التواصل معنا مباشرة في الوقت الحالي لحساب منظومتكم.</p>
       </div>
 
       <div id="ogCalcWrapOuter">
@@ -256,10 +291,10 @@
         <!-- Step 1: Loads (full width — the loads table needs the room) -->
         <div class="calc-panel og-section" id="ogStep1">
           <div class="og-section-head">
-            <div class="og-step-num">١</div>
+            <div class="og-step-num" data-og="step_1">١</div>
             <div>
-              <h2 class="og-step-title">الأحمال المطلوب تشغيلها</h2>
-              <p class="og-step-sub">اختر الأجهزة وحدد عددها وساعات تشغيلها</p>
+              <h2 class="og-step-title" data-og="s1_title">الأحمال المطلوب تشغيلها</h2>
+              <p class="og-step-sub" data-og="s1_sub">اختر الأجهزة وحدد عددها وساعات تشغيلها</p>
             </div>
           </div>
 
@@ -267,26 +302,26 @@
 
           <div class="field-group g2" style="align-items:flex-end;">
             <div class="field">
-              <label for="ogLoadPicker">اختر جهازًا لإضافته</label>
+              <label for="ogLoadPicker" data-og="pick_label">اختر جهازًا لإضافته</label>
               <select id="ogLoadPicker"></select>
             </div>
             <button type="button" class="btn-light" id="ogAddLoadBtn" style="height:42px;">
-              <i class="fa fa-plus" aria-hidden="true"></i> أضف الجهاز
+              <i class="fa fa-plus" aria-hidden="true"></i> <span data-og="add_btn">أضف الجهاز</span>
             </button>
           </div>
 
-          <p class="field-hint" id="ogNoLoadsHint">لم تتم إضافة أي جهاز بعد — اختر جهازًا من القائمة أعلاه، أو اختر أحد الأنظمة الجاهزة.</p>
+          <p class="field-hint" id="ogNoLoadsHint" data-og="no_loads_hint">لم تتم إضافة أي جهاز بعد — اختر جهازًا من القائمة أعلاه، أو اختر أحد الأنظمة الجاهزة.</p>
 
           <div class="loads-scroll" id="ogAddedLoadsWrap" hidden>
             <table class="loads-table">
               <thead>
                 <tr>
-                  <th style="width:30%;">الجهاز</th>
-                  <th>القدرة (وات)</th>
-                  <th>العدد</th>
-                  <th>ساعات نهار</th>
-                  <th>ساعات ليل</th>
-                  <th title="نسبة الوقت الفعلي اللي الجهاز شغال فيه فعليًا خلال الساعات المُدخّلة (1 = شغال طول الوقت، 0.5 = نص الوقت مثلًا)">معامل التشغيل</th>
+                  <th style="width:30%;" data-og="th_device">الجهاز</th>
+                  <th data-og="th_watt">القدرة (وات)</th>
+                  <th data-og="th_count">العدد</th>
+                  <th data-og="th_day">ساعات نهار</th>
+                  <th data-og="th_night">ساعات ليل</th>
+                  <th data-og="th_factor" data-og-attr="title:th_factor_tip" title="نسبة الوقت الفعلي اللي الجهاز شغال فيه فعليًا خلال الساعات المُدخّلة (1 = شغال طول الوقت، 0.5 = نص الوقت مثلًا)">معامل التشغيل</th>
                   <th></th>
                 </tr>
               </thead>
@@ -295,8 +330,8 @@
           </div>
 
           <div class="toggle-row">
-            <label class="toggle-chip"><input type="checkbox" id="ogMorning" checked> تشغيل فترة النهار</label>
-            <label class="toggle-chip"><input type="checkbox" id="ogNight" checked> تشغيل فترة الليل</label>
+            <label class="toggle-chip"><input type="checkbox" id="ogMorning" checked> <span data-og="chip_day">تشغيل فترة النهار</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="ogNight" checked> <span data-og="chip_night">تشغيل فترة الليل</span></label>
           </div>
         </div>
 
@@ -305,31 +340,31 @@
         <!-- Step 2: System settings + brands (revealed once at least one load is added) -->
         <div class="calc-panel og-section is-locked" id="ogStep2">
           <div class="og-section-head">
-            <div class="og-step-num">٢</div>
+            <div class="og-step-num" data-og="step_2">٢</div>
             <div>
-              <h2 class="og-step-title">إعدادات النظام والماركات</h2>
+              <h2 class="og-step-title" data-og="s2_title">إعدادات النظام والماركات</h2>
               <p class="og-step-sub" id="ogStep2Sub">أضف جهازًا واحدًا على الأقل لتفعيل هذه الخطوة</p>
             </div>
           </div>
 
           <div class="field-group g4">
             <div class="field">
-              <label for="ogPsh">متوسط ساعات الشمس (PSH)</label>
+              <label for="ogPsh" data-og="lbl_psh">متوسط ساعات الشمس (PSH)</label>
               <input type="number" id="ogPsh" value="6" min="1" step="0.5">
             </div>
             <div class="field">
-              <label for="ogSafety">معامل الأمان</label>
+              <label for="ogSafety" data-og="lbl_safety">معامل الأمان</label>
               <input type="number" id="ogSafety" value="1.1" min="1" step="0.05">
             </div>
             <div class="field">
-              <label for="ogAutonomy">أيام الاستقلالية (دون شمس)<button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden>القيمة 0 في أيام الاستقلالية تعني تغطية ليلة تشغيل عادية فقط، دون احتياطي إضافي لأيام غائمة متتالية.</span></label>
+              <label for="ogAutonomy"><span data-og="lbl_autonomy">أيام الاستقلالية (دون شمس)</span><button type="button" class="hint hint-info" aria-label="معلومة" data-og-attr="aria-label:aria_info" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden data-og="hint_autonomy">القيمة 0 في أيام الاستقلالية تعني تغطية ليلة تشغيل عادية فقط، دون احتياطي إضافي لأيام غائمة متتالية.</span></label>
               <input type="number" id="ogAutonomy" value="0" min="0" step="1">
             </div>
             <div class="field">
-              <label for="ogPhase">عدد الفازات</label>
+              <label for="ogPhase" data-og="lbl_phase">عدد الفازات</label>
               <select id="ogPhase">
-                <option value="single">أحادي الفاز</option>
-                <option value="three">ثلاثي الفاز</option>
+                <option value="single" data-og="phase_single">أحادي الفاز</option>
+                <option value="three" data-og="phase_three">ثلاثي الفاز</option>
               </select>
             </div>
           </div>
@@ -338,24 +373,24 @@
 
           <div class="field-group g4">
             <div class="field">
-              <label for="ogInvBrand">العلامة التجارية للانفرتر</label>
+              <label for="ogInvBrand" data-og="lbl_inv_brand">العلامة التجارية للانفرتر</label>
               <select id="ogInvBrand"></select>
             </div>
             <div class="field">
-              <label for="ogBattBrand">العلامة التجارية للبطارية</label>
+              <label for="ogBattBrand" data-og="lbl_batt_brand">العلامة التجارية للبطارية</label>
               <select id="ogBattBrand"></select>
             </div>
             <div class="field">
-              <label for="ogPanelBrand">العلامة التجارية للألواح</label>
+              <label for="ogPanelBrand" data-og="lbl_panel_brand">العلامة التجارية للألواح</label>
               <select id="ogPanelBrand"></select>
             </div>
             <div class="field">
-              <label for="ogPanelWatt">قدرة اللوح</label>
+              <label for="ogPanelWatt" data-og="lbl_panel_watt">قدرة اللوح</label>
               <select id="ogPanelWatt"></select>
             </div>
           </div>
           <button type="button" class="btn btn-primary" id="ogCalcBtn" style="width:100%;margin-top:var(--space-2);">
-            <i class="fa fa-calculator" aria-hidden="true"></i> احسب النظام
+            <i class="fa fa-calculator" aria-hidden="true"></i> <span data-og="calc_btn">احسب النظام</span>
           </button>
         </div>
           </div>
@@ -364,7 +399,7 @@
         <!-- Results -->
         <div class="results-panel og-section" id="ogResults" hidden>
           <div class="results-header">
-            <h2 class="results-title">نتيجة الحساب</h2>
+            <h2 class="results-title" data-og="res_title">نتيجة الحساب</h2>
           </div>
 
           <div class="metrics-row" id="ogMetrics"></div>
@@ -376,7 +411,7 @@
           <div class="og-table-wrap">
             <table class="og-table">
               <thead>
-                <tr><th>البند</th><th>النوع</th><th>الكمية</th><th>السعر</th></tr>
+                <tr><th data-og="th_item">البند</th><th data-og="th_type">النوع</th><th data-og="th_qty">الكمية</th><th data-og="th_price">السعر</th></tr>
               </thead>
               <tbody id="ogRowsBody"></tbody>
             </table>
@@ -385,15 +420,14 @@
           <div id="ogTechBrief"></div>
 
           <div class="footer-disclaimer">
-            <p><strong>الأسعار غير ظاهرة هنا</strong> — الكميات تغطي الخامات فقط و<strong>لا تشمل التركيب أو النقل</strong>.
-              <button type="button" class="hint hint-info" aria-label="معلومة" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden><strong>الأسعار غير ظاهرة هنا</strong> — انقر على "اعرف السعر" أمام كل بند لعرض سعره بالتفصيل في صفحة المنتج.
-              هذه الكميات تغطي الخامات فقط، و<strong>لا تشمل التركيب أو النقل أو أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</span></p>
+            <p><span data-og-html="foot_short_html"><strong>الأسعار غير ظاهرة هنا</strong> — الكميات تغطي الخامات فقط و<strong>لا تشمل التركيب أو النقل</strong>.</span>
+              <button type="button" class="hint hint-info" aria-label="معلومة" data-og-attr="aria-label:aria_info" aria-expanded="false"><i class="fa fa-circle-info" aria-hidden="true"></i></button><span class="hint-body" hidden data-og-html="foot_full_html"><strong>الأسعار غير ظاهرة هنا</strong> — انقر على "اعرف السعر" أمام كل بند لعرض سعره بالتفصيل في صفحة المنتج. هذه الكميات تغطي الخامات فقط، و<strong>لا تشمل التركيب أو النقل أو أي رسوم إضافية</strong>. للحصول على عرض سعر نهائي دقيق، تواصل معنا مباشرة.</span></p>
           </div>
         </div>
 
         <div class="calc-empty og-section" id="ogEmpty">
           <i class="fa fa-solar-panel" aria-hidden="true"></i>
-          <p>اختر الأحمال والعلامات التجارية ثم اضغط "احسب النظام" لعرض النتيجة</p>
+          <p data-og="empty_prompt">اختر الأحمال والعلامات التجارية ثم اضغط "احسب النظام" لعرض النتيجة</p>
         </div>
           </div>
         </div>
@@ -409,7 +443,7 @@
       <strong>Al Asl Solar Energy</strong>
       <p>sales@alaslsolar.com | +20 120 007 4344 | +966 56 127 4344</p>
     </div>
-    <div class="social-links" aria-label="روابط التواصل">
+    <div class="social-links" aria-label="روابط التواصل" data-og-attr="aria-label:aria_social">
       <a href="https://linkedin.com/company/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
       <a href="https://youtube.com/@alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
       <a href="https://facebook.com/alaslsolar" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
@@ -418,13 +452,14 @@
     </div>
   </footer>
 
-  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="تواصل معنا على واتساب">
+  <a class="whatsapp" href="https://wa.me/201200074344" target="_blank" rel="noopener noreferrer" aria-label="تواصل معنا على واتساب" data-og-attr="aria-label:aria_whatsapp">
     <i class="fab fa-whatsapp" aria-hidden="true"></i>
   </a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="offgrid-calc-engine.js"></script>
+  <script src="offgrid-i18n.js"></script>
   <script>
 /* Hint popover — مكوّن عام: أي زر .hint يليه عنصر .hint-body مخفي. نافذة واحدة على <body> (عشان الحاويات اللي overflow ما تقصّهاش).
    ماوس: hover/focus، وضغطة بتثبّتها. لمس: ضغطة تفتح/تقفل. Esc أو ضغطة برّه أو scroll/resize بتقفل. */
@@ -497,10 +532,13 @@
   });
   window.addEventListener('scroll', function () { if (cur) close(); }, true);
   window.addEventListener('resize', function () { if (cur) close(); });
+  window.__ogHintClose = close;
 })();
 </script>
 <script>
   (function () {
+    const OG = window.OG_I18N;                       // offgrid-i18n.js
+    const t = (k, p) => OG.t(k, p);
     /* ============================================================
        Default load catalogue (device power draw + typical duty
        cycle) — engineering reference data only, no cost/price here.
@@ -579,15 +617,17 @@
 
     function buildLoadPicker() {
       const sel = document.getElementById('ogLoadPicker');
+      const prev = sel.value;
       // القايمة بتفضل كاملة دايمًا — يسمح بإضافة نفس الجهاز أكتر من مرة (مثلًا:
       // نفس الشفاط بعدد وساعات مختلفة بالنهار، وصف تاني منفصل بعدد وساعات مختلفة بالليل).
       sel.innerHTML = DEFAULT_LOADS.length
         ? DEFAULT_LOADS.map((l, i) => {
-            const tag = (l.voltage === 380 || l.phase === 'three') ? ` — ${l.voltage || 380}V ثلاثي فاز` : '';
-            return `<option value="${i}">${l.name} (${l.watt} وات${tag})</option>`;
+            const tag = (l.voltage === 380 || l.phase === 'three') ? t('tag_three', { v: l.voltage || 380 }) : '';
+            return `<option value="${i}">${esc(OG.loadName(l.name))} (${l.watt} ${t('u_watt')}${tag})</option>`;
           }).join('')
-        : `<option value="">لا توجد أجهزة متاحة</option>`;
+        : `<option value="">${t('no_loads_opt')}</option>`;
       sel.disabled = DEFAULT_LOADS.length === 0;
+      if (prev !== '' && [...sel.options].some(o => o.value === prev)) sel.value = prev;   // تبديل اللغة ما يغيّرش الجهاز المختار
     }
 
     function refreshLoadsVisibility() {
@@ -595,9 +635,7 @@
       document.getElementById('ogAddedLoadsWrap').hidden = !hasAny;
       document.getElementById('ogNoLoadsHint').hidden = hasAny;
       document.getElementById('ogStep2').classList.toggle('is-locked', !hasAny);
-      document.getElementById('ogStep2Sub').textContent = hasAny
-        ? 'اختر العلامات التجارية ثم اضغط على "احسب النظام"'
-        : 'أضف جهازًا واحدًا على الأقل لتفعيل هذه الخطوة';
+      document.getElementById('ogStep2Sub').textContent = hasAny ? t('s2_sub_ready') : t('s2_sub_locked');
     }
 
     function addLoadRow(idx) {
@@ -610,13 +648,13 @@
       tr.dataset.rowId = rowId;
       tr.dataset.idx = idx;
       tr.innerHTML = `
-        <td class="load-name">${esc(l.name)}</td>
+        <td class="load-name">${esc(OG.loadName(l.name))}</td>
         <td>${l.watt}</td>
         <td><input type="number" min="1" value="1" data-field="count"></td>
         <td><input type="number" min="0" step="0.5" value="${l.dayHours}" data-field="dayHours"></td>
         <td><input type="number" min="0" step="0.5" value="${l.nightHours}" data-field="nightHours"></td>
         <td><input type="number" min="0" max="1" step="0.05" value="${l.runningFactor ?? 1}" data-field="runningFactor"></td>
-        <td><button type="button" class="load-remove-btn" aria-label="حذف" data-remove="${rowId}"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
+        <td><button type="button" class="load-remove-btn" aria-label="${t('aria_remove')}" data-remove="${rowId}"><i class="fa fa-trash" aria-hidden="true"></i></button></td>`;
       tr.querySelector('[data-remove]').addEventListener('click', () => removeLoadRow(rowId));
       body.appendChild(tr);
       refreshLoadsVisibility();
@@ -656,6 +694,16 @@
 
     /* ---------- Presets ("منظومات جاهزة") — admin-managed, loaded from Supabase ---------- */
 
+    let presetsData = [];
+    function relabelPresets() {
+      document.querySelectorAll('#ogPresets .preset-btn').forEach((btn) => {
+        const p = presetsData[Number(btn.dataset.preset)];
+        if (!p) return;
+        btn.textContent = OG.presetName(p.name);
+        btn.title = OG.presetDesc(p.description || '');
+      });
+    }
+
     async function buildPresets() {
       const wrap = document.getElementById('ogPresets');
       const client = (typeof getAlaslSupabase === 'function') ? getAlaslSupabase() : null;
@@ -663,7 +711,8 @@
       const { data, error } = await client.from('offgrid_presets').select('*').eq('is_active', true).order('sort_order');
       if (error || !data || !data.length) { wrap.innerHTML = ''; return; }
 
-      wrap.innerHTML = data.map((p, i) => `<button type="button" class="preset-btn" data-preset="${i}" title="${esc(p.description || '')}">${esc(p.name)}</button>`).join('');
+      presetsData = data;
+      wrap.innerHTML = data.map((p, i) => `<button type="button" class="preset-btn" data-preset="${i}" title="${esc(OG.presetDesc(p.description || ''))}">${esc(OG.presetName(p.name))}</button>`).join('');
       wrap.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const preset = data[btn.dataset.preset];
@@ -679,23 +728,32 @@
       });
     }
 
-    function fillBrandSelect(sel, brands, placeholder, preferred) {
+    function fillBrandSelect(sel, brands, placeholderKey, preferred) {
+      sel.dataset.phKey = placeholderKey;
       sel.innerHTML = brands.length
         ? brands.map(b => `<option value="${esc(b)}" ${b === preferred ? 'selected' : ''}>${esc(b)}</option>`).join('')
-        : `<option value="">${placeholder}</option>`;
+        : `<option value="">${t(placeholderKey)}</option>`;
+    }
+    function relabelBrandPlaceholders() {
+      ['ogInvBrand', 'ogBattBrand', 'ogPanelBrand'].forEach((id) => {
+        const sel = document.getElementById(id);
+        if (sel && sel.dataset.phKey && sel.value === '' && sel.options[0]) sel.options[0].textContent = t(sel.dataset.phKey);
+      });
     }
 
     // Populate the "قدرة اللوح" dropdown with the real, distinct wattages
     // actually registered for the currently-selected panel brand — only
     // real product rows the admin entered, never a guessed default.
-    function updatePanelWattOptions() {
+    function updatePanelWattOptions(keep) {
       const brand = document.getElementById('ogPanelBrand').value;
       const sel = document.getElementById('ogPanelWatt');
+      const prev = sel.value;
       const options = catalog.panels.filter(p => p.brand === brand && p.power);
       const distinctWatts = [...new Set(options.map(p => p.power))].sort((a, b) => a - b);
       sel.innerHTML = distinctWatts.length
-        ? distinctWatts.map(w => `<option value="${w}">${w} وات</option>`).join('')
-        : `<option value="">لا توجد قدرة مسجلة لهذه الماركة</option>`;
+        ? distinctWatts.map(w => `<option value="${w}">${w} ${t('u_watt')}</option>`).join('')
+        : `<option value="">${t('ph_watt')}</option>`;
+      if (keep === true && prev && distinctWatts.map(String).includes(prev)) sel.value = prev;   // لغة بس — مش تغيير ماركة
     }
 
     /* ---------- Catalog: only products that actually have a price, per calc_settings ---------- */
@@ -749,11 +807,11 @@
       const invBrands = [...new Set(catalog.inverters.map(r => r.brand))].sort();
       const battBrands = [...new Set(catalog.batteries.map(r => r.brand))].sort();
       const panelBrands = [...new Set(catalog.panels.map(r => r.brand))].sort();
-      fillBrandSelect(document.getElementById('ogInvBrand'), invBrands, 'لا توجد انفرترات منشورة بسعر', settings && settings.preferred_offgrid_inverter_brand);
-      fillBrandSelect(document.getElementById('ogBattBrand'), battBrands, 'لا توجد بطاريات منشورة بسعر', settings && settings.preferred_offgrid_battery_brand);
-      fillBrandSelect(document.getElementById('ogPanelBrand'), panelBrands, 'لا توجد ألواح منشورة بسعر', settings && settings.preferred_offgrid_panel_brand);
+      fillBrandSelect(document.getElementById('ogInvBrand'), invBrands, 'ph_inv', settings && settings.preferred_offgrid_inverter_brand);
+      fillBrandSelect(document.getElementById('ogBattBrand'), battBrands, 'ph_batt', settings && settings.preferred_offgrid_battery_brand);
+      fillBrandSelect(document.getElementById('ogPanelBrand'), panelBrands, 'ph_panel', settings && settings.preferred_offgrid_panel_brand);
       updatePanelWattOptions();
-      document.getElementById('ogPanelBrand').addEventListener('change', updatePanelWattOptions);
+      document.getElementById('ogPanelBrand').addEventListener('change', () => updatePanelWattOptions());
     }
 
     /* ---------- Results: quantities only, price hidden behind a per-product link ---------- */
@@ -762,8 +820,8 @@
       return `product-detail.html?cat=${encodeURIComponent(category)}&brand=${encodeURIComponent(brand || '')}&model=${encodeURIComponent(model || '')}`;
     }
 
-    function fmt(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
-    function fmt1(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 1 }); }
+    function fmt(n) { return Number(n || 0).toLocaleString(OG.locale(), { maximumFractionDigits: 0 }); }
+    function fmt1(n) { return Number(n || 0).toLocaleString(OG.locale(), { maximumFractionDigits: 1 }); }
     // عزل اتجاه القيمة (رقم + وحدة) عن باقي الجملة العربية — بدونه الوحدة الإنجليزية بتظهر قبل الرقم (kWh 19.2).
     function bi(s) { return '<bdi>' + s + '</bdi>'; }
     // قدرة: أقل من 1 كيلوواط تتعرض بالوات (عشان 0.04 kW ما تتقرّبش لـ "0 kW")، من 1 كيلوواط فأكثر بالكيلوواط.
@@ -785,12 +843,12 @@
     function hintIcon(html, kind) {
       kind = kind === 'warn' ? 'warn' : 'info';
       const icon = kind === 'warn' ? 'fa-triangle-exclamation' : 'fa-circle-info';
-      return `<button type="button" class="hint hint-${kind}" aria-label="${kind === 'warn' ? 'تنبيه' : 'معلومة'}" aria-expanded="false"><i class="fa ${icon}" aria-hidden="true"></i></button><span class="hint-body" hidden>${html}</span>`;
+      return `<button type="button" class="hint hint-${kind}" aria-label="${kind === 'warn' ? t('aria_warn') : t('aria_info')}" aria-expanded="false"><i class="fa ${icon}" aria-hidden="true"></i></button><span class="hint-body" hidden>${html}</span>`;
     }
     // تنبيهات الحساب: زر ظاهر بلون تحذيري (مش أيقونة صامتة) وتفاصيله جوه النافذة.
     function hintPill(items) {
       const n = items.length;
-      const label = n === 1 ? 'تنبيه' : n + ' تنبيهات';
+      const label = n === 1 ? t('note_one') : t('note_many', { n });
       return `<button type="button" class="hint hint-warn hint-pill" aria-expanded="false"><i class="fa fa-triangle-exclamation" aria-hidden="true"></i>${label}</button><span class="hint-body" hidden>${items.map(t => `<div class="hint-item">${t}</div>`).join('')}</span>`;
     }
 
@@ -838,53 +896,53 @@
       const totalConsumptionKWh = b.dayLoadKWh + b.nightLoadKWh;
       const prodDelta = b.dailyProductionKWh - totalConsumptionKWh;
       const prodSurplusBar = prodDelta >= 0
-        ? { label: "الفائض", value: prodDelta, color: "#3b6e52" }
-        : { label: "⚠ عجز", value: Math.abs(prodDelta), color: "#b23b3b" };
+        ? { label: t('bar_surplus'), value: prodDelta, color: "#3b6e52" }
+        : { label: t('bar_deficit'), value: Math.abs(prodDelta), color: "#b23b3b" };
       const prodCaption = prodDelta >= 0
-        ? `فائض إنتاج يومي ${bi('~' + fmtEnergy(prodDelta))} فوق احتياجك اليومي`
-        : `⚠ الإنتاج المتوقع أقل من احتياجك اليومي بـ ${bi('~' + fmtEnergy(Math.abs(prodDelta)))} — راجعنا لمراجعة التصميم`;
+        ? t('cap_prod_ok', { v: '~' + fmtEnergy(prodDelta) })
+        : t('cap_prod_bad', { v: '~' + fmtEnergy(Math.abs(prodDelta)) });
 
       const storageDelta = b.storedKWh - b.nightLoadKWh;
       const storageSurplusBar = storageDelta >= 0
-        ? { label: "الفائض", value: storageDelta, color: "#3b6e52" }
-        : { label: "⚠ عجز", value: Math.abs(storageDelta), color: "#b23b3b" };
+        ? { label: t('bar_surplus'), value: storageDelta, color: "#3b6e52" }
+        : { label: t('bar_deficit'), value: Math.abs(storageDelta), color: "#b23b3b" };
       const storageCaption = storageDelta >= 0
-        ? `فائض تخزين ${bi('~' + fmtEnergy(storageDelta))} فوق استهلاكك الليلي`
-        : `⚠ سعة البطاريات أقل من استهلاكك الليلي بـ ${bi('~' + fmtEnergy(Math.abs(storageDelta)))}`;
+        ? t('cap_store_ok', { v: '~' + fmtEnergy(storageDelta) })
+        : t('cap_store_bad', { v: '~' + fmtEnergy(Math.abs(storageDelta)) });
 
       const statsBlock = `
-        <div style="font-size:15px; font-weight:800; margin:18px 0 10px;">ملخص سريع لأداء نظامك</div>
+        <div style="font-size:15px; font-weight:800; margin:18px 0 10px;">${t('brief_title')}</div>
         <div class="og-table-wrap"><table class="og-table" style="font-size:13px;">
           <tbody>
-            <tr><td>إجمالي قدرة الألواح / الإنتاجية اليومية المتوقعة</td><td>${bi(fmt1(b.panelKWp) + ' kWp')} — ${bi(fmtEnergy(b.dailyProductionKWh))}/يوم</td></tr>
-            <tr><td>إجمالي استهلاكك النهاري / الليلي</td><td>${bi(fmtEnergy(b.dayLoadKWh))} نهار — ${bi(fmtEnergy(b.nightLoadKWh))} ليل</td></tr>
-            <tr><td>سعة التخزين بالبطاريات${b.batteryUsagePct != null ? " (نسبة الاستخدام)" : ""}</td><td>${bi(fmtEnergy(b.storedKWh))}${b.batteryUsagePct != null ? ` (${bi('~' + b.batteryUsagePct + '%')} من السعة الكاملة عند أقصى تفريغ)` : ""}</td></tr>
-            <tr><td>هل الإنفرتر يكفي كل أجهزتك مع بعض؟</td><td>${bi(fmtPower(b.peakInstantaneousKW))} أقصى تشغيل — الإنفرتر: ${bi(fmtPower(b.invRatedKW))} مستمر / ${bi(fmtPower(b.invSurgeKW))} إقلاع ${invOk ? "— كافٍ ✓" : "— ⚠ راجعنا لمراجعة الأحمال"}</td></tr>
-            <tr><td>أيام الاستقلالية المصمم عليها</td><td>${bi(fmt(b.autonomyDays))} يوم بدون شحن</td></tr>
+            <tr><td>${t('br_prod')}</td><td>${t('v_prod', { kwp: fmt1(b.panelKWp) + ' kWp', daily: fmtEnergy(b.dailyProductionKWh) })}</td></tr>
+            <tr><td>${t('br_cons')}</td><td>${t('v_cons', { day: fmtEnergy(b.dayLoadKWh), night: fmtEnergy(b.nightLoadKWh) })}</td></tr>
+            <tr><td>${t('br_store')}${b.batteryUsagePct != null ? t('br_store_pct') : ''}</td><td>${t('v_store', { stored: fmtEnergy(b.storedKWh), pct: b.batteryUsagePct })}</td></tr>
+            <tr><td>${t('br_inv')}</td><td>${t('v_inv', { peak: fmtPower(b.peakInstantaneousKW), rated: fmtPower(b.invRatedKW), surge: fmtPower(b.invSurgeKW), ok: invOk })}</td></tr>
+            <tr><td>${t('br_auto')}</td><td>${t('v_auto', { d: fmt(b.autonomyDays) })}</td></tr>
           </tbody>
         </table></div>`;
 
       // تعليق واحد تحت الرسمين (بدل 3): الإنتاج + التخزين + تنويه التقدير. عنبري لو فيه عجز في أي منهما.
       const chartsNote = hintIcon(
         [prodCaption, storageCaption,
-         'الأرقام تقديرية بناءً على معطيات التصميم (ساعات الشمس القصوى، كفاءة النظام) — للتأكيد النهائي راجع مع المهندس المسؤول قبل التنفيذ.'
+         t('est_note')
         ].map(t => `<div class="hint-item">${t}</div>`).join(''),
         (prodDelta < 0 || storageDelta < 0) ? 'warn' : 'info');
 
       const chartsRowBlock = `
         <div style="display:flex; gap:14px; margin-top:14px; flex-wrap:wrap;">
           <div style="flex:1; min-width:260px;">
-            ${svgBarCompare("إنتاج الألواح اليومي مقابل استهلاكك (kWh)", [
-              { label: "إنتاج الألواح", value: b.dailyProductionKWh, fmt: fmtEnergyBar },
-              { label: "استهلاك نهاري", value: b.dayLoadKWh, fmt: fmtEnergyBar },
-              { label: "استهلاك ليلي", value: b.nightLoadKWh, fmt: fmtEnergyBar },
+            ${svgBarCompare(t('ch_prod'), [
+              { label: t('bar_prod'), value: b.dailyProductionKWh, fmt: fmtEnergyBar },
+              { label: t('bar_day'), value: b.dayLoadKWh, fmt: fmtEnergyBar },
+              { label: t('bar_night'), value: b.nightLoadKWh, fmt: fmtEnergyBar },
               { ...prodSurplusBar, fmt: fmtEnergyBar },
             ], 380)}
           </div>
           <div style="flex:1; min-width:260px;">
-            ${svgBarCompare("سعة البطاريات مقابل استهلاكك الليلي (kWh)", [
-              { label: "سعة البطاريات", value: b.storedKWh, fmt: fmtEnergyBar },
-              { label: "استهلاك ليلي", value: b.nightLoadKWh, fmt: fmtEnergyBar },
+            ${svgBarCompare(t('ch_store'), [
+              { label: t('bar_storage'), value: b.storedKWh, fmt: fmtEnergyBar },
+              { label: t('bar_night'), value: b.nightLoadKWh, fmt: fmtEnergyBar },
               { ...storageSurplusBar, fmt: fmtEnergyBar },
             ], 380)}
           </div>
@@ -894,38 +952,49 @@
       return statsBlock + chartsRowBlock;
     }
 
+    let lastResultState = null;      // آخر نتيجة/خطأ معروض — بنعيد رسمه لما اللغة تتبدّل
+
+    function errTexts(result) {
+      return (result.errors || []).map((e, i) => {
+        const m = (result.messages || [])[i];
+        return (m && m.ui) ? t(m.ui) : OG.msg(m, e);   // العربي = نص المحرك الأصلي، غيره = قالب مترجم
+      });
+    }
+
     function renderResults(result) {
+      lastResultState = result;
+      const notes = errTexts(result);
       const empty = document.getElementById('ogEmpty');
       const panel = document.getElementById('ogResults');
       if (result.errors && result.errors.length && !result.offer) {
         empty.hidden = false;
         panel.hidden = true;
-        empty.innerHTML = `<i class="fa fa-triangle-exclamation" aria-hidden="true"></i><p>${result.errors.join('<br>')}</p>`;
+        empty.innerHTML = `<i class="fa fa-triangle-exclamation" aria-hidden="true"></i><p>${notes.join('<br>')}</p>`;
         return;
       }
       empty.hidden = true;
       panel.hidden = false;
 
+      const smallStore = result.storedKWh < 1 && result.storedKWh > 0;
       document.getElementById('ogMetrics').innerHTML = `
-        <div class="metric-card brand"><div class="metric-label">قدرة الانفرتر</div><div class="metric-value">${result.inv.powerKW}</div><div class="metric-unit">كيلوواط</div></div>
-        <div class="metric-card accent"><div class="metric-label">سعة التخزين</div><div class="metric-value">${result.storedKWh < 1 && result.storedKWh > 0 ? fmt(result.storedKWh * 1000) : fmt1(result.storedKWh)}</div><div class="metric-unit">${result.storedKWh < 1 && result.storedKWh > 0 ? 'واط.ساعة' : 'كيلوواط.ساعة'}</div></div>
-        <div class="metric-card"><div class="metric-label">عدد الألواح</div><div class="metric-value">${result.panelCount}</div><div class="metric-unit">لوح</div></div>
-        <div class="metric-card"><div class="metric-label">عدد البطاريات</div><div class="metric-value">${result.batteryCount}</div><div class="metric-unit">بطارية</div></div>
+        <div class="metric-card brand"><div class="metric-label">${t('m_inv')}</div><div class="metric-value">${fmt1(result.inv.powerKW)}</div><div class="metric-unit">${t('m_inv_u')}</div></div>
+        <div class="metric-card accent"><div class="metric-label">${t('m_store')}</div><div class="metric-value">${smallStore ? fmt(result.storedKWh * 1000) : fmt1(result.storedKWh)}</div><div class="metric-unit">${smallStore ? t('m_store_u_wh') : t('m_store_u')}</div></div>
+        <div class="metric-card"><div class="metric-label">${t('m_panels')}</div><div class="metric-value">${result.panelCount}</div><div class="metric-unit">${t('m_panels_u')}</div></div>
+        <div class="metric-card"><div class="metric-label">${t('m_batts')}</div><div class="metric-value">${result.batteryCount}</div><div class="metric-unit">${t('m_batts_u')}</div></div>
       `;
 
-      const noteItems = result.errors || [];
-      const notesHtml = noteItems.length ? `<div class="hint-row">${hintPill(noteItems)}</div>` : '';
+      const notesHtml = notes.length ? `<div class="hint-row">${hintPill(notes)}</div>` : '';
       document.getElementById('ogNotes').innerHTML = notesHtml;
 
       const linkFor = {
-        'الألواح': productLink('panels', result.panel.brand, ''),
-        'انفرتر': productLink('offgrid', result.inv.brand, result.inv.type),
-        'بطاريات': productLink('batteries', result.batt.brand, ''),
+        panels: productLink('panels', result.panel.brand, ''),
+        inverter: productLink('offgrid', result.inv.brand, result.inv.type),
+        batteries: productLink('batteries', result.batt.brand, ''),
       };
       document.getElementById('ogRowsBody').innerHTML = result.rows.map(r => `
         <tr>
-          <td>${esc(r.name)}</td><td>${esc(r.type)}</td><td>${r.qty}</td>
-          <td>${linkFor[r.name] ? `<a href="${linkFor[r.name]}" target="_blank" class="btn-light og-price-btn">اعرف السعر</a>` : '<span style="color:var(--muted);font-size:12px;">تواصل معنا</span>'}</td>
+          <td>${esc(r.key ? t('row_' + r.key) : r.name)}</td><td>${esc(r.typeKey ? t('type_' + r.typeKey) : r.type)}</td><td>${r.qty}</td>
+          <td>${linkFor[r.key] ? `<a href="${linkFor[r.key]}" target="_blank" class="btn-light og-price-btn">${t('know_price')}</a>` : `<span style="color:var(--muted);font-size:12px;">${t('contact_us')}</span>`}</td>
         </tr>`).join('');
 
       document.getElementById('ogTechBrief').innerHTML = buildCustomerBrief(result);
@@ -948,13 +1017,57 @@
         panelWatt: document.getElementById('ogPanelWatt').value,
       };
       if (!inputs.loads.length) {
-        renderResults({ errors: ['اختر جهازًا واحدًا على الأقل وحدد عدده، أو اضغط على أحد الأنظمة الجاهزة أعلاه.'] });
+        renderResults({ errors: [t('err_no_loads')], messages: [{ ui: 'err_no_loads' }] });
         return;
       }
       const result = window.computeOffgridMaterials(catalog, GENERIC_PRICES, inputs);
       renderResults(result);
     });
 
+    /* ---------- اللغة: ترجمة النصوص الثابتة + إعادة رسم الأجزاء الديناميكية لما الزائر يبدّل اللغة ---------- */
+    function applyStatic() {
+      document.querySelectorAll('[data-og]').forEach(el => { el.textContent = t(el.dataset.og); });
+      document.querySelectorAll('[data-og-html]').forEach(el => { el.innerHTML = t(el.dataset.ogHtml); });
+      document.querySelectorAll('[data-og-attr]').forEach(el => {
+        el.dataset.ogAttr.split(',').forEach(pair => {
+          const i = pair.indexOf(':');
+          if (i > 0) el.setAttribute(pair.slice(0, i).trim(), t(pair.slice(i + 1).trim()));
+        });
+      });
+      document.title = t('page_title');
+      const meta = document.querySelector('meta[name="description"]');
+      if (meta) meta.setAttribute('content', t('page_desc'));
+    }
+
+    function relabelLoadRows() {
+      document.querySelectorAll('#ogLoadsBody tr').forEach(tr => {
+        const l = DEFAULT_LOADS[Number(tr.dataset.idx)];
+        const td = tr.querySelector('.load-name');
+        if (l && td) td.textContent = OG.loadName(l.name);
+        const rm = tr.querySelector('.load-remove-btn');
+        if (rm) rm.setAttribute('aria-label', t('aria_remove'));
+      });
+    }
+
+    let currentLang = OG.lang();
+    function onLangChange() {
+      if (window.__ogHintClose) window.__ogHintClose();
+      applyStatic();
+      buildLoadPicker();
+      relabelLoadRows();
+      relabelPresets();
+      relabelBrandPlaceholders();
+      updatePanelWattOptions(true);
+      refreshLoadsVisibility();
+      if (lastResultState) renderResults(lastResultState);
+    }
+    // app.js بيغيّر <html lang> لما الزائر يختار لغة من زر اللغة — ده الإشارة الوحيدة اللي بنعتمد عليها.
+    new MutationObserver(() => {
+      const l = OG.lang();
+      if (l !== currentLang) { currentLang = l; onLangChange(); }
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+    applyStatic();
     (async () => {
       await loadOffgridLoads();      // لازم يخلص الأول عشان buildPresets يقدر يلاقي الأجهزة بالاسم
       buildLoadPicker();
