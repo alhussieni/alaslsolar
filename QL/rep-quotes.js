@@ -147,6 +147,7 @@ async function loadProductsForCategory() {
     .select("id, name_ar, name_en, price")
     .eq("category", category)
     .eq("published", true)
+    .eq("in_stock", true) // غير متاح = لا يظهر في أي أداة
     .order("name_ar", { ascending: true });
 
   productSel.innerHTML = "";

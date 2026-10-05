@@ -75,8 +75,8 @@ Deno.serve(async (req: Request) => {
     const { data: D } = await admin.from("irrigation_bom_settings").select("*").eq("id", 1).single();
     if (!D) return json({ error: "إعدادات الحساب مش موجودة (irrigation_bom_settings)." }, 500);
 
-    const { data: panel } = await admin.from("products").select("*").eq("id", panelProductId).eq("category", "panels").eq("published", true).eq("in_stock", true).maybeSingle();
-    if (!panel) return json({ error: "اللوح المختار مش موجود أو مش منشور أو غير متاح حاليًا." }, 400);
+    const { data: panel } = await admin.from("products").select("*").eq("id", panelProductId).eq("category", "panels").eq("published", true).maybeSingle();
+    if (!panel) return json({ error: "اللوح المختار مش موجود أو مش منشور." }, 400);
     if (!panel.vimp || !panel.power_watt) {
       return json({ error: `اللوح "${panel.name_ar}" ناقصه مواصفات كهربية (Vimp) في الكتالوج — لازم يتسجل الأول.` }, 400);
     }
@@ -101,13 +101,13 @@ Deno.serve(async (req: Request) => {
     const Iimp = arrays * iimp, Vimp = panelsPerString * vimp, Voc = panelsPerString * voc, Isc = arrays * isc;
 
     const inverterKwNeeded = Math.ceil(hp * 0.746) + inverterPowerIncrease;
-    let invQuery = admin.from("products").select("*").eq("category", "inverters").eq("published", true).eq("in_stock", true);
+    let invQuery = admin.from("products").select("*").eq("category", "inverters").eq("published", true);
     if (inverterBrand) invQuery = invQuery.eq("brand", inverterBrand);
     const { data: invertersBrandFiltered } = await invQuery.order("power_kw", { ascending: true });
     let inverters = invertersBrandFiltered;
     let inverterBrandFallback = false;
     if (inverterBrand && (!inverters || inverters.length === 0)) {
-      const { data: allInv } = await admin.from("products").select("*").eq("category", "inverters").eq("published", true).eq("in_stock", true).order("power_kw", { ascending: true });
+      const { data: allInv } = await admin.from("products").select("*").eq("category", "inverters").eq("published", true).order("power_kw", { ascending: true });
       inverters = allInv;
       inverterBrandFallback = true;
     }
@@ -131,7 +131,7 @@ Deno.serve(async (req: Request) => {
     const inverterWarning: string | null = inverterWarnings.length ? inverterWarnings.join(" | ") : null;
 
     const combinerNeeded = Math.ceil(arrays * combinerHeadroom);
-    const { data: combinersRaw } = await admin.from("products").select("*").eq("category", "combiners").eq("published", true).eq("in_stock", true);
+    const { data: combinersRaw } = await admin.from("products").select("*").eq("category", "combiners").eq("published", true);
     const combinersParsed = (combinersRaw || [])
       .map((r: any) => ({ row: r, capacity: extractNumberBefore(r.name_ar || "", /(\d+)\s*Arrays/i) }))
       .filter((x: any) => x.capacity != null)
@@ -140,7 +140,7 @@ Deno.serve(async (req: Request) => {
     if (!combinerMatch) return json({ error: "مفيش لوحات تجميع منشورة في الكتالوج." }, 500);
 
     const cableTag = calcKW >= 100 ? "6MM" : "4MM";
-    const { data: cablesRaw } = await admin.from("products").select("*").eq("category", "cables").eq("published", true).eq("in_stock", true);
+    const { data: cablesRaw } = await admin.from("products").select("*").eq("category", "cables").eq("published", true);
     const cable = (cablesRaw || []).find((r: any) => (r.name_ar || "").toUpperCase().includes(cableTag)) || (cablesRaw || [])[0];
     if (!cable) return json({ error: "مفيش كابلات منشورة في الكتالوج." }, 500);
     const cableLowMult = Number(D.cable_low_multiplier) || 45;
@@ -151,12 +151,12 @@ Deno.serve(async (req: Request) => {
     const evenUnit = hundredsUnit % 2 === 0 ? hundredsUnit : hundredsUnit > 0 ? hundredsUnit + 1 : hundredsUnit - 1;
     const cablesLen = Math.max(100, evenUnit * 100);
 
-    const { data: mc4Raw } = await admin.from("products").select("*").eq("category", "accessories").eq("published", true).eq("in_stock", true);
+    const { data: mc4Raw } = await admin.from("products").select("*").eq("category", "accessories").eq("published", true);
     const mc4 = (mc4Raw || []).find((r: any) => (r.name_ar || "").includes("أحادي") && (r.name_ar || "").includes("MC4"));
     if (!mc4) return json({ error: "مفيش وصلات MC4 منشورة في الكتالوج." }, 500);
     const mc4Qty = arrays * 2;
 
-    const { data: structuresRaw } = await admin.from("products").select("*").eq("category", "structures").eq("published", true).eq("in_stock", true);
+    const { data: structuresRaw } = await admin.from("products").select("*").eq("category", "structures").eq("published", true);
     const mountKeyword = structureMount === "rotational" ? "متحرك" : "ثابت";
     const structuresParsed = (structuresRaw || [])
       .filter((r: any) => (r.name_ar || "").includes(mountKeyword))
@@ -181,7 +181,7 @@ Deno.serve(async (req: Request) => {
     let pump: any = null;
     if (includePump) {
       if (pumpProductId) {
-        const { data: p } = await admin.from("products").select("*").eq("id", pumpProductId).eq("published", true).eq("in_stock", true).maybeSingle();
+        const { data: p } = await admin.from("products").select("*").eq("id", pumpProductId).eq("published", true).maybeSingle();
         pump = p;
       }
       if (!pump) {

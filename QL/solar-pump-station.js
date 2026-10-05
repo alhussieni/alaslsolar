@@ -120,7 +120,7 @@ async function loadPanels() {
   const { data, error } = await client
     .from("products")
     .select("id,brand,name_ar,power_watt,vimp")
-    .eq("category", "panels").eq("published", true)
+    .eq("category", "panels").eq("published", true).eq("in_stock", true)
     .not("vimp", "is", null).not("power_watt", "is", null)
     .order("brand", { ascending: true }).order("power_watt", { ascending: false });
 
@@ -147,7 +147,7 @@ async function loadInverterBrands() {
   const { data, error } = await client
     .from("products")
     .select("brand")
-    .eq("category", "inverters").eq("published", true);
+    .eq("category", "inverters").eq("published", true).eq("in_stock", true);
   if (error || !data || !data.length) { sel.innerHTML = `<option value="">تلقائي (الأنسب للقدرة)</option>`; return; }
   const brands = [...new Set(data.map((p) => p.brand))];
   sel.innerHTML = `<option value="">تلقائي (الأنسب للقدرة)</option>` + brands.map((b) => `<option value="${b}">${b}</option>`).join("");
