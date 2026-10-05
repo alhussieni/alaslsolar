@@ -3,7 +3,8 @@ const client = getAlaslSupabase();
 // التنقل بين أقسام لوحة التحكم (سايدبار) — يعرض قسم واحد بس في كل مرة
 function showDashSection(targetId, btn) {
   document.querySelectorAll('.dash-main > [id^="section-"]').forEach(el => {
-    el.style.display = (el.id === targetId) ? '' : 'none';
+    // 'grid' صريح: الأقسام مخفية بالكلاس .dash-grid-1col-hidden (display:none) فمسح الـinline (='') كان بيسيبها مخفية
+    el.style.display = (el.id === targetId) ? 'grid' : 'none';
   });
   document.querySelectorAll('.dash-nav-item').forEach(el => el.classList.remove('active'));
   if (btn) btn.classList.add('active');
