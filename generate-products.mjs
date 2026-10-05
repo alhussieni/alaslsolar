@@ -81,10 +81,10 @@ const INTRO_TEXT = {
 };
 
 const UI_TEXT = {
-  en: { kicker: "Product Catalog", specsCol: "Specifications", priceCol: "Price", nameCol: "Model", cta: "View & Configure This Product", inStock: "In Stock", outOfStock: "Contact Us", related: "Other brands in this category", backToAll: "View all products" },
-  ar: { kicker: "كتالوج المنتجات", specsCol: "المواصفات", priceCol: "السعر", nameCol: "الموديل", cta: "اعرض واختار مواصفات المنتج", inStock: "متاح", outOfStock: "تواصل معنا", related: "ماركات أخرى في نفس الفئة", backToAll: "عرض كل المنتجات" },
-  es: { kicker: "Catálogo de Productos", specsCol: "Especificaciones", priceCol: "Precio", nameCol: "Modelo", cta: "Ver y Configurar Este Producto", inStock: "Disponible", outOfStock: "Contáctenos", related: "Otras marcas en esta categoría", backToAll: "Ver todos los productos" },
-  zh: { kicker: "产品目录", specsCol: "规格", priceCol: "价格", nameCol: "型号", cta: "查看并选择配置", inStock: "现货", outOfStock: "联系我们", related: "同类别的其他品牌", backToAll: "查看所有产品" },
+  en: { kicker: "Product Catalog", specsCol: "Specifications", priceCol: "Price", nameCol: "Model", cta: "View & Configure This Product", inStock: "In Stock", outOfStock: "Contact Us", unavailable: "Product currently unavailable", related: "Other brands in this category", backToAll: "View all products" },
+  ar: { kicker: "كتالوج المنتجات", specsCol: "المواصفات", priceCol: "السعر", nameCol: "الموديل", cta: "اعرض واختار مواصفات المنتج", inStock: "متاح", outOfStock: "تواصل معنا", unavailable: "المنتج غير متاح حاليًا", related: "ماركات أخرى في نفس الفئة", backToAll: "عرض كل المنتجات" },
+  es: { kicker: "Catálogo de Productos", specsCol: "Especificaciones", priceCol: "Precio", nameCol: "Modelo", cta: "Ver y Configurar Este Producto", inStock: "Disponible", outOfStock: "Contáctenos", unavailable: "Producto no disponible actualmente", related: "Otras marcas en esta categoría", backToAll: "Ver todos los productos" },
+  zh: { kicker: "产品目录", specsCol: "规格", priceCol: "价格", nameCol: "型号", cta: "查看并选择配置", inStock: "现货", outOfStock: "联系我们", unavailable: "该产品暂时无货", related: "同类别的其他品牌", backToAll: "查看所有产品" },
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -112,6 +112,11 @@ function slugify(str = "") {
 
 function getField(row, field, lang) {
   return row[`${field}_${lang}`] || row[`${field}_ar`] || row[`${field}_en`] || row[field] || "";
+}
+
+// in_stock=false => product page stays, but price is replaced by a message and no price is exposed.
+function isAvailable(row) {
+  return row.in_stock !== false;
 }
 
 function fmtPrice(n) {
@@ -188,13 +193,17 @@ function buildFamilyPage(category, brand, rows, lang, allFamilies, brandLogos) {
   const ui = UI_TEXT[lang] || UI_TEXT.en;
 
   const sorted = rows.slice().sort((a, b) => Number(a.price) - Number(b.price));
-  const prices = sorted.map((r) => Number(r.price)).filter((n) => !Number.isNaN(n));
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
-  const priceRange = minPrice === maxPrice ? `${fmtPrice(minPrice)} EGP` : `${fmtPrice(minPrice)}–${fmtPrice(maxPrice)} EGP`;
+  const availableRows = sorted.filter(isAvailable);
+  const prices = availableRows.map((r) => Number(r.price)).filter((n) => !Number.isNaN(n));
+  const hasAvailable = prices.length > 0;
+  const minPrice = hasAvailable ? Math.min(...prices) : 0;
+  const maxPrice = hasAvailable ? Math.max(...prices) : 0;
+  const priceRange = !hasAvailable ? "" : (minPrice === maxPrice ? `${fmtPrice(minPrice)} EGP` : `${fmtPrice(minPrice)}–${fmtPrice(maxPrice)} EGP`);
 
-  const description = `${title} — ${INTRO_TEXT[lang] ? INTRO_TEXT[lang](rows.length) : INTRO_TEXT.en(rows.length)} ${priceRange}.`;
-  const metaTitleText = truncateForMeta(`${title} — ${priceRange}`, 60);
+  const description = hasAvailable
+    ? `${title} — ${INTRO_TEXT[lang] ? INTRO_TEXT[lang](availableRows.length) : INTRO_TEXT.en(availableRows.length)} ${priceRange}.`
+    : `${title} — ${ui.unavailable}.`;
+  const metaTitleText = truncateForMeta(hasAvailable ? `${title} — ${priceRange}` : title, 60);
   const metaDescription = truncateForMeta(description, 155);
 
   // Real product photo when available; fall back to the brand's logo
@@ -230,8 +239,8 @@ function buildFamilyPage(category, brand, rows, lang, allFamilies, brandLogos) {
   const rowsHtml = sorted.map((r) => {
     const name = esc(getField(r, "name", lang) || `${catLabel} ${brand}`);
     const specs = esc(getField(r, "specs", lang));
-    const price = `${fmtPrice(r.price)} EGP`;
-    const stock = r.in_stock === false ? ui.outOfStock : ui.inStock;
+    const price = isAvailable(r) ? `${fmtPrice(r.price)} EGP` : ui.unavailable;
+    const stock = isAvailable(r) ? ui.inStock : ui.outOfStock;
     return `        <tr>
           <td><img class="pd-static-thumb" src="${esc(imageOf(r))}" alt="${name}" loading="lazy" width="56" height="56"></td>
           <td>${name}</td>
@@ -268,13 +277,20 @@ ${siblings.map((f) => `        <li><a href="${category}-${slugify(f.brand)}${suf
         image: imageOf(r),
         brand: { "@type": "Brand", name: brand },
         description: getField(r, "specs", lang) || undefined,
-        offers: {
-          "@type": "Offer",
-          price: String(r.price),
-          priceCurrency: "EGP",
-          availability: r.in_stock === false ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
-          url: detailHref(r),
-        },
+        offers: isAvailable(r)
+          ? {
+              "@type": "Offer",
+              price: String(r.price),
+              priceCurrency: "EGP",
+              availability: "https://schema.org/InStock",
+              url: detailHref(r),
+            }
+          : {
+              // Unavailable: no price is exposed in structured data.
+              "@type": "Offer",
+              availability: "https://schema.org/OutOfStock",
+              url: detailHref(r),
+            },
       },
     })),
   });

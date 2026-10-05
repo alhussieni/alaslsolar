@@ -114,6 +114,7 @@
       </div>
 
       <div id="cartContent" hidden>
+        <p id="cartUnavailableNote" class="cart-form-msg error" hidden></p>
         <div id="cartLines"></div>
         <div class="cart-summary">
           <div class="cart-summary-row">
@@ -187,28 +188,28 @@
         subtotal: 'الإجمالي', egp: 'ج.م', remove: 'إزالة', vatNote: 'الأسعار غير شاملة ضريبة القيمة المضافة 14%.',
         formTitle: 'اطلب عرض سعر بمحتويات السلة', formHint: 'هيتواصل معاك مندوب المبيعات على الرقم ده يديك عرض السعر النهائي.',
         nameLabel: 'الاسم', phoneLabel: 'رقم الهاتف', cityLabel: 'المدينة (اختياري)', submit: 'اطلب عرض السعر', submitting: 'جاري الإرسال…',
-        errName: 'اكتب الاسم من فضلك.', errPhone: 'اكتب رقم هاتف صحيح (8 أرقام على الأقل).', errGeneric: 'حصل خطأ، حاول تاني.',
+        unavailableRemoved: 'تم حذف منتجات من السلة لأنها غير متاحة حاليًا.', errName: 'اكتب الاسم من فضلك.', errPhone: 'اكتب رقم هاتف صحيح (8 أرقام على الأقل).', errGeneric: 'حصل خطأ، حاول تاني.',
         successTitle: 'تم إرسال طلبك بنجاح!', successText: 'هيتواصل معاك مندوب المبيعات قريبًا على الرقم اللي سجّلته يديك عرض السعر النهائي.', successBtn: 'تصفح منتجات تانية' },
       en: { kicker: 'Cart', title: 'Your Cart', intro: 'Gather the products you need, set quantities, and request one quote for everything at once.',
         empty: 'Your cart is empty. Browse products and add what you need.', browse: 'Browse Products', loading: 'Loading…',
         subtotal: 'Subtotal', egp: 'EGP', remove: 'Remove', vatNote: 'Prices exclude 14% VAT.',
         formTitle: 'Request a Quote for Your Cart', formHint: 'A sales rep will contact you on this number with a final quote.',
         nameLabel: 'Name', phoneLabel: 'Phone Number', cityLabel: 'City (optional)', submit: 'Request Quote', submitting: 'Submitting…',
-        errName: 'Please enter your name.', errPhone: 'Please enter a valid phone number (at least 8 digits).', errGeneric: 'Something went wrong, please try again.',
+        unavailableRemoved: 'Some items were removed from your cart because they are currently unavailable.', errName: 'Please enter your name.', errPhone: 'Please enter a valid phone number (at least 8 digits).', errGeneric: 'Something went wrong, please try again.',
         successTitle: 'Your request was sent successfully!', successText: 'A sales rep will contact you soon on the number you provided with a final quote.', successBtn: 'Browse More Products' },
       es: { kicker: 'Carrito', title: 'Tu Carrito', intro: 'Reúne los productos que necesitas, define las cantidades, y solicita una cotización para todo a la vez.',
         empty: 'Tu carrito está vacío. Explora los productos y añade lo que necesites.', browse: 'Explorar Productos', loading: 'Cargando…',
         subtotal: 'Subtotal', egp: 'EGP', remove: 'Eliminar', vatNote: 'Los precios no incluyen el IVA del 14%.',
         formTitle: 'Solicitar Cotización de tu Carrito', formHint: 'Un representante de ventas te contactará a este número con la cotización final.',
         nameLabel: 'Nombre', phoneLabel: 'Número de Teléfono', cityLabel: 'Ciudad (opcional)', submit: 'Solicitar Cotización', submitting: 'Enviando…',
-        errName: 'Por favor ingresa tu nombre.', errPhone: 'Por favor ingresa un número de teléfono válido (mínimo 8 dígitos).', errGeneric: 'Algo salió mal, inténtalo de nuevo.',
+        unavailableRemoved: 'Se eliminaron productos del carrito porque no están disponibles actualmente.', errName: 'Por favor ingresa tu nombre.', errPhone: 'Por favor ingresa un número de teléfono válido (mínimo 8 dígitos).', errGeneric: 'Algo salió mal, inténtalo de nuevo.',
         successTitle: '¡Tu solicitud fue enviada con éxito!', successText: 'Un representante de ventas te contactará pronto al número que proporcionaste con la cotización final.', successBtn: 'Explorar Más Productos' },
       zh: { kicker: '购物车', title: '我的购物车', intro: '收集您需要的产品，设置数量，一次性为所有产品申请报价。',
         empty: '购物车是空的。浏览产品并添加您需要的商品。', browse: '浏览产品', loading: '加载中…',
         subtotal: '总计', egp: 'EGP', remove: '移除', vatNote: '价格不含14%增值税。',
         formTitle: '为购物车内容申请报价', formHint: '销售代表将通过此号码与您联系，提供最终报价。',
         nameLabel: '姓名', phoneLabel: '电话号码', cityLabel: '城市（可选）', submit: '申请报价', submitting: '提交中…',
-        errName: '请输入您的姓名。', errPhone: '请输入有效的电话号码（至少8位数字）。', errGeneric: '出现错误，请重试。',
+        unavailableRemoved: '部分商品暂时无货，已从购物车中移除。', errName: '请输入您的姓名。', errPhone: '请输入有效的电话号码（至少8位数字）。', errGeneric: '出现错误，请重试。',
         successTitle: '您的请求已成功发送！', successText: '销售代表将很快通过您提供的号码与您联系，提供最终报价。', successBtn: '浏览更多产品' },
     };
 
@@ -310,7 +311,7 @@
 
       const ids = items.map(x => x.id);
       const [{ data: rawRows, error }, { data: logos }] = await Promise.all([
-        sb.from('products').select('id, category, brand, model_available, price, image_url, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh, unit, power_watt, inverter_voltage_phase').in('id', ids),
+        sb.from('products').select('id, in_stock, category, brand, model_available, price, image_url, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh, unit, power_watt, inverter_voltage_phase').in('id', ids),
         sb.from('brand_logos').select('brand, logo_url'),
       ]);
       loading.hidden = true;
@@ -338,6 +339,15 @@
       liveRows = items
         .map(it => { const r = rows.find(r => String(r.id) === String(it.id)); return r ? { ...r, qty: it.qty } : null; })
         .filter(Boolean);
+
+      // Unavailable products (in_stock=false) cannot be priced or ordered: drop them
+      // from the cart so the quote request is not rejected by the server as a whole.
+      const unavailableRows = liveRows.filter(r => r.in_stock === false);
+      unavailableRows.forEach(r => window.AlaslCart.removeItem(r.id));
+      liveRows = liveRows.filter(r => r.in_stock !== false);
+      const unavailNote = document.getElementById('cartUnavailableNote');
+      unavailNote.hidden = unavailableRows.length === 0;
+      if (unavailableRows.length) unavailNote.textContent = t('unavailableRemoved');
 
       if (liveRows.length === 0) {
         empty.hidden = false; content.hidden = true;

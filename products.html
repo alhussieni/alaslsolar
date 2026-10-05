@@ -758,6 +758,7 @@
       padding: 2px 6px;
       margin-bottom: 4px;
     }
+    .prod-card-unavail { color: var(--muted, #6b7280); font-size: 13px; font-weight: 700; }
     .stock-badge {
       display: inline-block;
       font-size: 10px;
@@ -1107,10 +1108,10 @@
 
     // Currency unit labels per language
     const UNITS = {
-      ar: { egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', cheaper: 'الأوفر', outOfStock: 'غير متاح حاليًا' },
-      en: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Best Price', outOfStock: 'Currently Unavailable' },
-      es: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Más Barato', outOfStock: 'No Disponible' },
-      zh: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: '最优惠', outOfStock: '暂时缺货' },
+      ar: { egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', cheaper: 'الأوفر', outOfStock: 'غير متاح حاليًا', unavailableMsg: 'المنتج غير متاح حاليًا' },
+      en: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Best Price', outOfStock: 'Currently Unavailable', unavailableMsg: 'Product currently unavailable' },
+      es: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: 'Más Barato', outOfStock: 'No Disponible', unavailableMsg: 'Producto no disponible actualmente' },
+      zh: { egp: 'EGP', watt: 'EGP/W',   meter: 'EGP/m',  cheaper: '最优惠', outOfStock: '暂时缺货', unavailableMsg: '该产品暂时无货' },
     };
     function u(key) {
       return (UNITS[getLang()] || UNITS.ar)[key];
@@ -1282,11 +1283,11 @@
             <div class="prod-card-bottom">
               <div>
                 ${badge ? `<div>${badge}</div>` : ''}
-                <span class="prod-card-price">
+                ${outOfStock ? `<span class="prod-card-price prod-card-unavail">${u('unavailableMsg')}</span>` : `<span class="prod-card-price">
                   ${p.promo_pct ? `<span class="prod-price-original" style="text-decoration:line-through;color:var(--muted);font-size:0.8em;margin-inline-end:6px">${fmt(p.original_price)}</span>` : ''}
                   ${fmt(p.price)} <span class="prod-unit">${unitFor(p)}</span>
                   ${p.promo_pct ? `<span class="prod-promo-badge" style="background:#c0392b;color:#fff;border-radius:6px;padding:1px 6px;font-size:0.7em;margin-inline-start:6px">-${p.promo_pct}%</span>` : ''}
-                </span>
+                </span>`}
               </div>
               ${ds}
             </div>
@@ -1371,7 +1372,10 @@
       const anyInStock = group.some(r => r.in_stock !== false);
       const isNewFamily = group.some(r => isNewProduct(r.created_at));
       const newBadge = isNewFamily ? `<span class="new-badge">${NEW_BADGE_TEXT[getLang()] || NEW_BADGE_TEXT.ar}</span>` : '';
-      const prices = group.map(r => r.price);
+      // Unavailable variants never contribute to the displayed price range.
+      const pricedRows = group.filter(r => r.in_stock !== false);
+      const noneAvailable = pricedRows.length === 0;
+      const prices = pricedRows.map(r => r.price);
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       const variantsLine = (VARIANTS_TEXT[getLang()] || VARIANTS_TEXT.ar)(group.length);
@@ -1402,7 +1406,7 @@
             <div class="prod-card-bottom">
               <div>
                 ${newBadge ? `<div>${newBadge}</div>` : ''}
-                ${wideSpread ? '' : `<span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span>${promoBadge}</span>`}
+                ${noneAvailable ? `<span class="prod-card-price prod-card-unavail" style="font-size:14px">${u('unavailableMsg')}</span>` : wideSpread ? '' : `<span class="prod-card-price" style="font-size:14px">${priceLine} <span class="prod-unit">${unitFor(p)}</span>${promoBadge}</span>`}
               </div>
             </div>
           </div>
