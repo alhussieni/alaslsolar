@@ -137,6 +137,51 @@ async function loadCategories() {
   await loadProductsForCategory();
 }
 
+/* أسماء كتير في الداتا بيز متطابقة (مثلًا كل إنفرترات Delixi اسمها "إنفرتر Delixi")، والفرق الحقيقي بينها
+   في specs_ar (القدرة) و model_available (الموديل). بنضيفهم للاسم بس لما الاسم مش فريد جوه نفس الفئة،
+   عشان باقي المنتجات تفضل أسماءها القصيرة زي ما هي. */
+const nameCountsByCategory = new Map(); // category -> Map(اسم -> عدد المنتجات بنفس الاسم)
+
+function productBaseName(p) { return p.name_ar || p.name_en || "منتج"; }
+
+function countNames(rows) {
+  const counts = new Map();
+  rows.forEach((p) => { const n = productBaseName(p); counts.set(n, (counts.get(n) || 0) + 1); });
+  return counts;
+}
+
+// رقم المواصفة بدون أصفار زيادة (4.10 -> 4)، أو null لو مش متسجّل
+function specNum(v) {
+  if (v == null || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? String(n) : null;
+}
+
+/* الإنفرترات: دايمًا "الماركة الموديل - القدرة kW/HP" (مثال: VEICHI SI23 - 75KW/100HP)،
+   عشان المندوب والعميل يميّزوا الصنف ويقارنوا السعر. لو أي حقل ناقص نرجع للصيغة العامة. */
+function inverterLabel(p) {
+  const kw = specNum(p.power_kw);
+  const hp = specNum(p.power_hp);
+  if (!p.brand || kw == null || hp == null) return null;
+  const head = [p.brand, (p.model_available || "").trim()].filter(Boolean).join(" ");
+  return `${head} - ${kw}KW/${hp}HP`;
+}
+
+function buildProductLabel(p, nameCounts) {
+  if (p.category === "inverters") {
+    const inv = inverterLabel(p);
+    if (inv) return inv;
+  }
+  const base = productBaseName(p);
+  if ((nameCounts?.get(base) || 0) <= 1) return base;
+  const parts = [base];
+  const specs = (p.specs_ar || "").trim();
+  if (specs && !base.includes(specs)) parts.push(specs);
+  const model = (p.model_available || "").trim();
+  if (model && !base.includes(model)) parts.push("موديل " + model);
+  return parts.join(" — ");
+}
+
 async function loadProductsForCategory() {
   const category = $("#categorySelect").value;
   const productSel = $("#productSelect");
@@ -144,24 +189,62 @@ async function loadProductsForCategory() {
 
   const { data, error } = await client
     .from("products")
-    .select("id, name_ar, name_en, price")
+    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, price")
     .eq("category", category)
     .eq("published", true)
     .eq("in_stock", true) // غير متاح = لا يظهر في أي أداة
-    .order("name_ar", { ascending: true });
+    .order("name_ar", { ascending: true })
+    .order("power_kw", { ascending: true, nullsFirst: false }) // الأسماء المتكررة تترتب بالقدرة من الأصغر للأكبر
+    .order("price", { ascending: true });
 
   productSel.innerHTML = "";
   if (error || !data) {
     productSel.innerHTML = "<option>تعذر تحميل المنتجات</option>";
     return;
   }
+  const nameCounts = countNames(data);
+  nameCountsByCategory.set(category, nameCounts);
+
   data.forEach((p) => {
+    const label = buildProductLabel(p, nameCounts);
     const opt = document.createElement("option");
     opt.value = p.id;
-    opt.dataset.name = p.name_ar || p.name_en || "منتج";
+    opt.dataset.name = label;
     opt.dataset.price = p.price || 0;
-    opt.textContent = `${p.name_ar || p.name_en || "منتج"} — ${fmt(p.price)} ج.م`;
+    opt.textContent = `${label} — ${fmt(p.price)} ج.م`;
     productSel.appendChild(opt);
+  });
+}
+
+/* الدالة rep_create_quote بتخزّن name_ar بس في بنود العرض، فكل الإنفرترات بتطلع بنفس الاسم.
+   وقت الطباعة بنرجّع الاسم المميّز من جدول products بالـ product_id (بنود قديمة من غير product_id
+   أو منتج اتشال من الكتالوج بتفضل باسمها المحفوظ). */
+async function withProductLabels(items) {
+  const list = items || [];
+  const ids = [...new Set(list.map((it) => it.product_id).filter(Boolean))];
+  if (!ids.length) return list;
+
+  const { data: prods, error } = await client
+    .from("products")
+    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp")
+    .in("id", ids);
+  if (error || !prods) return list;
+
+  for (const category of new Set(prods.map((p) => p.category))) {
+    if (nameCountsByCategory.has(category)) continue;
+    const { data: rows } = await client
+      .from("products")
+      .select("name_ar, name_en")
+      .eq("category", category)
+      .eq("published", true)
+      .eq("in_stock", true);
+    if (rows) nameCountsByCategory.set(category, countNames(rows));
+  }
+
+  const byId = new Map(prods.map((p) => [p.id, p]));
+  return list.map((it) => {
+    const p = byId.get(it.product_id);
+    return p ? { ...it, name: buildProductLabel(p, nameCountsByCategory.get(p.category)) } : it;
   });
 }
 
@@ -444,7 +527,8 @@ async function printQuote(q) {
   const cust = q.customer || {};
 
   const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>`;
-  const rowUnits = (q.items || []).map((it) => ({
+  const printItems = await withProductLabels(q.items);
+  const rowUnits = printItems.map((it) => ({
     type: "row",
     html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>`,
   }));
