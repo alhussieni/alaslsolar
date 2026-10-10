@@ -167,10 +167,25 @@ function inverterLabel(p) {
   return `${head} - ${kw}KW/${hp}HP`;
 }
 
+/* البطاريات: السعة المخزّنة بالـKWH = AH × V ÷ 1000 (مثال: 100AH × 24V = 2.4KWH)، بتتضاف بجانب الاسم.
+   دي سعة اسمية (نظرية) — مش السعة القابلة للاستخدام (بتتأثر بـDoD). لو الاسم فيه kWh أصلًا أو AH/V ناقصين
+   مبنضيفش حاجة. voltage_v في الداتا بيز هو الفولت الاسمي المقرّب (12/24/48)، مش 12.8/25.6/51.2. */
+function batteryKwh(p) {
+  const ah = Number(p.capacity_ah);
+  const v = Number(p.voltage_v);
+  if (!(ah > 0) || !(v > 0)) return null;
+  return String(Math.round((ah * v) / 10) / 100); // kWh لأقرب خانتين عشريتين
+}
+
 function buildProductLabel(p, nameCounts) {
   if (p.category === "inverters") {
     const inv = inverterLabel(p);
     if (inv) return inv;
+  }
+  if (p.category === "batteries") {
+    const base = productBaseName(p);
+    const kwh = batteryKwh(p);
+    return kwh && !/kwh/i.test(base) ? `${base} — ${kwh}KWH` : base;
   }
   const base = productBaseName(p);
   if ((nameCounts?.get(base) || 0) <= 1) return base;
@@ -189,7 +204,7 @@ async function loadProductsForCategory() {
 
   const { data, error } = await client
     .from("products")
-    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, price")
+    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v, price")
     .eq("category", category)
     .eq("published", true)
     .eq("in_stock", true) // غير متاح = لا يظهر في أي أداة
@@ -226,7 +241,7 @@ async function withProductLabels(items) {
 
   const { data: prods, error } = await client
     .from("products")
-    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp")
+    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v")
     .in("id", ids);
   if (error || !prods) return list;
 
@@ -263,6 +278,7 @@ function addProductToCart() {
       name: opt.dataset.name,
       unitPrice: parseFloat(opt.dataset.price) || 0,
       qty,
+      note: "", // ملاحظة توضيحية للعميل (بتظهر في عمود "ملاحظات" في العرض المطبوع)
     });
   }
   renderCart();
@@ -278,6 +294,7 @@ function renderCart() {
       <td>${fmt(item.unitPrice)}</td>
       <td><input type="number" min="1" value="${item.qty}" data-idx="${idx}" class="cart-qty"></td>
       <td>${fmt(item.unitPrice * item.qty)}</td>
+      <td><input type="text" maxlength="300" value="${escHtml(item.note || "")}" data-idx="${idx}" class="cart-note" placeholder="ملاحظة للعميل (اختياري)"></td>
       <td><button type="button" class="rq-remove" data-idx="${idx}">حذف</button></td>
     `;
     body.appendChild(tr);
@@ -287,6 +304,13 @@ function renderCart() {
       const idx = parseInt(e.target.dataset.idx, 10);
       cart[idx].qty = Math.max(1, parseInt(e.target.value, 10) || 1);
       renderCart();
+    });
+  });
+  // الملاحظة بتتخزّن على عنصر السلة من غير إعادة رسم، عشان المؤشر ما يتنقلش وانت بتكتب
+  $$(".cart-note").forEach((inp) => {
+    inp.addEventListener("input", (e) => {
+      const idx = parseInt(e.target.dataset.idx, 10);
+      if (cart[idx]) cart[idx].note = e.target.value;
     });
   });
   $$(".rq-remove").forEach((btn) => {
@@ -399,7 +423,10 @@ async function saveQuote() {
     p_customer_phone: phone,
     p_customer_city: city || null,
     p_quote_type: quoteType,
-    p_items: cart.map((c) => ({ product_id: c.productId, qty: c.qty })),
+    p_items: cart.map((c) => {
+      const note = (c.note || "").trim();
+      return note ? { product_id: c.productId, qty: c.qty, note } : { product_id: c.productId, qty: c.qty };
+    }),
     p_installation_cost: installCost,
     p_notes: null,
   });
@@ -434,7 +461,7 @@ async function saveQuote() {
     id: saved.id,
     customer: { name, phone, city },
     quoteType,
-    items: saved.items || [],
+    items: withCartNotes(saved.items),
     subtotal: saved.subtotal,
     installCost: saved.installation_cost,
     total: saved.total,
@@ -442,6 +469,13 @@ async function saveQuote() {
   });
 
   await loadMyQuotes();
+}
+
+/* الدالة rep_create_quote لازم تكون محدّثة (migration ملاحظات البنود) عشان الملاحظة تتخزّن في العرض المحفوظ.
+   لحد ما تتطبّق، بنرجّع الملاحظات من السلة بالـproduct_id وقت أول طباعة بعد الحفظ، عشان ما تضيعش. */
+function withCartNotes(items) {
+  const notes = new Map(cart.filter((c) => (c.note || "").trim()).map((c) => [c.productId, c.note.trim()]));
+  return (items || []).map((it) => (it.note || !notes.has(it.product_id) ? it : { ...it, note: notes.get(it.product_id) }));
 }
 
 /* ---------------- الطباعة على الليتر هيد (نفس مقاسات وتنسيق rep-offgrid-quote.js) ---------------- */
@@ -526,11 +560,13 @@ async function printQuote(q) {
   const quoteNo = `Q-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, "0")}${String(issueDate.getDate()).padStart(2, "0")}-${String(q.id).padStart(3, "0")}`;
   const cust = q.customer || {};
 
-  const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>`;
   const printItems = await withProductLabels(q.items);
+  // عمود "ملاحظات" بيظهر بس لو في بند واحد على الأقل عليه ملاحظة (عشان ما ياخدش عرض من الجدول فاضي)
+  const hasNotes = printItems.some((it) => String(it.note || "").trim());
+  const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th>${hasNotes ? "<th>ملاحظات</th>" : ""}</tr>`;
   const rowUnits = printItems.map((it) => ({
     type: "row",
-    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>`,
+    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>${hasNotes ? `<td class="note-cell">${escHtml(String(it.note || "").trim())}</td>` : ""}</tr>`,
   }));
 
   const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;

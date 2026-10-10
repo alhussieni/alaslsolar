@@ -27,6 +27,7 @@
     .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; }
     .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
     .print-table th { background: #f3e4d4; }
+    .print-table td.note-cell { text-align: right; font-size: 11px; width: 30%; word-break: break-word; }
 
     .print-grand-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(251,246,239,0.9); border: 1.5px solid #c8752d; border-radius: 10px; padding: 12px 18px; }
     .print-grand-box .amount { font-size: 22px; font-weight: 800; color: #c8752d; }
@@ -64,6 +65,7 @@
     .rq-cart-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .rq-cart-table th, .rq-cart-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; }
     .rq-cart-table th { color: var(--muted); font-size: 12px; }
+    .rq-cart-table input.cart-note { width: 100%; min-width: 150px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; }
     .rq-cart-table input[type="number"] { width: 64px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; }
     .rq-quote-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 8px; font-size: 14px; }
   </style>
@@ -129,10 +131,12 @@
         <input type="number" id="qtyInput" min="1" value="1" style="max-width:80px">
         <button type="button" class="btn btn-primary" id="addProductBtn" style="min-height:44px">إضافة</button>
       </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
       <table class="rq-cart-table">
-        <thead><tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th></th></tr></thead>
+        <thead><tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th>ملاحظات</th><th></th></tr></thead>
         <tbody id="cartBody"></tbody>
       </table>
+      </div>
       <div class="totalbar" style="flex-direction:column;gap:6px;align-items:flex-start;padding:14px 18px">
         <div style="font-size:14px;color:rgba(255,255,255,.75)">الإجمالي قبل التركيب: <strong id="subtotalDisplay" class="num">0</strong> ج.م</div>
         <div data-install-total-row hidden style="font-size:14px;color:rgba(255,255,255,.75)">تكلفة التركيب: <strong id="installTotalDisplay" class="num">0</strong> ج.م</div>
