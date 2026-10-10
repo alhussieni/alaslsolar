@@ -305,7 +305,7 @@ async function saveQuote() {
     return;
   }
 
-  const { subtotal, installCost, grand } = updateTotals();
+  const { installCost } = updateTotals();
 
   msg.textContent = "جاري الحفظ...";
   msg.className = "rq-msg";
@@ -327,67 +327,180 @@ async function saveQuote() {
     return;
   }
 
-  msg.textContent = "تم حفظ العرض بنجاح.";
-  msg.className = "rq-msg ok";
-
   if (draftSaveTimer) clearTimeout(draftSaveTimer);
   await clearDraftNow();
 
-  printQuote({
-    id: data,
+  // الطباعة من الصف المحفوظ فعلًا (المصدر الوحيد للحقيقة)، مش من أرقام الشاشة — نفس نمط rep-offgrid-quote.js.
+  const { data: saved, error: readErr } = await client
+    .from("quotes")
+    .select("id, items, subtotal, installation_cost, total, created_at")
+    .eq("id", data)
+    .maybeSingle();
+
+  if (readErr || !saved) {
+    msg.textContent = "تم حفظ العرض رقم #" + data + "، لكن تعذر تحميله للطباعة. اطبعه من «عروضي السابقة».";
+    msg.className = "rq-msg ok";
+    await loadMyQuotes();
+    return;
+  }
+
+  msg.textContent = "تم حفظ العرض بنجاح.";
+  msg.className = "rq-msg ok";
+
+  await printQuote({
+    id: saved.id,
     customer: { name, phone, city },
     quoteType,
-    items: cart,
-    subtotal,
-    installCost,
-    grand,
-    createdAt: new Date(),
+    items: saved.items || [],
+    subtotal: saved.subtotal,
+    installCost: saved.installation_cost,
+    total: saved.total,
+    createdAt: saved.created_at,
   });
 
   await loadMyQuotes();
 }
 
-/* ---------------- الطباعة ---------------- */
+/* ---------------- الطباعة على الليتر هيد (نفس مقاسات وتنسيق rep-offgrid-quote.js) ---------------- */
 
-function printQuote(q) {
+const MM_TO_PX = 96 / 25.4;
+const PAGE_CONTENT_W_MM = 210 - 14 - 14; // عرض المحتوى داخل هوامش الصفحة اليمين/الشمال
+const PAGE_CONTENT_H_MM = 297 - 80 - 26; // الارتفاع المتاح بين مساحة اللوجو فوق والفوتر تحت
+const PAGE_SAFETY_BUFFER_MM = 12; // هامش أمان لفروق قياس الخط بين الشاشة والطباعة
+
+function fmtPrint(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
+
+function escHtml(v) {
+  return String(v ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+function measureBlockHeightPx(stage, html) {
+  stage.innerHTML = html;
+  return stage.getBoundingClientRect().height;
+}
+
+/* units: مصفوفة { type: 'row'|'block', html } — الوحدات دي معناها "ما ينفعش يتقطّع نصين"
+   بين صفحتين. صفوف الجدول بتتجمّع تلقائيًا في جدول واحد بعنوان لكل صفحة تحتوي عليها. */
+async function paginatePrintUnits(units, tableHead) {
+  await (document.fonts && document.fonts.ready ? document.fonts.ready.catch(() => {}) : Promise.resolve());
+
+  const stage = document.createElement("div");
+  stage.style.cssText = `position:absolute; visibility:hidden; left:-9999px; top:0; width:${PAGE_CONTENT_W_MM}mm; direction:rtl; font-family:'Cairo',sans-serif;`;
+  document.body.appendChild(stage);
+
+  const theadHeightPx = measureBlockHeightPx(stage, `<table class="print-table"><thead>${tableHead}</thead></table>`);
+  const maxH = (PAGE_CONTENT_H_MM - PAGE_SAFETY_BUFFER_MM) * MM_TO_PX;
+
+  const pages = [[]];
+  let curH = 0;
+  for (const unit of units) {
+    const wrappedForMeasure = unit.type === "row" ? `<table class="print-table"><tbody>${unit.html}</tbody></table>` : unit.html;
+    let h = measureBlockHeightPx(stage, wrappedForMeasure);
+    const curPage = pages[pages.length - 1];
+    const startsNewTableOnThisPage = unit.type === "row" && (curPage.length === 0 || curPage[curPage.length - 1].type !== "row");
+    if (startsNewTableOnThisPage) h += theadHeightPx;
+
+    if (curH + h > maxH && curPage.length > 0) {
+      pages.push([]);
+      curH = 0;
+      if (unit.type === "row") h += theadHeightPx; // أول صف في الصفحة الجديدة هيفتح جدول جديد بعنوانه
+    }
+    pages[pages.length - 1].push(unit);
+    curH += h;
+  }
+  document.body.removeChild(stage);
+  return pages;
+}
+
+function renderPrintPages(pages, tableHead, topRights) {
+  return pages.map((pageUnits, idx) => {
+    const parts = [];
+    let i = 0;
+    while (i < pageUnits.length) {
+      if (pageUnits[i].type === "row") {
+        let rowsHtml = "";
+        while (i < pageUnits.length && pageUnits[i].type === "row") { rowsHtml += pageUnits[i].html; i++; }
+        parts.push(`<table class="print-table"><thead>${tableHead}</thead><tbody>${rowsHtml}</tbody></table>`);
+      } else {
+        parts.push(pageUnits[i].html);
+        i++;
+      }
+    }
+    const topRight = (topRights && topRights[idx]) || "";
+    return `<div class="printPage">${topRight}${parts.join("")}</div>`;
+  }).join("");
+}
+
+/* q: { id, customer:{name,phone,city}, quoteType, items, subtotal, installCost, total, createdAt }
+   كل الأرقام جاية من الصف المحفوظ في جدول quotes. */
+async function printQuote(q) {
   const area = document.getElementById("printArea");
-  const dateStr = new Date(q.createdAt).toLocaleDateString("ar-EG");
+  const issueDate = new Date(q.createdAt);
+  const dateStr = issueDate.toLocaleDateString("ar-EG-u-nu-latn");
+  const validUntil = new Date(issueDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+  const validUntilStr = validUntil.toLocaleDateString("ar-EG-u-nu-latn");
   const typeLabel = q.quoteType === "supply_install" ? "توريد وتركيب" : "توريد فقط";
+  const quoteNo = `Q-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, "0")}${String(issueDate.getDate()).padStart(2, "0")}-${String(q.id).padStart(3, "0")}`;
+  const cust = q.customer || {};
 
-  const rows = q.items.map((it) => `
-    <tr>
-      <td>${QuoteItemUtils.getQuoteItemLabel(it)}</td>
-      <td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>
-      <td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td>
-      <td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>
-    </tr>
-  `).join("");
+  const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>`;
+  const rowUnits = (q.items || []).map((it) => ({
+    type: "row",
+    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>`,
+  }));
 
-  area.innerHTML = `
-    <div class="print-header">
-      <img src="logo.png" alt="الأصل للطاقة الشمسية">
-      <div style="text-align:left;">
-        <div class="print-title">عرض سعر</div>
-        <div>#${q.id} — ${dateStr}</div>
-      </div>
-    </div>
-    <div class="print-meta">
-      <div><strong>العميل:</strong> ${q.customer.name} — ${q.customer.phone}${q.customer.city ? " — " + q.customer.city : ""}</div>
-      <div><strong>نوع العرض:</strong> ${typeLabel}</div>
-    </div>
-    <table class="print-table">
-      <thead><tr><th>المنتج</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div class="print-totals">
-      <div class="row"><span>الإجمالي قبل التركيب</span><span>${fmt(q.subtotal)} ج.م</span></div>
-      ${q.quoteType === "supply_install" ? `<div class="row"><span>تكلفة التركيب</span><span>${fmt(q.installCost)} ج.م</span></div>` : ""}
-      <div class="row grand"><span>الإجمالي الكلي</span><span>${fmt(q.grand)} ج.م</span></div>
-    </div>
-    <div class="print-footer">الأصل للطاقة الشمسية — alaslsolar.com — هذا العرض قابل للتغيير حسب الأسعار وقت التعاقد.</div>
-  `;
+  const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
+  const infoRow = `
+    <div class="print-info-grid">
+      ${infoBox("العميل / المشروع", `${escHtml(cust.name)} — ${escHtml(cust.phone)}${cust.city ? " — " + escHtml(cust.city) : ""}`)}
+      ${infoBox("نوع العرض", typeLabel)}
+      ${infoBox("تاريخ الإصدار", dateStr)}
+      ${infoBox("صالح حتى", validUntilStr)}
+    </div>`;
 
-  setTimeout(() => window.print(), 100);
+  /* الهيدر (عنوان + رقم عرض + تاريخ + صناديق المعلومات) عنصر مطلق الموضع أعلى يمين كل صفحة بجوار اللوجو.
+     النسخة الكاملة في أول صفحة بس، وباقي الصفحات نسخة مصغّرة. */
+  const topRightFull = `
+    <div class="print-topright">
+      <div class="tr-title">عرض سعر</div>
+      <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
+      ${infoRow}
+    </div>`;
+  const topRightMinimal = `
+    <div class="print-topright">
+      <div class="tr-title">عرض سعر (تابع)</div>
+      <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
+    </div>`;
+
+  const subtotalBlock = q.quoteType === "supply_install" ? [{
+    type: "block",
+    html: `
+      <div class="print-terms">
+        <div class="row"><span>الإجمالي قبل التركيب</span><span>${fmtPrint(q.subtotal)} ج.م</span></div>
+        <div class="row"><span>تكلفة التركيب</span><span>${fmtPrint(q.installCost)} ج.م</span></div>
+      </div>`,
+  }] : [];
+  const grandBoxBlock = {
+    type: "block",
+    html: `
+      <div class="print-grand-box">
+        <div class="note">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
+        <div class="amount">${fmtPrint(q.total)} ج.م</div>
+      </div>`,
+  };
+  const termsBlock = {
+    type: "block",
+    html: `
+      <div class="print-terms">
+        <div class="fine">هذا العرض ساري لمدة 3 أيام من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
+      </div>`,
+  };
+
+  const pages = await paginatePrintUnits([...rowUnits, ...subtotalBlock, grandBoxBlock, termsBlock], tableHead);
+  const topRights = pages.map((_, idx) => (idx === 0 ? topRightFull : topRightMinimal));
+
+  area.innerHTML = renderPrintPages(pages, tableHead, topRights);
+  setTimeout(() => window.print(), 150);
 }
 
 /* ---------------- عروضي السابقة ---------------- */
@@ -398,7 +511,7 @@ async function loadMyQuotes() {
 
   const { data, error } = await client
     .from("quotes")
-    .select("id, created_at, quote_type, total, items, customers(name, phone, city)")
+    .select("id, created_at, quote_type, subtotal, installation_cost, total, items, customers(name, phone, city)")
     .order("created_at", { ascending: false })
     .limit(30);
 
@@ -429,9 +542,9 @@ async function loadMyQuotes() {
         customer: q.customers || {},
         quoteType: q.quote_type,
         items: q.items || [],
-        subtotal: q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0,
-        installCost: q.total - (q.items ? q.items.reduce((s, it) => s + QuoteItemUtils.getQuoteItemLineTotal(it), 0) : 0),
-        grand: q.total,
+        subtotal: q.subtotal,
+        installCost: q.installation_cost,
+        total: q.total,
         createdAt: q.created_at,
       });
     });
