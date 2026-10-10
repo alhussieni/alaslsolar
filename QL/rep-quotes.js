@@ -295,20 +295,29 @@ async function saveQuote() {
     return;
   }
 
+  // rep_create_quote بتقبل بس أصناف من جدول products (بـ product_id) وبتحسب الأسعار بنفسها.
+  // الأصناف المستوردة من الحاسبة (productId = null) هترفضها الدالة، فنوقف هنا برسالة واضحة.
+  const unlinked = cart.filter((c) => !c.productId);
+  if (unlinked.length) {
+    msg.textContent = "الأصناف دي مش من قائمة المنتجات ومينفعش تتحفظ هنا: " +
+      unlinked.map((c) => c.name).join("، ") + ". احذفها أو ضيف بدلها منتج من القائمة.";
+    msg.className = "rq-msg error";
+    return;
+  }
+
   const { subtotal, installCost, grand } = updateTotals();
 
   msg.textContent = "جاري الحفظ...";
   msg.className = "rq-msg";
 
+  // الأسعار والإجماليات بتتحسب في الداتا بيز (المصدر الوحيد للحقيقة) — بنبعت product_id و qty بس.
   const { data, error } = await client.rpc("rep_create_quote", {
     p_customer_name: name,
     p_customer_phone: phone,
     p_customer_city: city || null,
     p_quote_type: quoteType,
-    p_items: cart.map((c) => ({ name: c.name, unit_price: c.unitPrice, qty: c.qty, line_total: c.unitPrice * c.qty })),
-    p_subtotal: subtotal,
+    p_items: cart.map((c) => ({ product_id: c.productId, qty: c.qty })),
     p_installation_cost: installCost,
-    p_total: grand,
     p_notes: null,
   });
 
