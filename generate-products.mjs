@@ -71,6 +71,11 @@ const CAT_LABEL = {
   garden_lights: { en: "Solar Garden Lights",   ar: "إنارة حدائق شمسية",  es: "Luces Solares de Jardín", zh: "太阳能庭院灯" },
   solar_kits:    { en: "Solar Kits",            ar: "طقم طاقة شمسية",     es: "Kits Solares",            zh: "太阳能套件" },
   solar_safety:  { en: "Solar Safety Equipment",ar: "معدات أمان شمسية",   es: "Equipo de Seguridad Solar", zh: "太阳能安全设备" },
+  ongrid:            { en: "On-Grid Inverters", ar: "إنفرترات أون جريد", es: "Inversores On-Grid", zh: "并网逆变器" },
+  hybrid:            { en: "Hybrid Inverters", ar: "إنفرترات هايبرد", es: "Inversores Híbridos", zh: "混合逆变器" },
+  ev_chargers:       { en: "EV Chargers", ar: "شواحن سيارات كهربائية", es: "Cargadores para Vehículos Eléctricos", zh: "电动车充电桩" },
+  reactors:          { en: "Reactors", ar: "ريأكتورات", es: "Reactores", zh: "电抗器" },
+  charge_controllers:{ en: "Charge Controllers", ar: "منظمات الشحن", es: "Controladores de Carga", zh: "充电控制器" },
 };
 
 const INTRO_TEXT = {

@@ -357,7 +357,7 @@
 
   <script>
   (function () {
-    const CAT_ICONS = { inverters: '⚡', panels: '☀️', accessories: '🔌', combiners: '📦', structures: '🏗️', cables: '🔶', batteries: '🔋', offgrid: '🔆' };
+    const CAT_ICONS = { inverters: '⚡', panels: '☀️', accessories: '🔌', combiners: '📦', structures: '🏗️', cables: '🔶', batteries: '🔋', offgrid: '🔆', ongrid: '🌐', hybrid: '🔁', ev_chargers: '🚗', reactors: '🧲', charge_controllers: '🎛️' };
     const CAT_LABEL = {
       inverters:   { ar: 'إنفرتر',            en: 'Inverter',           es: 'Inversor',           zh: '逆变器' },
       panels:      { ar: 'لوح شمسي',          en: 'Solar Panel',        es: 'Panel Solar',        zh: '太阳能板' },
@@ -367,6 +367,11 @@
       cables:      { ar: 'كابل',              en: 'Cable',              es: 'Cable',               zh: '电缆' },
       batteries:   { ar: 'بطارية',            en: 'Battery',            es: 'Batería',             zh: '电池' },
       offgrid:     { ar: 'إنفرتر أوف جريد',   en: 'Off-Grid Inverter',  es: 'Inversor Off-Grid',  zh: '离网逆变器' },
+      ongrid: { ar: 'إنفرتر أون جريد', en: 'On-Grid Inverter', es: 'Inversor On-Grid', zh: '并网逆变器' },
+      hybrid: { ar: 'إنفرتر هايبرد', en: 'Hybrid Inverter', es: 'Inversor Híbrido', zh: '混合逆变器' },
+      ev_chargers: { ar: 'شاحن سيارات كهربائية', en: 'EV Charger', es: 'Cargador para Vehículo Eléctrico', zh: '电动车充电桩' },
+      reactors: { ar: 'ريأكتور', en: 'Reactor', es: 'Reactor', zh: '电抗器' },
+      charge_controllers: { ar: 'منظم شحن', en: 'Charge Controller', es: 'Controlador de Carga', zh: '充电控制器' },
     };
     const T = {
       ar: { back: 'الرجوع لكل المنتجات', loading: 'جاري تحميل بيانات المنتج…', error: 'تعذّر العثور على هذا المنتج — قد يكون غير منشور أو تم حذفه.',

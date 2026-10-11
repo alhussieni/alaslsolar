@@ -63,6 +63,11 @@
         prod_cat_garden_lights: "🪴 Solar Garden Lights",
         prod_cat_solar_kits: "🧰 Solar Home Systems",
         prod_cat_solar_safety: "🚧 Solar Road Safety",
+        prod_cat_ongrid: "🌐 On-Grid Inverters",
+        prod_cat_hybrid: "🔁 Hybrid Inverters",
+        prod_cat_ev_chargers: "🚗 EV Chargers",
+        prod_cat_reactors: "🧲 Reactors",
+        prod_cat_charge_controllers: "🎛️ Charge Controllers",
         prod_cat_structures: "🏗️ Mounting Structures",
         prod_cat_cables: "🔶 Cables",
         prod_loading: "Loading products…",
@@ -132,6 +137,11 @@
         prod_cat_garden_lights: "🪴 إضاءة حدائق شمسية",
         prod_cat_solar_kits: "🧰 أنظمة طاقة شمسية منزلية",
         prod_cat_solar_safety: "🚧 سلامة الطرق الشمسية",
+        prod_cat_ongrid: "🌐 إنفرترات أون جريد",
+        prod_cat_hybrid: "🔁 إنفرترات هايبرد",
+        prod_cat_ev_chargers: "🚗 شواحن سيارات كهربائية",
+        prod_cat_reactors: "🧲 ريأكتورات",
+        prod_cat_charge_controllers: "🎛️ منظمات الشحن",
         prod_cat_structures: "🏗️ شاسيهات",
         prod_cat_cables: "🔶 كابلات",
         prod_loading: "جاري تحميل المنتجات…",
@@ -201,6 +211,11 @@
         prod_cat_garden_lights: "🪴 Luces Solares de Jardín",
         prod_cat_solar_kits: "🧰 Sistemas Solares Domésticos",
         prod_cat_solar_safety: "🚧 Seguridad Solar Vial",
+        prod_cat_ongrid: "🌐 Inversores On-Grid",
+        prod_cat_hybrid: "🔁 Inversores Híbridos",
+        prod_cat_ev_chargers: "🚗 Cargadores para Vehículos Eléctricos",
+        prod_cat_reactors: "🧲 Reactores",
+        prod_cat_charge_controllers: "🎛️ Controladores de Carga",
         prod_cat_structures: "🏗️ Estructuras",
         prod_cat_cables: "🔶 Cables",
         prod_loading: "Cargando productos…",
@@ -270,6 +285,11 @@
         prod_cat_garden_lights: "🪴 太阳能庭院灯",
         prod_cat_solar_kits: "🧰 太阳能家用系统",
         prod_cat_solar_safety: "🚧 太阳能道路安全",
+        prod_cat_ongrid: "🌐 并网逆变器",
+        prod_cat_hybrid: "🔁 混合逆变器",
+        prod_cat_ev_chargers: "🚗 电动车充电桩",
+        prod_cat_reactors: "🧲 电抗器",
+        prod_cat_charge_controllers: "🎛️ 充电控制器",
         prod_cat_structures: "🏗️ 安装结构",
         prod_cat_cables: "🔶 电缆",
         prod_loading: "正在加载产品…",
@@ -1046,7 +1066,7 @@
   <script>
   (function () {
 
-    const CATEGORIES = ['inverters', 'panels', 'structures', 'cables', 'accessories', 'combiners', 'batteries', 'offgrid', 'well_motors', 'pumps', 'pipes', 'street_lights', 'flood_lights', 'garden_lights', 'solar_kits', 'solar_safety'];
+    const CATEGORIES = ['inverters', 'panels', 'structures', 'cables', 'accessories', 'combiners', 'batteries', 'offgrid', 'ongrid', 'hybrid', 'well_motors', 'pumps', 'pipes', 'street_lights', 'flood_lights', 'garden_lights', 'solar_kits', 'solar_safety', 'ev_chargers', 'reactors', 'charge_controllers'];
     // Panels' stored Arabic name leads with the category word ("الواح
     // Longi 575 وات") — English/Spanish/Chinese names already start with
     // the brand. Used to drop the redundant prefix in single-product cards
@@ -1058,16 +1078,19 @@
       combiners: '📦', structures: '🏗️', cables: '🔶',
       batteries: '🔋', offgrid: '🔆', well_motors: '🛠️', pumps: '🌊', pipes: '🧵',
       street_lights: '💡', flood_lights: '🔦', garden_lights: '🪴', solar_kits: '🧰', solar_safety: '🚧',
+      ongrid: '🌐', hybrid: '🔁', ev_chargers: '🚗', reactors: '🧲', charge_controllers: '🎛️',
     };
     const CAT_SECTION_LABEL = {
       ar: { inverters: 'إنفرترات', panels: 'ألواح شمسية', accessories: 'إكسسوارات', combiners: 'صناديق تجميع',
         structures: 'شاسيهات وهياكل تثبيت', cables: 'كابلات', batteries: 'بطاريات', offgrid: 'إنفرتر أوف جريد',
         well_motors: 'موتورات آبار', pumps: 'طلمبات ومضخات', pipes: 'مواسير', street_lights: 'إنارة شوارع شمسية',
-        flood_lights: 'كشافات شمسية', garden_lights: 'إضاءة حدائق شمسية', solar_kits: 'منظومات شمسية جاهزة', solar_safety: 'وسائل أمان طرق شمسية' },
+        flood_lights: 'كشافات شمسية', garden_lights: 'إضاءة حدائق شمسية', solar_kits: 'منظومات شمسية جاهزة', solar_safety: 'وسائل أمان طرق شمسية',
+        ongrid: 'إنفرترات أون جريد', hybrid: 'إنفرترات هايبرد', ev_chargers: 'شواحن سيارات كهربائية', reactors: 'ريأكتورات', charge_controllers: 'منظمات الشحن' },
       en: { inverters: 'Inverters', panels: 'Solar Panels', accessories: 'Accessories', combiners: 'Combiner Boxes',
         structures: 'Mounting Structures', cables: 'Cables', batteries: 'Batteries', offgrid: 'Off-Grid Inverters',
         well_motors: 'Well Motors', pumps: 'Pumps', pipes: 'HDPE Pipes', street_lights: 'Solar Street Lights',
-        flood_lights: 'Solar Flood Lights', garden_lights: 'Solar Garden Lights', solar_kits: 'Solar Home Systems', solar_safety: 'Solar Road Safety' },
+        flood_lights: 'Solar Flood Lights', garden_lights: 'Solar Garden Lights', solar_kits: 'Solar Home Systems', solar_safety: 'Solar Road Safety',
+        ongrid: 'On-Grid Inverters', hybrid: 'Hybrid Inverters', ev_chargers: 'EV Chargers', reactors: 'Reactors', charge_controllers: 'Charge Controllers' },
     };
     function categorySectionLabel(cat) {
       const lang = getLang();
@@ -1242,6 +1265,11 @@
         garden_lights: { ar: 'إضاءة حدائق شمسية', en: 'Solar Garden Light', es: 'Luz Solar de Jardín', zh: '太阳能庭院灯' },
         solar_kits: { ar: 'نظام طاقة شمسية منزلي', en: 'Solar Home System', es: 'Sistema Solar Doméstico', zh: '太阳能家用系统' },
         solar_safety: { ar: 'سلامة الطرق الشمسية', en: 'Solar Safety', es: 'Seguridad Solar', zh: '太阳能安全' },
+        ongrid: { ar: 'إنفرتر أون جريد', en: 'On-Grid Inverter', es: 'Inversor On-Grid', zh: '并网逆变器' },
+        hybrid: { ar: 'إنفرتر هايبرد', en: 'Hybrid Inverter', es: 'Inversor Híbrido', zh: '混合逆变器' },
+        ev_chargers: { ar: 'شاحن سيارات كهربائية', en: 'EV Charger', es: 'Cargador para Vehículo Eléctrico', zh: '电动车充电桩' },
+        reactors: { ar: 'ريأكتور', en: 'Reactor', es: 'Reactor', zh: '电抗器' },
+        charge_controllers: { ar: 'منظم شحن', en: 'Charge Controller', es: 'Controlador de Carga', zh: '充电控制器' },
       }[p.category];
       const catText = (catLabel && catLabel[getLang()]) || '';
 
@@ -1351,6 +1379,11 @@
         garden_lights: { ar: 'إضاءة حدائق شمسية', en: 'Solar Garden Light', es: 'Luz Solar de Jardín', zh: '太阳能庭院灯' },
         solar_kits: { ar: 'نظام طاقة شمسية منزلي', en: 'Solar Home System', es: 'Sistema Solar Doméstico', zh: '太阳能家用系统' },
         solar_safety: { ar: 'سلامة الطرق الشمسية', en: 'Solar Safety', es: 'Seguridad Solar', zh: '太阳能安全' },
+        ongrid: { ar: 'إنفرتر أون جريد', en: 'On-Grid Inverter', es: 'Inversor On-Grid', zh: '并网逆变器' },
+        hybrid: { ar: 'إنفرتر هايبرد', en: 'Hybrid Inverter', es: 'Inversor Híbrido', zh: '混合逆变器' },
+        ev_chargers: { ar: 'شاحن سيارات كهربائية', en: 'EV Charger', es: 'Cargador para Vehículo Eléctrico', zh: '电动车充电桩' },
+        reactors: { ar: 'ريأكتور', en: 'Reactor', es: 'Reactor', zh: '电抗器' },
+        charge_controllers: { ar: 'منظم شحن', en: 'Charge Controller', es: 'Controlador de Carga', zh: '充电控制器' },
       }[p.category];
       const catText = (catLabel && catLabel[getLang()]) || '';
 
@@ -1416,7 +1449,7 @@
     // ── Which product field holds the "power" tier for a given category's tree ──
     function powerFieldFor(cat) {
       if (cat === 'well_motors' || cat === 'pumps') return 'power_hp';
-      if (cat === 'inverters' || cat === 'offgrid') return 'power_kw';
+      if (cat === 'inverters' || cat === 'offgrid' || cat === 'ongrid' || cat === 'hybrid') return 'power_kw';
       if (cat === 'panels') return 'power_watt';
       return null;
     }
@@ -1571,9 +1604,10 @@
       { id: 'irrigation_wells',    i18n: 'prod_section_irrigation', cats: ['well_motors', 'pumps', 'pipes'] },
       { id: 'inverters',           i18n: 'prod_section_inverters',  cats: ['inverters', 'offgrid', 'ongrid', 'hybrid'] },
       { id: 'panels',              i18n: 'prod_section_panels',     cats: ['panels'] },
-      { id: 'install_components',  i18n: 'prod_section_install',    cats: ['structures', 'cables', 'combiners', 'accessories'] },
+      { id: 'install_components',  i18n: 'prod_section_install',    cats: ['structures', 'cables', 'combiners', 'accessories', 'reactors', 'charge_controllers'] },
       { id: 'standalone_lighting', i18n: 'prod_section_lighting',   cats: ['street_lights', 'flood_lights', 'garden_lights', 'solar_safety', 'solar_kits'] },
       { id: 'batteries',           i18n: 'prod_section_batteries',  cats: ['batteries'] },
+      { id: 'ev_charging',         i18n: 'prod_section_ev',         cats: ['ev_chargers'] },
     ];
     const CAT_I18N_KEY = {
       well_motors: 'prod_cat_well_motors', pumps: 'prod_cat_pumps', pipes: 'prod_cat_pipes',
@@ -1583,10 +1617,11 @@
       street_lights: 'prod_cat_street_lights', flood_lights: 'prod_cat_flood_lights',
       garden_lights: 'prod_cat_garden_lights', solar_safety: 'prod_cat_solar_safety',
       solar_kits: 'prod_cat_solar_kits', batteries: 'prod_cat_batteries',
+      ongrid: 'prod_cat_ongrid', hybrid: 'prod_cat_hybrid', ev_chargers: 'prod_cat_ev_chargers', reactors: 'prod_cat_reactors', charge_controllers: 'prod_cat_charge_controllers',
     };
     // Categories deep enough (brand + power variants) to get a 3-level branch;
     // everything else in the tree is a flat, childless leaf.
-    const BRAND_POWER_CATS = new Set(['well_motors', 'pumps', 'inverters', 'offgrid', 'panels']);
+    const BRAND_POWER_CATS = new Set(['well_motors', 'pumps', 'inverters', 'offgrid', 'ongrid', 'hybrid', 'panels']);
     const POWER_UNIT_LABEL = { power_hp: 'HP', power_kw: 'KW', power_watt: 'W' };
 
     // ── Build the tree structure from the live product list + category_settings ──

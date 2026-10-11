@@ -21,6 +21,11 @@ const CATEGORY_LABELS = {
   structures: "شاسيهات",
   cables: "كابلات",
   solar_kits: "باقات شمسية",
+  ongrid: "إنفرترات أون جريد",
+  hybrid: "إنفرترات هايبرد",
+  ev_chargers: "شواحن سيارات كهربائية",
+  reactors: "ريأكتورات",
+  charge_controllers: "منظمات الشحن",
 };
 
 let client = null;
@@ -137,81 +142,6 @@ async function loadCategories() {
   await loadProductsForCategory();
 }
 
-/* أسماء كتير في الداتا بيز متطابقة (مثلًا كل إنفرترات Delixi اسمها "إنفرتر Delixi")، والفرق الحقيقي بينها
-   في specs_ar (القدرة) و model_available (الموديل). بنضيفهم للاسم بس لما الاسم مش فريد جوه نفس الفئة،
-   عشان باقي المنتجات تفضل أسماءها القصيرة زي ما هي. */
-const nameCountsByCategory = new Map(); // category -> Map(اسم -> عدد المنتجات بنفس الاسم)
-
-function productBaseName(p) { return p.name_ar || p.name_en || "منتج"; }
-
-function countNames(rows) {
-  const counts = new Map();
-  rows.forEach((p) => { const n = productBaseName(p); counts.set(n, (counts.get(n) || 0) + 1); });
-  return counts;
-}
-
-// رقم المواصفة بدون أصفار زيادة (4.10 -> 4)، أو null لو مش متسجّل
-function specNum(v) {
-  if (v == null || v === "") return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? String(n) : null;
-}
-
-/* الإنفرترات: دايمًا "الماركة الموديل - القدرة kW/HP" (مثال: VEICHI SI23 - 75KW/100HP)،
-   عشان المندوب والعميل يميّزوا الصنف ويقارنوا السعر. لو أي حقل ناقص نرجع للصيغة العامة. */
-function inverterLabel(p) {
-  const kw = specNum(p.power_kw);
-  const hp = specNum(p.power_hp);
-  if (!p.brand || kw == null || hp == null) return null;
-  const head = [p.brand, (p.model_available || "").trim()].filter(Boolean).join(" ");
-  return `${head} - ${kw}KW/${hp}HP`;
-}
-
-/* البطاريات: بنعرض بجانب الاسم السعة المخزّنة بالـKWH.
-   - لو الـkWh مسجّل أصلًا من المصنع (في الاسم أو specs_ar، زي Phylion 5.04kWh) بنعرضه زي ما هو.
-   - لو مش مسجّل: KWH = الفولت الفعلي × AH ÷ 1000 بالأرقام المسجّلة على البطارية (مثال: 25.6V × 100Ah = 2.56KWH)،
-     من غير أي خصم DoD، لأن العرض بيعرض قيم المصنع في الحالة القياسية.
-   الفولت والـAh بيتقرأوا من specs_ar ("الجهد: 25.6V | السعة: 100Ah") لأن عمود voltage_v مقرّب (12/24/48)
-   مش الفولت الفعلي (12.8/25.6/51.2). لو النص مش بالشكل ده بنرجع للاسم ثم للأعمدة. */
-function firstNum(text, re) {
-  const m = String(text || "").match(re);
-  const n = m ? Number(m[1]) : NaN;
-  return n > 0 ? n : null;
-}
-
-function batteryKwh(p) {
-  const registered = firstNum(`${p.name_ar || ""} ${p.specs_ar || ""}`, /(\d+(?:\.\d+)?)\s*kwh/i);
-  if (registered) return String(registered);
-  const volts = firstNum(p.specs_ar, /الجهد:\s*(\d+(?:\.\d+)?)\s*V/i)
-    ?? firstNum(p.name_ar, /(\d+(?:\.\d+)?)\s*V\b/i)
-    ?? (Number(p.voltage_v) > 0 ? Number(p.voltage_v) : null);
-  const ah = firstNum(p.specs_ar, /السعة:\s*(\d+(?:\.\d+)?)\s*Ah/i)
-    ?? firstNum(p.name_ar, /(\d+(?:\.\d+)?)\s*Ah/i)
-    ?? (Number(p.capacity_ah) > 0 ? Number(p.capacity_ah) : null);
-  if (!volts || !ah) return null;
-  return String(Math.round((volts * ah) / 10) / 100); // kWh لأقرب خانتين عشريتين
-}
-
-function buildProductLabel(p, nameCounts) {
-  if (p.category === "inverters") {
-    const inv = inverterLabel(p);
-    if (inv) return inv;
-  }
-  if (p.category === "batteries") {
-    const base = productBaseName(p);
-    const kwh = batteryKwh(p);
-    return kwh && !/kwh/i.test(base) ? `${base} — ${kwh}KWH` : base;
-  }
-  const base = productBaseName(p);
-  if ((nameCounts?.get(base) || 0) <= 1) return base;
-  const parts = [base];
-  const specs = (p.specs_ar || "").trim();
-  if (specs && !base.includes(specs)) parts.push(specs);
-  const model = (p.model_available || "").trim();
-  if (model && !base.includes(model)) parts.push("موديل " + model);
-  return parts.join(" — ");
-}
-
 async function loadProductsForCategory() {
   const category = $("#categorySelect").value;
   const productSel = $("#productSelect");
@@ -219,62 +149,24 @@ async function loadProductsForCategory() {
 
   const { data, error } = await client
     .from("products")
-    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v, price")
+    .select("id, name_ar, name_en, price")
     .eq("category", category)
     .eq("published", true)
     .eq("in_stock", true) // غير متاح = لا يظهر في أي أداة
-    .order("name_ar", { ascending: true })
-    .order("power_kw", { ascending: true, nullsFirst: false }) // الأسماء المتكررة تترتب بالقدرة من الأصغر للأكبر
-    .order("price", { ascending: true });
+    .order("name_ar", { ascending: true });
 
   productSel.innerHTML = "";
   if (error || !data) {
     productSel.innerHTML = "<option>تعذر تحميل المنتجات</option>";
     return;
   }
-  const nameCounts = countNames(data);
-  nameCountsByCategory.set(category, nameCounts);
-
   data.forEach((p) => {
-    const label = buildProductLabel(p, nameCounts);
     const opt = document.createElement("option");
     opt.value = p.id;
-    opt.dataset.name = label;
+    opt.dataset.name = p.name_ar || p.name_en || "منتج";
     opt.dataset.price = p.price || 0;
-    opt.textContent = `${label} — ${fmt(p.price)} ج.م`;
+    opt.textContent = `${p.name_ar || p.name_en || "منتج"} — ${fmt(p.price)} ج.م`;
     productSel.appendChild(opt);
-  });
-}
-
-/* الدالة rep_create_quote بتخزّن name_ar بس في بنود العرض، فكل الإنفرترات بتطلع بنفس الاسم.
-   وقت الطباعة بنرجّع الاسم المميّز من جدول products بالـ product_id (بنود قديمة من غير product_id
-   أو منتج اتشال من الكتالوج بتفضل باسمها المحفوظ). */
-async function withProductLabels(items) {
-  const list = items || [];
-  const ids = [...new Set(list.map((it) => it.product_id).filter(Boolean))];
-  if (!ids.length) return list;
-
-  const { data: prods, error } = await client
-    .from("products")
-    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v")
-    .in("id", ids);
-  if (error || !prods) return list;
-
-  for (const category of new Set(prods.map((p) => p.category))) {
-    if (nameCountsByCategory.has(category)) continue;
-    const { data: rows } = await client
-      .from("products")
-      .select("name_ar, name_en")
-      .eq("category", category)
-      .eq("published", true)
-      .eq("in_stock", true);
-    if (rows) nameCountsByCategory.set(category, countNames(rows));
-  }
-
-  const byId = new Map(prods.map((p) => [p.id, p]));
-  return list.map((it) => {
-    const p = byId.get(it.product_id);
-    return p ? { ...it, name: buildProductLabel(p, nameCountsByCategory.get(p.category)) } : it;
   });
 }
 
@@ -293,7 +185,6 @@ function addProductToCart() {
       name: opt.dataset.name,
       unitPrice: parseFloat(opt.dataset.price) || 0,
       qty,
-      note: "", // ملاحظة توضيحية للعميل (بتظهر في عمود "ملاحظات" في العرض المطبوع)
     });
   }
   renderCart();
@@ -309,7 +200,6 @@ function renderCart() {
       <td>${fmt(item.unitPrice)}</td>
       <td><input type="number" min="1" value="${item.qty}" data-idx="${idx}" class="cart-qty"></td>
       <td>${fmt(item.unitPrice * item.qty)}</td>
-      <td><input type="text" maxlength="300" value="${escHtml(item.note || "")}" data-idx="${idx}" class="cart-note" placeholder="ملاحظة للعميل (اختياري)"></td>
       <td><button type="button" class="rq-remove" data-idx="${idx}">حذف</button></td>
     `;
     body.appendChild(tr);
@@ -319,13 +209,6 @@ function renderCart() {
       const idx = parseInt(e.target.dataset.idx, 10);
       cart[idx].qty = Math.max(1, parseInt(e.target.value, 10) || 1);
       renderCart();
-    });
-  });
-  // الملاحظة بتتخزّن على عنصر السلة من غير إعادة رسم، عشان المؤشر ما يتنقلش وانت بتكتب
-  $$(".cart-note").forEach((inp) => {
-    inp.addEventListener("input", (e) => {
-      const idx = parseInt(e.target.dataset.idx, 10);
-      if (cart[idx]) cart[idx].note = e.target.value;
     });
   });
   $$(".rq-remove").forEach((btn) => {
@@ -438,10 +321,7 @@ async function saveQuote() {
     p_customer_phone: phone,
     p_customer_city: city || null,
     p_quote_type: quoteType,
-    p_items: cart.map((c) => {
-      const note = (c.note || "").trim();
-      return note ? { product_id: c.productId, qty: c.qty, note } : { product_id: c.productId, qty: c.qty };
-    }),
+    p_items: cart.map((c) => ({ product_id: c.productId, qty: c.qty })),
     p_installation_cost: installCost,
     p_notes: null,
   });
@@ -476,7 +356,7 @@ async function saveQuote() {
     id: saved.id,
     customer: { name, phone, city },
     quoteType,
-    items: withCartNotes(saved.items),
+    items: saved.items || [],
     subtotal: saved.subtotal,
     installCost: saved.installation_cost,
     total: saved.total,
@@ -484,13 +364,6 @@ async function saveQuote() {
   });
 
   await loadMyQuotes();
-}
-
-/* الدالة rep_create_quote لازم تكون محدّثة (migration ملاحظات البنود) عشان الملاحظة تتخزّن في العرض المحفوظ.
-   لحد ما تتطبّق، بنرجّع الملاحظات من السلة بالـproduct_id وقت أول طباعة بعد الحفظ، عشان ما تضيعش. */
-function withCartNotes(items) {
-  const notes = new Map(cart.filter((c) => (c.note || "").trim()).map((c) => [c.productId, c.note.trim()]));
-  return (items || []).map((it) => (it.note || !notes.has(it.product_id) ? it : { ...it, note: notes.get(it.product_id) }));
 }
 
 /* ---------------- الطباعة على الليتر هيد (نفس مقاسات وتنسيق rep-offgrid-quote.js) ---------------- */
@@ -563,34 +436,6 @@ function renderPrintPages(pages, tableHead, topRights) {
   }).join("");
 }
 
-/* خيارات الطباعة (بتتقرا من الصفحة وقت الطباعة، ومبتتخزّنش في الداتا بيز — العرض المحفوظ دايمًا بالأسعار الكاملة):
-   - priceMode: "detailed" (سعر كل بند) أو "total_only" (إجمالي فقط من غير سعر الوحدة/إجمالي البند).
-   - showTotal: إظهار/إخفاء السعر الإجمالي. في وضع "total_only" الإجمالي بيظهر دايمًا
-     (إخفاؤه كان هيطلّع عرض من غير أي سعر). تفصيلي + إخفاء الإجمالي = قائمة أسعار ("برايس ليست"). */
-function getPrintOptions() {
-  const priceMode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode === "total_only" ? "total_only" : "detailed";
-  const showTotal = priceMode === "total_only" ? true : (document.getElementById("optShowTotal")?.checked !== false);
-  return { priceMode, showTotal };
-}
-
-function updatePrintOptionsUI() {
-  const mode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode;
-  const cb = document.getElementById("optShowTotal");
-  const hint = document.getElementById("printOptHint");
-  if (!cb || !hint) return;
-  if (mode === "total_only") {
-    cb.checked = true;
-    cb.disabled = true;
-    hint.textContent = "العرض هيظهر بدون سعر كل بند، والإجمالي بيظهر دايمًا في الوضع ده.";
-  } else {
-    cb.disabled = false;
-    hint.textContent = cb.checked
-      ? "العرض هيظهر بسعر كل بند والإجمالي."
-      : "العرض هيطلع كقائمة أسعار: سعر كل بند من غير إجمالي.";
-  }
-  hint.textContent += " الخيارات دي بتنطبق على الطباعة وإعادة الطباعة من «عروضي السابقة».";
-}
-
 /* q: { id, customer:{name,phone,city}, quoteType, items, subtotal, installCost, total, createdAt }
    كل الأرقام جاية من الصف المحفوظ في جدول quotes. */
 async function printQuote(q) {
@@ -603,15 +448,10 @@ async function printQuote(q) {
   const quoteNo = `Q-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, "0")}${String(issueDate.getDate()).padStart(2, "0")}-${String(q.id).padStart(3, "0")}`;
   const cust = q.customer || {};
 
-  const opts = getPrintOptions();
-  const detailed = opts.priceMode === "detailed";
-  const printItems = await withProductLabels(q.items);
-  // عمود "ملاحظات" بيظهر بس لو في بند واحد على الأقل عليه ملاحظة (عشان ما ياخدش عرض من الجدول فاضي)
-  const hasNotes = printItems.some((it) => String(it.note || "").trim());
-  const tableHead = `<tr><th>البند</th><th>الكمية</th>${detailed ? "<th>سعر الوحدة</th><th>الإجمالي</th>" : ""}${hasNotes ? "<th>ملاحظات</th>" : ""}</tr>`;
-  const rowUnits = printItems.map((it) => ({
+  const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>`;
+  const rowUnits = (q.items || []).map((it) => ({
     type: "row",
-    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>${detailed ? `<td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>` : ""}${hasNotes ? `<td class="note-cell">${escHtml(String(it.note || "").trim())}</td>` : ""}</tr>`,
+    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>`,
   }));
 
   const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
@@ -637,24 +477,22 @@ async function printQuote(q) {
       <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
     </div>`;
 
-  // الإجمالي قبل التركيب + تكلفة التركيب: بس في الوضع التفصيلي مع إظهار الإجمالي.
-  // قائمة الأسعار (تفصيلي من غير إجمالي): بنسيب سطر تكلفة التركيب لوحده (سعر مش إجمالي) لو أكبر من صفر.
-  // إجمالي فقط: مفيش تفصيل، الرقم الوحيد هو الإجمالي الكلي.
-  let subtotalBlock = [];
-  if (q.quoteType === "supply_install" && detailed) {
-    const installRow = `<div class="row"><span>تكلفة التركيب</span><span>${fmtPrint(q.installCost)} ج.م</span></div>`;
-    const subtotalRow = `<div class="row"><span>الإجمالي قبل التركيب</span><span>${fmtPrint(q.subtotal)} ج.م</span></div>`;
-    if (opts.showTotal) subtotalBlock = [{ type: "block", html: `<div class="print-terms">${subtotalRow}${installRow}</div>` }];
-    else if (Number(q.installCost) > 0) subtotalBlock = [{ type: "block", html: `<div class="print-terms">${installRow}</div>` }];
-  }
-  const grandBoxBlock = opts.showTotal ? [{
+  const subtotalBlock = q.quoteType === "supply_install" ? [{
+    type: "block",
+    html: `
+      <div class="print-terms">
+        <div class="row"><span>الإجمالي قبل التركيب</span><span>${fmtPrint(q.subtotal)} ج.م</span></div>
+        <div class="row"><span>تكلفة التركيب</span><span>${fmtPrint(q.installCost)} ج.م</span></div>
+      </div>`,
+  }] : [];
+  const grandBoxBlock = {
     type: "block",
     html: `
       <div class="print-grand-box">
         <div class="note">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
         <div class="amount">${fmtPrint(q.total)} ج.م</div>
       </div>`,
-  }] : [];
+  };
   const termsBlock = {
     type: "block",
     html: `
@@ -663,7 +501,7 @@ async function printQuote(q) {
       </div>`,
   };
 
-  const pages = await paginatePrintUnits([...rowUnits, ...subtotalBlock, ...grandBoxBlock, termsBlock], tableHead);
+  const pages = await paginatePrintUnits([...rowUnits, ...subtotalBlock, grandBoxBlock, termsBlock], tableHead);
   const topRights = pages.map((_, idx) => (idx === 0 ? topRightFull : topRightMinimal));
 
   area.innerHTML = renderPrintPages(pages, tableHead, topRights);
@@ -735,13 +573,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#custName").addEventListener("input", scheduleDraftAutosave);
   $("#custPhone").addEventListener("input", scheduleDraftAutosave);
   $$(".rq-type-btn").forEach((b) => b.addEventListener("click", () => setQuoteType(b.dataset.quoteType)));
-
-  $$(".rq-mode-btn").forEach((b) => b.addEventListener("click", () => {
-    $$(".rq-mode-btn").forEach((x) => x.classList.toggle("active", x === b));
-    updatePrintOptionsUI();
-  }));
-  $("#optShowTotal")?.addEventListener("change", updatePrintOptionsUI);
-  updatePrintOptionsUI();
 
   client.auth.onAuthStateChange((_event, session) => {
     updateAuthState(session);
