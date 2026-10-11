@@ -53,17 +53,6 @@
       .print-footer { margin-top: 18px; font-size: 11px; color: #777; border-top: 1px solid #e4d8ca; padding-top: 8px; }
     }
 
-    /* القاعدة الذهبية (38.2% / 61.8%) لتوزيع العمودين — نفس نسبة .grid2
-       المستخدمة في باقي صفحات المناديب، عشان النتيجة (الأهم للمندوب) تاخد
-       مساحة بصرية أكبر من عمود الإدخال. */
-    .sps-layout { display: grid; grid-template-columns: minmax(320px, 38.2%) minmax(0, 61.8%); gap: var(--space-4); align-items: start; }
-    @media (max-width: 1020px) { .sps-layout { grid-template-columns: 1fr; } }
-    .sps-col { display: flex; flex-direction: column; gap: var(--space-3); }
-    /* عرض النتيجة على الشمال، الفورم على اليمين */
-    .sps-col:first-child { order: 2; }
-    .sps-col:last-child { order: 1; position: sticky; top: var(--space-3); align-self: start; }
-    @media (max-width: 1020px) { .sps-col:last-child { position: static; } }
-
     /* تصغير كارتي "ملخص المنظومة" و"المواصفات الفنية" — مساحة أقل، وضوح
        زي ما هو (وزن الخط والتباين متغيرش، بس المسافات والأحجام اتصغرت). */
     [data-summary-card], [data-specs-card] { padding: 14px 16px; }
@@ -139,65 +128,17 @@
     </form>
   </section>
 
-  <div class="rep-main" data-rep-panel hidden style="max-width:1100px;padding-top:0">
+  <div class="rep-main rep-main--split" data-rep-panel hidden style="padding-top:0">
 
     <div class="dashboard-toolbar" style="position:static">
       <div><h2 style="margin:0;font-size:18px" data-user-name>—</h2></div>
       <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
     </div>
 
-    <div class="sps-layout">
+    <div class="rep-split">
 
-      <!-- عمود النتيجة (هيظهر شمال الصفحة بفضل CSS order) -->
-      <div class="sps-col">
-
-        <div class="card" data-summary-card hidden>
-          <h3>ملخص المنظومة</h3>
-          <div class="chip-row">
-            <span class="chip" data-chip-inverter>—</span>
-            <span class="chip" data-chip-panels>—</span>
-            <span class="chip" data-chip-kw>—</span>
-            <span class="chip outline" data-chip-perkw>—</span>
-          </div>
-          <div class="price-cards">
-            <div class="price-card" data-price-card="supply_only">
-              <div class="amt" data-price-supply-only>—</div>
-              <div class="lbl">توريد خامات فقط</div>
-            </div>
-            <div class="price-card" data-price-card="supply_install">
-              <div class="amt" data-price-supply-install>—</div>
-              <div class="lbl">توريد وتركيب شامل الضمان</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" data-specs-card hidden>
-          <h3>المواصفات الفنية</h3>
-          <div class="specs-grid" data-specs-grid></div>
-          <div class="warn-box" data-inverter-warning hidden></div>
-        </div>
-
-        <div class="card" data-details-card hidden>
-          <h3>تفصيل عرض السعر</h3>
-          <table class="items-table">
-            <thead><tr><th>البند</th><th>النوع</th><th>العدد</th><th>الضمان</th><th>السعر</th></tr></thead>
-            <tbody data-items-body></tbody>
-          </table>
-          <div class="final-price-banner">
-            <span class="lbl">السعر النهائي شامل الضريبة</span>
-            <span class="amt" data-grand-total>0 ج.م</span>
-          </div>
-
-          <div class="toolbar-btns">
-            <button type="button" class="btn btn-outline" id="saveQuoteBtn"><i class="fa-solid fa-print"></i> طباعة / حفظ PDF</button>
-          </div>
-          <p class="form-note" data-save-message></p>
-        </div>
-
-      </div>
-
-      <!-- عمود الفورم (هيظهر يمين الصفحة بفضل CSS order) -->
-      <div class="sps-col">
+      <!-- ===== عمود الإدخال (الثلث — يمين الصفحة) ===== -->
+      <div class="rep-split-input">
 
         <div class="card">
           <div class="step-eyebrow">
@@ -319,6 +260,53 @@
 
       </div>
 
+      <!-- ===== عمود العرض (الثلثين — شمال الصفحة) ===== -->
+      <div class="rep-split-view">
+
+        <div class="card" data-summary-card hidden>
+          <h3>ملخص المنظومة</h3>
+          <div class="chip-row">
+            <span class="chip" data-chip-inverter>—</span>
+            <span class="chip" data-chip-panels>—</span>
+            <span class="chip" data-chip-kw>—</span>
+            <span class="chip outline" data-chip-perkw>—</span>
+          </div>
+          <div class="price-cards">
+            <div class="price-card" data-price-card="supply_only">
+              <div class="amt" data-price-supply-only>—</div>
+              <div class="lbl">توريد خامات فقط</div>
+            </div>
+            <div class="price-card" data-price-card="supply_install">
+              <div class="amt" data-price-supply-install>—</div>
+              <div class="lbl">توريد وتركيب شامل الضمان</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" data-specs-card hidden>
+          <h3>المواصفات الفنية</h3>
+          <div class="specs-grid" data-specs-grid></div>
+          <div class="warn-box" data-inverter-warning hidden></div>
+        </div>
+
+        <div class="card" data-details-card hidden>
+          <h3>تفصيل عرض السعر</h3>
+          <table class="items-table">
+            <thead><tr><th>البند</th><th>النوع</th><th>العدد</th><th>الضمان</th><th>السعر</th></tr></thead>
+            <tbody data-items-body></tbody>
+          </table>
+          <div class="final-price-banner">
+            <span class="lbl">السعر النهائي شامل الضريبة</span>
+            <span class="amt" data-grand-total>0 ج.م</span>
+          </div>
+
+          <div class="toolbar-btns">
+            <button type="button" class="btn btn-outline" id="saveQuoteBtn"><i class="fa-solid fa-print"></i> طباعة / حفظ PDF</button>
+          </div>
+          <p class="form-note" data-save-message></p>
+        </div>
+
+      </div>
     </div>
   </div>
 </main>

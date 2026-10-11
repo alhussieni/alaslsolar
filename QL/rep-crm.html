@@ -12,10 +12,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="rep-widgets.css">
+  <link rel="stylesheet" href="quote-print.css">
   <script defer src="rep-header.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="../supabase-config.js"></script>
   <script defer src="quote-item-utils.js"></script>
+  <script defer src="product-labels.js"></script>
+  <script defer src="quote-print.js"></script>
   <script defer src="rep-crm.js"></script>
   <style>
     .crm-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-3); }
@@ -42,23 +45,10 @@
     .crm-quote-detail-row td { text-align: right; background: #faf7f2; padding: 12px 16px; }
     .crm-quote-detail-row table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
     .crm-quote-detail-row th, .crm-quote-detail-row td.dtd { border: 1px solid var(--line); padding: 5px 8px; text-align: center; background: #fff; }
-
-    #printAreaCrm { display: none; }
-    @media print {
-      body * { visibility: hidden; }
-      #printAreaCrm, #printAreaCrm * { visibility: visible; }
-      #printAreaCrm { display: block; position: absolute; top: 0; right: 0; left: 0; padding: 24px; direction: rtl; }
-      .print-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--brand); padding-bottom: 12px; margin-bottom: 16px; }
-      .print-header img { height: 55px; }
-      .print-title { font-size: 20px; font-weight: 800; color: var(--ink); }
-      .print-meta { font-size: 13px; color: #555; margin-bottom: 16px; }
-      .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-      .print-table th, .print-table td { border: 1px solid var(--line); padding: 6px 8px; text-align: center; }
-      .print-table th { background: var(--brand-soft); }
-      .print-totals { margin-top: 16px; font-size: 14px; width: 320px; margin-inline-start: auto; }
-      .print-totals .row { display: flex; justify-content: space-between; padding: 4px 0; }
-      .print-totals .grand { font-weight: 800; font-size: 17px; border-top: 2px solid var(--ink); margin-top: 6px; padding-top: 8px; }
-    }
+    .crm-print-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: var(--space-2); padding: 10px 12px; background: #faf7f2; border: 1px dashed var(--line); border-radius: var(--radius); }
+    .crm-print-opts .seg { min-width: 260px; }
+    .crm-print-opts .lbl { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+    .crm-print-opts label.chk { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer; margin: 0; }
   </style>
 </head>
 <body>
@@ -126,6 +116,14 @@
         </select>
         <button type="button" class="btn btn-secondary" id="crmClearFilters" style="flex:0;white-space:nowrap">مسح الفلاتر</button>
       </div>
+      <div class="crm-print-opts">
+        <span class="lbl">طريقة عرض الأسعار عند الطباعة:</span>
+        <div class="seg">
+          <button type="button" class="rq-mode-btn active" data-price-mode="detailed">تفصيلي (سعر كل بند)</button>
+          <button type="button" class="rq-mode-btn" data-price-mode="total_only">إجمالي فقط</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="optShowTotal" checked style="width:auto;min-height:auto"> إظهار السعر الإجمالي</label>
+      </div>
       <p class="form-note" data-crm-message></p>
       <table class="crm-quote-table" id="crmQuoteTable">
         <thead>
@@ -141,7 +139,7 @@
   </div>
 </main>
 
-<div id="printAreaCrm"></div>
+<div id="printArea"></div>
 
 </body>
 </html>

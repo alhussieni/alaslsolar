@@ -25,17 +25,29 @@
 .rep-main .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 @media (max-width: 640px) { .rep-main .row2 { grid-template-columns: 1fr; } }
 
-.grid2 { display: grid; grid-template-columns: minmax(320px, 38%) minmax(0, 62%); gap: var(--space-3); align-items: start; }
-@media (max-width: 1020px) { .grid2 { grid-template-columns: 1fr; } .input-rail { position: static; } }
-.input-rail { position: sticky; top: var(--space-3); align-self: start; }
+/* ---------- التقسيم الموحّد لكل أدوات المندوب (حاسبات + عروض المنتجات + دراسة الجدوى) ----------
+   أول عنصر في الـHTML = عمود الإدخال (الثلث على يمين الصفحة بسبب RTL)،
+   تاني عنصر = العرض/النتيجة (الثلثين على شمال الصفحة). الترتيب في الكود هو نفس الترتيب
+   على الشاشة، فمفيش حاجة اسمها order في CSS. على الشاشات الضيقة بيتحول لعمود واحد. */
+.rep-main--split { max-width: 1180px; }
+.rep-split { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(0, 2fr); gap: var(--space-3); align-items: start; }
+.rep-split-input { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.rep-split-view { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+@media (min-width: 1021px) {
+  .rep-split-input { position: sticky; top: var(--space-3); align-self: start; max-height: calc(100vh - 2 * var(--space-3)); overflow-y: auto; padding-bottom: 2px; }
+}
+@media (max-width: 1020px) { .rep-split { grid-template-columns: 1fr; } }
+/* الكروت جوه التقسيم من غير ظل/حركة hover الموروثة من .card في styles.css (الصفحات دي أدوات شغل مش كروت تسويقية) */
+.rep-split .card { box-shadow: none; transition: none; background: #fff; margin: 0; }
+.rep-split .card:hover { transform: none; box-shadow: none; }
+.rep-split .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 
 .rw-field { margin-bottom: var(--space-2); }
-.rw-field label, .grid2 label { display: block; font-weight: 700; font-size: 13px; color: var(--muted); margin: var(--space-2) 0 4px; }
-.grid2 input:not([type=checkbox]), .grid2 select {
+.rw-field label, .rep-split label { display: block; font-weight: 700; font-size: 13px; color: var(--muted); margin: var(--space-2) 0 4px; }
+.rep-split input:not([type=checkbox]), .rep-split select {
   width: 100%; min-height: 44px; padding: 8px 12px; border: 1.5px solid var(--line);
   border-radius: var(--radius); font: inherit; background: #fff; color: var(--ink);
 }
-.grid2 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 
 .seg { display: flex; border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .seg button { flex: 1; padding: 10px; border: 0; background: #fff; cursor: pointer; font: inherit; font-weight: 700; font-size: 13px; color: var(--muted); }

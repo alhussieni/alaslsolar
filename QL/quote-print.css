@@ -1,0 +1,48 @@
+/* ============================================================
+   quote-print.css
+   تنسيق طباعة عرض السعر على الليتر هيد — بيستخدمه quote-print.js
+   (صفحة عروض المنتجات + الـ CRM).
+   ============================================================ */
+#printArea { display: none; }
+@page { size: A4; margin: 0; }
+/* قواعد مكونات الطباعة برا @media print عن قصد: paginatePrintUnits بتقيس الارتفاع على الشاشة،
+   فلازم التنسيق (padding / حجم الخط) يكون هو نفسه اللي هيتطبع، وإلا القياس بيطلع أقل من الحقيقي
+   والصفحة بتفيض. العناصر دي موجودة بس جوه #printArea (display:none) أو المقياس المخفي. */
+.print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; }
+.print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
+.print-table th { background: #f3e4d4; }
+.print-table td.note-cell { text-align: right; font-size: 11px; width: 30%; word-break: break-word; }
+
+.print-grand-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(251,246,239,0.9); border: 1.5px solid #c8752d; border-radius: 10px; padding: 12px 18px; }
+.print-grand-box .amount { font-size: 22px; font-weight: 800; color: #c8752d; }
+.print-grand-box .note { font-size: 10.5px; color: #777; }
+
+.print-terms { margin-top: 16px; }
+.print-terms h4 { font-size: 13px; margin: 0 0 6px; }
+.print-terms .row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 4px 0; border-bottom: 1px dashed #eee; }
+.print-terms .fine { font-size: 10.5px; color: #888; margin-top: 8px; }
+
+@media print {
+  body * { visibility: hidden; }
+  #printArea, #printArea * { visibility: visible; }
+  #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; }
+
+  .printPage {
+    width: 210mm; min-height: 297mm; box-sizing: border-box; position: relative;
+    background: url('letterhead.jpg') no-repeat top center / 210mm 297mm;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+    padding: 80mm 14mm 26mm 14mm;
+    direction: rtl; font-family: 'Cairo', sans-serif;
+    page-break-after: always;
+  }
+  .printPage:last-child { page-break-after: auto; }
+
+  .print-topright { position: absolute; top: 8mm; right: 14mm; width: 148mm; text-align: right; z-index: 2; }
+  .print-topright .tr-title { font-size: 16px; font-weight: 800; color: #17120f; border-bottom: 2px solid #c8752d; padding-bottom: 6px; margin-bottom: 6px; }
+  .print-topright .tr-meta { font-size: 10px; color: #555; }
+
+  .print-info-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; justify-content: flex-end; }
+  .print-info-box { flex: 0 1 auto; min-width: 60px; border: 1px solid #e4d8ca; border-radius: 6px; padding: 4px 6px; text-align: center; background: rgba(251,246,239,0.92); }
+  .print-info-box .lbl { font-size: 7.5px; color: #8a7a68; margin-bottom: 2px; white-space: nowrap; }
+  .print-info-box .val { font-size: 9.5px; font-weight: 800; color: #17120f; white-space: nowrap; }
+}

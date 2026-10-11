@@ -332,6 +332,7 @@ function renderQuoteList() {
         <td>
           <button type="button" class="btn" data-toggle-detail="${q.id}" style="font-size:12px">التفاصيل</button>
           <button type="button" class="btn" data-quick-print="${q.id}" style="font-size:12px">طباعة</button>
+          <a class="btn" href="feasibility-study.html?quote_id=${q.id}" target="_blank" rel="noopener" style="font-size:12px">دراسة جدوى</a>
           ${isAdmin ? `<button type="button" class="btn btn-secondary dark" data-delete="${q.id}" style="font-size:12px">حذف</button>` : ""}
         </td>
       </tr>
@@ -341,7 +342,7 @@ function renderQuoteList() {
 
   filtered.forEach((q) => {
     tbody.querySelector(`[data-toggle-detail="${q.id}"]`).addEventListener("click", () => toggleDetail(q));
-    tbody.querySelector(`[data-quick-print="${q.id}"]`).addEventListener("click", () => quickPrint(q));
+    tbody.querySelector(`[data-quick-print="${q.id}"]`).addEventListener("click", () => printSavedQuote(q));
     const delBtn = tbody.querySelector(`[data-delete="${q.id}"]`);
     if (delBtn) delBtn.addEventListener("click", () => handleDelete(q));
   });
@@ -390,34 +391,34 @@ function toggleDetail(q) {
   row.hidden = false;
 }
 
-/* ---------------- طباعة سريعة (نسخة مبسّطة عامة تصلح لأي نوع عرض) ----------------
-   ملاحظة: دي نسخة عامة مبسّطة (جدول بنود + إجمالي بس)، مش نفس تصميم الليتر هيد
-   والصفحات المقسّمة الخاص بحاسبة الأوف جريد تحديدًا — لو محتاج نفس الشكل هنا
-   كمان محتاج نربطها بنفس محرك الطباعة المتقدم. */
-function quickPrint(q) {
-  const area = $("#printAreaCrm");
-  const dateStr = new Date(q.created_at).toLocaleDateString("ar-EG-u-nu-latn");
-  const items = Array.isArray(q.items) ? q.items : [];
-  const rows = items.map((it) => `
-    <tr><td>${QuoteItemUtils.getQuoteItemLabel(it)}</td><td>${fmt(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmt(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmt(QuoteItemUtils.getQuoteItemLineTotal(it))}</td></tr>
-  `).join("");
+/* ---------------- طباعة العرض ----------------
+   بتستخدم نفس محرك الطباعة على الليتر هيد المستخدم في صفحة عروض المنتجات (quote-print.js)،
+   بخيارات عرض الأسعار المختارة فوق الجدول. العرض المحفوظ نفسه دايمًا بالأسعار الكاملة. */
 
-  area.innerHTML = `
-    <div class="print-header">
-      <img src="../logo.png" alt="الأصل للطاقة الشمسية">
-      <div style="text-align:left;"><div class="print-title">عرض سعر #${q.id}</div><div>${dateStr}</div></div>
-    </div>
-    <div class="print-meta">
-      <div><strong>العميل:</strong> ${q.customers?.name || "—"} — ${q.customers?.phone || ""}${q.customers?.city ? " — " + q.customers.city : ""}</div>
-      ${isAdmin ? `<div><strong>المندوب:</strong> ${q.reps?.display_name || "—"}</div>` : ""}
-    </div>
-    <table class="print-table">
-      <thead><tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div class="print-totals"><div class="row grand"><span>الإجمالي الكلي</span><span>${fmt(q.total)} ج.م</span></div></div>
-  `;
-  setTimeout(() => window.print(), 100);
+function getPrintOptions() {
+  const priceMode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode === "total_only" ? "total_only" : "detailed";
+  return QuotePrint.normalizeOptions({ priceMode, showTotal: $("#optShowTotal")?.checked !== false });
+}
+
+function updatePrintOptionsUI() {
+  const cb = $("#optShowTotal");
+  if (!cb) return;
+  const totalOnly = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode === "total_only";
+  if (totalOnly) cb.checked = true; // في وضع "إجمالي فقط" الإجمالي بيظهر دايمًا
+  cb.disabled = totalOnly;
+}
+
+function printSavedQuote(q) {
+  return QuotePrint.print(client, {
+    id: q.id,
+    customer: q.customers || {},
+    quoteType: q.quote_type,
+    items: Array.isArray(q.items) ? q.items : [],
+    subtotal: q.subtotal,
+    installCost: q.installation_cost,
+    total: q.total,
+    createdAt: q.created_at,
+  }, getPrintOptions());
 }
 
 async function handleLogin(e) {
@@ -456,6 +457,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#crmDateFrom").addEventListener("change", renderQuoteList);
   $("#crmDateTo").addEventListener("change", renderQuoteList);
   $("#crmTypeFilter").addEventListener("change", renderQuoteList);
+  document.querySelectorAll(".rq-mode-btn").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll(".rq-mode-btn").forEach((x) => x.classList.toggle("active", x === b));
+    updatePrintOptionsUI();
+  }));
+  updatePrintOptionsUI();
   $("#crmClearFilters").addEventListener("click", () => {
     $("#crmSearchName").value = "";
     $("#crmSearchPhone").value = "";

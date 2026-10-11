@@ -22,19 +22,6 @@
     .preset-btn { font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
     .preset-btn:hover { border-color: var(--brand); color: var(--brand-dark); }
 
-    /* ---------- Minimal premium: .card أصلها بورد + ظل + hover-lift مشترك مع كروت
-       الموقع التسويقي (styles.css). هنا بنلغي الظل والحركة بس على كروت الصفحة دي،
-       من غير ما نلمس تعريف .card نفسه عشان مايأثرش على صفحات تانية. */
-    .input-rail .card, #quoteShell .card {
-      box-shadow: none;
-      transition: none;
-      background: #fff;
-    }
-    .input-rail .card:hover, #quoteShell .card:hover {
-      transform: none;
-      box-shadow: none;
-    }
-
     /* إفصاح تدريجي: خطوة إعدادات النظام مقفولة/باهتة لحد ما يتضاف حمل واحد على الأقل،
        لأن الحساب أصلًا مش هيشتغل من غيرها. */
     #ogSystemCard.is-locked { opacity: .45; pointer-events: none; }
@@ -105,11 +92,11 @@
     <p class="form-note">سجّل دخولك من <a href="index.html">بوابة المناديب</a> ثم ارجع هنا.</p>
   </section>
 
-  <div class="rep-main" data-rep-panel hidden style="padding-top:0">
-    <div class="grid2">
+  <div class="rep-main rep-main--split" data-rep-panel hidden style="padding-top:0">
+    <div class="rep-split">
 
       <!-- ===== عمود الإدخال ===== -->
-      <div class="input-rail">
+      <div class="rep-split-input">
 
         <div class="card">
           <div class="step-eyebrow"><span class="step-num">١</span><span class="step-label">بيانات العميل</span></div>
@@ -205,7 +192,7 @@
       </div>
 
       <!-- ===== عمود عرض السعر ===== -->
-      <div class="quote-shell" id="quoteShell">
+      <div class="rep-split-view" id="quoteShell">
 
         <div class="card" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 18px;background:#faf7f2;box-shadow:none">
           <div style="display:flex;align-items:center;gap:8px">

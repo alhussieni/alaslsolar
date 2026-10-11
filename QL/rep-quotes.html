@@ -13,61 +13,27 @@
   <link rel="preload" as="image" href="letterhead.jpg">
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="rep-widgets.css">
+  <link rel="stylesheet" href="quote-print.css">
   <script defer src="rep-header.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="../supabase-config.js"></script>
   <script defer src="quote-item-utils.js"></script>
+  <script defer src="product-labels.js"></script>
+  <script defer src="quote-print.js"></script>
   <script defer src="rep-quotes.js"></script>
   <style>
-    #printArea { display: none; }
-    @page { size: A4; margin: 0; }
-    /* قواعد مكونات الطباعة برا @media print عن قصد: paginatePrintUnits بتقيس الارتفاع على الشاشة،
-       فلازم التنسيق (padding / حجم الخط) يكون هو نفسه اللي هيتطبع، وإلا القياس بيطلع أقل من الحقيقي
-       والصفحة بتفيض. العناصر دي موجودة بس جوه #printArea (display:none) أو المقياس المخفي. */
-    .print-table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; }
-    .print-table th, .print-table td { border: 1px solid #e4d8ca; padding: 6px 8px; text-align: center; }
-    .print-table th { background: #f3e4d4; }
-    .print-table td.note-cell { text-align: right; font-size: 11px; width: 30%; word-break: break-word; }
-
-    .print-grand-box { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(251,246,239,0.9); border: 1.5px solid #c8752d; border-radius: 10px; padding: 12px 18px; }
-    .print-grand-box .amount { font-size: 22px; font-weight: 800; color: #c8752d; }
-    .print-grand-box .note { font-size: 10.5px; color: #777; }
-
-    .print-terms { margin-top: 16px; }
-    .print-terms h4 { font-size: 13px; margin: 0 0 6px; }
-    .print-terms .row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 4px 0; border-bottom: 1px dashed #eee; }
-    .print-terms .fine { font-size: 10.5px; color: #888; margin-top: 8px; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea { display: block; position: absolute; top: 0; right: 0; left: 0; }
-
-      .printPage {
-        width: 210mm; min-height: 297mm; box-sizing: border-box; position: relative;
-        background: url('letterhead.jpg') no-repeat top center / 210mm 297mm;
-        print-color-adjust: exact; -webkit-print-color-adjust: exact;
-        padding: 80mm 14mm 26mm 14mm;
-        direction: rtl; font-family: 'Cairo', sans-serif;
-        page-break-after: always;
-      }
-      .printPage:last-child { page-break-after: auto; }
-
-      .print-topright { position: absolute; top: 8mm; right: 14mm; width: 148mm; text-align: right; z-index: 2; }
-      .print-topright .tr-title { font-size: 16px; font-weight: 800; color: #17120f; border-bottom: 2px solid #c8752d; padding-bottom: 6px; margin-bottom: 6px; }
-      .print-topright .tr-meta { font-size: 10px; color: #555; }
-
-      .print-info-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; justify-content: flex-end; }
-      .print-info-box { flex: 0 1 auto; min-width: 60px; border: 1px solid #e4d8ca; border-radius: 6px; padding: 4px 6px; text-align: center; background: rgba(251,246,239,0.92); }
-      .print-info-box .lbl { font-size: 7.5px; color: #8a7a68; margin-bottom: 2px; white-space: nowrap; }
-      .print-info-box .val { font-size: 9.5px; font-weight: 800; color: #17120f; white-space: nowrap; }
-    }
+    /* جدول البنود جوه عمود العرض — بنفس منطق الطباعة: الأعمدة بتتغيّر حسب وضع عرض الأسعار */
     .rq-cart-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .rq-cart-table th, .rq-cart-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; }
-    .rq-cart-table th { color: var(--muted); font-size: 12px; }
-    .rq-cart-table input.cart-note { width: 100%; min-width: 150px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; }
-    .rq-cart-table input[type="number"] { width: 64px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; }
-    .rq-quote-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 8px; font-size: 14px; }
+    .rq-cart-table th, .rq-cart-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
+    .rq-cart-table th { color: var(--muted); font-size: 12px; background: var(--brand-soft); }
+    .rq-cart-table td.rq-name, .rq-cart-table th.rq-name { text-align: right; }
+    .rq-cart-table input.cart-note { width: 100%; min-width: 130px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; }
+    .rq-cart-table input[type="number"] { width: 64px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; text-align: center; }
+    .rq-empty { text-align: center; color: var(--muted); padding: 36px 18px; }
+    .rq-summary { margin-top: var(--space-2); display: flex; flex-direction: column; gap: 6px; }
+    .rq-summary .row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 2px; border-bottom: 1px dashed var(--line); }
+    .rq-internal-note { font-size: 12px; color: var(--muted); margin: 8px 2px 0; }
+    .rq-add-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -92,76 +58,112 @@
     </form>
   </section>
 
-  <div class="rep-main" data-rep-panel hidden style="max-width:820px;padding-top:0">
+  <div class="rep-main rep-main--split" data-rep-panel hidden style="padding-top:0">
 
     <div class="dashboard-toolbar" style="position:static">
       <div>
         <h2 style="margin:0;font-size:18px" data-user-name>—</h2>
+        <p class="form-note" style="margin:2px 0 0">العروض اللي أصدرتها بتلاقيها في <a href="rep-crm.html">CRM</a></p>
       </div>
       <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
     </div>
 
-    <div class="card">
-      <h3>بيانات العميل</h3>
-      <div class="row2">
-        <div><label>اسم العميل</label><input type="text" id="custName" required></div>
-        <div><label>رقم التليفون</label><input type="tel" id="custPhone" required placeholder="01xxxxxxxxx"></div>
-      </div>
-      <label>المدينة / المنطقة</label>
-      <input type="text" id="custCity">
-    </div>
+    <div class="rep-split">
 
-    <div class="card">
-      <h3>نوع العرض</h3>
-      <div class="seg">
-        <button type="button" class="rq-type-btn active" data-quote-type="supply_only">توريد فقط</button>
-        <button type="button" class="rq-type-btn" data-quote-type="supply_install">توريد وتركيب</button>
-      </div>
-      <div class="rw-field" data-install-cost-wrap hidden style="margin-top:var(--space-2)">
-        <label>تكلفة التركيب (تُضاف للإجمالي)</label>
-        <input type="number" id="installCost" min="0" step="1" value="0">
-      </div>
-    </div>
+      <!-- ===== عمود الإدخال (الثلث — يمين الصفحة) ===== -->
+      <div class="rep-split-input">
 
-    <div class="card">
-      <h3>إضافة منتجات للعرض</h3>
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-        <select id="categorySelect" style="flex:1;min-width:140px"></select>
-        <select id="productSelect" style="flex:2;min-width:200px"></select>
-        <input type="number" id="qtyInput" min="1" value="1" style="max-width:80px">
-        <button type="button" class="btn btn-primary" id="addProductBtn" style="min-height:44px">إضافة</button>
-      </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-      <table class="rq-cart-table">
-        <thead><tr><th>المنتج</th><th>سعر الوحدة</th><th>الكمية</th><th>الإجمالي</th><th>ملاحظات</th><th></th></tr></thead>
-        <tbody id="cartBody"></tbody>
-      </table>
-      </div>
-      <div class="totalbar" style="flex-direction:column;gap:6px;align-items:flex-start;padding:14px 18px">
-        <div style="font-size:14px;color:rgba(255,255,255,.75)">الإجمالي قبل التركيب: <strong id="subtotalDisplay" class="num">0</strong> ج.م</div>
-        <div data-install-total-row hidden style="font-size:14px;color:rgba(255,255,255,.75)">تكلفة التركيب: <strong id="installTotalDisplay" class="num">0</strong> ج.م</div>
-        <div class="big num">الإجمالي الكلي: <span id="grandTotalDisplay">0</span> ج.م</div>
-      </div>
-      <div class="rw-field" style="margin-top:16px">
-        <label>طريقة عرض الأسعار في العرض المطبوع</label>
-        <div class="seg">
-          <button type="button" class="rq-mode-btn active" data-price-mode="detailed">تفصيلي (سعر كل بند)</button>
-          <button type="button" class="rq-mode-btn" data-price-mode="total_only">إجمالي فقط</button>
+        <div class="card">
+          <h3>بيانات العميل</h3>
+          <label for="custName">اسم العميل</label>
+          <input type="text" id="custName" required>
+          <label for="custPhone">رقم التليفون</label>
+          <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
+          <label for="custCity">المدينة / المنطقة</label>
+          <input type="text" id="custCity">
         </div>
-        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-weight:600">
-          <input type="checkbox" id="optShowTotal" checked> إظهار السعر الإجمالي في العرض المطبوع
-        </label>
-        <p class="form-note" id="printOptHint"></p>
-      </div>
-      <button type="button" class="btn btn-primary" id="saveQuoteBtn" style="width:100%;margin-top:16px">
-        <i class="fa-solid fa-print"></i> حفظ العرض وطباعته
-      </button>
-      <p class="form-note" data-quote-message></p>
-    </div>
 
-    <div class="card">
-      <h3>عروضي السابقة</h3>
-      <div id="myQuotesList"></div>
+        <div class="card">
+          <h3>نوع العرض</h3>
+          <div class="seg">
+            <button type="button" class="rq-type-btn active" data-quote-type="supply_only">توريد فقط</button>
+            <button type="button" class="rq-type-btn" data-quote-type="supply_install">توريد وتركيب</button>
+          </div>
+          <div class="rw-field" data-install-cost-wrap hidden style="margin-top:var(--space-2)">
+            <label for="installCost">تكلفة التركيب (تُضاف للإجمالي)</label>
+            <input type="number" id="installCost" min="0" step="1" value="0">
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>إضافة منتجات للعرض</h3>
+          <label for="categorySelect">الفئة</label>
+          <select id="categorySelect"></select>
+          <label for="productSelect">المنتج</label>
+          <select id="productSelect"></select>
+          <div class="rq-add-row">
+            <input type="number" id="qtyInput" min="1" value="1" aria-label="الكمية">
+            <button type="button" class="btn btn-primary" id="addProductBtn" style="min-height:44px">إضافة للعرض</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>طريقة عرض الأسعار</h3>
+          <div class="seg">
+            <button type="button" class="rq-mode-btn active" data-price-mode="detailed">تفصيلي (سعر كل بند)</button>
+            <button type="button" class="rq-mode-btn" data-price-mode="total_only">إجمالي فقط</button>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-weight:600">
+            <input type="checkbox" id="optShowTotal" checked style="width:auto;min-height:auto"> إظهار السعر الإجمالي
+          </label>
+          <p class="form-note" id="printOptHint"></p>
+        </div>
+
+      </div>
+
+      <!-- ===== عمود العرض (الثلثين — شمال الصفحة) ===== -->
+      <div class="rep-split-view" id="quoteShell">
+
+        <div class="card" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 18px;background:#faf7f2">
+          <div style="display:flex;align-items:center;gap:8px">
+            <img src="../logo.png" alt="الأصل للطاقة الشمسية" style="width:32px;height:32px;object-fit:contain">
+            <div style="font-family:'Cairo';font-weight:700;font-size:13px;color:var(--muted)">الأصل للطاقة الشمسية</div>
+          </div>
+          <div>
+            <div id="bannerName" style="font-family:'Cairo';font-weight:700;font-size:14px">—</div>
+            <div id="bannerPhone" class="num" style="font-size:11.5px;color:var(--muted)">—</div>
+          </div>
+          <div style="text-align:left">
+            <div class="num" style="font-size:12.5px;color:var(--muted)" id="bannerDate">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>عرض السعر <span class="tag" id="quoteTypeTag">توريد فقط</span></h3>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+            <table class="rq-cart-table">
+              <thead id="cartHead"></thead>
+              <tbody id="cartBody"></tbody>
+            </table>
+          </div>
+
+          <div class="rq-summary" id="quoteSummary">
+            <div class="row" data-row-subtotal><span>الإجمالي قبل التركيب</span><strong class="num"><span id="subtotalDisplay">0</span> ج.م</strong></div>
+            <div class="row" data-install-total-row hidden><span>تكلفة التركيب</span><strong class="num"><span id="installTotalDisplay">0</span> ج.م</strong></div>
+          </div>
+          <div class="totalbar" data-grand-bar>
+            <div class="lbl">الإجمالي الكلي</div>
+            <div class="big num"><span id="grandTotalDisplay">0</span> ج.م</div>
+          </div>
+          <p class="rq-internal-note" data-internal-note hidden></p>
+
+          <button type="button" class="btn btn-primary" id="saveQuoteBtn" style="width:100%;margin-top:16px">
+            <i class="fa-solid fa-print"></i> حفظ العرض وطباعته
+          </button>
+          <p class="form-note" data-quote-message></p>
+        </div>
+
+      </div>
     </div>
 
   </div>

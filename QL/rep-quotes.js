@@ -1,8 +1,13 @@
 /* ============================================================
    rep-quotes.js
    منطق صفحة عروض الأسعار الخاصة بالمناديب.
-   يعتمد على supabase-config.js (نفس إعدادات باقي الموقع).
+   يعتمد على supabase-config.js (نفس إعدادات باقي الموقع) +
+   quote-item-utils.js / product-labels.js / quote-print.js (وحدات مشتركة مع الـ CRM).
+   العروض السابقة اتنقلت لصفحة الـ CRM (rep-crm.html).
    ============================================================ */
+
+const { escHtml } = window.QuotePrint;
+const { nameCountsByCategory, countNames, buildProductLabel } = window.ProductLabels;
 
 const CATEGORY_LABELS = {
   pumps: "مضخات",
@@ -101,7 +106,8 @@ async function updateAuthState(session) {
   }
 
   await loadCategories();
-  await loadMyQuotes();
+  renderCart();
+  updateBanner();
 }
 
 async function handleLogin(e) {
@@ -142,81 +148,6 @@ async function loadCategories() {
   await loadProductsForCategory();
 }
 
-/* أسماء كتير في الداتا بيز متطابقة (مثلًا كل إنفرترات Delixi اسمها "إنفرتر Delixi")، والفرق الحقيقي بينها
-   في specs_ar (القدرة) و model_available (الموديل). بنضيفهم للاسم بس لما الاسم مش فريد جوه نفس الفئة،
-   عشان باقي المنتجات تفضل أسماءها القصيرة زي ما هي. */
-const nameCountsByCategory = new Map(); // category -> Map(اسم -> عدد المنتجات بنفس الاسم)
-
-function productBaseName(p) { return p.name_ar || p.name_en || "منتج"; }
-
-function countNames(rows) {
-  const counts = new Map();
-  rows.forEach((p) => { const n = productBaseName(p); counts.set(n, (counts.get(n) || 0) + 1); });
-  return counts;
-}
-
-// رقم المواصفة بدون أصفار زيادة (4.10 -> 4)، أو null لو مش متسجّل
-function specNum(v) {
-  if (v == null || v === "") return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? String(n) : null;
-}
-
-/* الإنفرترات: دايمًا "الماركة الموديل - القدرة kW/HP" (مثال: VEICHI SI23 - 75KW/100HP)،
-   عشان المندوب والعميل يميّزوا الصنف ويقارنوا السعر. لو أي حقل ناقص نرجع للصيغة العامة. */
-function inverterLabel(p) {
-  const kw = specNum(p.power_kw);
-  const hp = specNum(p.power_hp);
-  if (!p.brand || kw == null || hp == null) return null;
-  const head = [p.brand, (p.model_available || "").trim()].filter(Boolean).join(" ");
-  return `${head} - ${kw}KW/${hp}HP`;
-}
-
-/* البطاريات: بنعرض بجانب الاسم السعة المخزّنة بالـKWH.
-   - لو الـkWh مسجّل أصلًا من المصنع (في الاسم أو specs_ar، زي Phylion 5.04kWh) بنعرضه زي ما هو.
-   - لو مش مسجّل: KWH = الفولت الفعلي × AH ÷ 1000 بالأرقام المسجّلة على البطارية (مثال: 25.6V × 100Ah = 2.56KWH)،
-     من غير أي خصم DoD، لأن العرض بيعرض قيم المصنع في الحالة القياسية.
-   الفولت والـAh بيتقرأوا من specs_ar ("الجهد: 25.6V | السعة: 100Ah") لأن عمود voltage_v مقرّب (12/24/48)
-   مش الفولت الفعلي (12.8/25.6/51.2). لو النص مش بالشكل ده بنرجع للاسم ثم للأعمدة. */
-function firstNum(text, re) {
-  const m = String(text || "").match(re);
-  const n = m ? Number(m[1]) : NaN;
-  return n > 0 ? n : null;
-}
-
-function batteryKwh(p) {
-  const registered = firstNum(`${p.name_ar || ""} ${p.specs_ar || ""}`, /(\d+(?:\.\d+)?)\s*kwh/i);
-  if (registered) return String(registered);
-  const volts = firstNum(p.specs_ar, /الجهد:\s*(\d+(?:\.\d+)?)\s*V/i)
-    ?? firstNum(p.name_ar, /(\d+(?:\.\d+)?)\s*V\b/i)
-    ?? (Number(p.voltage_v) > 0 ? Number(p.voltage_v) : null);
-  const ah = firstNum(p.specs_ar, /السعة:\s*(\d+(?:\.\d+)?)\s*Ah/i)
-    ?? firstNum(p.name_ar, /(\d+(?:\.\d+)?)\s*Ah/i)
-    ?? (Number(p.capacity_ah) > 0 ? Number(p.capacity_ah) : null);
-  if (!volts || !ah) return null;
-  return String(Math.round((volts * ah) / 10) / 100); // kWh لأقرب خانتين عشريتين
-}
-
-function buildProductLabel(p, nameCounts) {
-  if (p.category === "inverters") {
-    const inv = inverterLabel(p);
-    if (inv) return inv;
-  }
-  if (p.category === "batteries") {
-    const base = productBaseName(p);
-    const kwh = batteryKwh(p);
-    return kwh && !/kwh/i.test(base) ? `${base} — ${kwh}KWH` : base;
-  }
-  const base = productBaseName(p);
-  if ((nameCounts?.get(base) || 0) <= 1) return base;
-  const parts = [base];
-  const specs = (p.specs_ar || "").trim();
-  if (specs && !base.includes(specs)) parts.push(specs);
-  const model = (p.model_available || "").trim();
-  if (model && !base.includes(model)) parts.push("موديل " + model);
-  return parts.join(" — ");
-}
-
 async function loadProductsForCategory() {
   const category = $("#categorySelect").value;
   const productSel = $("#productSelect");
@@ -251,38 +182,6 @@ async function loadProductsForCategory() {
   });
 }
 
-/* الدالة rep_create_quote بتخزّن name_ar بس في بنود العرض، فكل الإنفرترات بتطلع بنفس الاسم.
-   وقت الطباعة بنرجّع الاسم المميّز من جدول products بالـ product_id (بنود قديمة من غير product_id
-   أو منتج اتشال من الكتالوج بتفضل باسمها المحفوظ). */
-async function withProductLabels(items) {
-  const list = items || [];
-  const ids = [...new Set(list.map((it) => it.product_id).filter(Boolean))];
-  if (!ids.length) return list;
-
-  const { data: prods, error } = await client
-    .from("products")
-    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v")
-    .in("id", ids);
-  if (error || !prods) return list;
-
-  for (const category of new Set(prods.map((p) => p.category))) {
-    if (nameCountsByCategory.has(category)) continue;
-    const { data: rows } = await client
-      .from("products")
-      .select("name_ar, name_en")
-      .eq("category", category)
-      .eq("published", true)
-      .eq("in_stock", true);
-    if (rows) nameCountsByCategory.set(category, countNames(rows));
-  }
-
-  const byId = new Map(prods.map((p) => [p.id, p]));
-  return list.map((it) => {
-    const p = byId.get(it.product_id);
-    return p ? { ...it, name: buildProductLabel(p, nameCountsByCategory.get(p.category)) } : it;
-  });
-}
-
 function addProductToCart() {
   const productSel = $("#productSelect");
   const opt = productSel.selectedOptions[0];
@@ -304,18 +203,44 @@ function addProductToCart() {
   renderCart();
 }
 
+/* خيارات عرض الأسعار: بتتقرا من الصفحة، وبتتحكم في شكل المعاينة على الشاشة وفي الطباعة بنفس القواعد
+   (القواعد نفسها في QuotePrint.normalizeOptions عشان الشاشة = المطبوع). */
+function getPrintOptions() {
+  const priceMode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode === "total_only" ? "total_only" : "detailed";
+  return QuotePrint.normalizeOptions({ priceMode, showTotal: document.getElementById("optShowTotal")?.checked !== false });
+}
+
 function renderCart() {
+  const opts = getPrintOptions();
+  const detailed = opts.priceMode === "detailed";
+  const head = $("#cartHead");
   const body = $("#cartBody");
+
+  head.innerHTML = `<tr>
+    <th class="rq-name">البند</th>
+    ${detailed ? "<th>سعر الوحدة</th>" : ""}
+    <th>الكمية</th>
+    ${detailed ? "<th>الإجمالي</th>" : ""}
+    <th>ملاحظات</th>
+    <th></th>
+  </tr>`;
+
   body.innerHTML = "";
+  if (!cart.length) {
+    body.innerHTML = `<tr><td colspan="${detailed ? 6 : 4}" class="rq-empty">
+      <i class="fa-solid fa-arrow-right" style="color:var(--brand);margin-left:6px"></i>
+      اختار المنتجات من العمود الجانبي وهتظهر هنا في عرض السعر.
+    </td></tr>`;
+  }
   cart.forEach((item, idx) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${item.name}</td>
-      <td>${fmt(item.unitPrice)}</td>
+      <td class="rq-name">${escHtml(item.name)}</td>
+      ${detailed ? `<td class="num">${fmt(item.unitPrice)}</td>` : ""}
       <td><input type="number" min="1" value="${item.qty}" data-idx="${idx}" class="cart-qty"></td>
-      <td>${fmt(item.unitPrice * item.qty)}</td>
+      ${detailed ? `<td class="num">${fmt(item.unitPrice * item.qty)}</td>` : ""}
       <td><input type="text" maxlength="300" value="${escHtml(item.note || "")}" data-idx="${idx}" class="cart-note" placeholder="ملاحظة للعميل (اختياري)"></td>
-      <td><button type="button" class="rq-remove" data-idx="${idx}">حذف</button></td>
+      <td><button type="button" class="rq-remove rw-remove" data-idx="${idx}">حذف</button></td>
     `;
     body.appendChild(tr);
   });
@@ -343,16 +268,42 @@ function renderCart() {
   updateTotals();
 }
 
+/* ملخص الإجماليات على الشاشة بنفس منطق الطباعة بالظبط:
+   - تفصيلي + إجمالي: الإجمالي قبل التركيب + التركيب + الإجمالي الكلي.
+   - تفصيلي من غير إجمالي (برايس ليست): تكلفة التركيب بس لو أكبر من صفر.
+   - إجمالي فقط: الرقم الوحيد هو الإجمالي الكلي. */
 function updateTotals() {
+  const opts = getPrintOptions();
+  const detailed = opts.priceMode === "detailed";
+  const isInstall = quoteType === "supply_install";
   const subtotal = cart.reduce((s, c) => s + c.unitPrice * c.qty, 0);
-  const installCost = quoteType === "supply_install" ? (parseFloat($("#installCost").value) || 0) : 0;
+  const installCost = isInstall ? (parseFloat($("#installCost").value) || 0) : 0;
   const grand = subtotal + installCost;
+
   $("#subtotalDisplay").textContent = fmt(subtotal);
   $("#installTotalDisplay").textContent = fmt(installCost);
   $("#grandTotalDisplay").textContent = fmt(grand);
-  $("[data-install-total-row]").hidden = quoteType !== "supply_install";
+
+  const showBreakdown = isInstall && detailed && opts.showTotal;
+  $("[data-row-subtotal]").hidden = !showBreakdown;
+  $("[data-install-total-row]").hidden = !(showBreakdown || (isInstall && detailed && installCost > 0));
+  $("[data-grand-bar]").hidden = !opts.showTotal;
+
+  // في وضع قائمة الأسعار الإجمالي مش بيظهر للعميل، بس المندوب لازم يفضل شايفه
+  const note = $("[data-internal-note]");
+  note.hidden = opts.showTotal;
+  if (!opts.showTotal) note.textContent = `الإجمالي (للمندوب فقط — مش هيظهر في المطبوع): ${fmt(grand)} ج.م`;
+
+  $("#quoteTypeTag").textContent = isInstall ? "توريد وتركيب" : "توريد فقط";
   scheduleDraftAutosave();
   return { subtotal, installCost, grand };
+}
+
+/* بانر العميل أعلى العرض (نفس فكرة بانر حاسبة الأوف جريد) */
+function updateBanner() {
+  $("#bannerName").textContent = $("#custName").value.trim() || "—";
+  $("#bannerPhone").textContent = $("#custPhone").value.trim() || "—";
+  $("#bannerDate").textContent = new Date().toLocaleDateString("ar-EG-u-nu-latn");
 }
 
 /* ---------------- نوع العرض ---------------- */
@@ -468,16 +419,15 @@ async function saveQuote() {
     .maybeSingle();
 
   if (readErr || !saved) {
-    msg.textContent = "تم حفظ العرض رقم #" + data + "، لكن تعذر تحميله للطباعة. اطبعه من «عروضي السابقة».";
+    msg.textContent = "تم حفظ العرض رقم #" + data + "، لكن تعذر تحميله للطباعة. اطبعه من صفحة CRM.";
     msg.className = "rq-msg ok";
-    await loadMyQuotes();
     return;
   }
 
-  msg.textContent = "تم حفظ العرض بنجاح.";
+  msg.textContent = "تم حفظ العرض رقم #" + saved.id + " — تلاقيه في CRM.";
   msg.className = "rq-msg ok";
 
-  await printQuote({
+  await QuotePrint.print(client, {
     id: saved.id,
     customer: { name, phone, city },
     quoteType,
@@ -486,9 +436,7 @@ async function saveQuote() {
     installCost: saved.installation_cost,
     total: saved.total,
     createdAt: saved.created_at,
-  });
-
-  await loadMyQuotes();
+  }, getPrintOptions());
 }
 
 /* الدالة rep_create_quote لازم تكون محدّثة (migration ملاحظات البنود) عشان الملاحظة تتخزّن في العرض المحفوظ.
@@ -498,85 +446,7 @@ function withCartNotes(items) {
   return (items || []).map((it) => (it.note || !notes.has(it.product_id) ? it : { ...it, note: notes.get(it.product_id) }));
 }
 
-/* ---------------- الطباعة على الليتر هيد (نفس مقاسات وتنسيق rep-offgrid-quote.js) ---------------- */
-
-const MM_TO_PX = 96 / 25.4;
-const PAGE_CONTENT_W_MM = 210 - 14 - 14; // عرض المحتوى داخل هوامش الصفحة اليمين/الشمال
-const PAGE_CONTENT_H_MM = 297 - 80 - 26; // الارتفاع المتاح بين مساحة اللوجو فوق والفوتر تحت
-const PAGE_SAFETY_BUFFER_MM = 12; // هامش أمان لفروق قياس الخط بين الشاشة والطباعة
-
-function fmtPrint(n) { return Number(n || 0).toLocaleString("ar-EG-u-nu-latn", { maximumFractionDigits: 0 }); }
-
-function escHtml(v) {
-  return String(v ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
-}
-
-function measureBlockHeightPx(stage, html) {
-  stage.innerHTML = html;
-  return stage.getBoundingClientRect().height;
-}
-
-/* units: مصفوفة { type: 'row'|'block', html } — الوحدات دي معناها "ما ينفعش يتقطّع نصين"
-   بين صفحتين. صفوف الجدول بتتجمّع تلقائيًا في جدول واحد بعنوان لكل صفحة تحتوي عليها. */
-async function paginatePrintUnits(units, tableHead) {
-  await (document.fonts && document.fonts.ready ? document.fonts.ready.catch(() => {}) : Promise.resolve());
-
-  const stage = document.createElement("div");
-  stage.style.cssText = `position:absolute; visibility:hidden; left:-9999px; top:0; width:${PAGE_CONTENT_W_MM}mm; direction:rtl; font-family:'Cairo',sans-serif;`;
-  document.body.appendChild(stage);
-
-  const theadHeightPx = measureBlockHeightPx(stage, `<table class="print-table"><thead>${tableHead}</thead></table>`);
-  const maxH = (PAGE_CONTENT_H_MM - PAGE_SAFETY_BUFFER_MM) * MM_TO_PX;
-
-  const pages = [[]];
-  let curH = 0;
-  for (const unit of units) {
-    const wrappedForMeasure = unit.type === "row" ? `<table class="print-table"><tbody>${unit.html}</tbody></table>` : unit.html;
-    let h = measureBlockHeightPx(stage, wrappedForMeasure);
-    const curPage = pages[pages.length - 1];
-    const startsNewTableOnThisPage = unit.type === "row" && (curPage.length === 0 || curPage[curPage.length - 1].type !== "row");
-    if (startsNewTableOnThisPage) h += theadHeightPx;
-
-    if (curH + h > maxH && curPage.length > 0) {
-      pages.push([]);
-      curH = 0;
-      if (unit.type === "row") h += theadHeightPx; // أول صف في الصفحة الجديدة هيفتح جدول جديد بعنوانه
-    }
-    pages[pages.length - 1].push(unit);
-    curH += h;
-  }
-  document.body.removeChild(stage);
-  return pages;
-}
-
-function renderPrintPages(pages, tableHead, topRights) {
-  return pages.map((pageUnits, idx) => {
-    const parts = [];
-    let i = 0;
-    while (i < pageUnits.length) {
-      if (pageUnits[i].type === "row") {
-        let rowsHtml = "";
-        while (i < pageUnits.length && pageUnits[i].type === "row") { rowsHtml += pageUnits[i].html; i++; }
-        parts.push(`<table class="print-table"><thead>${tableHead}</thead><tbody>${rowsHtml}</tbody></table>`);
-      } else {
-        parts.push(pageUnits[i].html);
-        i++;
-      }
-    }
-    const topRight = (topRights && topRights[idx]) || "";
-    return `<div class="printPage">${topRight}${parts.join("")}</div>`;
-  }).join("");
-}
-
-/* خيارات الطباعة (بتتقرا من الصفحة وقت الطباعة، ومبتتخزّنش في الداتا بيز — العرض المحفوظ دايمًا بالأسعار الكاملة):
-   - priceMode: "detailed" (سعر كل بند) أو "total_only" (إجمالي فقط من غير سعر الوحدة/إجمالي البند).
-   - showTotal: إظهار/إخفاء السعر الإجمالي. في وضع "total_only" الإجمالي بيظهر دايمًا
-     (إخفاؤه كان هيطلّع عرض من غير أي سعر). تفصيلي + إخفاء الإجمالي = قائمة أسعار ("برايس ليست"). */
-function getPrintOptions() {
-  const priceMode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode === "total_only" ? "total_only" : "detailed";
-  const showTotal = priceMode === "total_only" ? true : (document.getElementById("optShowTotal")?.checked !== false);
-  return { priceMode, showTotal };
-}
+/* ---------------- خيارات عرض الأسعار (واجهة) ---------------- */
 
 function updatePrintOptionsUI() {
   const mode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode;
@@ -586,141 +456,14 @@ function updatePrintOptionsUI() {
   if (mode === "total_only") {
     cb.checked = true;
     cb.disabled = true;
-    hint.textContent = "العرض هيظهر بدون سعر كل بند، والإجمالي بيظهر دايمًا في الوضع ده.";
+    hint.textContent = "العرض هيظهر بتفاصيل المنتجات من غير سعر كل بند، والإجمالي بيظهر دايمًا في الوضع ده.";
   } else {
     cb.disabled = false;
     hint.textContent = cb.checked
       ? "العرض هيظهر بسعر كل بند والإجمالي."
       : "العرض هيطلع كقائمة أسعار: سعر كل بند من غير إجمالي.";
   }
-  hint.textContent += " الخيارات دي بتنطبق على الطباعة وإعادة الطباعة من «عروضي السابقة».";
-}
-
-/* q: { id, customer:{name,phone,city}, quoteType, items, subtotal, installCost, total, createdAt }
-   كل الأرقام جاية من الصف المحفوظ في جدول quotes. */
-async function printQuote(q) {
-  const area = document.getElementById("printArea");
-  const issueDate = new Date(q.createdAt);
-  const dateStr = issueDate.toLocaleDateString("ar-EG-u-nu-latn");
-  const validUntil = new Date(issueDate.getTime() + 3 * 24 * 60 * 60 * 1000);
-  const validUntilStr = validUntil.toLocaleDateString("ar-EG-u-nu-latn");
-  const typeLabel = q.quoteType === "supply_install" ? "توريد وتركيب" : "توريد فقط";
-  const quoteNo = `Q-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, "0")}${String(issueDate.getDate()).padStart(2, "0")}-${String(q.id).padStart(3, "0")}`;
-  const cust = q.customer || {};
-
-  const opts = getPrintOptions();
-  const detailed = opts.priceMode === "detailed";
-  const printItems = await withProductLabels(q.items);
-  // عمود "ملاحظات" بيظهر بس لو في بند واحد على الأقل عليه ملاحظة (عشان ما ياخدش عرض من الجدول فاضي)
-  const hasNotes = printItems.some((it) => String(it.note || "").trim());
-  const tableHead = `<tr><th>البند</th><th>الكمية</th>${detailed ? "<th>سعر الوحدة</th><th>الإجمالي</th>" : ""}${hasNotes ? "<th>ملاحظات</th>" : ""}</tr>`;
-  const rowUnits = printItems.map((it) => ({
-    type: "row",
-    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>${detailed ? `<td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>` : ""}${hasNotes ? `<td class="note-cell">${escHtml(String(it.note || "").trim())}</td>` : ""}</tr>`,
-  }));
-
-  const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
-  const infoRow = `
-    <div class="print-info-grid">
-      ${infoBox("العميل / المشروع", `${escHtml(cust.name)} — ${escHtml(cust.phone)}${cust.city ? " — " + escHtml(cust.city) : ""}`)}
-      ${infoBox("نوع العرض", typeLabel)}
-      ${infoBox("تاريخ الإصدار", dateStr)}
-      ${infoBox("صالح حتى", validUntilStr)}
-    </div>`;
-
-  /* الهيدر (عنوان + رقم عرض + تاريخ + صناديق المعلومات) عنصر مطلق الموضع أعلى يمين كل صفحة بجوار اللوجو.
-     النسخة الكاملة في أول صفحة بس، وباقي الصفحات نسخة مصغّرة. */
-  const topRightFull = `
-    <div class="print-topright">
-      <div class="tr-title">عرض سعر</div>
-      <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
-      ${infoRow}
-    </div>`;
-  const topRightMinimal = `
-    <div class="print-topright">
-      <div class="tr-title">عرض سعر (تابع)</div>
-      <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
-    </div>`;
-
-  // الإجمالي قبل التركيب + تكلفة التركيب: بس في الوضع التفصيلي مع إظهار الإجمالي.
-  // قائمة الأسعار (تفصيلي من غير إجمالي): بنسيب سطر تكلفة التركيب لوحده (سعر مش إجمالي) لو أكبر من صفر.
-  // إجمالي فقط: مفيش تفصيل، الرقم الوحيد هو الإجمالي الكلي.
-  let subtotalBlock = [];
-  if (q.quoteType === "supply_install" && detailed) {
-    const installRow = `<div class="row"><span>تكلفة التركيب</span><span>${fmtPrint(q.installCost)} ج.م</span></div>`;
-    const subtotalRow = `<div class="row"><span>الإجمالي قبل التركيب</span><span>${fmtPrint(q.subtotal)} ج.م</span></div>`;
-    if (opts.showTotal) subtotalBlock = [{ type: "block", html: `<div class="print-terms">${subtotalRow}${installRow}</div>` }];
-    else if (Number(q.installCost) > 0) subtotalBlock = [{ type: "block", html: `<div class="print-terms">${installRow}</div>` }];
-  }
-  const grandBoxBlock = opts.showTotal ? [{
-    type: "block",
-    html: `
-      <div class="print-grand-box">
-        <div class="note">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
-        <div class="amount">${fmtPrint(q.total)} ج.م</div>
-      </div>`,
-  }] : [];
-  const termsBlock = {
-    type: "block",
-    html: `
-      <div class="print-terms">
-        <div class="fine">هذا العرض ساري لمدة 3 أيام من تاريخه، ولا يشمل ضريبة القيمة المضافة ما لم يذكر خلاف ذلك.</div>
-      </div>`,
-  };
-
-  const pages = await paginatePrintUnits([...rowUnits, ...subtotalBlock, ...grandBoxBlock, termsBlock], tableHead);
-  const topRights = pages.map((_, idx) => (idx === 0 ? topRightFull : topRightMinimal));
-
-  area.innerHTML = renderPrintPages(pages, tableHead, topRights);
-  setTimeout(() => window.print(), 150);
-}
-
-/* ---------------- عروضي السابقة ---------------- */
-
-async function loadMyQuotes() {
-  const list = $("#myQuotesList");
-  list.innerHTML = "جاري التحميل...";
-
-  const { data, error } = await client
-    .from("quotes")
-    .select("id, created_at, quote_type, subtotal, installation_cost, total, items, customers(name, phone, city)")
-    .order("created_at", { ascending: false })
-    .limit(30);
-
-  if (error) {
-    list.innerHTML = "تعذر تحميل العروض السابقة.";
-    return;
-  }
-  if (!data || data.length === 0) {
-    list.innerHTML = "<p style='color:var(--muted)'>لسه معملتش أي عرض سعر.</p>";
-    return;
-  }
-
-  list.innerHTML = "";
-  data.forEach((q) => {
-    const row = document.createElement("div");
-    row.className = "rq-quote-item";
-    const dateStr = new Date(q.created_at).toLocaleDateString("ar-EG");
-    row.innerHTML = `
-      <div>#${q.id} — ${q.customers?.name || "بدون اسم"} (${q.customers?.phone || ""}) — ${dateStr} — ${fmt(q.total)} ج.م</div>
-      <button type="button" class="btn" data-reprint="${q.id}">طباعة</button>
-      <a class="btn" href="feasibility-study.html?quote_id=${q.id}" target="_blank" rel="noopener">دراسة جدوى</a>
-    `;
-    list.appendChild(row);
-
-    row.querySelector("[data-reprint]").addEventListener("click", () => {
-      printQuote({
-        id: q.id,
-        customer: q.customers || {},
-        quoteType: q.quote_type,
-        items: q.items || [],
-        subtotal: q.subtotal,
-        installCost: q.installation_cost,
-        total: q.total,
-        createdAt: q.created_at,
-      });
-    });
-  });
+  hint.textContent += " الخيار ده بيتطبّق على المعاينة والطباعة، والعرض المحفوظ بيفضل بالأسعار الكاملة.";
 }
 
 /* ---------------- ربط الأحداث ---------------- */
@@ -737,15 +480,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#addProductBtn").addEventListener("click", addProductToCart);
   $("#saveQuoteBtn").addEventListener("click", saveQuote);
   $("#installCost").addEventListener("input", updateTotals);
-  $("#custName").addEventListener("input", scheduleDraftAutosave);
-  $("#custPhone").addEventListener("input", scheduleDraftAutosave);
+  $("#custName").addEventListener("input", () => { updateBanner(); scheduleDraftAutosave(); });
+  $("#custPhone").addEventListener("input", () => { updateBanner(); scheduleDraftAutosave(); });
   $$(".rq-type-btn").forEach((b) => b.addEventListener("click", () => setQuoteType(b.dataset.quoteType)));
 
   $$(".rq-mode-btn").forEach((b) => b.addEventListener("click", () => {
     $$(".rq-mode-btn").forEach((x) => x.classList.toggle("active", x === b));
     updatePrintOptionsUI();
+    renderCart();
   }));
-  $("#optShowTotal")?.addEventListener("change", updatePrintOptionsUI);
+  $("#optShowTotal")?.addEventListener("change", () => { updatePrintOptionsUI(); renderCart(); });
   updatePrintOptionsUI();
 
   client.auth.onAuthStateChange((_event, session) => {
