@@ -142,6 +142,17 @@
         <div data-install-total-row hidden style="font-size:14px;color:rgba(255,255,255,.75)">تكلفة التركيب: <strong id="installTotalDisplay" class="num">0</strong> ج.م</div>
         <div class="big num">الإجمالي الكلي: <span id="grandTotalDisplay">0</span> ج.م</div>
       </div>
+      <div class="rw-field" style="margin-top:16px">
+        <label>طريقة عرض الأسعار في العرض المطبوع</label>
+        <div class="seg">
+          <button type="button" class="rq-mode-btn active" data-price-mode="detailed">تفصيلي (سعر كل بند)</button>
+          <button type="button" class="rq-mode-btn" data-price-mode="total_only">إجمالي فقط</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-weight:600">
+          <input type="checkbox" id="optShowTotal" checked> إظهار السعر الإجمالي في العرض المطبوع
+        </label>
+        <p class="form-note" id="printOptHint"></p>
+      </div>
       <button type="button" class="btn btn-primary" id="saveQuoteBtn" style="width:100%;margin-top:16px">
         <i class="fa-solid fa-print"></i> حفظ العرض وطباعته
       </button>

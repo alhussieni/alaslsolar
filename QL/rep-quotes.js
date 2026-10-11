@@ -563,6 +563,34 @@ function renderPrintPages(pages, tableHead, topRights) {
   }).join("");
 }
 
+/* خيارات الطباعة (بتتقرا من الصفحة وقت الطباعة، ومبتتخزّنش في الداتا بيز — العرض المحفوظ دايمًا بالأسعار الكاملة):
+   - priceMode: "detailed" (سعر كل بند) أو "total_only" (إجمالي فقط من غير سعر الوحدة/إجمالي البند).
+   - showTotal: إظهار/إخفاء السعر الإجمالي. في وضع "total_only" الإجمالي بيظهر دايمًا
+     (إخفاؤه كان هيطلّع عرض من غير أي سعر). تفصيلي + إخفاء الإجمالي = قائمة أسعار ("برايس ليست"). */
+function getPrintOptions() {
+  const priceMode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode === "total_only" ? "total_only" : "detailed";
+  const showTotal = priceMode === "total_only" ? true : (document.getElementById("optShowTotal")?.checked !== false);
+  return { priceMode, showTotal };
+}
+
+function updatePrintOptionsUI() {
+  const mode = document.querySelector(".rq-mode-btn.active")?.dataset.priceMode;
+  const cb = document.getElementById("optShowTotal");
+  const hint = document.getElementById("printOptHint");
+  if (!cb || !hint) return;
+  if (mode === "total_only") {
+    cb.checked = true;
+    cb.disabled = true;
+    hint.textContent = "العرض هيظهر بدون سعر كل بند، والإجمالي بيظهر دايمًا في الوضع ده.";
+  } else {
+    cb.disabled = false;
+    hint.textContent = cb.checked
+      ? "العرض هيظهر بسعر كل بند والإجمالي."
+      : "العرض هيطلع كقائمة أسعار: سعر كل بند من غير إجمالي.";
+  }
+  hint.textContent += " الخيارات دي بتنطبق على الطباعة وإعادة الطباعة من «عروضي السابقة».";
+}
+
 /* q: { id, customer:{name,phone,city}, quoteType, items, subtotal, installCost, total, createdAt }
    كل الأرقام جاية من الصف المحفوظ في جدول quotes. */
 async function printQuote(q) {
@@ -575,13 +603,15 @@ async function printQuote(q) {
   const quoteNo = `Q-${issueDate.getFullYear()}${String(issueDate.getMonth() + 1).padStart(2, "0")}${String(issueDate.getDate()).padStart(2, "0")}-${String(q.id).padStart(3, "0")}`;
   const cust = q.customer || {};
 
+  const opts = getPrintOptions();
+  const detailed = opts.priceMode === "detailed";
   const printItems = await withProductLabels(q.items);
   // عمود "ملاحظات" بيظهر بس لو في بند واحد على الأقل عليه ملاحظة (عشان ما ياخدش عرض من الجدول فاضي)
   const hasNotes = printItems.some((it) => String(it.note || "").trim());
-  const tableHead = `<tr><th>البند</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th>${hasNotes ? "<th>ملاحظات</th>" : ""}</tr>`;
+  const tableHead = `<tr><th>البند</th><th>الكمية</th>${detailed ? "<th>سعر الوحدة</th><th>الإجمالي</th>" : ""}${hasNotes ? "<th>ملاحظات</th>" : ""}</tr>`;
   const rowUnits = printItems.map((it) => ({
     type: "row",
-    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>${hasNotes ? `<td class="note-cell">${escHtml(String(it.note || "").trim())}</td>` : ""}</tr>`,
+    html: `<tr><td>${escHtml(QuoteItemUtils.getQuoteItemLabel(it))}</td><td>${fmtPrint(QuoteItemUtils.parseQuoteItemQty(it.qty))}</td>${detailed ? `<td>${fmtPrint(QuoteItemUtils.getQuoteItemUnitPrice(it))}</td><td>${fmtPrint(QuoteItemUtils.getQuoteItemLineTotal(it))}</td>` : ""}${hasNotes ? `<td class="note-cell">${escHtml(String(it.note || "").trim())}</td>` : ""}</tr>`,
   }));
 
   const infoBox = (lbl, val) => `<div class="print-info-box"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
@@ -607,22 +637,24 @@ async function printQuote(q) {
       <div class="tr-meta">رقم العرض: ${quoteNo} — التاريخ: ${dateStr}</div>
     </div>`;
 
-  const subtotalBlock = q.quoteType === "supply_install" ? [{
-    type: "block",
-    html: `
-      <div class="print-terms">
-        <div class="row"><span>الإجمالي قبل التركيب</span><span>${fmtPrint(q.subtotal)} ج.م</span></div>
-        <div class="row"><span>تكلفة التركيب</span><span>${fmtPrint(q.installCost)} ج.م</span></div>
-      </div>`,
-  }] : [];
-  const grandBoxBlock = {
+  // الإجمالي قبل التركيب + تكلفة التركيب: بس في الوضع التفصيلي مع إظهار الإجمالي.
+  // قائمة الأسعار (تفصيلي من غير إجمالي): بنسيب سطر تكلفة التركيب لوحده (سعر مش إجمالي) لو أكبر من صفر.
+  // إجمالي فقط: مفيش تفصيل، الرقم الوحيد هو الإجمالي الكلي.
+  let subtotalBlock = [];
+  if (q.quoteType === "supply_install" && detailed) {
+    const installRow = `<div class="row"><span>تكلفة التركيب</span><span>${fmtPrint(q.installCost)} ج.م</span></div>`;
+    const subtotalRow = `<div class="row"><span>الإجمالي قبل التركيب</span><span>${fmtPrint(q.subtotal)} ج.م</span></div>`;
+    if (opts.showTotal) subtotalBlock = [{ type: "block", html: `<div class="print-terms">${subtotalRow}${installRow}</div>` }];
+    else if (Number(q.installCost) > 0) subtotalBlock = [{ type: "block", html: `<div class="print-terms">${installRow}</div>` }];
+  }
+  const grandBoxBlock = opts.showTotal ? [{
     type: "block",
     html: `
       <div class="print-grand-box">
         <div class="note">السعر الإجمالي للعرض (غير شامل ض.ق.م)</div>
         <div class="amount">${fmtPrint(q.total)} ج.م</div>
       </div>`,
-  };
+  }] : [];
   const termsBlock = {
     type: "block",
     html: `
@@ -631,7 +663,7 @@ async function printQuote(q) {
       </div>`,
   };
 
-  const pages = await paginatePrintUnits([...rowUnits, ...subtotalBlock, grandBoxBlock, termsBlock], tableHead);
+  const pages = await paginatePrintUnits([...rowUnits, ...subtotalBlock, ...grandBoxBlock, termsBlock], tableHead);
   const topRights = pages.map((_, idx) => (idx === 0 ? topRightFull : topRightMinimal));
 
   area.innerHTML = renderPrintPages(pages, tableHead, topRights);
@@ -703,6 +735,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#custName").addEventListener("input", scheduleDraftAutosave);
   $("#custPhone").addEventListener("input", scheduleDraftAutosave);
   $$(".rq-type-btn").forEach((b) => b.addEventListener("click", () => setQuoteType(b.dataset.quoteType)));
+
+  $$(".rq-mode-btn").forEach((b) => b.addEventListener("click", () => {
+    $$(".rq-mode-btn").forEach((x) => x.classList.toggle("active", x === b));
+    updatePrintOptionsUI();
+  }));
+  $("#optShowTotal")?.addEventListener("change", updatePrintOptionsUI);
+  updatePrintOptionsUI();
 
   client.auth.onAuthStateChange((_event, session) => {
     updateAuthState(session);
