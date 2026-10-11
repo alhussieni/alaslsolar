@@ -396,12 +396,23 @@ async function main() {
   console.log("🔄  Connecting to Supabase…");
   const client = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  const { data: products, error } = await client.from("products").select("*");
+  // The service-role key bypasses RLS, so we must apply the storefront's
+  // visibility rules ourselves: unpublished products and products in a category
+  // the admin switched off must never get a public static page or sitemap entry.
+  const { data: allProducts, error } = await client.from("products").select("*");
   if (error) {
     console.error("❌  Supabase error:", error.message);
     process.exit(1);
   }
-  console.log(`✅  Fetched ${products.length} product(s).`);
+  const { data: catSettings, error: catError } = await client.from("category_settings").select("category_key, visible");
+  if (catError) {
+    // Fail closed: without the visibility settings we could leak hidden categories.
+    console.error("❌  category_settings error:", catError.message);
+    process.exit(1);
+  }
+  const hiddenCats = new Set((catSettings || []).filter((c) => c.visible === false).map((c) => c.category_key));
+  const products = allProducts.filter((p) => p.published !== false && !hiddenCats.has(p.category));
+  console.log(`✅  Fetched ${allProducts.length} product(s); ${products.length} public (skipped ${allProducts.length - products.length} unpublished / hidden-category).`);
 
   const { data: logos, error: logoError } = await client.from("brand_logos").select("brand, logo_url");
   if (logoError) console.error("⚠️   brand_logos fetch error (continuing without logo fallback):", logoError.message);
