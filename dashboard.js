@@ -1522,10 +1522,16 @@ function renderDashProducts() {
   const rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
   if (rows.length === 0) { list.innerHTML = '<p style="color:var(--muted);font-size:14px">لا توجد منتجات في هذا التصنيف.</p>'; return; }
 
-  const catLabels = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد', ongrid:'🌐 أون جريد', hybrid:'🔁 هايبرد', ev_chargers:'🚗 شاحن سيارات', reactors:'🧲 ريأكتور', charge_controllers:'🎛️ منظم شحن', well_motors:'🛠️ موتور آبار', pumps:'🌊 طلمبة', pipes:'🧵 ماسورة', street_lights:'💡 إنارة شوارع', flood_lights:'🔦 كشاف', garden_lights:'🪴 حديقة', solar_kits:'🧰 نظام منزلي', solar_safety:'🚧 سلامة طرق' };
+  list.innerHTML = rows.map(dashProductRowHtml).join('');
+}
 
-  list.innerHTML = rows.map(p => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-3);border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:var(--space-2);flex-wrap:wrap">
+const DASH_PRODUCT_CAT_LABELS = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد', ongrid:'🌐 أون جريد', hybrid:'🔁 هايبرد', ev_chargers:'🚗 شاحن سيارات', reactors:'🧲 ريأكتور', charge_controllers:'🎛️ منظم شحن', well_motors:'🛠️ موتور آبار', pumps:'🌊 طلمبة', pipes:'🧵 ماسورة', street_lights:'💡 إنارة شوارع', flood_lights:'🔦 كشاف', garden_lights:'🪴 حديقة', solar_kits:'🧰 نظام منزلي', solar_safety:'🚧 سلامة طرق' };
+
+// قالب صف المنتج — اتفصل عن renderDashProducts عشان نقدر نعيد رسم صف واحد بس (بدون مسح القايمة كلها).
+function dashProductRowHtml(p) {
+  const catLabels = DASH_PRODUCT_CAT_LABELS;
+  return `
+    <div data-pid="${p.id}" style="display:flex;align-items:center;justify-content:space-between;padding:12px var(--space-3);border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:var(--space-2);flex-wrap:wrap">
       <div style="display:flex;gap:var(--space-2);flex:1;min-width:0">
         <div style="width:48px;height:48px;border-radius:var(--radius);background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0">
           ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:18px;opacity:.5">${({inverters:'⚡',panels:'☀️',accessories:'🔌',combiners:'📦',structures:'🏗️',cables:'🔶',batteries:'🔋',offgrid:'🔆',ongrid:'🌐',hybrid:'🔁',ev_chargers:'🚗',reactors:'🧲',charge_controllers:'🎛️',well_motors:'🛠️',pumps:'🌊',pipes:'🧵',street_lights:'💡',flood_lights:'🔦',garden_lights:'🪴',solar_kits:'🧰',solar_safety:'🚧'})[p.category] || '📦'}</span>`}
@@ -1562,7 +1568,17 @@ function renderDashProducts() {
             style="padding:4px 12px;border-radius:var(--radius);border:1px solid #fcc;background:#fff3f3;font-size:12px;cursor:pointer;color:#c33">🗑️ حذف</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+}
+
+// استبدال صف منتج واحد في مكانه (بيحافظ على موضع الاسكرول وباقي الصفوف زي ما هي)
+function refreshDashProductRow(p) {
+  const list = document.getElementById('productsList');
+  const row = list && list.querySelector('[data-pid="' + p.id + '"]');
+  if (!row) return;
+  const tpl = document.createElement('template');
+  tpl.innerHTML = dashProductRowHtml(p).trim();
+  row.replaceWith(tpl.content.firstElementChild);
 }
 
 function setProductImagePreview(url) {
@@ -1722,23 +1738,46 @@ function cancelProductForm() {
   toggleProductFieldsByCategory(document.getElementById('productCategory').value);
 }
 
-async function toggleProductPublish(id, current) {
+// تبديل إظهار/إتاحة المنتج بدون إعادة تحميل القايمة: بنحدّث الصف في مكانه فورًا، وبنكتب في الداتا بيز
+// في الخلفية، ولو فشلت الكتابة بنرجّع الحالة القديمة ونبلّغ. الحالة بتتاخد من allDashProducts مش من
+// القيمة المتخزنة في الزرار، عشان الضغطات السريعة ما تقراش حالة قديمة.
+const _dashProductPending = new Set();
+
+async function toggleProductFlag(id, field) {
   if (!client) return;
-  await client.from('products').update({ published: !current }).eq('id', id);
-  loadProducts();
+  const p = allDashProducts.find(x => x.id === id);
+  if (!p) return;
+  const key = id + ':' + field;
+  if (_dashProductPending.has(key)) return; // ضغطة تانية على نفس الزرار قبل ما الأولى تخلص
+  _dashProductPending.add(key);
+
+  const prev = field === 'in_stock' ? p.in_stock !== false : !!p.published;
+  const next = !prev;
+  p[field] = next;
+  refreshDashProductRow(p);
+
+  const { error } = await client.from('products').update({ [field]: next }).eq('id', id);
+  _dashProductPending.delete(key);
+  if (error) {
+    p[field] = prev;
+    refreshDashProductRow(p);
+    alert('تعذّر الحفظ: ' + error.message + '\nرجّعت الحالة زي ما كانت.');
+  }
 }
 
-async function toggleProductStock(id, current) {
-  if (!client) return;
-  await client.from('products').update({ in_stock: !current }).eq('id', id);
-  loadProducts();
-}
+function toggleProductPublish(id) { return toggleProductFlag(id, 'published'); }
+function toggleProductStock(id) { return toggleProductFlag(id, 'in_stock'); }
 
 async function deleteProduct(id) {
   if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
   if (!client) return;
-  await client.from('products').delete().eq('id', id);
-  loadProducts();
+  const { error } = await client.from('products').delete().eq('id', id);
+  if (error) { alert('تعذّر الحذف: ' + error.message); return; }
+  allDashProducts = allDashProducts.filter(x => x.id !== id);
+  updateProductCatCounts();
+  const row = document.getElementById('productsList')?.querySelector('[data-pid="' + id + '"]');
+  if (row) row.remove();
+  if (!document.querySelector('#productsList [data-pid]')) renderDashProducts(); // آخر منتج في التصنيف اتحذف
 }
 
 document.addEventListener('DOMContentLoaded', () => {
