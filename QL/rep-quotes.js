@@ -167,14 +167,29 @@ function inverterLabel(p) {
   return `${head} - ${kw}KW/${hp}HP`;
 }
 
-/* البطاريات: السعة المخزّنة بالـKWH = AH × V ÷ 1000 (مثال: 100AH × 24V = 2.4KWH)، بتتضاف بجانب الاسم.
-   دي سعة اسمية (نظرية) — مش السعة القابلة للاستخدام (بتتأثر بـDoD). لو الاسم فيه kWh أصلًا أو AH/V ناقصين
-   مبنضيفش حاجة. voltage_v في الداتا بيز هو الفولت الاسمي المقرّب (12/24/48)، مش 12.8/25.6/51.2. */
+/* البطاريات: بنعرض بجانب الاسم السعة المخزّنة بالـKWH.
+   - لو الـkWh مسجّل أصلًا من المصنع (في الاسم أو specs_ar، زي Phylion 5.04kWh) بنعرضه زي ما هو.
+   - لو مش مسجّل: KWH = الفولت الفعلي × AH ÷ 1000 بالأرقام المسجّلة على البطارية (مثال: 25.6V × 100Ah = 2.56KWH)،
+     من غير أي خصم DoD، لأن العرض بيعرض قيم المصنع في الحالة القياسية.
+   الفولت والـAh بيتقرأوا من specs_ar ("الجهد: 25.6V | السعة: 100Ah") لأن عمود voltage_v مقرّب (12/24/48)
+   مش الفولت الفعلي (12.8/25.6/51.2). لو النص مش بالشكل ده بنرجع للاسم ثم للأعمدة. */
+function firstNum(text, re) {
+  const m = String(text || "").match(re);
+  const n = m ? Number(m[1]) : NaN;
+  return n > 0 ? n : null;
+}
+
 function batteryKwh(p) {
-  const ah = Number(p.capacity_ah);
-  const v = Number(p.voltage_v);
-  if (!(ah > 0) || !(v > 0)) return null;
-  return String(Math.round((ah * v) / 10) / 100); // kWh لأقرب خانتين عشريتين
+  const registered = firstNum(`${p.name_ar || ""} ${p.specs_ar || ""}`, /(\d+(?:\.\d+)?)\s*kwh/i);
+  if (registered) return String(registered);
+  const volts = firstNum(p.specs_ar, /الجهد:\s*(\d+(?:\.\d+)?)\s*V/i)
+    ?? firstNum(p.name_ar, /(\d+(?:\.\d+)?)\s*V\b/i)
+    ?? (Number(p.voltage_v) > 0 ? Number(p.voltage_v) : null);
+  const ah = firstNum(p.specs_ar, /السعة:\s*(\d+(?:\.\d+)?)\s*Ah/i)
+    ?? firstNum(p.name_ar, /(\d+(?:\.\d+)?)\s*Ah/i)
+    ?? (Number(p.capacity_ah) > 0 ? Number(p.capacity_ah) : null);
+  if (!volts || !ah) return null;
+  return String(Math.round((volts * ah) / 10) / 100); // kWh لأقرب خانتين عشريتين
 }
 
 function buildProductLabel(p, nameCounts) {
