@@ -379,7 +379,7 @@
             quote: 'اطلب عرض سعر', whatsapp: 'تواصل واتساب', egp: 'ج.م', watt: 'ج.م/وات', meter: 'ج.م/م', specBrand: 'الماركة', specModel: 'الموديل', specUnit: 'الوحدة', specDetails: 'المواصفات', specChemistry: 'نوع الكيمياء', specNotes: 'ملاحظات', specDiameter: 'المقاس',
             home: 'الرئيسية', products: 'المنتجات', productCode: 'رقم المنتج:', category: 'التصنيف:',
             tabDesc: 'الوصف', tabSpecs: 'المواصفات', tabApps: 'التطبيقات', tabWarranty: 'الضمان', tabFiles: 'الملفات',
-            keyFeatures: 'المميزات الرئيسية', commonApps: 'التطبيقات الشائعة', similarProducts: 'منتجات مشابهة',
+            keyFeatures: 'المميزات الرئيسية', commonApps: 'التطبيقات الشائعة', similarProducts: 'منتجات مشابهة', suggestedAccessories: 'إكسسوارات مقترحة مع الإنفرتر',
             reviews: 'تقييم', noDescription: 'لا يوجد وصف تفصيلي لهذا المنتج بعد — تواصل معنا لمزيد من المعلومات.',
             noWarrantyInfo: 'للاستفسار عن تفاصيل الضمان لهذا المنتج، تواصل معنا مباشرة.', noFiles: 'لا توجد ملفات متاحة لهذا المنتج حاليًا.',
             factTempRange: 'مدى التشغيل', factWeight: 'الوزن', factIpRating: 'درجة الحماية', factCycleLife: 'عدد دورات الشحن', factCapacity: 'السعة الاسمية', factVoltage: 'الجهد الاسمي',
@@ -394,7 +394,7 @@
             quote: 'Request a Quote', whatsapp: 'Chat on WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Brand', specModel: 'Model', specUnit: 'Unit', specDetails: 'Specifications', specChemistry: 'Chemistry', specNotes: 'Notes', specDiameter: 'Diameter',
             home: 'Home', products: 'Products', productCode: 'Product code:', category: 'Category:',
             tabDesc: 'Description', tabSpecs: 'Specifications', tabApps: 'Applications', tabWarranty: 'Warranty', tabFiles: 'Files',
-            keyFeatures: 'Key Features', commonApps: 'Common Applications', similarProducts: 'Similar Products',
+            keyFeatures: 'Key Features', commonApps: 'Common Applications', similarProducts: 'Similar Products', suggestedAccessories: 'Suggested accessories for this inverter',
             reviews: 'reviews', noDescription: 'No detailed description yet for this product — contact us for more information.',
             noWarrantyInfo: 'Contact us directly for warranty details on this product.', noFiles: 'No files available for this product yet.',
             factTempRange: 'Operating Range', factWeight: 'Weight', factIpRating: 'Protection Rating', factCycleLife: 'Cycle Life', factCapacity: 'Rated Capacity', factVoltage: 'Rated Voltage',
@@ -409,7 +409,7 @@
             quote: 'Solicitar Presupuesto', whatsapp: 'Chatear por WhatsApp', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: 'Marca', specModel: 'Modelo', specUnit: 'Unidad', specDetails: 'Especificaciones', specChemistry: 'Química', specNotes: 'Notas', specDiameter: 'Diámetro',
             home: 'Inicio', products: 'Productos', productCode: 'Código de producto:', category: 'Categoría:',
             tabDesc: 'Descripción', tabSpecs: 'Especificaciones', tabApps: 'Aplicaciones', tabWarranty: 'Garantía', tabFiles: 'Archivos',
-            keyFeatures: 'Características Clave', commonApps: 'Aplicaciones Comunes', similarProducts: 'Productos Similares',
+            keyFeatures: 'Características Clave', commonApps: 'Aplicaciones Comunes', similarProducts: 'Productos Similares', suggestedAccessories: 'Accesorios sugeridos para este inversor',
             reviews: 'reseñas', noDescription: 'Aún no hay descripción detallada — contáctenos para más información.',
             noWarrantyInfo: 'Contáctenos directamente para conocer los detalles de la garantía.', noFiles: 'No hay archivos disponibles actualmente.',
             factTempRange: 'Rango de Funcionamiento', factWeight: 'Peso', factIpRating: 'Índice de Protección', factCycleLife: 'Ciclos de Vida', factCapacity: 'Capacidad Nominal', factVoltage: 'Voltaje Nominal',
@@ -424,7 +424,7 @@
             quote: '获取报价', whatsapp: 'WhatsApp 联系', egp: 'EGP', watt: 'EGP/W', meter: 'EGP/m', specBrand: '品牌', specModel: '型号', specUnit: '单位', specDetails: '规格', specChemistry: '化学类型', specNotes: '备注', specDiameter: '尺寸',
             home: '首页', products: '产品', productCode: '产品编号:', category: '分类:',
             tabDesc: '描述', tabSpecs: '规格', tabApps: '应用', tabWarranty: '保修', tabFiles: '文件',
-            keyFeatures: '主要特点', commonApps: '常见应用', similarProducts: '相似产品',
+            keyFeatures: '主要特点', commonApps: '常见应用', similarProducts: '相似产品', suggestedAccessories: '此逆变器的推荐配件',
             reviews: '条评价', noDescription: '该产品暂无详细描述——请联系我们了解更多信息。',
             noWarrantyInfo: '如需了解此产品的保修详情，请直接联系我们。', noFiles: '该产品暂无可用文件。',
             factTempRange: '工作温度范围', factWeight: '重量', factIpRating: '防护等级', factCycleLife: '循环寿命', factCapacity: '额定容量', factVoltage: '额定电压',
@@ -562,7 +562,7 @@
         if (sub != null) return sub;
       }
       if (p.category === 'batteries' && p.voltage_v != null) return p.voltage_v + 'V';
-      if (p.category === 'inverters' || p.category === 'offgrid') {
+      if (p.category === 'inverters' || p.category === 'offgrid' || p.category === 'ongrid' || p.category === 'hybrid') {
         const { kw, hp } = parseInvPower(p);
         const parts = [kw ? kw + ' KW' : '', hp ? hp + ' HP' : ''].filter(Boolean);
         if (p.category === 'offgrid' && p.voltage_v) parts.push(p.voltage_v + 'V');
@@ -591,7 +591,7 @@
       document.getElementById('pdWaText').textContent = t('whatsapp');
       document.getElementById('pdCodeLabel').textContent = t('productCode');
       document.getElementById('pdCatLabel').textContent = t('category');
-      document.getElementById('pdSimilarTitle').textContent = t('similarProducts');
+      document.getElementById('pdSimilarTitle').textContent = t(similarTitleKey);
       const compareBarText = document.getElementById('compareBarText');
       if (compareBarText) compareBarText.textContent = t('compareBarText');
       const cartBarText = document.getElementById('cartBarText');
@@ -804,13 +804,29 @@
       wrap.hidden = false;
     }
 
+    let similarTitleKey = 'similarProducts';
+
     async function renderSimilar(sb, row) {
       const grid = document.getElementById('pdSimilarGrid');
       const wrap = document.getElementById('pdSimilarWrap');
       if (!sb) { wrap.hidden = true; return; }
       try {
-        const { data, error } = await sb.from('products').select('*').eq('category', row.category).neq('brand', row.brand).limit(8);
-        let rows = (!error && data) ? data : [];
+        let rows = [];
+        similarTitleKey = 'similarProducts';
+        // On-grid / hybrid inverters: suggest the same brand's accessories
+        // (dongle, data logger, power sensor...) instead of other inverters.
+        if ((row.category === 'ongrid' || row.category === 'hybrid') && row.brand) {
+          const acc = await sb.from('products').select('*').eq('category', 'accessories').eq('brand', row.brand).neq('published', false).order('sort_order', { ascending: true }).limit(8);
+          if (!acc.error && acc.data && acc.data.length) {
+            rows = acc.data;
+            similarTitleKey = 'suggestedAccessories';
+          }
+        }
+        document.getElementById('pdSimilarTitle').textContent = t(similarTitleKey);
+        if (rows.length === 0) {
+          const { data, error } = await sb.from('products').select('*').eq('category', row.category).neq('brand', row.brand).limit(8);
+          rows = (!error && data) ? data : [];
+        }
         if (rows.length === 0) {
           const retry = await sb.from('products').select('*').eq('category', row.category).limit(8);
           rows = (retry.data || []).filter(r => r.model_available !== row.model_available);
@@ -860,7 +876,7 @@
           return `<a class="pd-similar-card" href="${href}">
             <div class="pd-similar-media">${media}</div>
             <div class="pd-similar-body">
-              <p class="pd-similar-name">${escapeHtml([catText, r.brand].filter(Boolean).join(' '))}</p>
+              <p class="pd-similar-name" title="${escapeHtml(r.category === 'accessories' ? localName(r) : '')}">${escapeHtml(r.category === 'accessories' ? (localName(r) || [catText, r.brand].filter(Boolean).join(' ')) : [catText, r.brand].filter(Boolean).join(' '))}</p>
               <p class="pd-similar-price">${r.in_stock === false ? escapeHtml(t('unavailableMsg')) : `${fmt(r.price)} ${escapeHtml(unitLabel(r))}${r.promo_pct ? ` <span style="background:#c0392b;color:#fff;border-radius:6px;padding:1px 6px;font-size:0.65em">-${r.promo_pct}%</span>` : ''}`}</p>
             </div>
           </a>`;
@@ -903,7 +919,7 @@
       // rather than by opaque model codes — visitors don't know what
       // "S.P 30" means, but they do know what a drainage pump is for.
       const isPumps = first.category === 'pumps';
-      const isOffgridInv = first.category === 'offgrid';
+      const isOffgridInv = ['offgrid', 'ongrid', 'hybrid'].includes(first.category);
       const isAccessories = first.category === 'accessories';
       const isBatteries = first.category === 'batteries';
       document.getElementById('pdModelLabel').textContent = isPumps ? t('choosePumpType') : (isAccessories ? t('chooseAccessoryType') : (isBatteries ? t('chooseAmp') : t('chooseModel')));
@@ -1055,7 +1071,7 @@
       // Latin/numeric fragments ("15 حصان - 380V - قطر التنصيب 6""); wrapping
       // each " - "-separated segment in <bdi> keeps each part's internal
       // reading order correct without disturbing the others.
-      const ltrLabel = ['inverters', 'offgrid'].includes(rowsForModel[0]?.category);
+      const ltrLabel = ['inverters', 'offgrid', 'ongrid', 'hybrid'].includes(rowsForModel[0]?.category);
 
       if (sorted.length <= 1) {
         variantsWrap.hidden = true;
@@ -1263,7 +1279,7 @@
 
       try {
         let rows;
-        const multiModelCat = cat === 'inverters' || cat === 'offgrid' || cat === 'pumps' || cat === 'well_motors' || cat === 'batteries';
+        const multiModelCat = cat === 'inverters' || cat === 'offgrid' || cat === 'ongrid' || cat === 'hybrid' || cat === 'pumps' || cat === 'well_motors' || cat === 'batteries';
         if (multiModelCat) {
           // Inverters/off-grid inverters can have several model lines under
           // one brand — always fetch the whole brand, then let the in-page
@@ -1332,7 +1348,7 @@
       const row = familyRows.find(r => String(r.id) === String(selected.id));
       if (!row) return;
       const isPumps = row.category === 'pumps';
-      const isOffgridInv = row.category === 'offgrid';
+      const isOffgridInv = ['offgrid', 'ongrid', 'hybrid'].includes(row.category);
       const series = isPumps ? (row.pump_type || null) : (isOffgridInv ? null : (row.model_available || null));
 
       if (series) {
