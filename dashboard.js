@@ -988,41 +988,29 @@ async function loadLists() {
 const CATEGORY_ICONS = { inverters:'⚡', panels:'☀️', accessories:'🔌', combiners:'📦', structures:'🏗️', cables:'🔶', batteries:'🔋', offgrid:'🔆', ongrid:'🔌', hybrid:'🔋', ev_chargers:'🚗', reactors:'🧲', charge_controllers:'🎛️', well_motors:'🛠️', pumps:'🌊', pipes:'🧵', street_lights:'💡', flood_lights:'🔦', garden_lights:'🪴', solar_kits:'🧰', solar_safety:'🚧' };
 const CATEGORY_LABELS_AR = { inverters:'إنفرتر بامب/VFD', panels:'الألواح الشمسية', accessories:'إكسسوارات', combiners:'صناديق تجميع', structures:'هياكل', cables:'كابلات', batteries:'بطاريات وتخزين', offgrid:'إنفرتر أوف جريد', ongrid:'إنفرتر أون جريد', hybrid:'إنفرتر هايبرد', well_motors:'موتورات آبار', pumps:'طلمبات ومضخات', pipes:'مواسير', street_lights:'إنارة شوارع شمسية', flood_lights:'كشافات شمسية', garden_lights:'إضاءة حدائق شمسية', solar_kits:'كيت إضاءة منزلي', solar_safety:'سلامة الطرق الشمسية', ev_chargers:'شواحن سيارات كهربائية', reactors:'ريأكتورات', charge_controllers:'منظمات شحن' };
 
+let categoryVisibilityMap = {}; // category_key -> visible (من category_settings: بيأثر على صفحة المنتجات العامة بس)
+
 async function loadCategoryVisibility() {
-  const panel = document.getElementById('categoryVisibilityPanel');
-  if (!panel) return;
-  if (!client) { panel.innerHTML = '<p style="color:var(--muted);font-size:13px">تعذّر الاتصال بقاعدة البيانات.</p>'; return; }
-
-  const { data, error } = await client
-    .from('category_settings')
-    .select('*')
-    .order('main_section', { ascending: true })
-    .order('sort_order', { ascending: true });
-
-  if (error) { panel.innerHTML = '<p style="color:red;font-size:13px">خطأ: ' + error.message + '</p>'; return; }
-
-  panel.innerHTML = (data || []).map(c => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;gap:8px">
-      <span style="font-size:13px;display:flex;align-items:center;gap:6px">
-        <span>${CATEGORY_ICONS[c.category_key] || '📦'}</span>
-        <span>${CATEGORY_LABELS_AR[c.category_key] || c.category_key}</span>
-        ${!c.visible ? '<span style="font-size:11px;color:#e44;font-weight:700">● مخفي من الموقع</span>' : ''}
-      </span>
-      <button type="button" onclick="toggleCategoryVisibility('${c.category_key}', ${c.visible})"
-        style="padding:4px 12px;border-radius:var(--radius);border:1px solid ${c.visible ? 'var(--line)' : '#fcc'};background:${c.visible ? '#fff' : '#fff3f3'};font-size:12px;cursor:pointer;color:${c.visible ? 'inherit' : '#c33'}">
-        ${c.visible ? '🙈 إخفاء' : '👁️ إظهار'}
-      </button>
-    </div>`).join('') || '<p style="color:var(--muted);font-size:13px">لا توجد تصنيفات معرّفة.</p>';
+  if (!client) return;
+  const { data, error } = await client.from('category_settings').select('category_key, visible');
+  if (error) return; // الشريط بيشتغل عادي، بس من غير زرار إظهار/إخفاء التصنيف
+  categoryVisibilityMap = Object.fromEntries((data || []).map(c => [c.category_key, !!c.visible]));
+  renderProductBrandUI();
 }
 
-async function toggleCategoryVisibility(key, current) {
+// إظهار/إخفاء التصنيف من صفحة المنتجات العامة (مش بيغيّر حالة المنتجات نفسها، ولا بيأثر على الحاسبات وعروض المندوبين)
+async function toggleCategoryVisibility(key) {
   if (!client) return;
-  const { error } = await client
-    .from('category_settings')
-    .update({ visible: !current, updated_at: new Date().toISOString() })
-    .eq('category_key', key);
-  if (error) { alert('خطأ: ' + error.message); return; }
-  loadCategoryVisibility();
+  const prev = categoryVisibilityMap[key];
+  if (prev === undefined) return;
+  categoryVisibilityMap[key] = !prev;
+  renderProductBrandUI();
+  const { error } = await client.from('category_settings').update({ visible: !prev, updated_at: new Date().toISOString() }).eq('category_key', key);
+  if (error) {
+    categoryVisibilityMap[key] = prev;
+    renderProductBrandUI();
+    alert('خطأ: ' + error.message);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1467,6 +1455,7 @@ async function handleFaqAdd(event) {
 
 let allDashProducts = [];
 let currentProdCat = 'all';
+let currentProdBrand = 'all'; // 'all' = كل ماركات التصنيف (من غير إجراءات جماعية)
 
 async function loadProducts() {
   const list = document.getElementById('productsList');
@@ -1483,6 +1472,7 @@ async function loadProducts() {
 
 function filterDashProducts(cat, btn) {
   currentProdCat = cat;
+  currentProdBrand = 'all';
   document.querySelectorAll('.prod-dash-filter').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderDashProducts();
@@ -1519,13 +1509,198 @@ function detectInvPower(p) {
 function renderDashProducts() {
   const list = document.getElementById('productsList');
   if (!list) return;
-  const rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
+  renderProductBrandUI(); // بيصفّر currentProdBrand لو الماركة المختارة اختفت (اتحذفت)، فلازم قبل الفلترة
+  let rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
+  if (currentProdCat !== 'all' && currentProdBrand !== 'all') rows = rows.filter(p => (p.brand || '') === currentProdBrand);
   if (rows.length === 0) { list.innerHTML = '<p style="color:var(--muted);font-size:14px">لا توجد منتجات في هذا التصنيف.</p>'; return; }
 
   list.innerHTML = rows.map(dashProductRowHtml).join('');
 }
 
 const DASH_PRODUCT_CAT_LABELS = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد', ongrid:'🌐 أون جريد', hybrid:'🔁 هايبرد', ev_chargers:'🚗 شاحن سيارات', reactors:'🧲 ريأكتور', charge_controllers:'🎛️ منظم شحن', well_motors:'🛠️ موتور آبار', pumps:'🌊 طلمبة', pipes:'🧵 ماسورة', street_lights:'💡 إنارة شوارع', flood_lights:'🔦 كشاف', garden_lights:'🪴 حديقة', solar_kits:'🧰 نظام منزلي', solar_safety:'🚧 سلامة طرق' };
+
+/* ═══════════════════════════════════════════════════════════════
+   الماركات داخل التصنيف + إجراءات جماعية على (تصنيف + ماركة) واحدة بس
+   - الشريط بيظهر لما تختار تصنيف. اختيار ماركة بيفلتر القايمة ويظهر سطر الإجراءات.
+   - الإجراء بيتنفّذ على منتجات التصنيف ده + الماركة دي فقط (MUST بطاريات ≠ MUST أوف جريد).
+   - إخفاء/إظهار/متاح/غير متاح: تحديث واحد في الداتا بيز + زرار تراجع 10 ثواني، والعدد على الزرار
+     هو عدد المنتجات اللي هتتغيّر فعلًا (اللي حالتها مختلفة بس، فالاختيارات الفردية مبتتمسحش من غير ما تشوفها).
+   - الحذف: كتابة اسم الماركة للتأكيد + نسخة احتياطية JSON بتنزل قبل الحذف.
+   ═══════════════════════════════════════════════════════════════ */
+const DASH_CHIP_BASE = 'padding:5px 12px;border-radius:999px;border:1px solid var(--line);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;';
+
+function selectProductBrand(brand) {
+  currentProdBrand = brand || 'all';
+  renderDashProducts();
+}
+
+function renderProductBrandUI() {
+  const bar = document.getElementById('productBrandBar');
+  if (!bar) return;
+  if (currentProdCat === 'all') { bar.innerHTML = ''; renderProductBrandActions(); return; }
+
+  const inCat = allDashProducts.filter(p => p.category === currentProdCat);
+  const brands = new Map(); // brand -> { n, visible }
+  inCat.forEach(p => {
+    const b = p.brand || '';
+    const e = brands.get(b) || { n: 0, visible: 0 };
+    e.n++; if (p.published) e.visible++;
+    brands.set(b, e);
+  });
+  if (currentProdBrand !== 'all' && !brands.has(currentProdBrand)) currentProdBrand = 'all';
+
+  const icon = CATEGORY_ICONS[currentProdCat] || '';
+  const label = CATEGORY_LABELS_AR[currentProdCat] || currentProdCat;
+  const catVisible = categoryVisibilityMap[currentProdCat]; // undefined = مفيش صف في category_settings
+  const catToggle = catVisible === undefined ? '' : `
+    <span style="font-size:12px;color:var(--muted)">
+      التصنيف على صفحة المنتجات العامة: <strong style="color:${catVisible ? 'var(--ok, #1a7f37)' : 'var(--danger, #c0392b)'}">${catVisible ? 'ظاهر' : 'مخفي'}</strong>
+      <button type="button" onclick="toggleCategoryVisibility('${currentProdCat}')" style="margin-inline-start:6px;padding:3px 10px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;cursor:pointer;font-family:inherit">${catVisible ? '🙈 إخفاء التصنيف' : '👁️ إظهار التصنيف'}</button>
+    </span>`;
+
+  const chip = (value, text, count, dim) => {
+    const active = currentProdBrand === value;
+    return `<button type="button" data-brand="${escP(value)}" onclick="selectProductBrand(this.dataset.brand)" style="${DASH_CHIP_BASE}${active ? 'background:var(--brand);color:#fff;border-color:var(--brand);' : 'background:#fff;color:inherit;'}${dim && !active ? 'opacity:.55;' : ''}">${escP(text)} (${count})</button>`;
+  };
+  const sorted = [...brands.entries()].sort((a, b) => a[0].localeCompare(b[0], 'en', { sensitivity: 'base' }));
+  bar.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <strong style="font-size:14px">${icon} ${escP(label)} · ${inCat.length} منتج</strong>${catToggle}
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${chip('all', 'كل الماركات', inCat.length, false)}
+      ${sorted.map(([b, e]) => chip(b, b || 'بدون ماركة', e.n, e.visible === 0)).join('')}
+    </div>`;
+  renderProductBrandActions();
+}
+
+function brandGroup() {
+  if (currentProdCat === 'all' || currentProdBrand === 'all' || !currentProdBrand) return [];
+  return allDashProducts.filter(p => p.category === currentProdCat && p.brand === currentProdBrand);
+}
+
+function renderProductBrandActions() {
+  const box = document.getElementById('productBrandActions');
+  if (!box) return;
+  const g = brandGroup();
+  if (!g.length) { box.innerHTML = ''; return; }
+
+  const nVis = g.filter(p => p.published).length, nHid = g.length - nVis;
+  const nAvail = g.filter(p => p.in_stock !== false).length, nUnav = g.length - nAvail;
+  const all = (n) => n === g.length;
+  const btn = (action, text, n, extra) => `<button type="button" onclick="bulkBrandAction('${action}')" style="padding:6px 12px;border-radius:var(--radius);border:1px solid var(--line);background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;${extra || ''}">${text} (${n})</button>`;
+  const buttons = [
+    nVis > 0 ? btn('hide', all(nVis) ? '🙈 إخفاء الكل' : '🙈 إخفاء الظاهر', nVis) : '',
+    nHid > 0 ? btn('show', all(nHid) ? '👁️ إظهار الكل' : '👁️ إظهار المخفي', nHid) : '',
+    nAvail > 0 ? btn('unavailable', all(nAvail) ? '🔴 الكل غير متاح' : '🔴 غير متاح للمتاح', nAvail) : '',
+    nUnav > 0 ? btn('available', all(nUnav) ? '🟢 الكل متاح' : '🟢 متاح لغير المتاح', nUnav) : '',
+    `<button type="button" onclick="deleteBrandProducts()" style="padding:6px 12px;border-radius:var(--radius);border:1px solid #c0392b;background:#fff;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ حذف الكل (${g.length})</button>`,
+  ].join('');
+
+  const icon = CATEGORY_ICONS[currentProdCat] || '';
+  const label = CATEGORY_LABELS_AR[currentProdCat] || currentProdCat;
+  box.innerHTML = `
+    <div style="border:1px solid var(--line);border-radius:var(--radius);background:var(--brand-soft, #faf6f0);padding:10px 12px">
+      <div style="font-weight:800;font-size:14px">${icon} ${escP(label)} — ${escP(currentProdBrand)}</div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 8px">${g.length} منتج · ${nVis} ظاهر · ${nHid} مخفي · ${nAvail} متاح · ${nUnav} غير متاح — الإجراءات هنا على الماركة دي في التصنيف ده فقط</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${buttons}</div>
+    </div>`;
+}
+
+function showUndoToast(text, onUndo) {
+  document.getElementById('dashUndoToast')?.remove();
+  const t = document.createElement('div');
+  t.id = 'dashUndoToast';
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:9999;display:flex;gap:14px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);direction:rtl';
+  const span = document.createElement('span'); span.textContent = text;
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = '↩️ تراجع';
+  b.style.cssText = 'background:#fff;color:#222;border:0;border-radius:6px;padding:4px 10px;font-weight:700;cursor:pointer;font-family:inherit';
+  const timer = setTimeout(() => t.remove(), 10000);
+  b.onclick = async () => { clearTimeout(timer); b.disabled = true; b.textContent = 'جاري التراجع…'; await onUndo(); t.remove(); };
+  t.append(span, b);
+  document.body.appendChild(t);
+}
+
+let _bulkBusy = false;
+const BULK_ACTIONS = {
+  hide:        { field: 'published', value: false, applies: p => p.published,          done: 'اتخفّى' },
+  show:        { field: 'published', value: true,  applies: p => !p.published,         done: 'اتنشر' },
+  unavailable: { field: 'in_stock',  value: false, applies: p => p.in_stock !== false, done: 'بقى غير متاح' },
+  available:   { field: 'in_stock',  value: true,  applies: p => p.in_stock === false, done: 'بقى متاح' },
+};
+
+async function bulkBrandAction(action) {
+  const cfg = BULK_ACTIONS[action];
+  if (!cfg || !client || _bulkBusy) return;
+  const cat = currentProdCat, brand = currentProdBrand;
+  const targets = brandGroup().filter(cfg.applies);
+  if (!targets.length) return;
+  _bulkBusy = true;
+
+  const prevValue = !cfg.value; // كل الإجراءات بتقلب قيمة boolean، فالقيمة القديمة دايمًا عكسها
+  // تحديث واحد في الداتا بيز على (تصنيف + ماركة + الحالة القديمة) بس — مفيش حاجة برا الماركة دي بتتلمس
+  let q = client.from('products').update({ [cfg.field]: cfg.value }).eq('category', cat).eq('brand', brand);
+  if (cfg.field === 'published') q = q.eq('published', prevValue);
+  else q = cfg.value === false ? q.or('in_stock.is.null,in_stock.eq.true') : q.eq('in_stock', false);
+  const { data, error } = await q.select('id');
+  _bulkBusy = false;
+
+  if (error) { alert('تعذّر الحفظ: ' + error.message); return; }
+  const changed = new Set((data || []).map(r => r.id));
+  allDashProducts.forEach(p => { if (changed.has(p.id)) p[cfg.field] = cfg.value; });
+  renderDashProducts();
+  if (!changed.size) return;
+
+  showUndoToast(`${changed.size} منتج ${cfg.done} — ${CATEGORY_LABELS_AR[cat] || cat} / ${brand}`, async () => {
+    const ids = [...changed];
+    for (let i = 0; i < ids.length; i += 80) { // دفعات صغيرة عشان طول الرابط
+      const { error: e2 } = await client.from('products').update({ [cfg.field]: prevValue }).in('id', ids.slice(i, i + 80));
+      if (e2) { alert('تعذّر التراجع: ' + e2.message); break; }
+      ids.slice(i, i + 80).forEach(id => { const p = allDashProducts.find(x => x.id === id); if (p) p[cfg.field] = prevValue; });
+    }
+    renderDashProducts();
+  });
+}
+
+function downloadJsonFile(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+async function deleteBrandProducts() {
+  if (!client || _bulkBusy) return;
+  const cat = currentProdCat, brand = currentProdBrand;
+  const g = brandGroup();
+  if (!g.length) return;
+  const label = CATEGORY_LABELS_AR[cat] || cat;
+  const typed = prompt(
+    `⚠️ حذف نهائي لـ ${g.length} منتج: ${label} — ${brand}\n` +
+    `الحذف مش بيتراجع منه. هينزل ملف نسخة احتياطية بالمنتجات دي قبل الحذف.\n\n` +
+    `للتأكيد اكتب اسم الماركة بالظبط: ${brand}`);
+  if (typed === null) return;
+  if (typed.trim().toLowerCase() !== brand.toLowerCase()) { alert('الاسم مش مطابق — الحذف اتلغى.'); return; }
+
+  const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
+  const safe = s => String(s).replace(/[^A-Za-z0-9_-]+/g, '_');
+  downloadJsonFile(`products-backup_${safe(cat)}_${safe(brand)}_${stamp}.json`, g);
+
+  _bulkBusy = true;
+  const { data, error } = await client.from('products').delete().eq('category', cat).eq('brand', brand).select('id');
+  _bulkBusy = false;
+  if (error) { alert('تعذّر الحذف: ' + error.message); return; }
+  const gone = new Set((data || []).map(r => r.id));
+  if (!gone.size) { alert('ما اتحذفش أي منتج (ممكن صلاحيات). النسخة الاحتياطية نزلت برضه.'); return; }
+  allDashProducts = allDashProducts.filter(p => !gone.has(p.id));
+  currentProdBrand = 'all';
+  updateProductCatCounts();
+  renderDashProducts();
+  alert(`اتحذف ${gone.size} منتج من ${label} — ${brand}. النسخة الاحتياطية اتنزلت على جهازك.`);
+}
 
 // قالب صف المنتج — اتفصل عن renderDashProducts عشان نقدر نعيد رسم صف واحد بس (بدون مسح القايمة كلها).
 function dashProductRowHtml(p) {
@@ -1579,6 +1754,7 @@ function refreshDashProductRow(p) {
   const tpl = document.createElement('template');
   tpl.innerHTML = dashProductRowHtml(p).trim();
   row.replaceWith(tpl.content.firstElementChild);
+  renderProductBrandActions(); // الأرقام (ظاهر/مخفي/متاح) في شريط الماركة بتتحدّث مع كل تبديل فردي
 }
 
 function setProductImagePreview(url) {
@@ -1777,6 +1953,9 @@ async function deleteProduct(id) {
   updateProductCatCounts();
   const row = document.getElementById('productsList')?.querySelector('[data-pid="' + id + '"]');
   if (row) row.remove();
+  const brandBefore = currentProdBrand;
+  renderProductBrandUI();
+  if (currentProdBrand !== brandBefore) { renderDashProducts(); return; } // آخر منتج في الماركة اتحذف
   if (!document.querySelector('#productsList [data-pid]')) renderDashProducts(); // آخر منتج في التصنيف اتحذف
 }
 
