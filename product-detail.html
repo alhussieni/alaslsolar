@@ -827,7 +827,7 @@
         const seen = new Set();
         const cards = [];
         for (const r of rows) {
-          const key = `${r.brand}|${r.model_available}`;
+          const key = r.category === 'batteries' ? `${r.brand}` : `${r.brand}|${r.model_available}`;
           if (seen.has(key)) continue;
           seen.add(key);
           cards.push(r);
@@ -1263,7 +1263,7 @@
 
       try {
         let rows;
-        const multiModelCat = cat === 'inverters' || cat === 'offgrid' || cat === 'pumps' || cat === 'well_motors';
+        const multiModelCat = cat === 'inverters' || cat === 'offgrid' || cat === 'pumps' || cat === 'well_motors' || cat === 'batteries';
         if (multiModelCat) {
           // Inverters/off-grid inverters can have several model lines under
           // one brand — always fetch the whole brand, then let the in-page

@@ -268,7 +268,7 @@
     }
 
     function detailHref(row) {
-      const multiModelCat = ['inverters', 'offgrid', 'pumps', 'well_motors'].includes(row.category);
+      const multiModelCat = ['inverters', 'offgrid', 'pumps', 'well_motors', 'batteries'].includes(row.category);
       const model = multiModelCat ? '' : (row.model_available || '');
       return `product-detail.html?cat=${encodeURIComponent(row.category)}&brand=${encodeURIComponent(row.brand)}&model=${encodeURIComponent(model)}`;
     }

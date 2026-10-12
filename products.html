@@ -1335,13 +1335,13 @@
       // H/VLT...) — they all live on ONE product-detail page with a model
       // selector inside it, so the model is deliberately left out of the
       // family-grouping link here.
-      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid' || p.category === 'pumps' || p.category === 'well_motors';
+      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid' || p.category === 'pumps' || p.category === 'well_motors' || p.category === 'batteries';
       params.set('model', multiModelCat ? '' : (p.model_available || ''));
       return params.toString();
     }
 
     function familyKeyOf(p) {
-      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid' || p.category === 'pumps' || p.category === 'well_motors';
+      const multiModelCat = p.category === 'inverters' || p.category === 'offgrid' || p.category === 'pumps' || p.category === 'well_motors' || p.category === 'batteries';
       const modelPart = multiModelCat ? '' : (p.model_available || '');
       return (p.category || '') + '|' + (p.brand || '') + '|' + modelPart;
     }
@@ -1387,7 +1387,11 @@
       }[p.category];
       const catText = (catLabel && catLabel[getLang()]) || '';
 
-      const nameParts = [p.brand || '', p.model_available || ''].filter(Boolean);
+      // A family card can cover several model codes (e.g. MUST LP15-12100 / LP16-48200...);
+      // naming it after the first row's model would be misleading, so only show the
+      // model when every row in the family shares the same one.
+      const distinctModels = new Set(group.map(r => r.model_available || ''));
+      const nameParts = [p.brand || '', distinctModels.size === 1 ? (p.model_available || '') : ''].filter(Boolean);
       const name = escapeHtml(nameParts.join(' — '));
 
       // Ferat/Shakti pump & well-motor rows currently all share one stale
