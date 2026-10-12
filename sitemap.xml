@@ -319,17 +319,6 @@
       <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/accessories-suntree-ar.html"/>
   </url>
   <url>
-    <loc>https://alaslsolar.com/products/batteries-luminous.html</loc>
-    <lastmod>2026-10-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/batteries-luminous.html"/>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/batteries-luminous-ar.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/batteries-luminous-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/batteries-luminous-zh.html"/>
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/batteries-luminous-ar.html"/>
-  </url>
-  <url>
     <loc>https://alaslsolar.com/products/batteries-must.html</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
@@ -339,28 +328,6 @@
       <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/batteries-must-es.html"/>
       <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/batteries-must-zh.html"/>
       <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/batteries-must-ar.html"/>
-  </url>
-  <url>
-    <loc>https://alaslsolar.com/products/batteries-npp.html</loc>
-    <lastmod>2026-10-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/batteries-npp.html"/>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/batteries-npp-ar.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/batteries-npp-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/batteries-npp-zh.html"/>
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/batteries-npp-ar.html"/>
-  </url>
-  <url>
-    <loc>https://alaslsolar.com/products/batteries-phylion.html</loc>
-    <lastmod>2026-10-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/batteries-phylion.html"/>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/batteries-phylion-ar.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/batteries-phylion-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/batteries-phylion-zh.html"/>
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/batteries-phylion-ar.html"/>
   </url>
   <url>
     <loc>https://alaslsolar.com/products/batteries-sinopoly.html</loc>
@@ -407,15 +374,15 @@
       <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/flood_lights-solar-street-light-and-garden-ar.html"/>
   </url>
   <url>
-    <loc>https://alaslsolar.com/products/garden_lights-solar-street-light-and-garden.html</loc>
+    <loc>https://alaslsolar.com/products/hybrid-must.html</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/garden_lights-solar-street-light-and-garden.html"/>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/garden_lights-solar-street-light-and-garden-ar.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/garden_lights-solar-street-light-and-garden-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/garden_lights-solar-street-light-and-garden-zh.html"/>
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/garden_lights-solar-street-light-and-garden-ar.html"/>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/hybrid-must.html"/>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/hybrid-must-ar.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/hybrid-must-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/hybrid-must-zh.html"/>
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/hybrid-must-ar.html"/>
   </url>
   <url>
     <loc>https://alaslsolar.com/products/inverters-delixi.html</loc>
@@ -440,6 +407,17 @@
       <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/inverters-veichi-ar.html"/>
   </url>
   <url>
+    <loc>https://alaslsolar.com/products/offgrid-must.html</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/offgrid-must.html"/>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/offgrid-must-ar.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/offgrid-must-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/offgrid-must-zh.html"/>
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/offgrid-must-ar.html"/>
+  </url>
+  <url>
     <loc>https://alaslsolar.com/products/offgrid-veichi.html</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
@@ -449,6 +427,17 @@
       <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/offgrid-veichi-es.html"/>
       <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/offgrid-veichi-zh.html"/>
       <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/offgrid-veichi-ar.html"/>
+  </url>
+  <url>
+    <loc>https://alaslsolar.com/products/ongrid-huawei.html</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/ongrid-huawei.html"/>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/ongrid-huawei-ar.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/ongrid-huawei-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/ongrid-huawei-zh.html"/>
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/ongrid-huawei-ar.html"/>
   </url>
   <url>
     <loc>https://alaslsolar.com/products/panels-aiko-solar.html</loc>
@@ -638,15 +627,15 @@
       <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/pumps-sp-sterapump-ar.html"/>
   </url>
   <url>
-    <loc>https://alaslsolar.com/products/solar_kits-solar-street-light-and-garden.html</loc>
+    <loc>https://alaslsolar.com/products/solar_safety-solar-street-light-and-garden.html</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/solar_kits-solar-street-light-and-garden.html"/>
-      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/solar_kits-solar-street-light-and-garden-ar.html"/>
-      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/solar_kits-solar-street-light-and-garden-es.html"/>
-      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/solar_kits-solar-street-light-and-garden-zh.html"/>
-      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/solar_kits-solar-street-light-and-garden-ar.html"/>
+      <xhtml:link rel="alternate" hreflang="en" href="https://alaslsolar.com/products/solar_safety-solar-street-light-and-garden.html"/>
+      <xhtml:link rel="alternate" hreflang="ar" href="https://alaslsolar.com/products/solar_safety-solar-street-light-and-garden-ar.html"/>
+      <xhtml:link rel="alternate" hreflang="es" href="https://alaslsolar.com/products/solar_safety-solar-street-light-and-garden-es.html"/>
+      <xhtml:link rel="alternate" hreflang="zh" href="https://alaslsolar.com/products/solar_safety-solar-street-light-and-garden-zh.html"/>
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://alaslsolar.com/products/solar_safety-solar-street-light-and-garden-ar.html"/>
   </url>
   <url>
     <loc>https://alaslsolar.com/products/street_lights-solar-street-light-and-garden.html</loc>
