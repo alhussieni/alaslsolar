@@ -357,6 +357,15 @@
 
   <script>
   (function () {
+    // Warranty wording — the period always covers manufacturing defects only.
+    const WARRANTY_TXT = {
+      ar: { label: 'الضمان', years: 'سنوات ضمان ضد عيوب الصناعة فقط', note: 'فترة الضمان تغطي عيوب الصناعة فقط.' },
+      en: { label: 'Warranty', years: 'years warranty — manufacturing defects only', note: 'The warranty period covers manufacturing defects only.' },
+      es: { label: 'Garantía', years: 'años de garantía — solo defectos de fabricación', note: 'El período de garantía cubre únicamente defectos de fabricación.' },
+      zh: { label: '保修', years: '年保修（仅限制造缺陷）', note: '保修期仅涵盖制造缺陷。' },
+    };
+    function warrantyTxt() { return WARRANTY_TXT[getLang()] || WARRANTY_TXT.ar; }
+
     const CAT_ICONS = { inverters: '⚡', panels: '☀️', accessories: '🔌', combiners: '📦', structures: '🏗️', cables: '🔶', batteries: '🔋', offgrid: '🔆', ongrid: '🌐', hybrid: '🔁', ev_chargers: '🚗', reactors: '🧲', charge_controllers: '🎛️' };
     const CAT_LABEL = {
       inverters:   { ar: 'إنفرتر',            en: 'Inverter',           es: 'Inversor',           zh: '逆变器' },
@@ -715,6 +724,7 @@
       if (row.temp_min != null && row.temp_max != null) facts.push(['fa fa-thermometer-half', t('factTempRange'), `${row.temp_min}°C – ${row.temp_max}°C`]);
       if (row.weight_kg) facts.push(['fa fa-weight-hanging', t('factWeight'), `${row.weight_kg} Kg`]);
       if (row.ip_rating) facts.push(['fa fa-shield-alt', t('factIpRating'), row.ip_rating]);
+      if (row.warranty_years) facts.push(['fa fa-certificate', warrantyTxt().label, `${row.warranty_years} ${warrantyTxt().years}`]);
       if (row.cycle_life) facts.push(['fa fa-sync-alt', t('factCycleLife'), row.cycle_life]);
       if (row.capacity_ah) facts.push(['fa fa-battery-full', t('factCapacity'), `${row.capacity_ah}Ah`]);
       if (row.voltage_v) facts.push(['fa fa-bolt', t('factVoltage'), `${row.voltage_v}V`]);
@@ -772,8 +782,8 @@
 
       // Warranty
       const warrantyHtml = row.warranty_years
-        ? `<div class="pd-warranty-box"><i class="fa fa-shield-alt" aria-hidden="true"></i> ${escapeHtml(String(row.warranty_years))} ${({ ar: 'سنوات ضمان', en: 'years warranty', es: 'años de garantía', zh: '年保修' })[getLang()] || 'years warranty'}${row.warranty_notes ? '<br>' + escapeHtml(row.warranty_notes) : ''}</div>`
-        : `<div class="pd-warranty-box">${escapeHtml(t('noWarrantyInfo'))}</div>`;
+        ? `<div class="pd-warranty-box"><i class="fa fa-shield-alt" aria-hidden="true"></i> ${escapeHtml(String(row.warranty_years))} ${escapeHtml(warrantyTxt().years)}<br><small>${escapeHtml(warrantyTxt().note)}</small>${row.warranty_notes ? '<br>' + escapeHtml(row.warranty_notes) : ''}</div>`
+        : `<div class="pd-warranty-box">${escapeHtml(t('noWarrantyInfo'))}<br><small>${escapeHtml(warrantyTxt().note)}</small></div>`;
       tabs.push(['warranty', t('tabWarranty'), warrantyHtml]);
 
       // Files
@@ -816,7 +826,7 @@
         // On-grid / hybrid inverters: suggest the same brand's accessories
         // (dongle, data logger, power sensor...) instead of other inverters.
         if ((row.category === 'ongrid' || row.category === 'hybrid') && row.brand) {
-          const acc = await sb.from('products').select('*').eq('category', 'accessories').eq('brand', row.brand).neq('published', false).order('sort_order', { ascending: true }).limit(8);
+          const acc = await sb.from('products').select('*').eq('category', 'accessories').eq('brand', row.brand).eq('published', true).order('sort_order', { ascending: true }).limit(8);
           if (!acc.error && acc.data && acc.data.length) {
             rows = acc.data;
             similarTitleKey = 'suggestedAccessories';
@@ -824,11 +834,11 @@
         }
         document.getElementById('pdSimilarTitle').textContent = t(similarTitleKey);
         if (rows.length === 0) {
-          const { data, error } = await sb.from('products').select('*').eq('category', row.category).neq('brand', row.brand).limit(8);
+          const { data, error } = await sb.from('products').select('*').eq('category', row.category).eq('published', true).neq('brand', row.brand).limit(8);
           rows = (!error && data) ? data : [];
         }
         if (rows.length === 0) {
-          const retry = await sb.from('products').select('*').eq('category', row.category).limit(8);
+          const retry = await sb.from('products').select('*').eq('category', row.category).eq('published', true).limit(8);
           rows = (retry.data || []).filter(r => r.model_available !== row.model_available);
         }
         // Same promo pricing rule as the main product fetch above.
@@ -1288,14 +1298,14 @@
           // Inverters/off-grid inverters can have several model lines under
           // one brand — always fetch the whole brand, then let the in-page
           // model/power pickers do the filtering (see buildPowerPicker below).
-          const { data: invData, error: invErr } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
+          const { data: invData, error: invErr } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('published', true);
           rows = invData || [];
           if (invErr || rows.length === 0) { showError(); return; }
         } else {
-          const { data, error } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('model_available', model);
+          const { data, error } = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('published', true).eq('model_available', model);
           if (error || !data || data.length === 0) {
             // model_available may be stored as null instead of '' — retry without that filter
-            const retry = await sb.from('products').select('*').eq('category', cat).eq('brand', brand);
+            const retry = await sb.from('products').select('*').eq('category', cat).eq('brand', brand).eq('published', true);
             rows = (retry.data || []).filter(r => (r.model_available || '') === model);
             if (rows.length === 0) { showError(); return; }
           } else {
