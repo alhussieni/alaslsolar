@@ -980,8 +980,12 @@
 
       if (distinctModels.length > 1) {
         modelWrap.hidden = false;
-        document.getElementById('pdModels').innerHTML = distinctModels.map((m, i) =>
-          `<button type="button" class="pd-variant-btn${i === 0 ? ' active' : ''}" data-model="${escapeHtml(m)}">${bidiLabel(modelButtonLabel(m))}</button>`
+        const wantedModel = isAccessories ? new URLSearchParams(location.search).get('model') : null;
+        const wantedRow = wantedModel ? familyRows.find(r => (r.model_available || '') === wantedModel) : null;
+        const wantedSeries = wantedRow ? seriesOf(wantedRow) : null;
+        const initialModel = (wantedSeries && distinctModels.includes(wantedSeries)) ? wantedSeries : distinctModels[0];
+        document.getElementById('pdModels').innerHTML = distinctModels.map((m) =>
+          `<button type="button" class="pd-variant-btn${m === initialModel ? ' active' : ''}" data-model="${escapeHtml(m)}">${bidiLabel(modelButtonLabel(m))}</button>`
         ).join('');
         document.querySelectorAll('#pdModels .pd-variant-btn').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -991,8 +995,8 @@
             routeToPowerPicker(familyRows.filter(r => seriesOf(r) === btn.dataset.model));
           });
         });
-        document.getElementById('pdSubtitle').textContent = isPumps ? '' : modelButtonLabel(distinctModels[0]);
-        routeToPowerPicker(familyRows.filter(r => seriesOf(r) === distinctModels[0]));
+        document.getElementById('pdSubtitle').textContent = isPumps ? '' : modelButtonLabel(initialModel);
+        routeToPowerPicker(familyRows.filter(r => seriesOf(r) === initialModel));
       } else {
         modelWrap.hidden = true;
         document.getElementById('pdSubtitle').textContent = (isPumps || isOffgridInv) ? '' : (first.model_available || '');
@@ -1279,7 +1283,7 @@
 
       try {
         let rows;
-        const multiModelCat = cat === 'inverters' || cat === 'offgrid' || cat === 'ongrid' || cat === 'hybrid' || cat === 'pumps' || cat === 'well_motors' || cat === 'batteries';
+        const multiModelCat = cat === 'inverters' || cat === 'offgrid' || cat === 'ongrid' || cat === 'hybrid' || cat === 'accessories' || cat === 'pumps' || cat === 'well_motors' || cat === 'batteries';
         if (multiModelCat) {
           // Inverters/off-grid inverters can have several model lines under
           // one brand — always fetch the whole brand, then let the in-page

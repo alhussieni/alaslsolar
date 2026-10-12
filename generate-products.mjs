@@ -220,7 +220,7 @@ function buildFamilyPage(category, brand, rows, lang, allFamilies, brandLogos) {
 
   const pageUrl = `${SITE_URL}/products/${slug}${suffix}.html`;
   const detailHref = (row) => {
-    const multiModelCat = ["inverters", "offgrid", "ongrid", "hybrid", "pumps", "well_motors", "batteries"].includes(category);
+    const multiModelCat = ["inverters", "offgrid", "ongrid", "hybrid", "accessories", "pumps", "well_motors", "batteries"].includes(category);
     const model = multiModelCat ? "" : (row.model_available || "");
     return `${SITE_URL}/product-detail.html?cat=${encodeURIComponent(category)}&brand=${encodeURIComponent(brand)}&model=${encodeURIComponent(model)}`;
   };
