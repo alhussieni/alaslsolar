@@ -12,12 +12,12 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="أسعار منتجات الطاقة الشمسية — إنفرترات، ألواح شمسية، إكسسوارات، شاسيهات، كابلات وصناديق تجميع. الأصل للطاقة الشمسية.">
+  <meta name="description" content="أسعار منتجات الطاقة الشمسية — إنفرترات (أون جريد، أوف جريد، هايبرد، طلمبات)، ألواح شمسية، بطاريات، مواتير وطلمبات ومواسير، إكسسوارات، شاسيهات، كابلات وصناديق تجميع. الأصل للطاقة الشمسية.">
   <meta name="theme-color" content="#0d0b0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta property="og:title" content="المنتجات والأسعار | الأصل للطاقة الشمسية">
-  <meta property="og:description" content="قائمة أسعار منتجات الطاقة الشمسية — إنفرترات VEICHI وDelixi، ألواح شمسية، إكسسوارات Suntree، كابلات وشاسيهات.">
+  <meta property="og:description" content="قائمة أسعار منتجات الطاقة الشمسية — إنفرترات (Huawei، MUST، VEICHI، Delixi)، ألواح شمسية، بطاريات، مواتير وطلمبات ومواسير، إكسسوارات وكابلات وشاسيهات.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://alaslsolar.com/products.html">
   <meta property="og:image" content="https://alaslsolar.com/solar.jpg">
@@ -49,7 +49,7 @@
         compare_bar_text: "Compare Products",
         cart_bar_text: "Cart",
         prod_cat_all: "All",
-        prod_cat_inverters: "⚡ Inverters",
+        prod_cat_inverters: "⚡ Pump Inverters",
         prod_cat_panels: "☀️ Solar Panels",
         prod_cat_accessories: "🔌 Accessories",
         prod_cat_combiners: "📦 Combiner Boxes",
@@ -123,7 +123,7 @@
         compare_bar_text: "قارن المنتجات",
         cart_bar_text: "السلة",
         prod_cat_all: "الكل",
-        prod_cat_inverters: "⚡ إنفرترات",
+        prod_cat_inverters: "⚡ إنفرتر طلمبات",
         prod_cat_panels: "☀️ ألواح شمسية",
         prod_cat_accessories: "🔌 إكسسوارات",
         prod_cat_combiners: "📦 صناديق تجميع",
@@ -197,7 +197,7 @@
         compare_bar_text: "Comparar Productos",
         cart_bar_text: "Carrito",
         prod_cat_all: "Todos",
-        prod_cat_inverters: "⚡ Inversores",
+        prod_cat_inverters: "⚡ Inversores de bombas",
         prod_cat_panels: "☀️ Paneles solares",
         prod_cat_accessories: "🔌 Accesorios",
         prod_cat_combiners: "📦 Cajas combinadoras",
@@ -271,7 +271,7 @@
         compare_bar_text: "比较产品",
         cart_bar_text: "购物车",
         prod_cat_all: "全部",
-        prod_cat_inverters: "⚡ 逆变器",
+        prod_cat_inverters: "⚡ 水泵变频器",
         prod_cat_panels: "☀️ 太阳能板",
         prod_cat_accessories: "🔌 配件",
         prod_cat_combiners: "📦 汇流箱",
@@ -561,6 +561,7 @@
       color:var(--brand-dark);margin-top:6px}
     .ftree-node:first-child > .ftree-section-row{margin-top:0}
     .ftree-section-row.selected{background:transparent;color:var(--brand-dark)}
+.ftree-section-row.ftree-sel-top.selected{background:var(--brand-soft)}
     .ftree-section-row .ftree-count{background:var(--brand-soft)}
 
     .ftree-toggle{width:16px;height:16px;flex:0 0 16px;display:flex;align-items:center;justify-content:center;
@@ -1066,7 +1067,8 @@
   <script>
   (function () {
 
-    const CATEGORIES = ['inverters', 'panels', 'structures', 'cables', 'accessories', 'combiners', 'batteries', 'offgrid', 'ongrid', 'hybrid', 'well_motors', 'pumps', 'pipes', 'street_lights', 'flood_lights', 'garden_lights', 'solar_kits', 'solar_safety', 'ev_chargers', 'reactors', 'charge_controllers'];
+    // Order here = order of the product grid sections (matches the sidebar tree).
+    const CATEGORIES = ['ongrid', 'offgrid', 'hybrid', 'inverters', 'panels', 'batteries', 'well_motors', 'pumps', 'pipes', 'structures', 'cables', 'combiners', 'accessories', 'street_lights', 'flood_lights', 'garden_lights', 'solar_kits', 'solar_safety', 'ev_chargers', 'reactors', 'charge_controllers'];
     // Panels' stored Arabic name leads with the category word ("الواح
     // Longi 575 وات") — English/Spanish/Chinese names already start with
     // the brand. Used to drop the redundant prefix in single-product cards
@@ -1081,12 +1083,12 @@
       ongrid: '🌐', hybrid: '🔁', ev_chargers: '🚗', reactors: '🧲', charge_controllers: '🎛️',
     };
     const CAT_SECTION_LABEL = {
-      ar: { inverters: 'إنفرترات', panels: 'ألواح شمسية', accessories: 'إكسسوارات', combiners: 'صناديق تجميع',
+      ar: { inverters: 'إنفرتر طلمبات', panels: 'ألواح شمسية', accessories: 'إكسسوارات', combiners: 'صناديق تجميع',
         structures: 'شاسيهات وهياكل تثبيت', cables: 'كابلات', batteries: 'بطاريات', offgrid: 'إنفرتر أوف جريد',
         well_motors: 'موتورات آبار', pumps: 'طلمبات ومضخات', pipes: 'مواسير', street_lights: 'إنارة شوارع شمسية',
         flood_lights: 'كشافات شمسية', garden_lights: 'إضاءة حدائق شمسية', solar_kits: 'منظومات شمسية جاهزة', solar_safety: 'وسائل أمان طرق شمسية',
         ongrid: 'إنفرترات أون جريد', hybrid: 'إنفرترات هايبرد', ev_chargers: 'شواحن سيارات كهربائية', reactors: 'ريأكتورات', charge_controllers: 'منظمات الشحن' },
-      en: { inverters: 'Inverters', panels: 'Solar Panels', accessories: 'Accessories', combiners: 'Combiner Boxes',
+      en: { inverters: 'Pump Inverters', panels: 'Solar Panels', accessories: 'Accessories', combiners: 'Combiner Boxes',
         structures: 'Mounting Structures', cables: 'Cables', batteries: 'Batteries', offgrid: 'Off-Grid Inverters',
         well_motors: 'Well Motors', pumps: 'Pumps', pipes: 'HDPE Pipes', street_lights: 'Solar Street Lights',
         flood_lights: 'Solar Flood Lights', garden_lights: 'Solar Garden Lights', solar_kits: 'Solar Home Systems', solar_safety: 'Solar Road Safety',
@@ -1466,11 +1468,15 @@
       if (selectedFilters.size === 0) return true;
       for (const id of selectedFilters) {
         const parts = id.split('::');
-        if (parts[0] !== p.category) continue;
+        if (parts[0] !== p.treeCat) continue;
         if (parts.length === 1) return true;
         if (parts[1] !== (p.brand || '—')) continue;
         if (parts.length === 2) return true;
-        const field = powerFieldFor(p.category);
+        if (parts[2].startsWith('sub:')) {            // subtype node, e.g. "ongrid::Huawei::sub:accessories"
+          if (p.subtype && parts[2] === 'sub:' + p.subtype) return true;
+          continue;
+        }
+        const field = powerFieldFor(p.treeCat);
         const val = field && p[field] != null ? fmtPower(p[field]) : null;
         if (val !== null && parts[2] === val) return true;
       }
@@ -1529,7 +1535,9 @@
       // selected in the sidebar tree at once, or when nothing is selected
       // (i.e. "all").
       const catOrder = (cat) => { const i = CATEGORIES.indexOf(cat); return i === -1 ? CATEGORIES.length : i; };
-      const allCards = Array.from(groups.values()).sort((a, b) => catOrder(a[0].category) - catOrder(b[0].category));
+      const allCards = Array.from(groups.values()).sort((a, b) =>
+        (catOrder(a[0].treeCat) - catOrder(b[0].treeCat)) ||
+        ((a[0].subtype ? 1 : 0) - (b[0].subtype ? 1 : 0)));  // subtype items (e.g. accessories) after the main items of the same section
       const effectivePageSize = Number.isFinite(PAGE_SIZE) ? PAGE_SIZE : allCards.length;
       const totalPages = Math.max(1, Math.ceil(allCards.length / effectivePageSize));
       if (currentPage > totalPages) currentPage = totalPages;
@@ -1539,7 +1547,7 @@
       let html = '';
       let lastCat = null;
       pageCards.forEach(group => {
-        const cat = group[0].category;
+        const cat = group[0].treeCat;
         if (cat !== lastCat) {
           html += `<h3 class="prod-cat-heading">${CAT_ICONS[cat] || '📦'} ${categorySectionLabel(cat)}</h3>`;
           lastCat = cat;
@@ -1601,18 +1609,22 @@
       return dict[key] || (typeof translations !== 'undefined' && translations.ar && translations.ar[key]) || key;
     }
 
-    // Section grouping + per-section category order — mirrors the taxonomy
-    // agreed on for the products page (irrigation → inverters → panels →
-    // install components → standalone lighting → batteries).
+    // Sidebar tree taxonomy (level 1 = section, level 2 = category, then brand → power/subtype).
+    // `collapse: true` = the section has a single category, so the section
+    // row IS the category row (selectable, brands directly underneath).
+    // Order here = order in the sidebar.
     const SECTIONS = [
-      { id: 'irrigation_wells',    i18n: 'prod_section_irrigation', cats: ['well_motors', 'pumps', 'pipes'] },
-      { id: 'inverters',           i18n: 'prod_section_inverters',  cats: ['inverters', 'offgrid', 'ongrid', 'hybrid'] },
-      { id: 'panels',              i18n: 'prod_section_panels',     cats: ['panels'] },
+      { id: 'inverters_group',     i18n: 'prod_section_inverters',  cats: ['ongrid', 'offgrid', 'hybrid', 'inverters'] },
+      { id: 'panels',              i18n: 'prod_section_panels',     cats: ['panels'],      collapse: true },
+      { id: 'batteries',           i18n: 'prod_section_batteries',  cats: ['batteries'],   collapse: true },
+      { id: 'well_motors',         i18n: 'prod_node_well_motors',   cats: ['well_motors'], collapse: true },
+      { id: 'pumps',               i18n: 'prod_node_pumps',         cats: ['pumps'],       collapse: true },
+      { id: 'pipes',               i18n: 'prod_node_pipes',         cats: ['pipes'],       collapse: true },
       { id: 'install_components',  i18n: 'prod_section_install',    cats: ['structures', 'cables', 'combiners', 'accessories', 'reactors', 'charge_controllers'] },
       { id: 'standalone_lighting', i18n: 'prod_section_lighting',   cats: ['street_lights', 'flood_lights', 'garden_lights', 'solar_safety', 'solar_kits'] },
-      { id: 'batteries',           i18n: 'prod_section_batteries',  cats: ['batteries'] },
-      { id: 'ev_charging',         i18n: 'prod_section_ev',         cats: ['ev_chargers'] },
+      { id: 'ev_charging',         i18n: 'prod_section_ev',         cats: ['ev_chargers'], collapse: true },
     ];
+    // Full category label (with emoji) — used for chips / grid badges.
     const CAT_I18N_KEY = {
       well_motors: 'prod_cat_well_motors', pumps: 'prod_cat_pumps', pipes: 'prod_cat_pipes',
       inverters: 'prod_cat_inverters', offgrid: 'prod_cat_offgrid',
@@ -1623,9 +1635,16 @@
       solar_kits: 'prod_cat_solar_kits', batteries: 'prod_cat_batteries',
       ongrid: 'prod_cat_ongrid', hybrid: 'prod_cat_hybrid', ev_chargers: 'prod_cat_ev_chargers', reactors: 'prod_cat_reactors', charge_controllers: 'prod_cat_charge_controllers',
     };
-    // Categories deep enough (brand + power variants) to get a 3-level branch;
-    // everything else in the tree is a flat, childless leaf.
-    const BRAND_POWER_CATS = new Set(['well_motors', 'pumps', 'inverters', 'offgrid', 'ongrid', 'hybrid', 'panels']);
+    // Short label used for the category row inside the sidebar tree (when it
+    // sits under a section that already says "Inverters", repeating the word is noise).
+    const NODE_I18N_KEY = {
+      ongrid: 'prod_node_ongrid', offgrid: 'prod_node_offgrid', hybrid: 'prod_node_hybrid', inverters: 'prod_node_pump_vfd',
+    };
+    // Optional 4th-level node under a brand, driven by products.subtype.
+    const SUBTYPE_I18N_KEY = { accessories: 'prod_subtype_accessories' };
+    // Categories that get a brand level in the tree (+ a power level when
+    // powerFieldFor() has a field for them). Others stay flat leaves.
+    const BRAND_POWER_CATS = new Set(['well_motors', 'pumps', 'pipes', 'batteries', 'inverters', 'offgrid', 'ongrid', 'hybrid', 'panels']);
     const POWER_UNIT_LABEL = { power_hp: 'HP', power_kw: 'KW', power_watt: 'W' };
 
     // ── Build the tree structure from the live product list + category_settings ──
@@ -1633,16 +1652,20 @@
     // since it's a handful of GROUP BY-style passes over an in-memory array.
     function buildFilterTree(sectionOf) {
       nodeLabels = { all: tr('prod_cat_all') };
-      const presentCats = new Set(allProducts.map(p => p.category));
+      // treeCat = where the product is shown in the tree/grid. Normally its
+      // own category; products.display_category can place it under another
+      // category WITHOUT changing products.category (calculators, quotes and
+      // discounts keep seeing the real category).
+      const presentCats = new Set(allProducts.map(p => p.treeCat));
 
       filterTree = SECTIONS.map(section => {
-        const cats = section.cats.filter(c => presentCats.has(c)); // hides empty/placeholder cats (e.g. ongrid, hybrid) automatically
+        const cats = section.cats.filter(c => presentCats.has(c)); // hides empty/placeholder cats automatically
         if (!cats.length) return null;
 
         const catNodes = cats.map(cat => {
-          const catProducts = allProducts.filter(p => p.category === cat);
-          const label = tr(CAT_I18N_KEY[cat] || cat);
-          nodeLabels[cat] = label;
+          const catProducts = allProducts.filter(p => p.treeCat === cat);
+          const label = tr(NODE_I18N_KEY[cat] || CAT_I18N_KEY[cat] || cat);
+          nodeLabels[cat] = tr(CAT_I18N_KEY[cat] || cat); // chips keep the full, unambiguous label
 
           let children;
           if (BRAND_POWER_CATS.has(cat)) {
@@ -1656,33 +1679,45 @@
               const brandId = `${cat}::${brand}`;
               nodeLabels[brandId] = brand;
 
-              let powerChildren;
+              const sub = [];
               if (field) {
                 const byPower = {};
                 brandProducts.forEach(p => {
                   if (p[field] == null) return;
                   const key = fmtPower(p[field]);
-                  (byPower[key] = byPower[key] || 0);
-                  byPower[key]++;
+                  byPower[key] = (byPower[key] || 0) + 1;
                 });
-                const powerKeys = Object.keys(byPower).sort((a, b) => Number(a) - Number(b));
-                if (powerKeys.length) {
-                  powerChildren = powerKeys.map(key => {
-                    const powerId = `${brandId}::${key}`;
-                    const label = `${key} ${unit}`;
-                    nodeLabels[powerId] = label;
-                    return { id: powerId, label, count: byPower[key] };
-                  });
-                }
+                Object.keys(byPower).sort((a, b) => Number(a) - Number(b)).forEach(key => {
+                  const powerId = `${brandId}::${key}`;
+                  const plabel = `${key} ${unit}`;
+                  nodeLabels[powerId] = plabel;
+                  sub.push({ id: powerId, label: plabel, count: byPower[key] });
+                });
               }
+              // Subtype nodes (e.g. Huawei → Accessories), listed after the power tiers.
+              const bySubtype = {};
+              brandProducts.forEach(p => { if (p.subtype) bySubtype[p.subtype] = (bySubtype[p.subtype] || 0) + 1; });
+              Object.keys(bySubtype).sort().forEach(st => {
+                const subId = `${brandId}::sub:${st}`;
+                const slabel = tr(SUBTYPE_I18N_KEY[st] || st);
+                nodeLabels[subId] = `${brand} — ${slabel}`;
+                sub.push({ id: subId, label: slabel, count: bySubtype[st] });
+              });
 
-              return { id: brandId, label: brand, count: brandProducts.length, children: powerChildren };
+              return { id: brandId, label: brand, count: brandProducts.length, children: sub.length ? sub : undefined };
             });
           }
 
           return { id: cat, label, count: catProducts.length, children };
         });
 
+        // Single-category section → the section row itself is the category node.
+        if (section.collapse && catNodes.length === 1) {
+          const only = catNodes[0];
+          const secLabel = tr(section.i18n);
+          nodeLabels[only.id] = secLabel;
+          return { ...only, label: secLabel, selectable: true };
+        }
         return { id: section.id, label: tr(section.i18n), count: catProducts_total(catNodes), children: catNodes };
       }).filter(Boolean);
     }
@@ -1706,11 +1741,12 @@
       const hasChildren = node.children && node.children.length;
       const isOpen = openNodes.has(node.id) || (q && hasChildren);
       const isSelected = selectedFilters.has(node.id);
-      const selectable = level > 1; // level 1 = section grouping only, not a real filter value
+      const selectable = level > 1 || !!node.selectable; // level 1 = section grouping only, unless it is a collapsed single-category section
 
       const rowClasses = ['ftree-row'];
       if (isSelected) rowClasses.push('selected');
       if (level === 1) rowClasses.push('ftree-section-row');
+      if (level === 1 && node.selectable) rowClasses.push('ftree-sel-top');
 
       const rowHtml = `
         <div class="${rowClasses.join(' ')}">
@@ -1868,7 +1904,7 @@
 
       try {
         const [{ data, error }, { data: catSettings }] = await Promise.all([
-          sb.from('products').select('id, category, brand, model_available, price, image_url, in_stock, created_at, datasheet_url, sort_order, power_kw, power_hp, power_watt, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh').eq('published', true).order('sort_order', { ascending: true }),
+          sb.from('products').select('id, category, brand, model_available, price, image_url, in_stock, created_at, datasheet_url, sort_order, power_kw, power_hp, power_watt, name_ar, name_en, name_es, name_zh, specs_ar, specs_en, specs_es, specs_zh, display_category, subtype').eq('published', true).order('sort_order', { ascending: true }),
           sb.from('category_settings').select('category_key, visible, main_section, sort_order'),
         ]);
 
@@ -1909,6 +1945,7 @@
         const withLogos = rawProducts.map(p => ({
           ...p,
           image_url: p.image_url || (p.brand && brandLogos[p.brand]) || null,
+          treeCat: (p.display_category && CATEGORIES.includes(p.display_category)) ? p.display_category : p.category,
         }));
 
         // Apply active promotional discounts to the *display* price only.
