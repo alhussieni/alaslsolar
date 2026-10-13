@@ -135,6 +135,11 @@ async function handleLogout() {
 
 /* ---------------- المنتجات ---------------- */
 
+/* الاختيار على ٣ مستويات: الفئة ← البراند ← المنتج.
+   بنحمّل منتجات الفئة كلها مرة واحدة (متاح + منشور فقط) ونفلتر بالبراند محليًا، عشان تغيير البراند فوري. */
+let categoryProducts = []; // منتجات الفئة المختارة حاليًا
+const NO_BRAND = "__none__";
+
 async function loadCategories() {
   const sel = $("#categorySelect");
   sel.innerHTML = "";
@@ -145,17 +150,20 @@ async function loadCategories() {
     sel.appendChild(opt);
   });
   sel.addEventListener("change", loadProductsForCategory);
+  $("#brandSelect").addEventListener("change", renderProductOptions);
   await loadProductsForCategory();
 }
 
 async function loadProductsForCategory() {
   const category = $("#categorySelect").value;
+  const brandSel = $("#brandSelect");
   const productSel = $("#productSelect");
-  productSel.innerHTML = "<option>...جاري التحميل</option>";
+  brandSel.innerHTML = "<option>...جاري التحميل</option>";
+  productSel.innerHTML = "";
 
   const { data, error } = await client
     .from("products")
-    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v, price")
+    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v, dod, cycle_life, price")
     .eq("category", category)
     .eq("published", true)
     .eq("in_stock", true) // غير متاح = لا يظهر في أي أداة
@@ -163,15 +171,43 @@ async function loadProductsForCategory() {
     .order("power_kw", { ascending: true, nullsFirst: false }) // الأسماء المتكررة تترتب بالقدرة من الأصغر للأكبر
     .order("price", { ascending: true });
 
-  productSel.innerHTML = "";
   if (error || !data) {
-    productSel.innerHTML = "<option>تعذر تحميل المنتجات</option>";
+    categoryProducts = [];
+    brandSel.innerHTML = "<option>تعذر تحميل المنتجات</option>";
     return;
   }
-  const nameCounts = countNames(data);
-  nameCountsByCategory.set(category, nameCounts);
+  categoryProducts = data;
+  // عدّاد الأسماء على مستوى الفئة كلها (مش البراند بس) عشان الاسم يطلع بنفس الشكل في الطباعة
+  nameCountsByCategory.set(category, countNames(data));
 
-  data.forEach((p) => {
+  const brands = [...new Set(data.map((p) => (p.brand || "").trim()))].sort((a, b) => a.localeCompare(b, "en"));
+  brandSel.innerHTML = "";
+  if (!brands.length) {
+    brandSel.innerHTML = "<option value=\"\">لا توجد منتجات متاحة في هذه الفئة</option>";
+    return;
+  }
+  brands.forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = b || NO_BRAND;
+    opt.textContent = b || "بدون براند";
+    brandSel.appendChild(opt);
+  });
+  renderProductOptions();
+}
+
+// المنتجات: بنرتّب البطاريات بالفولت ثم السعة، والباقي زي ترتيب الاستعلام
+function renderProductOptions() {
+  const category = $("#categorySelect").value;
+  const brand = $("#brandSelect").value;
+  const productSel = $("#productSelect");
+  productSel.innerHTML = "";
+
+  let rows = categoryProducts.filter((p) => ((p.brand || "").trim() || NO_BRAND) === brand);
+  if (category === "batteries") {
+    rows = [...rows].sort((a, b) => (Number(a.voltage_v) - Number(b.voltage_v)) || (Number(a.capacity_ah) - Number(b.capacity_ah)));
+  }
+  const nameCounts = nameCountsByCategory.get(category);
+  rows.forEach((p) => {
     const label = buildProductLabel(p, nameCounts);
     const opt = document.createElement("option");
     opt.value = p.id;

@@ -61,6 +61,25 @@ function batteryKwh(p) {
   return String(Math.round((volts * ah) / 10) / 100); // kWh لأقرب خانتين عشريتين
 }
 
+/* عمق التفريغ DOD (%) — من عمود dod (0.8 أو 80) أو من النص ("6000 @80% DOD" / "80%DOD@25°C").
+   بنرجّع null لو مش مسجّل، ومبنخمّنش (الجل/التيوبلار مش هيظهر لهم DOD غير لو اتسجّل في الداتا). */
+function batteryDodPct(p) {
+  const raw = Number(p.dod);
+  if (Number.isFinite(raw) && raw > 0 && raw <= 100) return Math.round(raw <= 1 ? raw * 100 : raw);
+  const t = `${p.cycle_life || ""} ${p.specs_ar || ""}`;
+  const m = t.match(/(\d+(?:\.\d+)?)\s*%\s*DOD/i) || t.match(/DOD\s*[:=]?\s*(\d+(?:\.\d+)?)\s*%/i);
+  const n = m ? Math.round(Number(m[1])) : NaN;
+  return n > 0 && n <= 100 ? n : null;
+}
+
+/* عدد الدورات — من cycle_life ("6000 @80% DOD") أو من specs_ar ("عمر تشغيلي >6000 دورة") */
+function batteryCycles(p) {
+  const fromCol = firstNum(p.cycle_life, /(\d{3,5})/);
+  if (fromCol) return String(fromCol);
+  const m = String(p.specs_ar || "").match(/(\d{3,5})\s*دورة/);
+  return m ? m[1] : null;
+}
+
 function buildProductLabel(p, nameCounts) {
   if (p.category === "inverters") {
     const inv = inverterLabel(p);
@@ -69,7 +88,12 @@ function buildProductLabel(p, nameCounts) {
   if (p.category === "batteries") {
     const base = productBaseName(p);
     const kwh = batteryKwh(p);
-    return kwh && !/kwh/i.test(base) ? `${base} — ${kwh}KWH` : base;
+    const head = kwh && !/kwh/i.test(base) ? `${base} — ${kwh}KWH` : base;
+    // مثال: بطارية ليثيوم MUST 25.6V 200Ah — 5.12KWH - DOD80% @ 6000Cycle
+    const dod = batteryDodPct(p);
+    const cyc = batteryCycles(p);
+    const tail = dod && cyc ? ` - DOD${dod}% @ ${cyc}Cycle` : dod ? ` - DOD${dod}%` : cyc ? ` - ${cyc}Cycle` : "";
+    return head + tail;
   }
   const base = productBaseName(p);
   if ((nameCounts?.get(base) || 0) <= 1) return base;
@@ -91,7 +115,7 @@ async function withProductLabels(client, items) {
 
   const { data: prods, error } = await client
     .from("products")
-    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v")
+    .select("id, category, brand, name_ar, name_en, specs_ar, model_available, power_kw, power_hp, capacity_ah, voltage_v, dod, cycle_life")
     .in("id", ids);
   if (error || !prods) return list;
 

@@ -1981,6 +1981,7 @@ function editProduct(id) {
   document.getElementById('battVoltage').value = p.voltage_v != null ? p.voltage_v : '';
   document.getElementById('battAh').value = p.capacity_ah != null ? p.capacity_ah : '';
   document.getElementById('battDod').value = p.dod != null ? p.dod : '';
+  document.getElementById('battCycleLife').value = p.cycle_life != null ? p.cycle_life : '';
   document.getElementById('panelWatt').value = p.power_watt != null ? p.power_watt : '';
   document.getElementById('panelVoc').value = p.voc != null ? p.voc : '';
   document.getElementById('panelVimp').value = p.vimp != null ? p.vimp : '';
@@ -2004,7 +2005,7 @@ function cancelProductForm() {
   document.getElementById('productImageUrl').value = '';
   document.getElementById('productPowerKw').value = '';
   document.getElementById('productPowerHp').value = '';
-  ['ogPowerKw','ogVoltage','ogPvVocMax','ogSurgePct','ogMpptMin','ogMpptMax','battVoltage','battAh','battDod','panelWatt','panelVoc','panelVimp','invVoltageV','invPvVocMax','invMpptMin','invMpptMax']
+  ['ogPowerKw','ogVoltage','ogPvVocMax','ogSurgePct','ogMpptMin','ogMpptMax','battVoltage','battAh','battDod','battCycleLife','panelWatt','panelVoc','panelVimp','invVoltageV','invPvVocMax','invMpptMin','invMpptMax']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   setProductImagePreview('');
   document.getElementById('productAddWrap').style.display = 'none';
@@ -2158,6 +2159,7 @@ document.addEventListener('DOMContentLoaded', () => {
       payload.voltage_v  = v('battVoltage') !== '' ? parseFloat(v('battVoltage')) : null;
       payload.capacity_ah = v('battAh') !== '' ? parseFloat(v('battAh')) : null;
       payload.dod         = v('battDod') !== '' ? parseFloat(v('battDod')) : null;
+      payload.cycle_life  = v('battCycleLife').trim() !== '' ? v('battCycleLife').trim() : null;
     } else if (isPanel) {
       const v = id => document.getElementById(id).value;
       payload.power_watt = v('panelWatt') !== '' ? parseFloat(v('panelWatt')) : null;
