@@ -336,7 +336,7 @@ async function handleLogin(event) {
   event.preventDefault();
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
-  setText("[data-auth-message]", "Logging in...");
+  setText("[data-auth-message]", "جاري تسجيل الدخول...");
 
   const { data, error } = await client.auth.signInWithPassword({ email, password });
   if (error) {
@@ -1067,7 +1067,7 @@ async function loadStats() {
     " data-stat-row="${stat.id}">
       <div style="display:grid;grid-template-columns:120px 1fr 1fr 1fr 1fr;gap:var(--space-2);align-items:end">
         <div>
-          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Value</label>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">القيمة</label>
           <input
             id="stat_value_${stat.id}"
             value="${stat.value}"
@@ -1076,19 +1076,19 @@ async function loadStats() {
           >
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">English label</label>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">التسمية بالإنجليزية</label>
           <input id="stat_en_${stat.id}" value="${stat.label_en}" placeholder="Label in English">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Arabic label</label>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">التسمية بالعربية</label>
           <input id="stat_ar_${stat.id}" value="${stat.label_ar}" placeholder="التسمية بالعربية" dir="rtl">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Spanish label</label>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">التسمية بالإسبانية</label>
           <input id="stat_es_${stat.id}" value="${stat.label_es}" placeholder="Etiqueta en español">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Chinese label</label>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">التسمية بالصينية</label>
           <input id="stat_zh_${stat.id}" value="${stat.label_zh}" placeholder="中文标签">
         </div>
       </div>
@@ -1098,7 +1098,7 @@ async function loadStats() {
         onclick="saveStat('${stat.id}')"
         style="margin-top:var(--space-2);min-height:40px;font-size:13px"
       >
-        Save this stat
+        حفظ هذه الإحصائية
       </button>
     </div>
   `).join("");
@@ -1113,11 +1113,11 @@ async function saveStat(id) {
   const label_zh = document.getElementById(`stat_zh_${id}`)?.value.trim();
 
   if (!value || !label_en || !label_ar) {
-    if (msg) msg.textContent = "Value, English label, and Arabic label are required.";
+    if (msg) msg.textContent = "القيمة والتسمية الإنجليزية والعربية مطلوبين.";
     return;
   }
 
-  if (msg) msg.textContent = "Saving...";
+  if (msg) msg.textContent = "جاري الحفظ...";
 
   const { error } = await client
     .from("site_stats")
@@ -1125,12 +1125,12 @@ async function saveStat(id) {
     .eq("id", id);
 
   if (error) {
-    if (msg) msg.textContent = "Error: " + error.message;
+    if (msg) msg.textContent = "خطأ: " + error.message;
     return;
   }
 
   if (msg) {
-    msg.textContent = "✅ Saved! Homepage will reflect the new values immediately.";
+    msg.textContent = "✅ اتحفظ! الصفحة الرئيسية هتعرض القيم الجديدة فورًا.";
     setTimeout(() => { if (msg) msg.textContent = ""; }, 4000);
   }
 }
@@ -1456,6 +1456,8 @@ async function handleFaqAdd(event) {
 let allDashProducts = [];
 let currentProdCat = 'all';
 let currentProdBrand = 'all'; // 'all' = كل ماركات التصنيف (من غير إجراءات جماعية)
+let currentProdSearch = '';   // نص البحث (بيفضل ثابت لما تبدّل التصنيف)
+let currentProdQuick = 'all'; // 'all' | 'hidden' | 'unavail'
 
 async function loadProducts() {
   const list = document.getElementById('productsList');
@@ -1510,11 +1512,76 @@ function renderDashProducts() {
   const list = document.getElementById('productsList');
   if (!list) return;
   renderProductBrandUI(); // بيصفّر currentProdBrand لو الماركة المختارة اختفت (اتحذفت)، فلازم قبل الفلترة
-  let rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
-  if (currentProdCat !== 'all' && currentProdBrand !== 'all') rows = rows.filter(p => (p.brand || '') === currentProdBrand);
-  if (rows.length === 0) { list.innerHTML = '<p style="color:var(--muted);font-size:14px">لا توجد منتجات في هذا التصنيف.</p>'; return; }
+  const scope = currentProdScopeRows();
+  const searched = productsMatchingSearch(scope);
+  const rows = productsMatchingQuick(searched);
+  renderProductQuickFilters(searched, rows.length, scope.length);
+  if (rows.length === 0) {
+    const filtering = currentProdSearch.trim() || currentProdQuick !== 'all';
+    list.innerHTML = filtering
+      ? '<p style="color:var(--muted);font-size:14px">لا توجد منتجات مطابقة للبحث أو الفلتر الحالي.</p>'
+      : '<p style="color:var(--muted);font-size:14px">لا توجد منتجات في هذا التصنيف.</p>';
+    return;
+  }
 
   list.innerHTML = rows.map(dashProductRowHtml).join('');
+}
+
+/* ───────── البحث والفلاتر السريعة ───────── */
+// منتجات التصنيف/الماركة المختارين حاليًا (قبل البحث والفلتر السريع)
+function currentProdScopeRows() {
+  let rows = currentProdCat === 'all' ? allDashProducts : allDashProducts.filter(p => p.category === currentProdCat);
+  if (currentProdCat !== 'all' && currentProdBrand !== 'all') rows = rows.filter(p => (p.brand || '') === currentProdBrand);
+  return rows;
+}
+
+// توحيد النص العربي عشان البحث يلقط (أ/إ/آ=ا، ة=ه، ى=ي، من غير تشكيل، وأرقام عربية=إنجليزية)
+function normSearch(str) {
+  return String(str || '').toLowerCase()
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+    .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+    .replace(/\s+/g, ' ').trim();
+}
+
+function productsMatchingSearch(rows) {
+  const tokens = normSearch(currentProdSearch).split(' ').filter(Boolean);
+  if (!tokens.length) return rows;
+  return rows.filter(p => {
+    const hay = normSearch([p.name_ar, p.name_en, p.brand, p.model_available, p.specs_ar, p.specs_en, p.sku, p.notes].filter(Boolean).join(' '));
+    return tokens.every(t => hay.includes(t));
+  });
+}
+
+function productsMatchingQuick(rows) {
+  if (currentProdQuick === 'hidden') return rows.filter(p => !p.published);
+  if (currentProdQuick === 'unavail') return rows.filter(p => p.in_stock === false);
+  return rows;
+}
+
+function renderProductQuickFilters(searched, shown, scopeTotal) {
+  const box = document.getElementById('productQuickFilters');
+  if (box) {
+    const nHidden = searched.filter(p => !p.published).length;
+    const nUnavail = searched.filter(p => p.in_stock === false).length;
+    const chip = (key, text, n) => `<button type="button" class="prod-quick-chip${currentProdQuick === key ? ' active' : ''}" onclick="setProductQuick('${key}')">${text}${n == null ? '' : ' (' + n + ')'}</button>`;
+    box.innerHTML = chip('all', 'الكل', searched.length) + chip('hidden', '🙈 المخفي فقط', nHidden) + chip('unavail', '🔴 غير المتاح فقط', nUnavail)
+      + (currentProdSearch.trim() || currentProdQuick !== 'all' ? '<button type="button" class="prod-quick-chip" onclick="clearProductFilters()">✖ مسح الفلاتر</button>' : '');
+  }
+  const cnt = document.getElementById('productResultCount');
+  if (cnt) cnt.textContent = shown === scopeTotal ? `${shown} منتج` : `${shown} من ${scopeTotal} منتج`;
+}
+
+let _prodSearchTimer = null;
+function onProductSearchInput(v) {
+  clearTimeout(_prodSearchTimer);
+  _prodSearchTimer = setTimeout(() => { currentProdSearch = v || ''; renderDashProducts(); }, 150);
+}
+function setProductQuick(key) { currentProdQuick = key; renderDashProducts(); }
+function clearProductFilters() {
+  currentProdSearch = ''; currentProdQuick = 'all';
+  const inp = document.getElementById('productSearch'); if (inp) inp.value = '';
+  renderDashProducts();
 }
 
 const DASH_PRODUCT_CAT_LABELS = { inverters:'⚡ إنفرتر', panels:'☀️ لوح', accessories:'🔌 إكسسوار', combiners:'📦 صندوق تجميع', structures:'🏗️ شاسيه', cables:'🔶 كابل', batteries:'🔋 بطارية', offgrid:'🔆 أوف جريد', ongrid:'🌐 أون جريد', hybrid:'🔁 هايبرد', ev_chargers:'🚗 شاحن سيارات', reactors:'🧲 ريأكتور', charge_controllers:'🎛️ منظم شحن', well_motors:'🛠️ موتور آبار', pumps:'🌊 طلمبة', pipes:'🧵 ماسورة', street_lights:'💡 إنارة شوارع', flood_lights:'🔦 كشاف', garden_lights:'🪴 حديقة', solar_kits:'🧰 نظام منزلي', solar_safety:'🚧 سلامة طرق' };
@@ -1730,7 +1797,7 @@ function dashProductRowHtml(p) {
           ${p.datasheet_url ? `<a href="${p.datasheet_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:none">📄 داتا شيت</a>` : ''}
         </div>
       </div>
-      <div style="text-align:left;flex-shrink:0">
+      <div style="text-align:end;flex-shrink:0">
         <p style="font-weight:800;font-size:16px;color:var(--brand-dark);margin:0">${Number(p.price).toLocaleString('ar-EG')} <span style="font-size:11px;font-weight:400">ج.م/${p.unit||'قطعة'}</span></p>
         <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
           <button type="button" onclick="editProduct('${p.id}')"
@@ -1755,6 +1822,7 @@ function refreshDashProductRow(p) {
   tpl.innerHTML = dashProductRowHtml(p).trim();
   row.replaceWith(tpl.content.firstElementChild);
   renderProductBrandActions(); // الأرقام (ظاهر/مخفي/متاح) في شريط الماركة بتتحدّث مع كل تبديل فردي
+  { const sc = currentProdScopeRows(), se = productsMatchingSearch(sc); renderProductQuickFilters(se, productsMatchingQuick(se).length, sc.length); }
 }
 
 function setProductImagePreview(url) {

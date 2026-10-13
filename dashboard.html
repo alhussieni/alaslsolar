@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0d0b0a">
-  <title>Admin Dashboard | Al Asl Solar</title>
+  <title>لوحة التحكم | الأصل للطاقة الشمسية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -44,7 +44,7 @@
       font-family: 'Cairo', sans-serif;
       font-size: 14px;
       font-weight: 600;
-      text-align: right;
+      text-align: start;
       cursor: pointer;
       width: 100%;
       transition: background .18s, border-color .18s, color .18s;
@@ -56,6 +56,28 @@
       background: rgba(0,0,0,0.06); color: inherit;
     }
     .dash-nav-item.active .dash-nav-count { background: rgba(255,255,255,0.25); }
+    .dash-nav-group {
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      padding: 10px var(--space-2) 2px; letter-spacing: .02em;
+    }
+    .dash-nav-group:first-child { padding-top: 4px; }
+    .prod-dash-group {
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      padding: 10px 12px 2px;
+    }
+    .prod-toolbar { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--space-2); }
+    .prod-search {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--line);
+      border-radius: var(--radius); font-family: 'Cairo', sans-serif; font-size: 14px; background: #fff;
+    }
+    .prod-search:focus { outline: none; border-color: var(--brand); }
+    .prod-quick { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .prod-quick-chip {
+      padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
+      font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: inherit;
+    }
+    .prod-quick-chip.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .prod-result-count { font-size: 12px; color: var(--muted); margin: 0 0 var(--space-2); }
     .dash-main { flex: 1 1 auto; min-width: 0; }
     .dash-subsidebar {
       flex: 0 0 190px;
@@ -69,7 +91,7 @@
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
       padding: 8px 12px; border-radius: var(--radius); border: none;
       background: transparent; color: var(--ink); font-family: 'Cairo', sans-serif;
-      font-size: 13px; font-weight: 600; text-align: right; cursor: pointer; width: 100%;
+      font-size: 13px; font-weight: 600; text-align: start; cursor: pointer; width: 100%;
     }
     .prod-dash-filter:hover { background: var(--brand-soft); }
     .prod-dash-filter.active { background: var(--brand); color: #fff; }
@@ -81,11 +103,13 @@
     @media (max-width: 860px) {
       .dash-subsidebar { flex-direction: row; overflow-x: auto; max-height: none; flex-wrap: nowrap; }
       .prod-dash-filter { width: auto; white-space: nowrap; }
+      .prod-dash-group { display: none; }
     }
     @media (max-width: 860px) {
       .dash-shell-flex { flex-direction: column; }
       .dash-sidebar { flex-direction: row; overflow-x: auto; position: static; width: 100%; }
       .dash-nav-item { width: auto; white-space: nowrap; }
+      .dash-nav-group { display: none; }
     }
   </style>
   <style>
@@ -169,20 +193,20 @@
           <i class="fa fa-house" aria-hidden="true"></i>
           <span>الرئيسية</span>
         </a>
-        <p class="eyebrow" style="margin-bottom:2px">Admin</p>
-        <h1>Content Dashboard</h1>
-        <p>Add projects, upload images, and publish articles without editing code.</p>
+        <p class="eyebrow" style="margin-bottom:2px">لوحة التحكم</p>
+        <h1>لوحة إدارة المحتوى</h1>
+        <p>أضف المشاريع، وارفع الصور، وانشر المقالات من غير ما تعدّل في الكود.</p>
       </div>
     </section>
 
     <section class="dashboard-card" data-auth-panel>
-      <h2>Login</h2>
+      <h2>تسجيل الدخول</h2>
       <form class="admin-form" id="loginForm">
-        <label for="loginEmail">Email</label>
-        <input id="loginEmail" type="email" autocomplete="email" required>
-        <label for="loginPassword">Password</label>
-        <input id="loginPassword" type="password" autocomplete="current-password" required>
-        <button class="btn btn-primary" type="submit">Login</button>
+        <label for="loginEmail">البريد الإلكتروني</label>
+        <input id="loginEmail" type="email" autocomplete="email" dir="ltr" required>
+        <label for="loginPassword">كلمة المرور</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" dir="ltr" required>
+        <button class="btn btn-primary" type="submit">دخول</button>
         <p class="form-note" data-auth-message></p>
       </form>
     </section>
@@ -190,38 +214,42 @@
     <section class="dashboard-content" data-dashboard hidden>
       <div class="dashboard-toolbar">
         <div>
-          <h2>Manage Content</h2>
+          <h2>إدارة المحتوى</h2>
           <p data-user-email></p>
         </div>
-        <button class="btn btn-secondary dark" type="button" data-logout>Logout</button>
+        <button class="btn btn-secondary dark" type="button" data-logout>تسجيل الخروج</button>
       </div>
 
       <div class="dash-shell-flex">
         <nav class="dash-sidebar" aria-label="أقسام لوحة التحكم">
+          <div class="dash-nav-group">المحتوى</div>
           <button class="dash-nav-item active" data-target="section-stats" onclick="showDashSection('section-stats', this)">
             <span>🔢 الإحصائيات</span>
           </button>
-          <button class="dash-nav-item" data-target="section-faq" onclick="showDashSection('section-faq', this)">
-            <span>❓ الأسئلة الشائعة</span>
+          <button class="dash-nav-item" data-target="section-articles" onclick="showDashSection('section-articles', this)">
+            <span>📝 المقالات</span>
           </button>
           <button class="dash-nav-item" data-target="section-projects" onclick="showDashSection('section-projects', this)">
             <span>📁 المشاريع</span>
           </button>
+          <button class="dash-nav-item" data-target="section-faq" onclick="showDashSection('section-faq', this)">
+            <span>❓ الأسئلة الشائعة</span>
+          </button>
+          <div class="dash-nav-group">المتجر</div>
           <button class="dash-nav-item" data-target="section-products" onclick="showDashSection('section-products', this)">
             <span>🛒 المنتجات</span>
           </button>
           <button class="dash-nav-item" data-target="section-brands" onclick="showDashSection('section-brands', this)">
             <span>🏷️ شعارات الماركات</span>
           </button>
-          <button class="dash-nav-item" data-target="section-calc" onclick="showDashSection('section-calc', this)">
-            <span>🧮 إعدادات الحاسبة</span>
-          </button>
-          <button class="dash-nav-item" data-target="section-articles" onclick="showDashSection('section-articles', this)">
-            <span>📝 المقالات</span>
-          </button>
           <button class="dash-nav-item" data-target="section-supplier-discounts" onclick="showDashSection('section-supplier-discounts', this)">
             <span>💸 خصومات الموردين</span>
           </button>
+          <div class="dash-nav-group">الحاسبات والتسعير</div>
+          <button class="dash-nav-item" data-target="section-calc" onclick="showDashSection('section-calc', this)">
+            <span>🧮 إعدادات الحاسبة</span>
+          </button>
+          <div class="dash-nav-group">الفريق</div>
           <button class="dash-nav-item" data-target="section-reps" onclick="showDashSection('section-reps', this)">
             <span>👥 المناديب</span>
           </button>
@@ -232,12 +260,12 @@
       <!-- Stats Management -->
       <div class="dashboard-grid" id="section-stats" style="grid-template-columns:1fr;margin-bottom:0">
         <article class="dashboard-card" id="statsCard">
-          <h3>🔢 Homepage Stats</h3>
+          <h3>🔢 إحصائيات الصفحة الرئيسية</h3>
           <p style="color:var(--muted);font-size:14px;margin-bottom:var(--space-3)">
-            Edit the three numbers shown on the homepage. Changes go live immediately after saving.
+            عدّل الأرقام الثلاثة الظاهرة في الصفحة الرئيسية. التغييرات بتظهر على الموقع فور الحفظ.
           </p>
           <div id="statsList" class="dash-grid-gap-2">
-            <p class="dash-muted-14">Loading stats...</p>
+            <p class="dash-muted-14">جاري تحميل الإحصائيات...</p>
           </div>
           <p class="form-note dash-mt-2" id="statsMessage"></p>
         </article>
@@ -414,7 +442,7 @@
               </div>
               <div>
                 <label>الرابط الدائم (Slug) <span class="dash-normal-muted">— يتولّد تلقائيًا، وتقدر تعدّله</span></label>
-                <input id="projectSlug" name="slug" placeholder="مثال: alwadi-group-poultry-farm-solar" oninput="this.dataset.userEdited='true'">
+                <input id="projectSlug" dir="ltr" name="slug" placeholder="مثال: alwadi-group-poultry-farm-solar" oninput="this.dataset.userEdited='true'">
               </div>
               <div>
                 <label>قصة المشروع الكاملة (تظهر في صفحة المشروع المستقلة على جوجل)</label>
@@ -636,38 +664,33 @@
                 onclick="filterDashProducts('all',this)">
                 <span>الكل</span><span class="prod-cat-count" data-pcat-count="all">0</span>
               </button>
+              <div class="prod-dash-group">⚡ الإنفرترات</div>
               <button type="button" class="prod-dash-filter" data-pcat="inverters"
                 onclick="filterDashProducts('inverters',this)">
                 <span>⚡ إنفرترات</span><span class="prod-cat-count" data-pcat-count="inverters">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="panels"
-                onclick="filterDashProducts('panels',this)">
-                <span>☀️ ألواح</span><span class="prod-cat-count" data-pcat-count="panels">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="accessories"
-                onclick="filterDashProducts('accessories',this)">
-                <span>🔌 إكسسوارات</span><span class="prod-cat-count" data-pcat-count="accessories">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="combiners"
-                onclick="filterDashProducts('combiners',this)">
-                <span>📦 صناديق</span><span class="prod-cat-count" data-pcat-count="combiners">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="structures"
-                onclick="filterDashProducts('structures',this)">
-                <span>🏗️ شاسيهات</span><span class="prod-cat-count" data-pcat-count="structures">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="cables"
-                onclick="filterDashProducts('cables',this)">
-                <span>🔶 كابلات</span><span class="prod-cat-count" data-pcat-count="cables">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="batteries"
-                onclick="filterDashProducts('batteries',this)">
-                <span>🔋 بطاريات</span><span class="prod-cat-count" data-pcat-count="batteries">0</span>
               </button>
               <button type="button" class="prod-dash-filter" data-pcat="offgrid"
                 onclick="filterDashProducts('offgrid',this)">
                 <span>🔆 أوف جريد</span><span class="prod-cat-count" data-pcat-count="offgrid">0</span>
               </button>
+              <button type="button" class="prod-dash-filter" data-pcat="ongrid"
+                onclick="filterDashProducts('ongrid',this)">
+                <span>🌐 إنفرترات أون جريد</span><span class="prod-cat-count" data-pcat-count="ongrid">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="hybrid"
+                onclick="filterDashProducts('hybrid',this)">
+                <span>🔁 إنفرترات هايبرد</span><span class="prod-cat-count" data-pcat-count="hybrid">0</span>
+              </button>
+              <div class="prod-dash-group">☀️ الألواح والتخزين</div>
+              <button type="button" class="prod-dash-filter" data-pcat="panels"
+                onclick="filterDashProducts('panels',this)">
+                <span>☀️ ألواح</span><span class="prod-cat-count" data-pcat-count="panels">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="batteries"
+                onclick="filterDashProducts('batteries',this)">
+                <span>🔋 بطاريات</span><span class="prod-cat-count" data-pcat-count="batteries">0</span>
+              </button>
+              <div class="prod-dash-group">🌊 الري والآبار</div>
               <button type="button" class="prod-dash-filter" data-pcat="well_motors"
                 onclick="filterDashProducts('well_motors',this)">
                 <span>🛠️ موتورات آبار</span><span class="prod-cat-count" data-pcat-count="well_motors">0</span>
@@ -680,6 +703,32 @@
                 onclick="filterDashProducts('pipes',this)">
                 <span>🧵 مواسير</span><span class="prod-cat-count" data-pcat-count="pipes">0</span>
               </button>
+              <div class="prod-dash-group">🔌 مكونات التركيب</div>
+              <button type="button" class="prod-dash-filter" data-pcat="structures"
+                onclick="filterDashProducts('structures',this)">
+                <span>🏗️ شاسيهات</span><span class="prod-cat-count" data-pcat-count="structures">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="cables"
+                onclick="filterDashProducts('cables',this)">
+                <span>🔶 كابلات</span><span class="prod-cat-count" data-pcat-count="cables">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="combiners"
+                onclick="filterDashProducts('combiners',this)">
+                <span>📦 صناديق</span><span class="prod-cat-count" data-pcat-count="combiners">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="accessories"
+                onclick="filterDashProducts('accessories',this)">
+                <span>🔌 إكسسوارات</span><span class="prod-cat-count" data-pcat-count="accessories">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="reactors"
+                onclick="filterDashProducts('reactors',this)">
+                <span>🧲 ريأكتورات</span><span class="prod-cat-count" data-pcat-count="reactors">0</span>
+              </button>
+              <button type="button" class="prod-dash-filter" data-pcat="charge_controllers"
+                onclick="filterDashProducts('charge_controllers',this)">
+                <span>🎛️ منظمات الشحن</span><span class="prod-cat-count" data-pcat-count="charge_controllers">0</span>
+              </button>
+              <div class="prod-dash-group">💡 الإنارة المستقلة</div>
               <button type="button" class="prod-dash-filter" data-pcat="street_lights"
                 onclick="filterDashProducts('street_lights',this)">
                 <span>💡 إنارة شوارع</span><span class="prod-cat-count" data-pcat-count="street_lights">0</span>
@@ -700,29 +749,21 @@
                 onclick="filterDashProducts('solar_safety',this)">
                 <span>🚧 سلامة الطرق</span><span class="prod-cat-count" data-pcat-count="solar_safety">0</span>
               </button>
-              <button type="button" class="prod-dash-filter" data-pcat="ongrid"
-                onclick="filterDashProducts('ongrid',this)">
-                <span>🌐 إنفرترات أون جريد</span><span class="prod-cat-count" data-pcat-count="ongrid">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="hybrid"
-                onclick="filterDashProducts('hybrid',this)">
-                <span>🔁 إنفرترات هايبرد</span><span class="prod-cat-count" data-pcat-count="hybrid">0</span>
-              </button>
+              <div class="prod-dash-group">🚗 شحن السيارات</div>
               <button type="button" class="prod-dash-filter" data-pcat="ev_chargers"
                 onclick="filterDashProducts('ev_chargers',this)">
                 <span>🚗 شواحن سيارات كهربائية</span><span class="prod-cat-count" data-pcat-count="ev_chargers">0</span>
               </button>
-              <button type="button" class="prod-dash-filter" data-pcat="reactors"
-                onclick="filterDashProducts('reactors',this)">
-                <span>🧲 ريأكتورات</span><span class="prod-cat-count" data-pcat-count="reactors">0</span>
-              </button>
-              <button type="button" class="prod-dash-filter" data-pcat="charge_controllers"
-                onclick="filterDashProducts('charge_controllers',this)">
-                <span>🎛️ منظمات الشحن</span><span class="prod-cat-count" data-pcat-count="charge_controllers">0</span>
-              </button>
             </nav>
 
             <div style="flex:1;min-width:0">
+              <!-- بحث + فلاتر سريعة -->
+              <div class="prod-toolbar">
+                <input id="productSearch" class="prod-search" type="search" autocomplete="off"
+                  placeholder="🔍 ابحث بالاسم أو الماركة أو الموديل أو الكود..." oninput="onProductSearchInput(this.value)">
+                <div id="productQuickFilters" class="prod-quick"></div>
+              </div>
+              <p id="productResultCount" class="prod-result-count"></p>
               <!-- شريط التصنيف + الماركات (بيترسم بالـJS لما تختار تصنيف) -->
               <div id="productBrandBar" style="margin-bottom:var(--space-2)"></div>
               <!-- إجراءات الماركة (تصنيف + ماركة واحدة بس) -->
@@ -1029,7 +1070,7 @@
                 </label>
                 <div class="dash-flex-gap6">
                   <span style="font-size:12px;color:var(--muted);white-space:nowrap">alaslsolar.com/articles/</span>
-                  <input id="articleSlug" name="slug_custom" placeholder="solar-energy-guide" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" title="حروف إنجليزية صغيرة وأرقام وشرطة فقط" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/--+/g,'-')" class="dash-flex-1">
+                  <input id="articleSlug" dir="ltr" name="slug_custom" placeholder="solar-energy-guide" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" title="حروف إنجليزية صغيرة وأرقام وشرطة فقط" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/--+/g,'-')" class="dash-flex-1">
                 </div>
                 <p class="dash-caption-mt4">مثال: <code>solar-energy-basics</code> أو <code>pv-diesel-hybrid-guide</code></p>
               </div>
@@ -1217,7 +1258,7 @@
             </div>
             <div>
               <label class="dash-field-label">البريد الإلكتروني</label>
-              <input type="email" id="repNewEmail" required style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px;min-width:220px">
+              <input type="email" id="repNewEmail" dir="ltr" required style="padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14px;min-width:220px">
             </div>
             <button type="submit" class="btn btn-primary dash-fs-13" id="repInviteBtn">إرسال الدعوة</button>
           </form>
