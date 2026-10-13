@@ -65,6 +65,35 @@
       font-size: 11px; font-weight: 800; color: var(--muted);
       padding: 10px 12px 2px;
     }
+    .home-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-2); }
+    .home-tile {
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; background: #fff;
+      cursor: pointer; text-align: start; font-family: inherit; color: inherit;
+    }
+    .home-tile:hover { border-color: var(--brand); }
+    .home-tile .n { display: block; font-size: 26px; font-weight: 800; color: var(--brand-dark); }
+    .home-tile .l { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .home-tile.warn { border-color: #f0c36d; background: #fffaf0; }
+    .home-tile.warn .n { color: #c60; }
+    .home-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--space-2); }
+    .req-card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; padding: 12px var(--space-3); display: grid; gap: 8px; }
+    .req-card.is-new { border-inline-start: 4px solid #e8a317; }
+    .req-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+    .req-meta { font-size: 13px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .req-meta a { color: var(--brand-dark); font-weight: 700; text-decoration: none; }
+    .req-status { font-size: 11px; font-weight: 800; padding: 2px 10px; border-radius: 999px; }
+    .req-status.st-new { background: #fff3d6; color: #9a6200; }
+    .req-status.st-contacted { background: #e0f0ff; color: #0b5cad; }
+    .req-status.st-closed { background: #e6f4e6; color: #2a7a2a; }
+    .req-items { margin: 6px 0 0; padding-inline-start: 18px; font-size: 13px; }
+    .req-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .req-actions select { padding: 5px 10px; border: 1px solid var(--line); border-radius: var(--radius); font-family: inherit; font-size: 13px; background: #fff; }
+    .calc-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--space-1); }
+    .calc-tab {
+      padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; color: inherit;
+    }
+    .calc-tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
     .prod-toolbar { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--space-2); }
     .prod-search {
       width: 100%; padding: 10px 14px; border: 1.5px solid var(--line);
@@ -222,8 +251,11 @@
 
       <div class="dash-shell-flex">
         <nav class="dash-sidebar" aria-label="أقسام لوحة التحكم">
+          <button class="dash-nav-item active" data-target="section-home" onclick="showDashSection('section-home', this)">
+            <span>🏠 الرئيسية</span>
+          </button>
           <div class="dash-nav-group">المحتوى</div>
-          <button class="dash-nav-item active" data-target="section-stats" onclick="showDashSection('section-stats', this)">
+          <button class="dash-nav-item" data-target="section-stats" onclick="showDashSection('section-stats', this)">
             <span>🔢 الإحصائيات</span>
           </button>
           <button class="dash-nav-item" data-target="section-articles" onclick="showDashSection('section-articles', this)">
@@ -236,6 +268,9 @@
             <span>❓ الأسئلة الشائعة</span>
           </button>
           <div class="dash-nav-group">المتجر</div>
+          <button class="dash-nav-item" data-target="section-requests" onclick="showDashSection('section-requests', this)">
+            <span>📥 طلبات العملاء</span><span class="dash-nav-count" id="navRequestsCount" hidden>0</span>
+          </button>
           <button class="dash-nav-item" data-target="section-products" onclick="showDashSection('section-products', this)">
             <span>🛒 المنتجات</span>
           </button>
@@ -247,7 +282,7 @@
           </button>
           <div class="dash-nav-group">الحاسبات والتسعير</div>
           <button class="dash-nav-item" data-target="section-calc" onclick="showDashSection('section-calc', this)">
-            <span>🧮 إعدادات الحاسبة</span>
+            <span>🧮 الحاسبات والتكاليف</span>
           </button>
           <div class="dash-nav-group">الفريق</div>
           <button class="dash-nav-item" data-target="section-reps" onclick="showDashSection('section-reps', this)">
@@ -258,7 +293,37 @@
         <div class="dash-main">
 
       <!-- Stats Management -->
-      <div class="dashboard-grid" id="section-stats" style="grid-template-columns:1fr;margin-bottom:0">
+      <div class="dashboard-grid" id="section-home" style="grid-template-columns:1fr;margin-bottom:0">
+        <article class="dashboard-card">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">👋 نظرة سريعة</h3>
+            <button type="button" class="dash-btn-secondary" onclick="loadHome()">🔄 تحديث</button>
+          </div>
+          <p class="dash-muted-13-mb3">اضغط على أي رقم يفتحلك القائمة المقصودة مباشرة.</p>
+          <div class="home-tiles" id="homeTiles"><p class="dash-muted-14">جاري التحميل…</p></div>
+        </article>
+        <article class="dashboard-card">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">📥 آخر طلبات العملاء</h3>
+            <button type="button" class="dash-btn-secondary" onclick="goToSection('section-requests')">عرض الكل</button>
+          </div>
+          <div id="homeLatestRequests" class="dash-grid-gap-2" style="margin-top:var(--space-2)"><p class="dash-muted-14">جاري التحميل…</p></div>
+        </article>
+        <article class="dashboard-card">
+          <h3 class="dash-m0">⚡ اختصارات</h3>
+          <div class="home-links">
+            <button type="button" class="dash-btn-secondary" onclick="goToSection('section-products')">📦 المنتجات</button>
+            <button type="button" class="dash-btn-secondary" onclick="goToSection('section-articles')">📝 المقالات</button>
+            <button type="button" class="dash-btn-secondary" onclick="goToSection('section-projects')">🏗️ المشاريع</button>
+            <button type="button" class="dash-btn-secondary" onclick="goToSection('section-supplier-discounts')">💸 خصومات الموردين</button>
+            <button type="button" class="dash-btn-secondary" onclick="goToSection('section-calc')">🧮 الحاسبات والتكاليف</button>
+            <a class="dash-btn-secondary" href="rep-crm.html" target="_blank" rel="noopener" style="text-decoration:none">📇 نظام العملاء CRM</a>
+            <a class="dash-btn-secondary" href="index.html" target="_blank" rel="noopener" style="text-decoration:none">🌐 فتح الموقع</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-stats" style="grid-template-columns:1fr;margin-bottom:0">
         <article class="dashboard-card" id="statsCard">
           <h3>🔢 إحصائيات الصفحة الرئيسية</h3>
           <p style="color:var(--muted);font-size:14px;margin-bottom:var(--space-3)">
@@ -489,6 +554,23 @@
       </div>
 
       <!-- ── Products Management ── -->
+      <div class="dashboard-grid dash-grid-1col-hidden" id="section-requests">
+        <article class="dashboard-card">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">📥 طلبات العملاء (من سلة الأسعار)</h3>
+            <button type="button" class="dash-btn-secondary" onclick="loadRequests()">🔄 تحديث</button>
+          </div>
+          <p class="dash-muted-13-mb3">الطلبات اللي العملاء بيبعتوها من صفحة السلة. غيّر الحالة بعد ما تتواصل مع العميل.</p>
+          <div class="prod-toolbar">
+            <input id="reqSearch" class="prod-search" type="search" autocomplete="off"
+              placeholder="🔍 ابحث بالاسم أو رقم الموبايل أو المدينة أو اسم منتج..." oninput="onRequestSearchInput(this.value)">
+            <div id="reqStatusFilters" class="prod-quick"></div>
+          </div>
+          <p id="reqCount" class="prod-result-count"></p>
+          <div id="requestsList" class="dash-grid-gap-2"><p class="dash-muted-14">جاري التحميل…</p></div>
+        </article>
+      </div>
+
       <div class="dashboard-grid dash-grid-1col-hidden" id="section-products">
         <article class="dashboard-card">
           <div class="dash-row-between">
@@ -827,7 +909,13 @@
 
       <!-- ── Calculator Suggestions Settings ── -->
       <div class="dashboard-grid dash-grid-1col-hidden" id="section-calc">
-        <article class="dashboard-card" id="calcSettingsCard">
+        <div class="calc-tabs" role="tablist" aria-label="أقسام إعدادات الحاسبات">
+          <button type="button" class="calc-tab active" data-calc-tabbtn="pump" onclick="showCalcTab('pump')">💧 الضخ والري</button>
+          <button type="button" class="calc-tab" data-calc-tabbtn="offgrid" onclick="showCalcTab('offgrid')">🔋 الأوف جريد</button>
+          <button type="button" class="calc-tab" data-calc-tabbtn="roi" onclick="showCalcTab('roi')">📈 العائد ROI</button>
+        </div>
+
+        <article class="dashboard-card" id="calcSettingsCard" data-calc-tab="pump">
           <div class="dash-row-between">
             <h3 class="dash-m0">🧮 إعدادات اقتراحات حاسبة الضخ</h3>
           </div>
@@ -868,7 +956,45 @@
           </form>
         </article>
 
-        <article class="dashboard-card" id="offgridSettingsCard">
+        <article class="dashboard-card" id="bomCard" data-calc-tab="pump">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🏗️ تكاليف تركيب محطات الري الشمسية</h3>
+          </div>
+          <p class="dash-muted-13-mb3">
+            الأسعار دي مش منتج له كارت في الكتالوج (خرسانة، تأريض، تركيب، نقل) — بتتحسب لوحدها
+            جوه عرض سعر "محطة ري بالطاقة الشمسية" اللي المندوب بيقدمها للعميل. عدّلها هنا وقت ما الأسعار تتغير.
+          </p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-2)">
+            <div>
+              <label class="dash-field-label">الخرسانة (جنيه/وحدة)</label>
+              <input type="number" id="bomConcretePerUnit" min="0" step="1" class="dash-input">
+            </div>
+            <div>
+              <label class="dash-field-label">التأريض (جنيه/بئر)</label>
+              <input type="number" id="bomEarthingPerUnit" min="0" step="1" class="dash-input">
+            </div>
+            <div>
+              <label class="dash-field-label">تركيب ميكانيكي (جنيه/لوح)</label>
+              <input type="number" id="bomMechInstallPerPanel" min="0" step="1" class="dash-input">
+            </div>
+            <div>
+              <label class="dash-field-label">تركيب كهربائي (جنيه/لوح)</label>
+              <input type="number" id="bomElecInstallPerPanel" min="0" step="1" class="dash-input">
+            </div>
+            <div>
+              <label class="dash-field-label">النقل (جنيه/رحلة)</label>
+              <input type="number" id="bomTransportPerTrip" min="0" step="1" class="dash-input">
+            </div>
+            <div>
+              <label class="dash-field-label">حد أدنى للنقل (جنيه)</label>
+              <input type="number" id="bomTransportMinimum" min="0" step="1" class="dash-input">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary dash-fs13-mt2" id="bomSaveBtn">حفظ التكاليف</button>
+          <p class="form-note" data-bom-message></p>
+        </article>
+
+        <article class="dashboard-card" id="offgridSettingsCard" data-calc-tab="offgrid">
           <div class="dash-row-between">
             <h3 class="dash-m0">🔋 إعدادات حاسبة الأوف جريد</h3>
           </div>
@@ -921,7 +1047,7 @@
           </form>
         </article>
 
-        <article class="dashboard-card" id="offgridPresetsCard">
+        <article class="dashboard-card" id="offgridPresetsCard" data-calc-tab="offgrid">
           <div class="dash-row-between">
             <h3 class="dash-m0">🏠 منظومات جاهزة (عروض سريعة للزائر)</h3>
             <button type="button" id="addOffgridPresetBtn" onclick="showOffgridPresetForm()" class="dash-btn-outline-brand">+ إضافة منظومة</button>
@@ -962,7 +1088,7 @@
           </div>
         </article>
 
-        <article class="dashboard-card" id="offgridLoadsCard">
+        <article class="dashboard-card" id="offgridLoadsCard" data-calc-tab="offgrid">
           <div class="dash-row-between">
             <h3 class="dash-m0">🔌 الأجهزة والأحمال (حاسبة الأوف جريد)</h3>
             <button type="button" id="addOffgridLoadBtn" onclick="showOffgridLoadForm()" class="dash-btn-outline-brand">+ إضافة جهاز</button>
@@ -1034,6 +1160,32 @@
               <p class="form-note dash-mt-6" id="offgridLoadMessage"></p>
             </form>
           </div>
+        </article>
+
+        <article class="dashboard-card" id="roiCard" data-calc-tab="roi">
+          <div class="dash-row-between">
+            <h3 class="dash-m0">🔌 إعدادات حساب ROI</h3>
+          </div>
+          <p class="dash-muted-13-mb3">
+            سعري الكهرباء والديزيل دول مش مرتبطين بأي منتج أو عرض سعر لحد دلوقتي — بيتخزّنوا هنا
+            عشان يتستخدموا مستقبلًا في حساب مدة استرداد رأس المال (ROI) للعروض. عدّلهم هنا وقت ما الأسعار تتغير.
+          </p>
+          <div class="dash-grid-auto-200">
+            <div>
+              <label class="dash-field-label">سعر الكهرباء (جنيه/كيلوواط ساعة)</label>
+              <input type="number" id="roiElectricityPrice" min="0" step="0.01" class="dash-input">
+            </div>
+            <div>
+              <label class="dash-field-label">سعر الديزيل (جنيه/لتر)</label>
+              <input type="number" id="roiDieselPrice" min="0" step="0.01" class="dash-input">
+            </div>
+            <div>
+              <label class="dash-field-label">معدل الخصم الافتراضي لحساب NPV (%)</label>
+              <input type="number" id="roiDiscountRate" min="0" step="0.1" class="dash-input">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary dash-fs13-mt2" id="roiSaveBtn">حفظ إعدادات ROI</button>
+          <p class="form-note" data-roi-message></p>
         </article>
       </div>
 
@@ -1183,69 +1335,20 @@
           </table>
         </article>
 
-        <article class="dash-card">
-          <h2 class="dash-mt-0">🏗️ تكاليف تركيب محطات الري الشمسية</h2>
-          <p class="dash-muted-13-mt-neg8">
-            الأسعار دي مش منتج له كارت في الكتالوج (خرسانة، تأريض، تركيب، نقل) — بتتحسب لوحدها
-            جوه عرض سعر "محطة ري بالطاقة الشمسية" اللي المندوب بيقدمها للعميل. عدّلها هنا وقت ما الأسعار تتغير.
-          </p>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--space-2)">
-            <div>
-              <label class="dash-field-label">الخرسانة (جنيه/وحدة)</label>
-              <input type="number" id="bomConcretePerUnit" min="0" step="1" class="dash-input">
-            </div>
-            <div>
-              <label class="dash-field-label">التأريض (جنيه/بئر)</label>
-              <input type="number" id="bomEarthingPerUnit" min="0" step="1" class="dash-input">
-            </div>
-            <div>
-              <label class="dash-field-label">تركيب ميكانيكي (جنيه/لوح)</label>
-              <input type="number" id="bomMechInstallPerPanel" min="0" step="1" class="dash-input">
-            </div>
-            <div>
-              <label class="dash-field-label">تركيب كهربائي (جنيه/لوح)</label>
-              <input type="number" id="bomElecInstallPerPanel" min="0" step="1" class="dash-input">
-            </div>
-            <div>
-              <label class="dash-field-label">النقل (جنيه/رحلة)</label>
-              <input type="number" id="bomTransportPerTrip" min="0" step="1" class="dash-input">
-            </div>
-            <div>
-              <label class="dash-field-label">حد أدنى للنقل (جنيه)</label>
-              <input type="number" id="bomTransportMinimum" min="0" step="1" class="dash-input">
-            </div>
-          </div>
-          <button type="button" class="btn btn-primary dash-fs13-mt2" id="bomSaveBtn">حفظ التكاليف</button>
-          <p class="form-note" data-bom-message></p>
-        </article>
-
-        <article class="dash-card">
-          <h2 class="dash-mt-0">🔌 إعدادات حساب ROI</h2>
-          <p class="dash-muted-13-mt-neg8">
-            سعري الكهرباء والديزيل دول مش مرتبطين بأي منتج أو عرض سعر لحد دلوقتي — بيتخزّنوا هنا
-            عشان يتستخدموا مستقبلًا في حساب مدة استرداد رأس المال (ROI) للعروض. عدّلهم هنا وقت ما الأسعار تتغير.
-          </p>
-          <div class="dash-grid-auto-200">
-            <div>
-              <label class="dash-field-label">سعر الكهرباء (جنيه/كيلوواط ساعة)</label>
-              <input type="number" id="roiElectricityPrice" min="0" step="0.01" class="dash-input">
-            </div>
-            <div>
-              <label class="dash-field-label">سعر الديزيل (جنيه/لتر)</label>
-              <input type="number" id="roiDieselPrice" min="0" step="0.01" class="dash-input">
-            </div>
-            <div>
-              <label class="dash-field-label">معدل الخصم الافتراضي لحساب NPV (%)</label>
-              <input type="number" id="roiDiscountRate" min="0" step="0.1" class="dash-input">
-            </div>
-          </div>
-          <button type="button" class="btn btn-primary dash-fs13-mt2" id="roiSaveBtn">حفظ إعدادات ROI</button>
-          <p class="form-note" data-roi-message></p>
-        </article>
       </div>
 
       <!-- Reps Management -->
       <div class="dashboard-grid dash-grid-1col-hidden" id="section-reps">
+        <article class="dash-card">
+          <div class="dash-row-between">
+            <div>
+              <h2 class="dash-mt-0">📇 نظام العملاء والعروض (CRM)</h2>
+              <p class="dash-muted-13-mb3" style="margin:0">الصفحة اللي بيشتغل عليها المناديب لإنشاء عروض الأسعار ومتابعة العملاء.</p>
+            </div>
+            <a class="btn btn-primary dash-fs-13" href="rep-crm.html" target="_blank" rel="noopener" style="text-decoration:none">فتح صفحة الـCRM</a>
+          </div>
+        </article>
+
         <article class="dash-card">
           <h2 class="dash-mt-0">👥 إضافة مندوب جديد</h2>
           <p class="dash-muted-13-mt-neg8">

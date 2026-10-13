@@ -8,7 +8,34 @@ function showDashSection(targetId, btn) {
   });
   document.querySelectorAll('.dash-nav-item').forEach(el => el.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  if (targetId === 'section-home') loadHome();
+  if (targetId === 'section-requests') loadRequests();
 }
+
+// تنقّل برمجي لأي قسم (من أرقام الصفحة الرئيسية والاختصارات)
+function goToSection(id) {
+  const btn = document.querySelector('.dash-nav-item[data-target="' + id + '"]');
+  showDashSection(id, btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// فتح قائمة المنتجات على فلتر جاهز: 'hidden' (المخفي) أو 'unavail' (غير المتاح)
+function openProductsFiltered(kind) {
+  currentProdQuick = kind;
+  goToSection('section-products');
+  renderDashProducts();
+}
+
+// تبويبات قسم الحاسبات (الضخ والري / الأوف جريد / ROI)
+function showCalcTab(key) {
+  document.querySelectorAll('#section-calc [data-calc-tab]').forEach(el => {
+    el.style.display = (el.getAttribute('data-calc-tab') === key) ? '' : 'none';
+  });
+  document.querySelectorAll('#section-calc [data-calc-tabbtn]').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-calc-tabbtn') === key);
+  });
+}
+document.addEventListener('DOMContentLoaded', () => showCalcTab('pump'));
 
 function setText(selector, text) {
   const element = document.querySelector(selector);
@@ -982,6 +1009,8 @@ async function loadLists() {
   loadOffgridLoadsAdmin();
   loadOffgridPresets();
   loadReps();
+  loadHome();
+  loadRequests();
 }
 
 // ── Category visibility (show/hide an entire product category from the public site) ──
@@ -2898,13 +2927,18 @@ async function loadReps() {
 
   const [{ data: reps, error }, { data: quotes }] = await Promise.all([
     client.from('reps').select('id, display_name, email, active, can_access_offgrid, can_access_products, can_access_crm').order('created_at', { ascending: false }),
-    client.from('quotes').select('rep_id'),
+    client.from('quotes').select('rep_id, created_at'),
   ]);
 
   if (error) { tbody.innerHTML = `<tr><td colspan="8" style="padding:12px;color:red">خطأ: ${error.message}</td></tr>`; return; }
 
   const quoteCounts = {};
-  (quotes || []).forEach((q) => { quoteCounts[q.rep_id] = (quoteCounts[q.rep_id] || 0) + 1; });
+  const quoteCounts30 = {};
+  const since30 = Date.now() - 30 * 864e5;
+  (quotes || []).forEach((q) => {
+    quoteCounts[q.rep_id] = (quoteCounts[q.rep_id] || 0) + 1;
+    if (new Date(q.created_at).getTime() >= since30) quoteCounts30[q.rep_id] = (quoteCounts30[q.rep_id] || 0) + 1;
+  });
 
   if (!reps || !reps.length) { tbody.innerHTML = `<tr><td colspan="8" style="padding:12px;color:var(--muted)">مفيش مناديب مسجلين لسه.</td></tr>`; return; }
 
@@ -2918,7 +2952,7 @@ async function loadReps() {
       <td style="padding:8px">${checkboxCell(r.id, "can_access_offgrid", r.can_access_offgrid)}</td>
       <td style="padding:8px">${checkboxCell(r.id, "can_access_products", r.can_access_products)}</td>
       <td style="padding:8px">${checkboxCell(r.id, "can_access_crm", r.can_access_crm)}</td>
-      <td style="padding:8px">${quoteCounts[r.id] || 0}</td>
+      <td style="padding:8px">${quoteCounts[r.id] || 0} <small style="color:var(--muted)">(${quoteCounts30[r.id] || 0} آخر 30 يوم)</small></td>
       <td style="padding:8px">${checkboxCell(r.id, "active", r.active)}</td>
       <td style="padding:8px"><span class="form-note" data-rep-save-msg="${r.id}" style="min-height:auto"></span></td>
     </tr>
@@ -2984,3 +3018,162 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('repInviteForm');
   if (form) form.addEventListener('submit', handleRepInvite);
 });
+
+
+/* ═══════════════════════════════════════════════════════════════
+   الصفحة الرئيسية للوحة + طلبات العملاء
+   ═══════════════════════════════════════════════════════════════ */
+const REQ_STATUS_LABELS = { new: 'جديد', contacted: 'تم التواصل', closed: 'مغلق' };
+let allRequests = [];
+let reqStatusFilter = 'all';
+let reqSearchText = '';
+
+function fmtMoney(n) { return Number(n || 0).toLocaleString('ar-EG'); }
+function fmtWhen(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? '' : d.toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+async function loadHome() {
+  const box = document.getElementById('homeTiles');
+  if (!box || !client) return;
+  const count = (q) => q.then(r => (r.error ? null : (r.count ?? 0)));
+  const head = { count: 'exact', head: true };
+  const since7 = new Date(Date.now() - 7 * 864e5).toISOString();
+  const [newReq, hidden, unavail, total, quotes7, reps] = await Promise.all([
+    count(client.from('cart_quote_requests').select('id', head).eq('status', 'new')),
+    count(client.from('products').select('id', head).eq('published', false)),
+    count(client.from('products').select('id', head).eq('in_stock', false)),
+    count(client.from('products').select('id', head)),
+    count(client.from('quotes').select('id', head).gte('created_at', since7)),
+    count(client.from('reps').select('id', head).eq('active', true)),
+  ]);
+  const tile = (icon, label, n, action, warn) =>
+    `<button type="button" class="home-tile${warn && n > 0 ? ' warn' : ''}" onclick="${action}"><span class="n">${n == null ? '—' : fmtMoney(n)}</span><span class="l">${icon} ${label}</span></button>`;
+  box.innerHTML =
+    tile('📥', 'طلبات عملاء جديدة', newReq, "goToSection('section-requests')", true) +
+    tile('🙈', 'منتجات مخفية', hidden, "openProductsFiltered('hidden')", false) +
+    tile('🔴', 'منتجات غير متاحة', unavail, "openProductsFiltered('unavail')", true) +
+    tile('📦', 'إجمالي المنتجات', total, "goToSection('section-products')", false) +
+    tile('🧾', 'عروض أسعار (آخر 7 أيام)', quotes7, "goToSection('section-reps')", false) +
+    tile('👥', 'مناديب نشطين', reps, "goToSection('section-reps')", false);
+  updateRequestsBadge(newReq);
+
+  const latestBox = document.getElementById('homeLatestRequests');
+  if (latestBox) {
+    const { data, error } = await client.from('cart_quote_requests')
+      .select('id, customer_name, customer_city, subtotal, status, created_at')
+      .order('created_at', { ascending: false }).limit(5);
+    if (error) { latestBox.innerHTML = `<p class="dash-muted-14">تعذّر تحميل الطلبات: ${escHtml(error.message)}</p>`; return; }
+    latestBox.innerHTML = (data && data.length)
+      ? data.map(r => `<div class="req-card${r.status === 'new' ? ' is-new' : ''}" style="cursor:pointer" onclick="goToSection('section-requests')">
+          <div class="req-head"><strong>${escHtml(r.customer_name)}</strong><span class="req-status st-${escHtml(r.status)}">${escHtml(REQ_STATUS_LABELS[r.status] || r.status)}</span></div>
+          <div class="req-meta"><span>${escHtml(r.customer_city || '')}</span><span>${fmtMoney(r.subtotal)} ج.م</span><span>${escHtml(fmtWhen(r.created_at))}</span></div>
+        </div>`).join('')
+      : '<p class="dash-muted-14">مفيش طلبات لسه.</p>';
+  }
+}
+
+function updateRequestsBadge(n) {
+  const el = document.getElementById('navRequestsCount');
+  if (!el) return;
+  if (n && n > 0) { el.textContent = n; el.hidden = false; } else { el.hidden = true; }
+}
+
+async function loadRequests() {
+  const list = document.getElementById('requestsList');
+  if (!list || !client) return;
+  const { data, error } = await client.from('cart_quote_requests').select('*').order('created_at', { ascending: false }).limit(500);
+  if (error) { list.innerHTML = `<p style="color:red;font-size:14px">خطأ: ${escHtml(error.message)}</p>`; return; }
+  allRequests = data || [];
+  updateRequestsBadge(allRequests.filter(r => r.status === 'new').length);
+  renderRequests();
+}
+
+function onRequestSearchInput(v) { reqSearchText = v || ''; renderRequests(); }
+function setRequestFilter(k) { reqStatusFilter = k; renderRequests(); }
+
+function renderRequests() {
+  const list = document.getElementById('requestsList');
+  if (!list) return;
+  const tokens = normSearch(reqSearchText).split(' ').filter(Boolean);
+  const searched = allRequests.filter(r => {
+    if (!tokens.length) return true;
+    const hay = normSearch([r.customer_name, r.customer_phone, r.customer_city, r.notes,
+      ...(Array.isArray(r.items) ? r.items.map(i => (i.name || '') + ' ' + (i.brand || '')) : [])].join(' '));
+    return tokens.every(t => hay.includes(t));
+  });
+  const rows = reqStatusFilter === 'all' ? searched : searched.filter(r => r.status === reqStatusFilter);
+
+  const chip = (k, text) => {
+    const n = k === 'all' ? searched.length : searched.filter(r => r.status === k).length;
+    return `<button type="button" class="prod-quick-chip${reqStatusFilter === k ? ' active' : ''}" onclick="setRequestFilter('${k}')">${text} (${n})</button>`;
+  };
+  const f = document.getElementById('reqStatusFilters');
+  if (f) f.innerHTML = chip('all', 'الكل') + chip('new', '🟡 جديد') + chip('contacted', '🔵 تم التواصل') + chip('closed', '🟢 مغلق');
+  const c = document.getElementById('reqCount');
+  if (c) c.textContent = rows.length === allRequests.length ? `${rows.length} طلب` : `${rows.length} من ${allRequests.length} طلب`;
+
+  list.innerHTML = rows.length ? rows.map(requestCardHtml).join('')
+    : `<p class="dash-muted-14">${allRequests.length ? 'لا توجد طلبات مطابقة.' : 'مفيش طلبات لسه.'}</p>`;
+}
+
+// رقم واتساب: بنشيل أي رموز، والرقم المحلي (يبدأ بصفر) بنحوّله لصيغة مصر الدولية
+function waNumber(phone) {
+  let d = String(phone || '').replace(/\D/g, '');
+  if (d.startsWith('00')) d = d.slice(2);
+  else if (d.startsWith('0')) d = '20' + d.slice(1);
+  return d;
+}
+
+function requestCardHtml(r) {
+  const id = Number(r.id);
+  const items = Array.isArray(r.items) ? r.items : [];
+  const phone = String(r.customer_phone || '').trim();
+  const tel = phone.replace(/[^\d+]/g, '');
+  const wa = waNumber(phone);
+  const st = REQ_STATUS_LABELS[r.status] ? r.status : 'new';
+  const opts = Object.entries(REQ_STATUS_LABELS).map(([k, v]) => `<option value="${k}"${k === st ? ' selected' : ''}>${v}</option>`).join('');
+  return `
+    <div class="req-card${st === 'new' ? ' is-new' : ''}" data-rid="${id}">
+      <div class="req-head">
+        <span><strong>${escHtml(r.customer_name)}</strong> <span class="req-status st-${st}">${REQ_STATUS_LABELS[st]}</span></span>
+        <span class="req-meta">${escHtml(fmtWhen(r.created_at))}</span>
+      </div>
+      <div class="req-meta">
+        <span>📞 <a href="tel:${escHtml(tel)}" dir="ltr">${escHtml(phone)}</a></span>
+        ${wa ? `<a href="https://wa.me/${escHtml(wa)}" target="_blank" rel="noopener">💬 واتساب</a>` : ''}
+        ${r.customer_city ? `<span>📍 ${escHtml(r.customer_city)}</span>` : ''}
+      </div>
+      <details>
+        <summary style="cursor:pointer;font-weight:700;font-size:13px">${items.length} صنف — الإجمالي ${fmtMoney(r.subtotal)} ج.م</summary>
+        <ul class="req-items">${items.map(i => `<li>${escHtml(i.name)}${i.brand ? ' (' + escHtml(i.brand) + ')' : ''} × ${Number(i.qty) || 0} — ${fmtMoney(i.line_total)} ج.م</li>`).join('')}</ul>
+      </details>
+      ${r.notes ? `<div class="req-meta">📝 ${escHtml(r.notes)}</div>` : ''}
+      <div class="req-actions">
+        <label style="font-size:13px">الحالة:</label>
+        <select onchange="setRequestStatus(${id}, this.value)">${opts}</select>
+        <button type="button" class="dash-btn-secondary" style="color:#c33;border-color:#fcc" onclick="deleteRequest(${id})">🗑️ حذف</button>
+      </div>
+    </div>`;
+}
+
+async function setRequestStatus(id, status) {
+  if (!REQ_STATUS_LABELS[status]) return;
+  const { error } = await client.from('cart_quote_requests').update({ status }).eq('id', id);
+  if (error) { alert('تعذّر تغيير الحالة: ' + error.message); renderRequests(); return; }
+  const r = allRequests.find(x => Number(x.id) === id);
+  if (r) r.status = status;
+  updateRequestsBadge(allRequests.filter(x => x.status === 'new').length);
+  renderRequests();
+}
+
+async function deleteRequest(id) {
+  const r = allRequests.find(x => Number(x.id) === id);
+  if (!confirm(`حذف طلب "${r ? r.customer_name : id}" نهائيًا؟`)) return;
+  const { error } = await client.from('cart_quote_requests').delete().eq('id', id);
+  if (error) { alert('تعذّر الحذف: ' + error.message); return; }
+  allRequests = allRequests.filter(x => Number(x.id) !== id);
+  updateRequestsBadge(allRequests.filter(x => x.status === 'new').length);
+  renderRequests();
+}
