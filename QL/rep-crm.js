@@ -7,7 +7,8 @@
 
 let client = null;
 let currentSession = null;
-let isAdmin = false;
+let isAdmin = false;        // يشوف كل العروض + نشاط المناديب (أدمن قديم أو صلاحية reps.activity.read)
+let isLegacyAdmin = false;  // الحذف لسه مقصور على admin_users (سياسة DELETE القديمة)
 let allQuotes = []; // كل العروض اللي رجعت من الاستعلام (متفلترة أصلًا حسب الصلاحيات)
 let repFilterId = null; // null = من غير فلتر مندوب (أدمن بس)
 let activeDrafts = []; // مسودّات العروض الحالية (أدمن بس)
@@ -51,6 +52,13 @@ async function checkIsAdmin(email) {
   return !!data;
 }
 
+/* صلاحيات الدور الجديد (RBAC). الواجهة بتستخدمها للإخفاء/الإظهار بس —
+   الحماية الفعلية في RLS على السيرفر. لو الدالة فشلت بنرجع [] (أقل صلاحيات). */
+async function getMyPermissions() {
+  const { data, error } = await client.rpc("my_permissions");
+  return error || !Array.isArray(data) ? [] : data;
+}
+
 function showMsg(text, kind) {
   const el = $("[data-crm-message]");
   if (!el) return;
@@ -76,7 +84,9 @@ async function updateAuthState(session) {
   }
 
   const rep = await checkRepStatus(session.user.id);
-  isAdmin = await checkIsAdmin(session.user.email);
+  isLegacyAdmin = await checkIsAdmin(session.user.email);
+  const perms = await getMyPermissions();
+  isAdmin = isLegacyAdmin || perms.includes("reps.activity.read");
 
   if (!rep && !isAdmin) {
     authMsg.textContent = "هذا الحساب غير مفعّل كمندوب. تواصل مع الأدمن.";
@@ -92,7 +102,7 @@ async function updateAuthState(session) {
   authPanel.hidden = true;
   repPanel.hidden = false;
   logoutBtn.hidden = false;
-  userName.textContent = isAdmin ? `${rep?.display_name || session.user.email} (أدمن)` : (rep?.display_name || "—");
+  userName.textContent = isAdmin ? `${rep?.display_name || session.user.email} (${isLegacyAdmin ? "أدمن" : "إدارة"})` : (rep?.display_name || "—");
 
   if (!isAdmin && rep && !rep.can_access_crm) {
     repPanel.innerHTML = `<div class="card" style="text-align:center;padding:40px 18px;color:var(--muted)">
@@ -333,7 +343,7 @@ function renderQuoteList() {
           <button type="button" class="btn" data-toggle-detail="${q.id}" style="font-size:12px">التفاصيل</button>
           <button type="button" class="btn" data-quick-print="${q.id}" style="font-size:12px">طباعة</button>
           <a class="btn" href="feasibility-study.html?quote_id=${q.id}" target="_blank" rel="noopener" style="font-size:12px">دراسة جدوى</a>
-          ${isAdmin ? `<button type="button" class="btn btn-secondary dark" data-delete="${q.id}" style="font-size:12px">حذف</button>` : ""}
+          ${isLegacyAdmin ? `<button type="button" class="btn btn-secondary dark" data-delete="${q.id}" style="font-size:12px">حذف</button>` : ""}
         </td>
       </tr>
       <tr class="crm-quote-detail-row" id="detail-${q.id}" hidden><td colspan="${isAdmin ? 7 : 6}"></td></tr>
