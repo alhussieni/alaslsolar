@@ -231,8 +231,8 @@
     <section class="dashboard-card" data-auth-panel>
       <h2>تسجيل الدخول</h2>
       <form class="admin-form" id="loginForm">
-        <label for="loginEmail">البريد الإلكتروني</label>
-        <input id="loginEmail" type="email" autocomplete="email" dir="ltr" required>
+        <label for="loginEmail">اسم المستخدم أو البريد الإلكتروني</label>
+        <input id="loginEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr" required>
         <label for="loginPassword">كلمة المرور</label>
         <input id="loginPassword" type="password" autocomplete="current-password" dir="ltr" required>
         <button class="btn btn-primary" type="submit">دخول</button>
@@ -255,38 +255,41 @@
             <span>🏠 الرئيسية</span>
           </button>
           <div class="dash-nav-group">المحتوى</div>
-          <button class="dash-nav-item" data-target="section-stats" onclick="showDashSection('section-stats', this)">
+          <button class="dash-nav-item" data-perm="content.manage" data-target="section-stats" onclick="showDashSection('section-stats', this)">
             <span>🔢 الإحصائيات</span>
           </button>
-          <button class="dash-nav-item" data-target="section-articles" onclick="showDashSection('section-articles', this)">
+          <button class="dash-nav-item" data-perm="articles.write" data-target="section-articles" onclick="showDashSection('section-articles', this)">
             <span>📝 المقالات</span>
           </button>
-          <button class="dash-nav-item" data-target="section-projects" onclick="showDashSection('section-projects', this)">
+          <button class="dash-nav-item" data-perm="content.manage" data-target="section-projects" onclick="showDashSection('section-projects', this)">
             <span>📁 المشاريع</span>
           </button>
-          <button class="dash-nav-item" data-target="section-faq" onclick="showDashSection('section-faq', this)">
+          <button class="dash-nav-item" data-perm="content.manage" data-target="section-faq" onclick="showDashSection('section-faq', this)">
             <span>❓ الأسئلة الشائعة</span>
           </button>
           <div class="dash-nav-group">المتجر</div>
-          <button class="dash-nav-item" data-target="section-requests" onclick="showDashSection('section-requests', this)">
+          <button class="dash-nav-item" data-perm="leads.manage" data-target="section-requests" onclick="showDashSection('section-requests', this)">
             <span>📥 طلبات العملاء</span><span class="dash-nav-count" id="navRequestsCount" hidden>0</span>
           </button>
-          <button class="dash-nav-item" data-target="section-products" onclick="showDashSection('section-products', this)">
+          <button class="dash-nav-item" data-perm="products.write" data-target="section-products" onclick="showDashSection('section-products', this)">
             <span>🛒 المنتجات</span>
           </button>
-          <button class="dash-nav-item" data-target="section-brands" onclick="showDashSection('section-brands', this)">
+          <button class="dash-nav-item" data-perm="content.manage" data-target="section-brands" onclick="showDashSection('section-brands', this)">
             <span>🏷️ شعارات الماركات</span>
           </button>
-          <button class="dash-nav-item" data-target="section-supplier-discounts" onclick="showDashSection('section-supplier-discounts', this)">
+          <button class="dash-nav-item" data-perm="pricing.manage" data-target="section-supplier-discounts" onclick="showDashSection('section-supplier-discounts', this)">
             <span>💸 خصومات الموردين</span>
           </button>
           <div class="dash-nav-group">الحاسبات والتسعير</div>
-          <button class="dash-nav-item" data-target="section-calc" onclick="showDashSection('section-calc', this)">
+          <button class="dash-nav-item" data-perm="pricing.manage" data-target="section-calc" onclick="showDashSection('section-calc', this)">
             <span>🧮 الحاسبات والتكاليف</span>
           </button>
           <div class="dash-nav-group">الفريق</div>
-          <button class="dash-nav-item" data-target="section-reps" onclick="showDashSection('section-reps', this)">
+          <button class="dash-nav-item" data-perm="reps.manage" data-target="section-reps" onclick="showDashSection('section-reps', this)">
             <span>👥 المناديب</span>
+          </button>
+          <button class="dash-nav-item" data-perm="staff.manage" onclick="location.href='admin/staff.html'">
+            <span>🔐 إدارة الموظفين والصلاحيات</span>
           </button>
         </nav>
 

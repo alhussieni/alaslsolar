@@ -344,14 +344,55 @@ function openNewProjectEditor() {
   initRichEditor("proj_new", { initialHtml: "<p></p>", hiddenFieldId: "projectContent", editorElId: "projectContentEditor_proj_new" });
 }
 
-function updateAuthState(session) {
+/* صلاحيات المستخدم الحالي (RBAC). بتتحكم في إظهار/إخفاء أقسام اللوحة فقط —
+   الحماية الفعلية على السيرفر (RLS)، فلو الدالة فشلت بنرجع [] (أقل صلاحيات). */
+let dashPerms = [];
+
+async function loadDashPerms() {
+  const { data, error } = await client.rpc("my_permissions");
+  if (error || !Array.isArray(data)) { dashPerms = []; return false; }
+  dashPerms = data;
+  return true;
+}
+
+function applyDashPermissions() {
+  document.querySelectorAll(".dash-sidebar [data-perm]").forEach((el) => {
+    el.style.display = dashPerms.includes(el.getAttribute("data-perm")) ? "" : "none";
+  });
+  // عنوان المجموعة يختفي لو كل أزرارها مخفية
+  document.querySelectorAll(".dash-sidebar .dash-nav-group").forEach((g) => {
+    let n = g.nextElementSibling, any = false;
+    while (n && !n.classList.contains("dash-nav-group")) {
+      if (n.style.display !== "none") any = true;
+      n = n.nextElementSibling;
+    }
+    g.style.display = any ? "" : "none";
+  });
+}
+
+async function updateAuthState(session) {
   const authPanel = document.querySelector("[data-auth-panel]");
   const dashboard = document.querySelector("[data-dashboard]");
 
   if (session) {
+    const ok = await loadDashPerms();
+    if (!ok) {
+      authPanel.hidden = false;
+      dashboard.hidden = true;
+      setText("[data-auth-message]", "تعذر التحقق من الصلاحيات، حدّث الصفحة وحاول مرة أخرى.");
+      return;
+    }
+    if (!dashPerms.includes("dashboard.access")) {
+      await client.auth.signOut();
+      authPanel.hidden = false;
+      dashboard.hidden = true;
+      setText("[data-auth-message]", "هذا الحساب لا يملك صلاحية الدخول للوحة التحكم.");
+      return;
+    }
     authPanel.hidden = true;
     dashboard.hidden = false;
     setText("[data-user-email]", session.user.email);
+    applyDashPermissions();
     loadLists();
   } else {
     authPanel.hidden = false;
@@ -361,7 +402,9 @@ function updateAuthState(session) {
 
 async function handleLogin(event) {
   event.preventDefault();
-  const email = document.getElementById("loginEmail").value.trim();
+  // اسم مستخدم من غير @ بيتحول لإيميل الموظفين الداخلي (نفس تحويل QL و staff-admin)
+  let email = document.getElementById("loginEmail").value.trim();
+  if (email && email.indexOf("@") < 0) email = email.toLowerCase() + "@staff.alaslsolar.com";
   const password = document.getElementById("loginPassword").value;
   setText("[data-auth-message]", "جاري تسجيل الدخول...");
 
@@ -372,7 +415,7 @@ async function handleLogin(event) {
   }
 
   setText("[data-auth-message]", "");
-  updateAuthState(data.session);
+  await updateAuthState(data.session);
 }
 
 async function handleLogout() {
