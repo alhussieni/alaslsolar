@@ -15,6 +15,7 @@
   <script defer src="rep-header.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="../supabase-config.js"></script>
+  <script defer src="auth-utils.js"></script>
   <script defer src="index.js"></script>
   <style>
     /* ---------- إعادة تصميم بوابة المناديب: مجموعات + كروت أخف (بدون
@@ -47,8 +48,8 @@
     <section class="dashboard-card" data-auth-panel>
       <h2>تسجيل دخول المندوب</h2>
       <form class="admin-form" data-login-form>
-        <label for="loginEmail">البريد الإلكتروني</label>
-        <input id="loginEmail" type="email" autocomplete="username" required>
+        <label for="loginEmail">اسم المستخدم أو البريد الإلكتروني</label>
+        <input type="text" id="loginEmail" required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr">
         <label for="loginPassword">كلمة المرور</label>
         <input id="loginPassword" type="password" autocomplete="current-password" required>
         <button class="btn btn-primary" type="submit">دخول</button>

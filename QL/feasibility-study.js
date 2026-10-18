@@ -62,7 +62,7 @@ async function handleLogin(e) {
   e.preventDefault();
   const msg = $("[data-auth-message]");
   msg.textContent = "جاري الدخول..."; msg.className = "form-note";
-  const email = $("#loginEmail").value.trim();
+  const email = window.QLAuth ? window.QLAuth.toLoginEmail($("#loginEmail").value) : $("#loginEmail").value.trim();
   const password = $("#loginPassword").value;
   const { data, error } = await client.auth.signInWithPassword({ email, password });
   if (error) { msg.textContent = "بيانات الدخول غير صحيحة."; msg.className = "form-note error"; return; }

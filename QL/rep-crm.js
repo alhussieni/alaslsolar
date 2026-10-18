@@ -423,7 +423,7 @@ function printSavedQuote(q) {
 
 async function handleLogin(e) {
   e.preventDefault();
-  const email = $("#loginEmail").value.trim();
+  const email = window.QLAuth ? window.QLAuth.toLoginEmail($("#loginEmail").value) : $("#loginEmail").value.trim();
   const password = $("#loginPassword").value;
   const authMsg = $("[data-auth-message]");
   authMsg.textContent = "جاري الدخول...";

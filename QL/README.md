@@ -7,6 +7,7 @@
 | الملف | الدور |
 |---|---|
 | `rep-header.js` | هيدر ثابت مشترك لكل الصفحات (الروابط في مصفوفة `NAV_ITEMS`) |
+| `auth-utils.js` | دخول بالـ username أو الإيميل (`QLAuth.toLoginEmail`) — لازم يتحمّل قبل ملف الصفحة |
 | `rep-widgets.css` | تنسيقات مشتركة، **ومنها التقسيم الموحّد `.rep-split`** |
 | `quote-item-utils.js` | قراءة بنود `quotes.items` بشكل موحّد (qty / unit price / line total) |
 | `product-labels.js` | تسمية المنتجات في العروض (`window.ProductLabels`) |
