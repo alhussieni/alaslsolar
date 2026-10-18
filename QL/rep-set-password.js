@@ -29,7 +29,7 @@ async function handleSubmit(e) {
   const newPassword = $("#newPassword").value;
   const confirmPassword = $("#confirmPassword").value;
 
-  if (newPassword.length < 6) { showMsg("كلمة المرور لازم تكون 6 حروف/أرقام على الأقل.", "error"); return; }
+  if (newPassword.length < 10 || !/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) { showMsg("كلمة المرور لازم تكون 10 خانات على الأقل وتحتوي على حروف وأرقام.", "error"); return; }
   if (newPassword !== confirmPassword) { showMsg("تأكيد كلمة المرور مش مطابق.", "error"); return; }
 
   showMsg("جاري التفعيل...");

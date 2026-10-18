@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>العملاء والمتابعة | مناديب الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="rep-widgets.css">
+  <script defer src="rep-header.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../supabase-config.js"></script>
+  <script defer src="auth-utils.js"></script>
+  <script defer src="rep-customers.js"></script>
+  <style>
+    .rc-section { margin-bottom: var(--space-3); }
+    .rc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rc-table th, .rc-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: top; }
+    .rc-table th { color: var(--muted); font-size: 11.5px; font-weight: 700; }
+    .rc-table tbody tr.rc-click:hover { background: #faf7f2; cursor: pointer; }
+    .rc-table tbody tr.rc-selected { background: var(--brand-soft); }
+    .rc-overdue { color: #b23b23; font-weight: 700; }
+    .rc-scroll { overflow-x: auto; }
+    .rc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-2); }
+    .rc-box { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; background: #fff; }
+    .rc-box h4 { margin: 0 0 8px; font-size: 14px; }
+    .rc-box label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 3px; }
+    .rc-box input, .rc-box select, .rc-box textarea { width: 100%; }
+    .rc-timeline { list-style: none; margin: 0; padding: 0; }
+    .rc-timeline li { padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+    .rc-timeline .meta { color: var(--muted); font-size: 11.5px; }
+    .rc-tag { display: inline-block; padding: 1px 8px; border-radius: 99px; background: var(--brand-soft); font-size: 11.5px; margin-inline-end: 6px; }
+    .rc-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: var(--space-2); }
+    .rc-filters input, .rc-filters select { flex: 1; min-width: 140px; }
+    .rc-toolbar-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">بوابة المناديب</p>
+      <h1>العملاء والمتابعة</h1>
+    </div>
+  </section>
+
+  <section class="dashboard-card" data-auth-panel style="max-width:420px;text-align:center">
+    <h2>تسجيل دخول</h2>
+    <form class="admin-form" data-login-form>
+      <label for="loginEmail">اسم المستخدم أو البريد الإلكتروني</label>
+      <input type="text" id="loginEmail" required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr">
+      <label for="loginPassword">كلمة المرور</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password">
+      <button type="submit" class="btn btn-primary">دخول</button>
+      <p class="form-note" data-auth-message></p>
+    </form>
+  </section>
+
+  <div class="rep-main" data-rep-panel hidden style="padding-top:0">
+    <div class="dashboard-toolbar" style="position:static">
+      <div><h2 style="margin:0;font-size:18px" data-user-name>—</h2></div>
+      <button class="btn btn-secondary dark" data-logout>تسجيل خروج</button>
+    </div>
+    <p class="rq-msg" data-page-message role="status"></p>
+
+    <section class="card rc-section" data-overview-section hidden>
+      <div class="rc-toolbar-row">
+        <h3 style="margin:0">أداء المناديب</h3>
+        <select data-overview-days aria-label="الفترة">
+          <option value="7">آخر 7 أيام</option>
+          <option value="30" selected>آخر 30 يوم</option>
+          <option value="90">آخر 90 يوم</option>
+        </select>
+      </div>
+      <div class="rc-scroll">
+        <table class="rc-table">
+          <thead><tr><th>المندوب</th><th>عروض</th><th>قيمة العروض</th><th>مقبولة</th><th>قيمة المقبولة</th><th>عملاء</th><th>متابعات متأخرة</th><th>آخر نشاط</th></tr></thead>
+          <tbody data-overview-body></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card rc-section">
+      <h3 style="margin-top:0">متابعات مفتوحة</h3>
+      <div class="rc-scroll">
+        <table class="rc-table">
+          <thead><tr><th>العميل</th><th>الموعد</th><th>المندوب</th><th>ملاحظة</th><th></th></tr></thead>
+          <tbody data-followups-body></tbody>
+        </table>
+      </div>
+      <p class="rq-msg" data-followups-empty hidden>لا توجد متابعات مفتوحة.</p>
+    </section>
+
+    <section class="card rc-section">
+      <h3 style="margin-top:0">العملاء</h3>
+      <div class="rc-filters">
+        <input type="search" data-customer-search placeholder="بحث بالاسم أو الموبايل أو المدينة">
+      </div>
+      <div class="rc-scroll">
+        <table class="rc-table">
+          <thead><tr><th>الاسم</th><th>الموبايل</th><th>المدينة</th><th>المندوب</th><th>عروض</th></tr></thead>
+          <tbody data-customers-body></tbody>
+        </table>
+      </div>
+      <p class="rq-msg" data-customers-empty hidden>لا يوجد عملاء.</p>
+    </section>
+
+    <section class="card rc-section" data-detail-section hidden>
+      <div class="rc-toolbar-row">
+        <h3 style="margin:0" data-detail-title>—</h3>
+        <button type="button" class="btn btn-secondary dark" data-detail-close>إغلاق</button>
+      </div>
+      <p class="rq-msg" data-detail-info></p>
+      <div class="rc-grid" data-detail-forms></div>
+      <h4>عروض الأسعار</h4>
+      <div class="rc-scroll">
+        <table class="rc-table">
+          <thead><tr><th>#</th><th>النوع</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+          <tbody data-detail-quotes></tbody>
+        </table>
+      </div>
+      <h4>سجل النشاط</h4>
+      <ul class="rc-timeline" data-detail-timeline></ul>
+    </section>
+  </div>
+</main>
+
+</body>
+</html>

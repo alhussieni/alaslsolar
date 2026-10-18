@@ -8,6 +8,7 @@
     { href: "rep-quotes.html", label: "عروض المنتجات", icon: "fa-file-invoice" },
     { href: "feasibility-study.html", label: "دراسة جدوى", icon: "fa-chart-line" },
     { href: "rep-crm.html", label: "CRM", icon: "fa-users" },
+    { href: "rep-customers.html", label: "العملاء والمتابعة", icon: "fa-address-book" },
     { href: "rep-settings.html", label: "الإعدادات", icon: "fa-gear" },
   ];
 
