@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>إدارة الموظفين | الأصل سولار</title>
+<style>
+  :root{--bg:#f5f6f8;--card:#fff;--text:#1b1f24;--muted:#667085;--line:#e3e6ea;--brand:#0b6b3a;--brand-text:#fff;--danger:#b42318;--warn:#b54708;--ok:#067647;}
+  @media (prefers-color-scheme:dark){:root{--bg:#14171a;--card:#1d2125;--text:#eceff2;--muted:#9aa4af;--line:#2d3339;--brand:#2fa866;--brand-text:#06210f;--danger:#f97066;--warn:#fdb022;--ok:#47cd89;}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--line)}
+  header h1{font-size:18px;margin:0}
+  main{max-width:1100px;margin:0 auto;padding:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  .card h2{font-size:16px;margin:0 0 12px}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input[type=text],input[type=password],input[type=email]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+  input[dir=ltr]{text-align:left}
+  .row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+  .row>input{flex:1;min-width:160px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 12px}
+  button.primary{background:var(--brand);color:var(--brand-text);border-color:var(--brand);font-weight:600}
+  button.danger{color:var(--danger);border-color:var(--danger)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .roles{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0}
+  .roles label{display:flex;gap:6px;align-items:center;margin:0;color:var(--text);font-size:14px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;font-size:14px}
+  th{color:var(--muted);font-weight:600;font-size:13px}
+  .scroll{overflow-x:auto}
+  .tag{display:inline-block;padding:2px 8px;border-radius:99px;border:1px solid var(--line);font-size:12px;margin:0 0 4px 4px}
+  .on{color:var(--ok)} .off{color:var(--danger)}
+  .actions{display:flex;gap:6px;flex-wrap:wrap}
+  #msg{position:sticky;top:0;z-index:5;margin:0 0 12px;padding:10px 12px;border-radius:8px;display:none;font-size:14px}
+  #msg.ok{display:block;background:rgba(6,118,71,.12);color:var(--ok);border:1px solid var(--ok)}
+  #msg.err{display:block;background:rgba(180,35,24,.12);color:var(--danger);border:1px solid var(--danger)}
+  dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);max-width:440px;width:92%}
+  dialog::backdrop{background:rgba(0,0,0,.45)}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  .hidden{display:none!important}
+  #login{max-width:380px;margin:60px auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>إدارة الموظفين والصلاحيات</h1>
+  <div id="who" class="hint"></div>
+  <button id="logout" class="hidden">تسجيل الخروج</button>
+</header>
+<main>
+  <div id="msg" role="status"></div>
+
+  <section id="login" class="card">
+    <h2>تسجيل الدخول</h2>
+    <label for="l_id">اسم المستخدم أو الإيميل</label>
+    <input id="l_id" type="text" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <label for="l_pw">كلمة المرور</label>
+    <input id="l_pw" type="password" dir="ltr" autocomplete="current-password">
+    <p><button id="l_btn" class="primary">دخول</button></p>
+  </section>
+
+  <section id="denied" class="card hidden">
+    <h2>غير مصرح</h2>
+    <p>هذه الصفحة للسوبر أدمن فقط.</p>
+  </section>
+
+  <div id="app" class="hidden">
+    <section class="card">
+      <h2>إضافة مستخدم جديد</h2>
+      <div class="grid">
+        <div>
+          <label for="c_login">اسم المستخدم (حروف إنجليزية صغيرة وأرقام) أو إيميل</label>
+          <input id="c_login" type="text" dir="ltr" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="مثال: ahmed.sales">
+          <div class="hint">اسم المستخدم من 3 إلى 32 حرف: a-z 0-9 . _ -</div>
+        </div>
+        <div>
+          <label for="c_name">الاسم الظاهر</label>
+          <input id="c_name" type="text" autocomplete="off" maxlength="80">
+        </div>
+      </div>
+      <label for="c_pw">كلمة المرور (10 حروف على الأقل، حروف وأرقام)</label>
+      <div class="row">
+        <input id="c_pw" type="text" dir="ltr" autocomplete="new-password" spellcheck="false">
+        <button id="c_gen" type="button">توليد</button>
+        <button id="c_copy" type="button">نسخ</button>
+      </div>
+      <label>الأدوار</label>
+      <div id="c_roles" class="roles"></div>
+      <div id="c_flags" class="roles hidden">
+        <label><input type="checkbox" id="f_offgrid" checked> الأوف جريد</label>
+        <label><input type="checkbox" id="f_products" checked> المنتجات</label>
+        <label><input type="checkbox" id="f_crm" checked> CRM</label>
+      </div>
+      <p><button id="c_btn" class="primary">إنشاء المستخدم</button></p>
+      <div class="hint">انسخ كلمة المرور وسلّمها للموظف الآن. لا تُعرض مرة أخرى بعد الإنشاء، لكن تقدر تغيّرها في أي وقت.</div>
+    </section>
+
+    <section class="card">
+      <h2>المستخدمون</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>الاسم</th><th>الدخول</th><th>الأدوار</th><th>الحالة</th><th>آخر دخول</th><th>إجراءات</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<dialog id="dlg_pw">
+  <h2>تغيير كلمة المرور</h2>
+  <p id="dlg_pw_who" class="hint"></p>
+  <div class="row">
+    <input id="p_pw" type="text" dir="ltr" autocomplete="new-password" spellcheck="false">
+    <button id="p_gen" type="button">توليد</button>
+    <button id="p_copy" type="button">نسخ</button>
+  </div>
+  <div class="hint">جلسات الموظف المفتوحة حالياً قد تفضل شغالة لحد ساعة. للإيقاف الفوري استخدم «تعطيل».</div>
+  <p class="row"><button id="p_ok" class="primary">حفظ</button><button id="p_cancel">إلغاء</button></p>
+</dialog>
+
+<dialog id="dlg_roles">
+  <h2>تعديل الأدوار</h2>
+  <p id="dlg_roles_who" class="hint"></p>
+  <div id="r_roles" class="roles"></div>
+  <p class="row"><button id="r_ok" class="primary">حفظ</button><button id="r_cancel">إلغاء</button></p>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  // Public values by design (publishable key). Security is enforced by RLS + the staff-admin Edge Function.
+  var SUPABASE_URL = 'https://nymkmrdbicfuniobunth.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_vrHvQTuZT4kbzFP6hoIf0w_5FMFFk2e';
+  var EMAIL_DOMAIN = 'staff.alaslsolar.com';
+  var FN_URL = SUPABASE_URL + '/functions/v1/staff-admin';
+  var ROLES = [
+    { key: 'superadmin', label: 'سوبر أدمن' },
+    { key: 'admin', label: 'أدمن' },
+    { key: 'sales_manager', label: 'مدير مناديب' },
+    { key: 'sales_rep', label: 'مندوب' }
+  ];
+  var REP_ROLES = ['sales_rep', 'sales_manager'];
+  var ERRORS = {
+    forbidden: 'ليس لديك صلاحية.', invalid_token: 'انتهت الجلسة، سجّل الدخول من جديد.', missing_token: 'سجّل الدخول أولاً.',
+    username_or_email_required: 'اكتب اسم مستخدم أو إيميل.', invalid_username_format: 'اسم المستخدم غير صالح (a-z 0-9 . _ - من 3 إلى 32).',
+    invalid_email_format: 'الإيميل غير صالح.', display_name_required: 'الاسم الظاهر مطلوب.', roles_required: 'اختر دوراً واحداً على الأقل.',
+    password_too_short_min_10: 'كلمة المرور أقل من 10 حروف.', password_too_long_max_72_bytes: 'كلمة المرور طويلة جداً.',
+    password_needs_letter_and_digit: 'كلمة المرور لازم تحتوي حروف وأرقام.', password_contains_username: 'كلمة المرور لا يجب أن تحتوي اسم المستخدم.',
+    user_exists: 'المستخدم موجود بالفعل.', username_taken: 'اسم المستخدم مستخدم بالفعل.', staff_user_not_found: 'المستخدم غير موجود.',
+    cannot_deactivate_self: 'لا يمكنك تعطيل حسابك.', cannot_remove_own_superadmin: 'لا يمكنك إزالة دور السوبر أدمن عن نفسك.',
+    last_superadmin: 'لا يمكن تعطيل أو إزالة آخر سوبر أدمن.', internal_error: 'خطأ في الخادم، حاول مرة أخرى.'
+  };
+
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var $ = function (id) { return document.getElementById(id); };
+  var currentUser = null, users = [], dlgTarget = null;
+
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === 'class') el.className = attrs[k]; else el.setAttribute(k, attrs[k]);
+    });
+    for (var i = 2; i < arguments.length; i++) {
+      var c = arguments[i];
+      if (c == null) continue;
+      el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+    return el;
+  }
+  function msg(text, ok) { var m = $('msg'); m.textContent = text; m.className = ok ? 'ok' : 'err'; if (ok) setTimeout(function () { m.className = ''; m.textContent = ''; }, 6000); }
+  function errText(code) { return ERRORS[code] || ('تعذر تنفيذ العملية (' + code + ')'); }
+  function toEmail(id) { id = id.trim().toLowerCase(); return id.indexOf('@') >= 0 ? id : id + '@' + EMAIL_DOMAIN; }
+  function roleLabel(k) { var r = ROLES.filter(function (x) { return x.key === k; })[0]; return r ? r.label : k; }
+  function fmtDate(s) { if (!s) return '—'; try { return new Date(s).toLocaleString('ar-EG'); } catch (e) { return s; } }
+
+  function genPassword() {
+    var letters = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ', digits = '23456789', all = letters + digits + '!@#$%';
+    var buf = new Uint32Array(14); crypto.getRandomValues(buf);
+    var out = Array.prototype.map.call(buf, function (n) { return all[n % all.length]; });
+    out[0] = letters[buf[0] % letters.length]; out[1] = digits[buf[1] % digits.length];
+    return out.join('');
+  }
+  function copy(input) {
+    if (!input.value) return;
+    navigator.clipboard.writeText(input.value).then(function () { msg('تم النسخ.', true); }, function () { input.select(); msg('انسخ يدوياً.', false); });
+  }
+
+  async function call(action, payload) {
+    var s = (await sb.auth.getSession()).data.session;
+    if (!s) throw new Error('invalid_token');
+    var res = await fetch(FN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.access_token, 'apikey': SUPABASE_KEY },
+      body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+    });
+    var data = {}; try { data = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error(data.error || ('http_' + res.status));
+    return data;
+  }
+
+  function renderRoleBoxes(container, selected, onChange) {
+    container.textContent = '';
+    ROLES.forEach(function (r) {
+      var cb = h('input', { type: 'checkbox', value: r.key });
+      cb.checked = selected.indexOf(r.key) >= 0;
+      if (onChange) cb.addEventListener('change', onChange);
+      container.appendChild(h('label', {}, cb, r.label));
+    });
+  }
+  function checked(container) { return Array.prototype.filter.call(container.querySelectorAll('input'), function (i) { return i.checked; }).map(function (i) { return i.value; }); }
+
+  function renderUsers() {
+    var tb = $('rows'); tb.textContent = '';
+    users.forEach(function (u) {
+      var rolesCell = h('td', {}); u.roles.forEach(function (r) { rolesCell.appendChild(h('span', { 'class': 'tag' }, roleLabel(r))); });
+      var active = u.active && !u.banned;
+      var btnPw = h('button', {}, 'كلمة المرور'), btnRoles = h('button', {}, 'الأدوار');
+      var btnAct = h('button', { 'class': active ? 'danger' : '' }, active ? 'تعطيل' : 'تفعيل');
+      btnPw.addEventListener('click', function () { openPw(u); });
+      btnRoles.addEventListener('click', function () { openRoles(u); });
+      btnAct.addEventListener('click', function () { toggleActive(u, !active); });
+      tb.appendChild(h('tr', {},
+        h('td', {}, u.display_name || '—'),
+        h('td', { dir: 'ltr' }, u.username || u.email),
+        rolesCell,
+        h('td', { 'class': active ? 'on' : 'off' }, active ? 'نشط' : 'معطّل'),
+        h('td', {}, fmtDate(u.last_sign_in_at)),
+        h('td', {}, h('div', { 'class': 'actions' }, btnPw, btnRoles, btnAct))
+      ));
+    });
+  }
+
+  async function reload() {
+    try { users = (await call('list_users')).users; renderUsers(); }
+    catch (e) { msg(errText(e.message), false); }
+  }
+
+  function openPw(u) { dlgTarget = u; $('dlg_pw_who').textContent = (u.display_name || '') + ' — ' + (u.username || u.email); $('p_pw').value = ''; $('dlg_pw').showModal(); }
+  function openRoles(u) { dlgTarget = u; $('dlg_roles_who').textContent = (u.display_name || '') + ' — ' + (u.username || u.email); renderRoleBoxes($('r_roles'), u.roles); $('dlg_roles').showModal(); }
+
+  async function toggleActive(u, active) {
+    if (!confirm(active ? 'تفعيل هذا المستخدم؟' : 'تعطيل هذا المستخدم؟ لن يستطيع تسجيل الدخول.')) return;
+    try { var r = await call('set_active', { user_id: u.id, active: active }); msg(r.legacy_reps_synced === false ? 'تم، لكن مزامنة جدول المناديب القديم لم تكتمل، راجعها.' : 'تم.', r.legacy_reps_synced !== false); await reload(); }
+    catch (e) { msg(errText(e.message), false); }
+  }
+
+  function syncFlags() { var show = checked($('c_roles')).some(function (r) { return REP_ROLES.indexOf(r) >= 0; }); $('c_flags').classList.toggle('hidden', !show); }
+
+  async function onLogin() {
+    var id = $('l_id').value, pw = $('l_pw').value;
+    if (!id || !pw) return msg('اكتب اسم المستخدم وكلمة المرور.', false);
+    $('l_btn').disabled = true;
+    var r = await sb.auth.signInWithPassword({ email: toEmail(id), password: pw });
+    $('l_btn').disabled = false;
+    if (r.error) return msg('بيانات الدخول غير صحيحة.', false);
+    $('l_pw').value = '';
+    await boot();
+  }
+
+  async function boot() {
+    var s = (await sb.auth.getSession()).data.session;
+    $('login').classList.toggle('hidden', !!s); $('logout').classList.toggle('hidden', !s);
+    $('app').classList.add('hidden'); $('denied').classList.add('hidden');
+    if (!s) { $('who').textContent = ''; return; }
+    currentUser = s.user; $('who').textContent = s.user.email;
+    var p = await sb.rpc('my_permissions');
+    var perms = p.data || [];
+    if (p.error || perms.indexOf('staff.manage') < 0) { $('denied').classList.remove('hidden'); return; }
+    $('app').classList.remove('hidden');
+    renderRoleBoxes($('c_roles'), ['sales_rep'], syncFlags); syncFlags();
+    await reload();
+  }
+
+  $('l_btn').addEventListener('click', onLogin);
+  $('l_pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') onLogin(); });
+  $('logout').addEventListener('click', async function () { await sb.auth.signOut(); users = []; await boot(); });
+  $('c_gen').addEventListener('click', function () { $('c_pw').value = genPassword(); });
+  $('c_copy').addEventListener('click', function () { copy($('c_pw')); });
+  $('p_gen').addEventListener('click', function () { $('p_pw').value = genPassword(); });
+  $('p_copy').addEventListener('click', function () { copy($('p_pw')); });
+  $('p_cancel').addEventListener('click', function () { $('p_pw').value = ''; $('dlg_pw').close(); });
+  $('r_cancel').addEventListener('click', function () { $('dlg_roles').close(); });
+
+  $('c_btn').addEventListener('click', async function () {
+    var login = $('c_login').value.trim(), roles = checked($('c_roles'));
+    var payload = { display_name: $('c_name').value, password: $('c_pw').value, roles: roles,
+      flags: { offgrid: $('f_offgrid').checked, products: $('f_products').checked, crm: $('f_crm').checked } };
+    if (login.indexOf('@') >= 0) payload.email = login; else payload.username = login;
+    $('c_btn').disabled = true;
+    try {
+      var r = await call('create_user', payload);
+      msg('تم إنشاء المستخدم. الدخول: ' + r.login + (r.legacy_reps_synced === false ? ' (تنبيه: مزامنة جدول المناديب القديم لم تكتمل)' : ''), r.legacy_reps_synced !== false);
+      $('c_login').value = ''; $('c_name').value = ''; // keep password visible so you can copy it once
+      await reload();
+    } catch (e) { msg(errText(e.message), false); }
+    $('c_btn').disabled = false;
+  });
+
+  $('p_ok').addEventListener('click', async function () {
+    try { await call('set_password', { user_id: dlgTarget.id, password: $('p_pw').value }); $('p_pw').value = ''; $('dlg_pw').close(); msg('تم تغيير كلمة المرور.', true); }
+    catch (e) { msg(errText(e.message), false); }
+  });
+  $('r_ok').addEventListener('click', async function () {
+    try { var r = await call('set_roles', { user_id: dlgTarget.id, roles: checked($('r_roles')) }); $('dlg_roles').close(); msg(r.legacy_reps_synced === false ? 'تم، لكن مزامنة جدول المناديب القديم لم تكتمل، راجعها.' : 'تم تحديث الأدوار.', r.legacy_reps_synced !== false); await reload(); }
+    catch (e) { msg(errText(e.message), false); }
+  });
+
+  boot();
+})();
+</script>
+</body>
+</html>
