@@ -1,132 +1,148 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0d0b0a">
-<title>بوابة الإدارة | الأصل للطاقة الشمسية</title>
-<style>
-  :root{--bg:#f5f6f8;--card:#fff;--text:#1b1f24;--muted:#667085;--line:#e3e6ea;--brand:#0b6b3a;--brand-text:#fff;--danger:#b42318;}
-  @media (prefers-color-scheme:dark){:root{--bg:#14171a;--card:#1d2125;--text:#eceff2;--muted:#9aa4af;--line:#2d3339;--brand:#2fa866;--brand-text:#06210f;--danger:#f97066;}}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--line)}
-  header h1{margin:0;font-size:18px}
-  .who{font-size:13px;color:var(--muted)}
-  main{max-width:960px;margin:0 auto;padding:22px 16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
-  #login{max-width:380px;margin:50px auto}
-  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
-  input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;direction:ltr;text-align:left}
-  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:9px 14px}
-  button.primary{background:var(--brand);color:var(--brand-text);border-color:var(--brand);font-weight:700;width:100%;margin-top:14px}
-  button:disabled{opacity:.55;cursor:not-allowed}
-  .msg{min-height:22px;font-size:13px;margin-top:10px;color:var(--danger)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:6px}
-  a.tile{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .15s,transform .15s}
-  a.tile:hover,a.tile:focus-visible{border-color:var(--brand);transform:translateY(-2px);outline:none}
-  .tile .ico{font-size:28px;line-height:1}
-  .tile h2{margin:10px 0 4px;font-size:17px}
-  .tile p{margin:0;font-size:13px;color:var(--muted)}
-  .tile .soon{display:inline-block;margin-top:8px;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
-  h3{margin:0 0 4px}
-  .hint{color:var(--muted);font-size:13px}
-  .hidden{display:none!important}
-</style>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>بوابة الإدارة | الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../QL/rep-widgets.css">
+  <style>
+    /* نفس تصميم بوابة المناديب (QL/index.html): مجموعات + كروت خفيفة بدون ظل. */
+    .ql-group { margin-top: 32px; }
+    .ql-group:first-of-type { margin-top: 0; }
+    .ql-group-title { font-size: 13px; font-weight: 800; color: var(--muted); margin: 0 0 16px; }
+    .ql-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .ql-card.card {
+      text-align: center; text-decoration: none; color: inherit; display: block;
+      box-shadow: none; transition: border-color .15s, background .15s; padding: 24px;
+    }
+    .ql-card.card:hover { transform: none; box-shadow: none; border-color: var(--brand); background: var(--brand-soft); }
+    .ql-card i { font-size: 28px; color: var(--brand); margin-bottom: 8px; }
+    .ql-card h3 { margin: 8px 0 4px; }
+    .ql-card p { font-size: 13px; color: var(--muted); margin: 0; }
+    .ql-soon { display: inline-block; margin-top: 8px; padding: 1px 10px; border-radius: 99px; background: var(--brand-soft); color: var(--brand-dark); font-size: 11.5px; font-weight: 800; }
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-<header>
-  <h1>بوابة الإدارة</h1>
-  <span class="who" id="who"></span>
-  <button id="logout" class="hidden">تسجيل الخروج</button>
-</header>
-<main>
-  <section id="login" class="card">
-    <h3>تسجيل الدخول</h3>
-    <p class="hint">دخول واحد لكل الأقسام اللي صلاحيتك تسمح بها.</p>
-    <label for="l_id">اسم المستخدم أو البريد الإلكتروني</label>
-    <input id="l_id" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
-    <label for="l_pw">كلمة المرور</label>
-    <input id="l_pw" type="password" autocomplete="current-password">
-    <button id="l_btn" class="primary">دخول</button>
-    <div class="msg" id="l_msg" role="status"></div>
-  </section>
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <a class="dashboard-logo" href="../index.html"><img src="../logo-white.png" alt="Al Asl Solar logo"></a>
+      <div class="dashboard-hero-text">
+        <p class="eyebrow" style="margin-bottom:2px">الأصل للطاقة الشمسية</p>
+        <h1>بوابة الإدارة</h1>
+        <p>دخول واحد لكل الأقسام اللي صلاحيتك تسمح بها</p>
+      </div>
+    </section>
 
-  <section id="home" class="hidden">
-    <h3>أقسامك</h3>
-    <p class="hint" id="home_hint"></p>
-    <div class="grid" id="tiles"></div>
-  </section>
-</main>
+    <section class="dashboard-card" id="login" data-auth-panel>
+      <h2>تسجيل دخول الموظفين</h2>
+      <form class="admin-form" id="login_form" style="text-align:right">
+        <label for="l_id">اسم المستخدم أو البريد الإلكتروني</label>
+        <input type="text" id="l_id" required autocomplete="username" autocapitalize="none" spellcheck="false" dir="ltr">
+        <label for="l_pw">كلمة المرور</label>
+        <input type="password" id="l_pw" required autocomplete="current-password">
+        <button class="btn btn-primary" type="submit" id="l_btn">دخول</button>
+        <p class="form-note" id="l_msg" role="status"></p>
+      </form>
+    </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="../supabase-config.js"></script>
-<script>
-(function () {
-  'use strict';
-  // كل الأقسام بتشارك نفس جلسة Supabase (نفس الدومين + نفس العميل)، فتسجيل الدخول هنا بيفتح الباقي بدون دخول تاني.
-  // ظهور البطاقة تجميل فقط: الحماية الفعلية في RLS ودوال السيرفر.
-  var EMAIL_DOMAIN = 'staff.alaslsolar.com';
-  var MODULES = [
-    { key: 'dashboard', icon: '🛠️', title: 'لوحة التحكم', desc: 'المنتجات والمقالات والمحتوى وطلبات الموقع', href: '../dashboard.html', any: ['dashboard.access'] },
-    { key: 'customers', icon: '📇', title: 'العملاء والمتابعة', desc: 'العملاء، المتابعات، حالة العروض، وأداء المناديب', href: '../QL/rep-customers.html', any: ['customers.read_own', 'customers.read_all'] },
-    { key: 'crm', icon: '🧾', title: 'سجل العروض (CRM)', desc: 'كل عروض الأسعار ونشاط المناديب المباشر', href: '../QL/rep-crm.html', any: ['crm.access'] },
-    { key: 'ql', icon: '☀️', title: 'عروض الأسعار (QL)', desc: 'إصدار عروض أسعار الطاقة الشمسية والري والأوف جريد', href: '../QL/', any: ['ql.access'] },
-    { key: 'staff', icon: '🔐', title: 'إدارة الموظفين', desc: 'إنشاء المستخدمين، كلمات المرور، الأدوار والصلاحيات', href: '../admin/staff.html', any: ['staff.manage'] },
-    { key: 'erp', icon: '🏭', title: 'ERP', desc: 'المخازن والمشتريات والحسابات', href: '../erp/', any: ['erp.access'], soon: true }
-  ];
+    <section class="dashboard-content hidden" id="home">
+      <div class="dashboard-toolbar">
+        <div>
+          <h2>أهلًا بيك، <span id="who"></span></h2>
+          <p id="home_hint">اختار القسم اللي محتاجه</p>
+        </div>
+        <button class="btn btn-secondary dark" type="button" id="logout">تسجيل خروج</button>
+      </div>
+      <div id="groups"></div>
+    </section>
+  </main>
 
-  var sb = window.getAlaslSupabase ? window.getAlaslSupabase() : null;
-  var $ = function (id) { return document.getElementById(id); };
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="../supabase-config.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    // كل الأقسام بتشارك نفس جلسة Supabase (نفس الدومين + نفس العميل)، فالدخول من هنا بيفتح الباقي بدون دخول تاني.
+    // ظهور الكارت تجميل فقط: الحماية الفعلية في RLS ودوال السيرفر.
+    var EMAIL_DOMAIN = 'staff.alaslsolar.com';
+    var GROUPS = [
+      { title: 'العمل اليومي', modules: [
+        { icon: 'fa-address-book', title: 'العملاء والمتابعة', desc: 'العملاء والمتابعات وحالة العروض وأداء المناديب', href: '../QL/rep-customers.html', any: ['customers.read_own', 'customers.read_all'] },
+        { icon: 'fa-users', title: 'CRM — عروض الأسعار', desc: 'كل عروض الأسعار ونشاط المناديب المباشر', href: '../QL/rep-crm.html', any: ['crm.access'] },
+        { icon: 'fa-file-invoice', title: 'عروض الأسعار (QL)', desc: 'أوف جريد، منتجات، محطات ري، ودراسات جدوى', href: '../QL/', any: ['ql.access'] }
+      ] },
+      { title: 'الإدارة', modules: [
+        { icon: 'fa-gauge-high', title: 'لوحة التحكم', desc: 'المنتجات والمقالات والمحتوى وطلبات الموقع', href: '../dashboard.html', any: ['dashboard.access'] },
+        { icon: 'fa-user-shield', title: 'إدارة الموظفين', desc: 'المستخدمون وكلمات المرور والأدوار وفتح QL', href: '../admin/staff.html', any: ['staff.manage'] },
+        { icon: 'fa-industry', title: 'ERP', desc: 'المخازن والمشتريات والحسابات', href: '../erp/', any: ['erp.access'], soon: true }
+      ] }
+    ];
 
-  function h(tag, attrs) {
-    var el = document.createElement(tag);
-    Object.keys(attrs || {}).forEach(function (k) { if (k === 'class') el.className = attrs[k]; else if (k === 'text') el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); });
-    for (var i = 2; i < arguments.length; i++) { var c = arguments[i]; if (c != null) el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }
-    return el;
-  }
-  function toEmail(v) { v = v.trim(); return v.indexOf('@') >= 0 ? v : v.toLowerCase() + '@' + EMAIL_DOMAIN; }
+    var sb = window.getAlaslSupabase ? window.getAlaslSupabase() : null;
+    var $ = function (id) { return document.getElementById(id); };
 
-  async function render() {
-    var s = (await sb.auth.getSession()).data.session;
-    $('login').classList.toggle('hidden', !!s);
-    $('home').classList.toggle('hidden', !s);
-    $('logout').classList.toggle('hidden', !s);
-    $('who').textContent = s ? (s.user.email || '') : '';
-    if (!s) return;
+    function h(tag, attrs) {
+      var el = document.createElement(tag);
+      Object.keys(attrs || {}).forEach(function (k) { if (k === 'class') el.className = attrs[k]; else if (k === 'text') el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); });
+      for (var i = 2; i < arguments.length; i++) { var c = arguments[i]; if (c != null) el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }
+      return el;
+    }
+    function toEmail(v) { v = v.trim(); return v.indexOf('@') >= 0 ? v : v.toLowerCase() + '@' + EMAIL_DOMAIN; }
+    function setMsg(t) { $('l_msg').textContent = t || ''; }
 
-    var r = await sb.rpc('my_permissions');
-    if (r.error || !Array.isArray(r.data)) { $('home_hint').textContent = 'تعذر التحقق من الصلاحيات، حدّث الصفحة.'; $('tiles').textContent = ''; return; }
-    var perms = r.data;
-    var tiles = $('tiles'); tiles.textContent = '';
-    var shown = MODULES.filter(function (m) { return m.any.some(function (p) { return perms.indexOf(p) >= 0; }); });
-    shown.forEach(function (m) {
-      var a = h('a', { 'class': 'tile', href: m.href }, h('div', { 'class': 'ico', text: m.icon }), h('h2', { text: m.title }), h('p', { text: m.desc }));
-      if (m.soon) a.appendChild(h('span', { 'class': 'soon', text: 'قيد التجهيز' }));
-      tiles.appendChild(a);
-    });
-    $('home_hint').textContent = shown.length ? '' : 'هذا الحساب لا يملك صلاحية لأي قسم حاليًا. تواصل مع الإدارة.';
-  }
+    async function render() {
+      var s = (await sb.auth.getSession()).data.session;
+      $('login').classList.toggle('hidden', !!s);
+      $('home').classList.toggle('hidden', !s);
+      if (!s) return;
+      $('who').textContent = s.user.email || '';
 
-  async function login() {
-    var id = $('l_id').value, pw = $('l_pw').value;
-    $('l_msg').textContent = '';
-    if (!id || !pw) { $('l_msg').textContent = 'اكتب اسم المستخدم وكلمة المرور.'; return; }
-    $('l_btn').disabled = true;
-    var r = await sb.auth.signInWithPassword({ email: toEmail(id), password: pw });
-    $('l_btn').disabled = false;
-    if (r.error) { $('l_msg').textContent = 'بيانات الدخول غير صحيحة.'; return; }
-    $('l_pw').value = '';
-    await render();
-  }
+      var r = await sb.rpc('my_permissions');
+      var box = $('groups'); box.textContent = '';
+      if (r.error || !Array.isArray(r.data)) { $('home_hint').textContent = 'تعذر التحقق من الصلاحيات، حدّث الصفحة.'; return; }
+      var perms = r.data, total = 0;
+      GROUPS.forEach(function (g) {
+        var mods = g.modules.filter(function (m) { return m.any.some(function (p) { return perms.indexOf(p) >= 0; }); });
+        if (!mods.length) return;
+        total += mods.length;
+        var cards = h('div', { 'class': 'ql-cards' });
+        mods.forEach(function (m) {
+          var a = h('a', { 'class': 'card ql-card', href: m.href },
+            h('i', { 'class': 'fa-solid ' + m.icon, 'aria-hidden': 'true' }), h('h3', { text: m.title }), h('p', { text: m.desc }));
+          if (m.soon) a.appendChild(h('span', { 'class': 'ql-soon', text: 'قيد التجهيز' }));
+          cards.appendChild(a);
+        });
+        box.appendChild(h('div', { 'class': 'ql-group' }, h('p', { 'class': 'ql-group-title', text: g.title }), cards));
+      });
+      $('home_hint').textContent = total ? 'اختار القسم اللي محتاجه' : 'هذا الحساب لا يملك صلاحية لأي قسم حاليًا. تواصل مع الإدارة.';
+    }
 
-  if (!sb) { $('l_msg').textContent = 'تعذر الاتصال بالخادم.'; return; }
-  $('l_btn').addEventListener('click', login);
-  $('l_pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); });
-  $('logout').addEventListener('click', async function () { await sb.auth.signOut(); await render(); });
-  render();
-})();
-</script>
+    async function login(e) {
+      e.preventDefault();
+      var id = $('l_id').value, pw = $('l_pw').value;
+      setMsg('');
+      if (!id || !pw) { setMsg('اكتب اسم المستخدم وكلمة المرور.'); return; }
+      $('l_btn').disabled = true;
+      var r = await sb.auth.signInWithPassword({ email: toEmail(id), password: pw });
+      $('l_btn').disabled = false;
+      if (r.error) { setMsg('بيانات الدخول غير صحيحة.'); return; }
+      $('l_pw').value = '';
+      await render();
+    }
+
+    if (!sb) { setMsg('تعذر الاتصال بالخادم.'); return; }
+    $('login_form').addEventListener('submit', login);
+    $('logout').addEventListener('click', async function () { await sb.auth.signOut(); await render(); });
+    render();
+  })();
+  </script>
 </body>
 </html>

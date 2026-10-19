@@ -2,23 +2,31 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0b0a">
   <title>ERP | الأصل للطاقة الشمسية</title>
-  <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f5f6f8;color:#1b1f24;font:16px/1.7 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
-    @media (prefers-color-scheme:dark){body{background:#14171a;color:#eceff2}}
-    main{max-width:480px;padding:24px;text-align:center}
-    h1{margin:0 0 8px;font-size:22px}
-    p{margin:6px 0;opacity:.8}
-    a{color:inherit}
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-  <main>
-    <h1>نظام ERP قيد التجهيز</h1>
-    <p>هذا المكان محجوز لموديول إدارة الموارد (المخازن والمشتريات والمبيعات والحسابات).</p>
-    <p><a href="../dashboard.html">العودة للوحة التحكم</a></p>
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <a class="dashboard-logo" href="../index.html"><img src="../logo-white.png" alt="Al Asl Solar logo"></a>
+      <div class="dashboard-hero-text">
+        <p class="eyebrow" style="margin-bottom:2px">الأصل للطاقة الشمسية</p>
+        <h1>نظام ERP</h1>
+        <p>إدارة الموارد: المخازن والمشتريات والمبيعات والحسابات</p>
+      </div>
+    </section>
+    <section class="dashboard-card" style="max-width:520px;text-align:center">
+      <h2><i class="fa-solid fa-industry" aria-hidden="true" style="color:var(--brand)"></i> قيد التجهيز</h2>
+      <p>هذا المكان محجوز لموديول الـ ERP، وسيُفتح هنا فور اكتماله.</p>
+      <a class="btn btn-primary" href="../management/">العودة لبوابة الإدارة</a>
+    </section>
   </main>
 </body>
 </html>

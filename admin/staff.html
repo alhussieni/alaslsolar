@@ -1,108 +1,127 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>إدارة الموظفين | الأصل سولار</title>
-<style>
-  :root{--bg:#f5f6f8;--card:#fff;--text:#1b1f24;--muted:#667085;--line:#e3e6ea;--brand:#0b6b3a;--brand-text:#fff;--danger:#b42318;--warn:#b54708;--ok:#067647;}
-  @media (prefers-color-scheme:dark){:root{--bg:#14171a;--card:#1d2125;--text:#eceff2;--muted:#9aa4af;--line:#2d3339;--brand:#2fa866;--brand-text:#06210f;--danger:#f97066;--warn:#fdb022;--ok:#47cd89;}}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--line)}
-  header h1{font-size:18px;margin:0}
-  main{max-width:1100px;margin:0 auto;padding:18px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
-  .card h2{font-size:16px;margin:0 0 12px}
-  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
-  input[type=text],input[type=password],input[type=email]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
-  input[dir=ltr]{text-align:left}
-  .row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
-  .row>input{flex:1;min-width:160px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 12px}
-  button.primary{background:var(--brand);color:var(--brand-text);border-color:var(--brand);font-weight:600}
-  button.danger{color:var(--danger);border-color:var(--danger)}
-  button:disabled{opacity:.55;cursor:not-allowed}
-  .roles{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0}
-  .roles label{display:flex;gap:6px;align-items:center;margin:0;color:var(--text);font-size:14px}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;font-size:14px}
-  th{color:var(--muted);font-weight:600;font-size:13px}
-  .scroll{overflow-x:auto}
-  .tag{display:inline-block;padding:2px 8px;border-radius:99px;border:1px solid var(--line);font-size:12px;margin:0 0 4px 4px}
-  .on{color:var(--ok)} .off{color:var(--danger)}
-  .actions{display:flex;gap:6px;flex-wrap:wrap}
-  #msg{position:sticky;top:0;z-index:5;margin:0 0 12px;padding:10px 12px;border-radius:8px;display:none;font-size:14px}
-  #msg.ok{display:block;background:rgba(6,118,71,.12);color:var(--ok);border:1px solid var(--ok)}
-  #msg.err{display:block;background:rgba(180,35,24,.12);color:var(--danger);border:1px solid var(--danger)}
-  dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);max-width:440px;width:92%}
-  dialog::backdrop{background:rgba(0,0,0,.45)}
-  .hint{font-size:12px;color:var(--muted);margin-top:4px}
-  .hidden{display:none!important}
-  #login{max-width:380px;margin:60px auto}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>إدارة الموظفين | الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../QL/rep-widgets.css">
+  <style>
+    /* صفحة إدارة الموظفين: كل الألوان والخطوط من styles.css الأصلي؛ هنا بس تفاصيل الجدول والنوافذ. */
+    .hidden { display: none !important; }
+    .row { display: flex; gap: var(--space-1); flex-wrap: wrap; align-items: stretch; }
+    .row > input { flex: 1; min-width: 160px; }
+    .hint { font-size: 13px; color: var(--muted); margin: var(--space-1) 0 0; }
+    .roles { display: flex; gap: var(--space-3); flex-wrap: wrap; margin: 4px 0; }
+    .roles label { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+    .roles input[type=checkbox] { width: 18px; min-height: 0; height: 18px; accent-color: var(--brand); }
+    .staff-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .staff-table th, .staff-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+    .staff-table th { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .scroll { overflow-x: auto; }
+    .tag { display: inline-block; padding: 1px 10px; margin: 0 0 4px 4px; border-radius: 99px; background: var(--brand-soft); color: var(--brand-dark); font-size: 12px; font-weight: 700; }
+    .on { color: var(--forest); font-weight: 700; }
+    .off { color: #b23b23; font-weight: 700; }
+    .actions-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .actions-row .btn-outline { padding: 6px 12px; font-size: 13px; }
+    .btn-outline.is-danger { border-color: #b23b23; background: #fbeceb; color: #b23b23; }
+    .btn-outline.is-danger:hover { background: #b23b23; color: #fff; }
+    .btn-outline:disabled, .btn:disabled { opacity: .55; cursor: not-allowed; }
+    #msg { position: sticky; top: 76px; z-index: 15; margin: 0 0 var(--space-2); padding: 10px 14px; border-radius: var(--radius); display: none; font-size: 14px; font-weight: 600; }
+    #msg.ok { display: block; background: #e8f3ec; color: var(--forest); border: 1px solid var(--forest); }
+    #msg.err { display: block; background: #fbeceb; color: #b23b23; border: 1px solid #b23b23; }
+    dialog { border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; color: var(--ink); max-width: 460px; width: 92%; padding: var(--space-3); box-shadow: var(--shadow-lg); font-family: inherit; }
+    dialog::backdrop { background: rgba(13, 11, 10, 0.55); }
+    dialog h2 { margin: 0 0 var(--space-1); }
+    dialog input { width: 100%; min-height: 47px; padding: 8px 13px; border: 1.5px solid var(--line); border-radius: var(--radius); font: inherit; direction: ltr; text-align: left; }
+    dialog input:focus { outline: none; border-color: var(--brand); }
+    dialog .row { margin-top: var(--space-2); }
+    #l_id, #l_pw, #c_login, #c_pw { direction: ltr; text-align: left; }
+    .toolbar-links { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+    .toolbar-links a { color: rgba(255,255,255,.8); text-decoration: none; font-size: 14px; font-weight: 700; }
+    .toolbar-links a:hover { color: #fff; }
+  </style>
 </head>
 <body>
-<header>
-  <h1>إدارة الموظفين والصلاحيات</h1>
-  <a href="../management/" class="hint">← بوابة الإدارة</a>
-  <div id="who" class="hint"></div>
-  <button id="logout" class="hidden">تسجيل الخروج</button>
-</header>
-<main>
-  <div id="msg" role="status"></div>
-
-  <section id="login" class="card">
-    <h2>تسجيل الدخول</h2>
-    <label for="l_id">اسم المستخدم أو الإيميل</label>
-    <input id="l_id" type="text" dir="ltr" autocomplete="username" autocapitalize="none" spellcheck="false">
-    <label for="l_pw">كلمة المرور</label>
-    <input id="l_pw" type="password" dir="ltr" autocomplete="current-password">
-    <p><button id="l_btn" class="primary">دخول</button></p>
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <a class="dashboard-logo" href="../index.html"><img src="../logo-white.png" alt="Al Asl Solar logo"></a>
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">الإدارة</p>
+      <h1>إدارة الموظفين والصلاحيات</h1>
+      <p>إنشاء المستخدمين، كلمات المرور، الأدوار، وفتح QL</p>
+    </div>
   </section>
 
-  <section id="denied" class="card hidden">
+  <section class="dashboard-card" id="login" data-auth-panel>
+    <h2>تسجيل الدخول</h2>
+    <div class="admin-form" style="text-align:right">
+      <label for="l_id">اسم المستخدم أو البريد الإلكتروني</label>
+      <input id="l_id" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <label for="l_pw">كلمة المرور</label>
+      <input id="l_pw" type="password" autocomplete="current-password">
+      <button id="l_btn" class="btn btn-primary" type="button">دخول</button>
+    </div>
+  </section>
+
+  <section class="dashboard-card hidden" id="denied">
     <h2>غير مصرح</h2>
     <p>هذه الصفحة للسوبر أدمن فقط.</p>
+    <a class="btn btn-primary" href="../management/">العودة لبوابة الإدارة</a>
   </section>
 
-  <div id="app" class="hidden">
-    <section class="card">
+  <div class="dashboard-content hidden" id="app">
+    <div class="dashboard-toolbar">
+      <div><h2 style="margin:0;color:#fff;font-size:18px">إدارة الموظفين</h2><p id="who" style="margin:0"></p></div>
+      <div class="toolbar-links">
+        <a href="../management/"><i class="fa-solid fa-house" aria-hidden="true"></i> بوابة الإدارة</a>
+        <button id="logout" class="btn btn-secondary dark" type="button" style="min-height:44px">تسجيل الخروج</button>
+      </div>
+    </div>
+    <div id="msg" role="status"></div>
+
+    <section class="dashboard-card">
       <h2>إضافة مستخدم جديد</h2>
-      <div class="grid">
-        <div>
-          <label for="c_login">اسم المستخدم (حروف إنجليزية صغيرة وأرقام) أو إيميل</label>
-          <input id="c_login" type="text" dir="ltr" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="مثال: ahmed.sales">
-          <div class="hint">اسم المستخدم من 3 إلى 32 حرف: a-z 0-9 . _ -</div>
+      <div class="admin-form">
+        <div class="dashboard-grid">
+          <div>
+            <label for="c_login">اسم المستخدم أو إيميل</label>
+            <input id="c_login" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="مثال: ahmed.sales">
+            <p class="hint">اسم المستخدم من 3 إلى 32 حرف: a-z 0-9 . _ -</p>
+          </div>
+          <div>
+            <label for="c_name">الاسم الظاهر</label>
+            <input id="c_name" type="text" autocomplete="off" maxlength="80">
+          </div>
         </div>
-        <div>
-          <label for="c_name">الاسم الظاهر</label>
-          <input id="c_name" type="text" autocomplete="off" maxlength="80">
+        <label for="c_pw">كلمة المرور (10 حروف على الأقل، حروف وأرقام)</label>
+        <div class="row">
+          <input id="c_pw" type="text" autocomplete="new-password" spellcheck="false">
+          <button id="c_gen" class="btn-outline" type="button">توليد</button>
+          <button id="c_copy" class="btn-outline" type="button">نسخ</button>
         </div>
+        <label>الأدوار</label>
+        <div id="c_roles" class="roles"></div>
+        <div id="c_flags" class="roles hidden">
+          <label><input type="checkbox" id="f_offgrid" checked> الأوف جريد</label>
+          <label><input type="checkbox" id="f_products" checked> المنتجات</label>
+          <label><input type="checkbox" id="f_crm" checked> CRM</label>
+        </div>
+        <div><button id="c_btn" class="btn btn-primary" type="button">إنشاء المستخدم</button></div>
+        <p class="hint">انسخ كلمة المرور وسلّمها للموظف الآن. لا تُعرض مرة أخرى بعد الإنشاء، لكن تقدر تغيّرها في أي وقت.</p>
       </div>
-      <label for="c_pw">كلمة المرور (10 حروف على الأقل، حروف وأرقام)</label>
-      <div class="row">
-        <input id="c_pw" type="text" dir="ltr" autocomplete="new-password" spellcheck="false">
-        <button id="c_gen" type="button">توليد</button>
-        <button id="c_copy" type="button">نسخ</button>
-      </div>
-      <label>الأدوار</label>
-      <div id="c_roles" class="roles"></div>
-      <div id="c_flags" class="roles hidden">
-        <label><input type="checkbox" id="f_offgrid" checked> الأوف جريد</label>
-        <label><input type="checkbox" id="f_products" checked> المنتجات</label>
-        <label><input type="checkbox" id="f_crm" checked> CRM</label>
-      </div>
-      <p><button id="c_btn" class="primary">إنشاء المستخدم</button></p>
-      <div class="hint">انسخ كلمة المرور وسلّمها للموظف الآن. لا تُعرض مرة أخرى بعد الإنشاء، لكن تقدر تغيّرها في أي وقت.</div>
     </section>
 
-    <section class="card">
+    <section class="dashboard-card">
       <h2>المستخدمون</h2>
       <div class="scroll">
-        <table>
+        <table class="staff-table">
           <thead><tr><th>الاسم</th><th>الدخول</th><th>الأدوار</th><th>الحالة</th><th>آخر دخول</th><th>إجراءات</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
@@ -115,19 +134,19 @@
   <h2>تغيير كلمة المرور</h2>
   <p id="dlg_pw_who" class="hint"></p>
   <div class="row">
-    <input id="p_pw" type="text" dir="ltr" autocomplete="new-password" spellcheck="false">
-    <button id="p_gen" type="button">توليد</button>
-    <button id="p_copy" type="button">نسخ</button>
+    <input id="p_pw" type="text" autocomplete="new-password" spellcheck="false">
+    <button id="p_gen" class="btn-outline" type="button">توليد</button>
+    <button id="p_copy" class="btn-outline" type="button">نسخ</button>
   </div>
-  <div class="hint">جلسات الموظف المفتوحة حالياً قد تفضل شغالة لحد ساعة. للإيقاف الفوري استخدم «تعطيل».</div>
-  <p class="row"><button id="p_ok" class="primary">حفظ</button><button id="p_cancel">إلغاء</button></p>
+  <p class="hint">جلسات الموظف المفتوحة حالياً قد تفضل شغالة لحد ساعة. للإيقاف الفوري استخدم «تعطيل».</p>
+  <div class="row"><button id="p_ok" class="btn btn-primary" type="button" style="min-height:44px">حفظ</button><button id="p_cancel" class="btn-outline" type="button">إلغاء</button></div>
 </dialog>
 
 <dialog id="dlg_roles">
   <h2>تعديل الأدوار</h2>
   <p id="dlg_roles_who" class="hint"></p>
   <div id="r_roles" class="roles"></div>
-  <p class="row"><button id="r_ok" class="primary">حفظ</button><button id="r_cancel">إلغاء</button></p>
+  <div class="row"><button id="r_ok" class="btn btn-primary" type="button" style="min-height:44px">حفظ</button><button id="r_cancel" class="btn-outline" type="button">إلغاء</button></div>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -226,9 +245,9 @@
       if (hasQL) rolesCell.appendChild(h('span', { 'class': 'tag' }, 'QL (مفتوح يدويًا)'));
       var qlNotNeeded = u.roles.some(function (r) { return REP_ROLES.indexOf(r) >= 0 || r === 'superadmin'; });
       var active = u.active && !u.banned;
-      var btnPw = h('button', {}, 'كلمة المرور'), btnRoles = h('button', {}, 'الأدوار');
-      var btnAct = h('button', { 'class': active ? 'danger' : '' }, active ? 'تعطيل' : 'تفعيل');
-      var btnQl = qlNotNeeded ? null : h('button', { 'class': hasQL ? 'danger' : '' }, hasQL ? 'غلق QL' : 'فتح QL');
+      var btnPw = h('button', { 'class': 'btn-outline', type: 'button' }, 'كلمة المرور'), btnRoles = h('button', { 'class': 'btn-outline', type: 'button' }, 'الأدوار');
+      var btnAct = h('button', { 'class': 'btn-outline' + (active ? ' is-danger' : ''), type: 'button' }, active ? 'تعطيل' : 'تفعيل');
+      var btnQl = qlNotNeeded ? null : h('button', { 'class': 'btn-outline' + (hasQL ? ' is-danger' : ''), type: 'button' }, hasQL ? 'غلق QL' : 'فتح QL');
       if (btnQl) btnQl.addEventListener('click', function () { toggleQl(u, !hasQL); });
       btnPw.addEventListener('click', function () { openPw(u); });
       btnRoles.addEventListener('click', function () { openRoles(u); });
