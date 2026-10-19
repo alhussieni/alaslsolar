@@ -10,6 +10,7 @@
     { href: "rep-crm.html", label: "CRM", icon: "fa-users" },
     { href: "rep-customers.html", label: "العملاء والمتابعة", icon: "fa-address-book" },
     { href: "rep-settings.html", label: "الإعدادات", icon: "fa-gear" },
+    { href: "../management/", label: "بوابة الإدارة", icon: "fa-house" },
   ];
 
   const current = (location.pathname.split("/").pop() || "index.html");

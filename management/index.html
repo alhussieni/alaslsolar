@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0d0b0a">
+<title>بوابة الإدارة | الأصل للطاقة الشمسية</title>
+<style>
+  :root{--bg:#f5f6f8;--card:#fff;--text:#1b1f24;--muted:#667085;--line:#e3e6ea;--brand:#0b6b3a;--brand-text:#fff;--danger:#b42318;}
+  @media (prefers-color-scheme:dark){:root{--bg:#14171a;--card:#1d2125;--text:#eceff2;--muted:#9aa4af;--line:#2d3339;--brand:#2fa866;--brand-text:#06210f;--danger:#f97066;}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:18px}
+  .who{font-size:13px;color:var(--muted)}
+  main{max-width:960px;margin:0 auto;padding:22px 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  #login{max-width:380px;margin:50px auto}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;direction:ltr;text-align:left}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:9px 14px}
+  button.primary{background:var(--brand);color:var(--brand-text);border-color:var(--brand);font-weight:700;width:100%;margin-top:14px}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .msg{min-height:22px;font-size:13px;margin-top:10px;color:var(--danger)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:6px}
+  a.tile{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .15s,transform .15s}
+  a.tile:hover,a.tile:focus-visible{border-color:var(--brand);transform:translateY(-2px);outline:none}
+  .tile .ico{font-size:28px;line-height:1}
+  .tile h2{margin:10px 0 4px;font-size:17px}
+  .tile p{margin:0;font-size:13px;color:var(--muted)}
+  .tile .soon{display:inline-block;margin-top:8px;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+  h3{margin:0 0 4px}
+  .hint{color:var(--muted);font-size:13px}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>بوابة الإدارة</h1>
+  <span class="who" id="who"></span>
+  <button id="logout" class="hidden">تسجيل الخروج</button>
+</header>
+<main>
+  <section id="login" class="card">
+    <h3>تسجيل الدخول</h3>
+    <p class="hint">دخول واحد لكل الأقسام اللي صلاحيتك تسمح بها.</p>
+    <label for="l_id">اسم المستخدم أو البريد الإلكتروني</label>
+    <input id="l_id" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <label for="l_pw">كلمة المرور</label>
+    <input id="l_pw" type="password" autocomplete="current-password">
+    <button id="l_btn" class="primary">دخول</button>
+    <div class="msg" id="l_msg" role="status"></div>
+  </section>
+
+  <section id="home" class="hidden">
+    <h3>أقسامك</h3>
+    <p class="hint" id="home_hint"></p>
+    <div class="grid" id="tiles"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../supabase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  // كل الأقسام بتشارك نفس جلسة Supabase (نفس الدومين + نفس العميل)، فتسجيل الدخول هنا بيفتح الباقي بدون دخول تاني.
+  // ظهور البطاقة تجميل فقط: الحماية الفعلية في RLS ودوال السيرفر.
+  var EMAIL_DOMAIN = 'staff.alaslsolar.com';
+  var MODULES = [
+    { key: 'dashboard', icon: '🛠️', title: 'لوحة التحكم', desc: 'المنتجات والمقالات والمحتوى وطلبات الموقع', href: '../dashboard.html', any: ['dashboard.access'] },
+    { key: 'customers', icon: '📇', title: 'العملاء والمتابعة', desc: 'العملاء، المتابعات، حالة العروض، وأداء المناديب', href: '../QL/rep-customers.html', any: ['customers.read_own', 'customers.read_all'] },
+    { key: 'crm', icon: '🧾', title: 'سجل العروض (CRM)', desc: 'كل عروض الأسعار ونشاط المناديب المباشر', href: '../QL/rep-crm.html', any: ['crm.access'] },
+    { key: 'ql', icon: '☀️', title: 'عروض الأسعار (QL)', desc: 'إصدار عروض أسعار الطاقة الشمسية والري والأوف جريد', href: '../QL/', any: ['ql.access'] },
+    { key: 'staff', icon: '🔐', title: 'إدارة الموظفين', desc: 'إنشاء المستخدمين، كلمات المرور، الأدوار والصلاحيات', href: '../admin/staff.html', any: ['staff.manage'] },
+    { key: 'erp', icon: '🏭', title: 'ERP', desc: 'المخازن والمشتريات والحسابات', href: '../erp/', any: ['erp.access'], soon: true }
+  ];
+
+  var sb = window.getAlaslSupabase ? window.getAlaslSupabase() : null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { if (k === 'class') el.className = attrs[k]; else if (k === 'text') el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); });
+    for (var i = 2; i < arguments.length; i++) { var c = arguments[i]; if (c != null) el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }
+    return el;
+  }
+  function toEmail(v) { v = v.trim(); return v.indexOf('@') >= 0 ? v : v.toLowerCase() + '@' + EMAIL_DOMAIN; }
+
+  async function render() {
+    var s = (await sb.auth.getSession()).data.session;
+    $('login').classList.toggle('hidden', !!s);
+    $('home').classList.toggle('hidden', !s);
+    $('logout').classList.toggle('hidden', !s);
+    $('who').textContent = s ? (s.user.email || '') : '';
+    if (!s) return;
+
+    var r = await sb.rpc('my_permissions');
+    if (r.error || !Array.isArray(r.data)) { $('home_hint').textContent = 'تعذر التحقق من الصلاحيات، حدّث الصفحة.'; $('tiles').textContent = ''; return; }
+    var perms = r.data;
+    var tiles = $('tiles'); tiles.textContent = '';
+    var shown = MODULES.filter(function (m) { return m.any.some(function (p) { return perms.indexOf(p) >= 0; }); });
+    shown.forEach(function (m) {
+      var a = h('a', { 'class': 'tile', href: m.href }, h('div', { 'class': 'ico', text: m.icon }), h('h2', { text: m.title }), h('p', { text: m.desc }));
+      if (m.soon) a.appendChild(h('span', { 'class': 'soon', text: 'قيد التجهيز' }));
+      tiles.appendChild(a);
+    });
+    $('home_hint').textContent = shown.length ? '' : 'هذا الحساب لا يملك صلاحية لأي قسم حاليًا. تواصل مع الإدارة.';
+  }
+
+  async function login() {
+    var id = $('l_id').value, pw = $('l_pw').value;
+    $('l_msg').textContent = '';
+    if (!id || !pw) { $('l_msg').textContent = 'اكتب اسم المستخدم وكلمة المرور.'; return; }
+    $('l_btn').disabled = true;
+    var r = await sb.auth.signInWithPassword({ email: toEmail(id), password: pw });
+    $('l_btn').disabled = false;
+    if (r.error) { $('l_msg').textContent = 'بيانات الدخول غير صحيحة.'; return; }
+    $('l_pw').value = '';
+    await render();
+  }
+
+  if (!sb) { $('l_msg').textContent = 'تعذر الاتصال بالخادم.'; return; }
+  $('l_btn').addEventListener('click', login);
+  $('l_pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); });
+  $('logout').addEventListener('click', async function () { await sb.auth.signOut(); await render(); });
+  render();
+})();
+</script>
+</body>
+</html>
