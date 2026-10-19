@@ -19,6 +19,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BAN_FOREVER = "876000h";
 // Legacy bridge: today's RLS (is_rep()) reads public.reps, so rep-like roles need a reps row until policies migrate.
 const REP_ROLES = new Set(["sales_rep", "sales_manager"]);
+// Extra permissions a superadmin may grant to a single user (on top of roles). Whitelisted on purpose: nothing here
+// can touch pricing/costs/staff management. Granting ql.access or quotes.create also opens the legacy reps row (see syncLegacyReps).
+const GRANTABLE_EXTRAS = new Set(["ql.access", "quotes.create", "quotes.read_own", "customers.read_own", "crm.access"]);
+const QL_TRIGGER_EXTRAS = ["ql.access", "quotes.create"];
 
 const ALLOWED_ORIGINS = new Set([
   "https://alaslsolar.com",
@@ -131,6 +135,12 @@ Deno.serve(async (req: Request) => {
       return roles;
     };
 
+    const loadExtras = async (uid: string): Promise<string[]> => {
+      const { data, error } = await admin.from("user_permissions").select("permission_key").eq("user_id", uid);
+      if (error) throw new Error("extras_load_failed");
+      return (data ?? []).map((r: { permission_key: string }) => r.permission_key);
+    };
+
     const requireStaffTarget = async (id: unknown) => {
       const uid = str(id, 64);
       if (!uid) throw new HttpError(400, "user_id_required");
@@ -150,9 +160,11 @@ Deno.serve(async (req: Request) => {
       t: { id: string; email: string; display_name: string | null },
       roles: string[],
       active: boolean,
+      extras: string[] = [],
       flags?: { offgrid?: boolean; products?: boolean; crm?: boolean },
     ): Promise<boolean> => {
-      const needs = roles.some((r) => REP_ROLES.has(r));
+      // rep-like roles OR an explicit QL grant from the superadmin => the person needs an active legacy reps row
+      const needs = roles.some((r) => REP_ROLES.has(r)) || extras.some((e) => QL_TRIGGER_EXTRAS.includes(e));
       const { data: row, error } = await admin.from("reps").select("id, active").eq("id", t.id).maybeSingle();
       if (error) return false;
       if (needs && !row) {
@@ -180,12 +192,13 @@ Deno.serve(async (req: Request) => {
 
     switch (action) {
       case "list_users": {
-        const [profiles, userRoles, authList] = await Promise.all([
+        const [profiles, userRoles, authList, extrasRes] = await Promise.all([
           admin.from("staff_profiles").select("id, email, username, display_name, active, created_at").order("created_at"),
           admin.from("user_roles").select("user_id, role_key"),
           admin.auth.admin.listUsers({ page: 1, perPage: 200 }),
+          admin.from("user_permissions").select("user_id, permission_key"),
         ]);
-        if (profiles.error || userRoles.error || authList.error) throw new Error("list_failed");
+        if (profiles.error || userRoles.error || authList.error || extrasRes.error) throw new Error("list_failed");
         const authMap = new Map(authList.data.users.map((u) => [u.id, u]));
         const users = (profiles.data ?? []).map((p) => {
           const a = authMap.get(p.id);
@@ -193,6 +206,7 @@ Deno.serve(async (req: Request) => {
           return {
             ...p,
             roles: (userRoles.data ?? []).filter((r) => r.user_id === p.id).map((r) => r.role_key).sort(),
+            extras: (extrasRes.data ?? []).filter((r) => r.user_id === p.id).map((r) => r.permission_key).sort(),
             last_sign_in_at: a?.last_sign_in_at ?? null,
             banned: !!bannedUntil && new Date(bannedUntil).getTime() > Date.now(),
           };
@@ -249,6 +263,7 @@ Deno.serve(async (req: Request) => {
           { id: uid, email: authEmail, display_name: displayName },
           roles,
           true,
+          [],
           { offgrid: flags.offgrid as boolean | undefined, products: flags.products as boolean | undefined, crm: flags.crm as boolean | undefined },
         );
         await audit("create_user", uid, { username, email: authEmail, roles });
@@ -276,7 +291,7 @@ Deno.serve(async (req: Request) => {
         const { error: bErr } = await admin.auth.admin.updateUserById(t.id, { ban_duration: active ? "none" : BAN_FOREVER });
         if (bErr) throw new HttpError(500, "ban_update_failed");
         const { data: rs } = await admin.from("user_roles").select("role_key").eq("user_id", t.id);
-        const synced = await syncLegacyReps(t, (rs ?? []).map((r) => r.role_key), active);
+        const synced = await syncLegacyReps(t, (rs ?? []).map((r) => r.role_key), active, await loadExtras(t.id));
         await audit("set_active", t.id, { active });
         return json(req, 200, { ok: true, legacy_reps_synced: synced });
       }
@@ -300,8 +315,33 @@ Deno.serve(async (req: Request) => {
           const { error } = await admin.from("user_roles").delete().eq("user_id", t.id).in("role_key", toRemove);
           if (error) throw new HttpError(400, error.message.includes("last active superadmin") ? "last_superadmin" : "roles_failed");
         }
-        const synced = await syncLegacyReps(t, roles, t.active);
+        const synced = await syncLegacyReps(t, roles, t.active, await loadExtras(t.id));
         await audit("set_roles", t.id, { added: toAdd, removed: toRemove });
+        return json(req, 200, { ok: true, legacy_reps_synced: synced });
+      }
+
+      case "set_permissions": {
+        // Replaces the user's EXTRA permissions (on top of roles). Superadmin-only (enforced above) and whitelisted.
+        const t = await requireStaffTarget(body.user_id);
+        if (!Array.isArray(body.permissions) || body.permissions.length > 20) throw new HttpError(400, "permissions_required");
+        const wanted = [...new Set(body.permissions.map(String))];
+        for (const k of wanted) if (!GRANTABLE_EXTRAS.has(k)) throw new HttpError(400, `permission_not_grantable:${k}`);
+        const have = new Set(await loadExtras(t.id));
+        const toAdd = wanted.filter((k) => !have.has(k));
+        const toRemove = [...have].filter((k) => !wanted.includes(k));
+        if (toAdd.length) {
+          const { error } = await admin.from("user_permissions").insert(
+            toAdd.map((k) => ({ user_id: t.id, permission_key: k, granted_by: caller.id })),
+          );
+          if (error) throw new HttpError(400, "permissions_failed");
+        }
+        if (toRemove.length) {
+          const { error } = await admin.from("user_permissions").delete().eq("user_id", t.id).in("permission_key", toRemove);
+          if (error) throw new HttpError(400, "permissions_failed");
+        }
+        const { data: rs } = await admin.from("user_roles").select("role_key").eq("user_id", t.id);
+        const synced = await syncLegacyReps(t, (rs ?? []).map((r) => r.role_key), t.active, wanted);
+        await audit("set_permissions", t.id, { added: toAdd, removed: toRemove });
         return json(req, 200, { ok: true, legacy_reps_synced: synced });
       }
 

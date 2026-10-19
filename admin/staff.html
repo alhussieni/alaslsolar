@@ -145,6 +145,8 @@
     { key: 'sales_rep', label: 'مندوب' }
   ];
   var REP_ROLES = ['sales_rep', 'sales_manager'];
+  // حزمة «فتح QL» اللي السوبر أدمن يديها يدويًا لمستخدم (مثلاً أدمن) عشان يدخل QL ويقدم عروض أسعار
+  var QL_BUNDLE = ['ql.access', 'quotes.create', 'quotes.read_own', 'customers.read_own', 'crm.access'];
   var ERRORS = {
     forbidden: 'ليس لديك صلاحية.', invalid_token: 'انتهت الجلسة، سجّل الدخول من جديد.', missing_token: 'سجّل الدخول أولاً.',
     username_or_email_required: 'اكتب اسم مستخدم أو إيميل.', invalid_username_format: 'اسم المستخدم غير صالح (a-z 0-9 . _ - من 3 إلى 32).',
@@ -153,7 +155,7 @@
     password_needs_letter_and_digit: 'كلمة المرور لازم تحتوي حروف وأرقام.', password_contains_username: 'كلمة المرور لا يجب أن تحتوي اسم المستخدم.',
     user_exists: 'المستخدم موجود بالفعل.', username_taken: 'اسم المستخدم مستخدم بالفعل.', staff_user_not_found: 'المستخدم غير موجود.',
     cannot_deactivate_self: 'لا يمكنك تعطيل حسابك.', cannot_remove_own_superadmin: 'لا يمكنك إزالة دور السوبر أدمن عن نفسك.',
-    last_superadmin: 'لا يمكن تعطيل أو إزالة آخر سوبر أدمن.', internal_error: 'خطأ في الخادم، حاول مرة أخرى.'
+    last_superadmin: 'لا يمكن تعطيل أو إزالة آخر سوبر أدمن.', permissions_failed: 'تعذر تحديث الصلاحيات الإضافية.', permissions_required: 'قائمة الصلاحيات غير صالحة.', internal_error: 'خطأ في الخادم، حاول مرة أخرى.'
   };
 
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -218,9 +220,15 @@
     var tb = $('rows'); tb.textContent = '';
     users.forEach(function (u) {
       var rolesCell = h('td', {}); u.roles.forEach(function (r) { rolesCell.appendChild(h('span', { 'class': 'tag' }, roleLabel(r))); });
+      var extras = u.extras || [];
+      var hasQL = extras.indexOf('ql.access') >= 0;
+      if (hasQL) rolesCell.appendChild(h('span', { 'class': 'tag' }, 'QL (مفتوح يدويًا)'));
+      var qlNotNeeded = u.roles.some(function (r) { return REP_ROLES.indexOf(r) >= 0 || r === 'superadmin'; });
       var active = u.active && !u.banned;
       var btnPw = h('button', {}, 'كلمة المرور'), btnRoles = h('button', {}, 'الأدوار');
       var btnAct = h('button', { 'class': active ? 'danger' : '' }, active ? 'تعطيل' : 'تفعيل');
+      var btnQl = qlNotNeeded ? null : h('button', { 'class': hasQL ? 'danger' : '' }, hasQL ? 'غلق QL' : 'فتح QL');
+      if (btnQl) btnQl.addEventListener('click', function () { toggleQl(u, !hasQL); });
       btnPw.addEventListener('click', function () { openPw(u); });
       btnRoles.addEventListener('click', function () { openRoles(u); });
       btnAct.addEventListener('click', function () { toggleActive(u, !active); });
@@ -230,7 +238,7 @@
         rolesCell,
         h('td', { 'class': active ? 'on' : 'off' }, active ? 'نشط' : 'معطّل'),
         h('td', {}, fmtDate(u.last_sign_in_at)),
-        h('td', {}, h('div', { 'class': 'actions' }, btnPw, btnRoles, btnAct))
+        h('td', {}, h('div', { 'class': 'actions' }, btnPw, btnRoles, btnQl, btnAct))
       ));
     });
   }
@@ -247,6 +255,16 @@
     if (!confirm(active ? 'تفعيل هذا المستخدم؟' : 'تعطيل هذا المستخدم؟ لن يستطيع تسجيل الدخول.')) return;
     try { var r = await call('set_active', { user_id: u.id, active: active }); msg(r.legacy_reps_synced === false ? 'تم، لكن مزامنة جدول المناديب القديم لم تكتمل، راجعها.' : 'تم.', r.legacy_reps_synced !== false); await reload(); }
     catch (e) { msg(errText(e.message), false); }
+  }
+
+  async function toggleQl(u, open) {
+    var q = open ? 'فتح دخول QL وتقديم عروض الأسعار لهذا المستخدم؟' : 'غلق دخول QL لهذا المستخدم؟';
+    if (!confirm(q)) return;
+    try {
+      var r = await call('set_permissions', { user_id: u.id, permissions: open ? QL_BUNDLE : [] });
+      msg(r.legacy_reps_synced === false ? 'تم، لكن مزامنة جدول المناديب القديم لم تكتمل، راجعها.' : (open ? 'تم فتح QL.' : 'تم غلق QL.'), r.legacy_reps_synced !== false);
+      await reload();
+    } catch (e) { msg(errText(e.message), false); }
   }
 
   function syncFlags() { var show = checked($('c_roles')).some(function (r) { return REP_ROLES.indexOf(r) >= 0; }); $('c_flags').classList.toggle('hidden', !show); }
