@@ -47,6 +47,8 @@
 3. `can_access_crm` تحكم واجهة فقط (مفيش دالة تقابله). `can_access_offgrid/products` مفروضة على السيرفر.
 4. زر «حذف» العروض في CRM لسه مقصور على `admin_users`.
 5. فحص الباسوردات المسرّبة غير متاح (خطة Free).
+6. **صلاحيات الجداول (بعد migration 20261024231645):** الزائر (`anon`) للقراءة فقط على مستوى الصلاحيات، والموظف المسجل (`authenticated`) بدون `TRUNCATE`. أي جدول جديد لازم يتفعّل عليه RLS، ولو محتاج كتابة عامة من الزائر اعملها عبر دالة `SECURITY DEFINER` (زي `submit_cart_quote_request`) مش بمنح `INSERT` مباشر.
+7. تعديل `reps.active` وأعلام `can_access_*` بيشتغل لمن يملك `reps.manage` (السوبر أدمن) أو موجود في `admin_users` القديم.
 
 ## ترتيب النشر والتراجع
 نشر: migrations بالترتيب ← Edge Function ← ملفات الواجهة. التراجع: عكس الترتيب، وكل migration ليه ملف في `supabase/rollbacks/`.
