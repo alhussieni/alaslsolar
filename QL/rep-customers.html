@@ -18,7 +18,7 @@
   <script defer src="auth-utils.js"></script>
   <script defer src="rep-customers.js"></script>
   <style>
-    .rc-section { margin-bottom: var(--space-3); }
+    .rc-section { margin-bottom: var(--space-3); scroll-margin-top: calc(var(--ash-total, 0px) + 16px); }
     .rc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .rc-table th, .rc-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: top; }
     .rc-table th { color: var(--muted); font-size: 11.5px; font-weight: 700; }
@@ -69,7 +69,7 @@
     </div>
     <p class="rq-msg" data-page-message role="status"></p>
 
-    <section class="card rc-section" data-overview-section hidden>
+    <section class="card rc-section" id="overview" data-overview-section hidden>
       <div class="rc-toolbar-row">
         <h3 style="margin:0">أداء المناديب</h3>
         <select data-overview-days aria-label="الفترة">
@@ -86,7 +86,7 @@
       </div>
     </section>
 
-    <section class="card rc-section">
+    <section class="card rc-section" id="followups">
       <h3 style="margin-top:0">متابعات مفتوحة</h3>
       <div class="rc-scroll">
         <table class="rc-table">

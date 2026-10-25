@@ -1,0 +1,107 @@
+/* ============================================================
+   management/shell/shell.css — الهيكل الثابت لكل أقسام الموظفين
+   (بوابة الإدارة، العملاء/CRM، QL، لوحة التحكم، الموظفين، ERP).
+   بيعتمد على متغيرات الموقع في styles.css (الألوان/الخط/المسافات).
+   ============================================================ */
+:root { --ash-h: 64px; --ash-sub-h: 0px; }
+body.has-shell { --ash-total: calc(var(--ash-h) + var(--ash-sub-h)); }
+
+.ash-bar {
+  position: sticky; top: 0; z-index: 60;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 8px clamp(14px, 3vw, 28px);
+  background: rgba(13, 11, 10, 0.97); color: #fff; direction: rtl;
+  box-shadow: 0 4px 24px rgba(13, 11, 10, 0.3);
+  font-family: inherit;
+}
+.ash-brand { display: flex; align-items: center; flex: 0 0 auto; line-height: 0; }
+.ash-brand img { height: 40px; width: auto; max-width: 110px; object-fit: contain; }
+
+.ash-nav { display: flex; align-items: center; gap: 2px; flex: 1 1 auto; flex-wrap: wrap; }
+.ash-link {
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 10px;
+  color: rgba(255,255,255,.78); text-decoration: none; font-size: 14px; font-weight: 700; white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.ash-link i { font-size: 13px; }
+.ash-link:hover, .ash-link:focus-visible { background: rgba(255,255,255,.12); color: #fff; outline: none; }
+.ash-link.is-active { background: var(--brand, #c8752d); color: #fff; }
+
+.ash-search { position: relative; flex: 0 1 240px; min-width: 150px; }
+.ash-search input {
+  width: 100%; height: 38px; padding: 0 12px 0 34px; border: 1px solid rgba(255,255,255,.18); border-radius: 10px;
+  background: rgba(255,255,255,.1); color: #fff; font: inherit; font-size: 14px;
+}
+.ash-search input::placeholder { color: rgba(255,255,255,.55); }
+.ash-search input:focus { outline: none; background: rgba(255,255,255,.16); border-color: var(--brand, #c8752d); }
+.ash-search i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.6); font-size: 13px; pointer-events: none; }
+.ash-results {
+  position: absolute; top: calc(100% + 6px); right: 0; left: 0; min-width: 280px; z-index: 70;
+  background: #fff; color: var(--ink, #1b1a18); border: 1px solid var(--line, #e3ddd3); border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(13,11,10,.28); overflow: hidden;
+}
+.ash-results a, .ash-results .ash-empty { display: block; padding: 10px 14px; text-decoration: none; color: inherit; font-size: 14px; border-bottom: 1px solid var(--line, #e3ddd3); }
+.ash-results a:last-child, .ash-results .ash-empty:last-child { border-bottom: 0; }
+.ash-results a:hover, .ash-results a:focus-visible { background: var(--brand-soft, #fbeede); outline: none; }
+.ash-results small { display: block; color: var(--muted, #6b655c); font-size: 12px; direction: ltr; text-align: right; }
+.ash-empty { color: var(--muted, #6b655c); }
+
+.ash-user { position: relative; flex: 0 0 auto; }
+.ash-user > button {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 6px; border-radius: 99px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #fff; font: inherit; font-size: 13px; font-weight: 700;
+}
+.ash-user > button:hover { background: rgba(255,255,255,.16); }
+.ash-avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--brand, #c8752d); color: #fff; font-size: 13px; font-weight: 800; }
+.ash-menu {
+  position: absolute; top: calc(100% + 8px); left: 0; min-width: 240px; z-index: 70; padding: 8px;
+  background: #fff; color: var(--ink, #1b1a18); border: 1px solid var(--line, #e3ddd3); border-radius: 12px; box-shadow: 0 14px 40px rgba(13,11,10,.28);
+}
+.ash-menu .ash-who { padding: 8px 10px 10px; border-bottom: 1px solid var(--line, #e3ddd3); margin-bottom: 6px; }
+.ash-menu .ash-who strong { display: block; font-size: 14px; }
+.ash-menu .ash-who span { display: block; font-size: 12px; color: var(--muted, #6b655c); direction: ltr; text-align: right; word-break: break-all; }
+.ash-role { display: inline-block; margin: 6px 0 0 4px; padding: 1px 9px; border-radius: 99px; background: var(--brand-soft, #fbeede); color: var(--brand-dark, #8a4a14); font-size: 11.5px; font-weight: 800; }
+.ash-menu a, .ash-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; font-size: 14px; text-align: right; text-decoration: none; cursor: pointer; }
+.ash-menu a:hover, .ash-menu button:hover { background: var(--brand-soft, #fbeede); }
+.ash-menu .ash-danger { color: #b23b23; }
+
+.ash-login { color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 8px 14px; border-radius: 10px; background: var(--brand, #c8752d); }
+
+.ash-burger { display: none; width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #fff; cursor: pointer; font-size: 16px; }
+
+/* تبويبات القسم (CRM / أدوات QL) */
+.ash-sub {
+  position: sticky; top: var(--ash-h); z-index: 55; display: flex; gap: 4px; overflow-x: auto; direction: rtl;
+  padding: 0 clamp(14px, 3vw, 28px); background: #fff; border-bottom: 1px solid var(--line, #e3ddd3); font-family: inherit;
+}
+.ash-sub a {
+  position: relative; padding: 12px 14px; color: var(--muted, #6b655c); text-decoration: none; font-size: 14px; font-weight: 700; white-space: nowrap;
+}
+.ash-sub a:hover { color: var(--ink, #1b1a18); }
+.ash-sub a.is-active { color: var(--brand-dark, #8a4a14); }
+.ash-sub a.is-active::after { content: ""; position: absolute; right: 10px; left: 10px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--brand, #c8752d); }
+
+/* ── ضبط الصفحات الموجودة مع الشريط الجديد ── */
+body.has-shell .dashboard-shell { padding-top: var(--space-2, 16px); min-height: calc(100vh - var(--ash-total)); }
+/* بانر الصفحة بقى مضغوط: العنوان بس (اللوجو والروابط في الشريط) */
+body.has-shell .dashboard-hero { padding-bottom: var(--space-1, 8px); border-bottom: 0; }
+body.has-shell .dashboard-hero .dashboard-logo,
+body.has-shell .dashboard-hero .dashboard-home-btn,
+body.has-shell .dashboard-hero-text > p:not(.eyebrow) { display: none !important; }
+body.has-shell .dashboard-hero .eyebrow { display: none; }
+body.has-shell .dashboard-hero h1 { font-size: clamp(18px, 2vw, 22px); }
+body.has-shell .dashboard-toolbar { top: calc(var(--ash-total) + 8px); }
+body.has-shell .dash-sidebar { top: calc(var(--ash-total) + var(--space-2, 16px)); }
+body.has-shell .rep-split-input { top: calc(var(--ash-total) + var(--space-2, 16px)); max-height: calc(100vh - var(--ash-total) - 2 * var(--space-2, 16px)); }
+body.has-shell .rep-header { display: none !important; } /* هيدر QL القديم اتبدل بالشريط الموحد */
+
+@media (max-width: 860px) {
+  .ash-burger { display: inline-grid; place-items: center; }
+  .ash-nav { display: none; order: 5; flex: 1 1 100%; }
+  .ash-bar.is-open .ash-nav { display: flex; flex-direction: column; align-items: stretch; }
+  .ash-search { order: 6; flex: 1 1 100%; }
+  .ash-user { margin-inline-start: auto; }
+  .ash-user .ash-uname { display: none; }
+  body.has-shell .dash-sidebar { top: auto; }
+}
+@media print { .ash-bar, .ash-sub { display: none !important; } }

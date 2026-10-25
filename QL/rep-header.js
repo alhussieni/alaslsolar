@@ -1,37 +1,13 @@
-/* هيدر ثابت مشترك لكل صفحات المندوب — بيتحقن تلقائيًا في بداية الصفحة، بنفس شكل
-   هيدر الموقع العام (.site-header) بس بروابط خاصة بأدوات المندوب. الملف ده مصدر واحد
-   لكل الصفحات عشان أي تعديل على الروابط يحصل مرة واحدة بدل ما نكرره في كل ملف. */
+/* QL/rep-header.js — بقى مجرد محمّل للهيكل الموحد.
+   الهيدر القديم (روابط QL فقط) اتبدل بالشريط الموحد الموجود في /management/shell/ (أقسام النظام + بحث + قائمة المستخدم)،
+   وروابط أدوات QL بقت تبويبات تحت الشريط. الملف محتفظ باسمه عشان صفحات QL كلها لسه بتحمّله من غير تعديل. */
 (function () {
-  const NAV_ITEMS = [
-    { href: "rep-offgrid-quote.html", label: "حاسبة أوف جريد", icon: "fa-car-battery" },
-    { href: "solar-pump-station.html", label: "محطة ري شمسية", icon: "fa-solar-panel" },
-    { href: "rep-quotes.html", label: "عروض المنتجات", icon: "fa-file-invoice" },
-    { href: "feasibility-study.html", label: "دراسة جدوى", icon: "fa-chart-line" },
-    { href: "rep-crm.html", label: "CRM", icon: "fa-users" },
-    { href: "rep-customers.html", label: "العملاء والمتابعة", icon: "fa-address-book" },
-    { href: "rep-settings.html", label: "الإعدادات", icon: "fa-gear" },
-    { href: "../management/", label: "بوابة الإدارة", icon: "fa-house" },
-  ];
-
-  const current = (location.pathname.split("/").pop() || "index.html");
-
-  const navHtml = NAV_ITEMS.map((item) => {
-    const active = item.href === current;
-    return `<a href="${item.href}" class="rep-nav-link${active ? " active" : ""}"${active ? ' aria-current="page"' : ""}>
-      <i class="fa-solid ${item.icon}" aria-hidden="true"></i><span>${item.label}</span>
-    </a>`;
-  }).join("");
-
-  const header = document.createElement("header");
-  header.className = "site-header rep-header";
-  header.innerHTML = `
-    <a class="brand" href="index.html" aria-label="الأصل للطاقة الشمسية — بوابة المناديب">
-      <img src="../logo-white.png" alt="الأصل للطاقة الشمسية" width="90" height="52" loading="eager">
-    </a>
-    <nav class="rep-nav" aria-label="تنقل صفحات المندوب">${navHtml}</nav>
-  `;
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.body.insertBefore(header, document.body.firstChild);
-  });
+  if (window.__alaslShell) return;
+  var link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "/management/shell/shell.css";
+  document.head.appendChild(link);
+  var script = document.createElement("script");
+  script.src = "/management/shell/shell.js";
+  document.head.appendChild(script);
 })();

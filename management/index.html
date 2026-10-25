@@ -27,8 +27,19 @@
     .ql-card h3 { margin: 8px 0 4px; }
     .ql-card p { font-size: 13px; color: var(--muted); margin: 0; }
     .ql-soon { display: inline-block; margin-top: 8px; padding: 1px 10px; border-radius: 99px; background: var(--brand-soft); color: var(--brand-dark); font-size: 11.5px; font-weight: 800; }
+    /* لوحة اليوم: أرقام صغيرة بتفتح الصفحة المعنية */
+    .ql-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .ql-stat.card { display: block; text-decoration: none; color: inherit; box-shadow: none; padding: 16px 18px; transition: border-color .15s, background .15s; }
+    .ql-stat.card:hover { transform: none; box-shadow: none; border-color: var(--brand); background: var(--brand-soft); }
+    .ql-stat .num { display: block; font-size: 28px; font-weight: 800; line-height: 1.1; }
+    .ql-stat .lbl { display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 4px; }
+    .ql-stat .sub { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .ql-stat.is-alert { border-color: #b23b23; }
+    .ql-stat.is-alert .num { color: #b23b23; }
     .hidden { display: none !important; }
   </style>
+  <link rel="stylesheet" href="/management/shell/shell.css">
+  <script defer src="/management/shell/shell.js"></script>
 </head>
 <body>
   <main class="dashboard-shell">
@@ -60,6 +71,10 @@
           <p id="home_hint">اختار القسم اللي محتاجه</p>
         </div>
         <button class="btn btn-secondary dark" type="button" id="logout">تسجيل خروج</button>
+      </div>
+      <div class="ql-group" id="today" hidden>
+        <p class="ql-group-title">اليوم</p>
+        <div class="ql-stats" id="stats"></div>
       </div>
       <div id="groups"></div>
     </section>
@@ -123,6 +138,35 @@
         box.appendChild(h('div', { 'class': 'ql-group' }, h('p', { 'class': 'ql-group-title', text: g.title }), cards));
       });
       $('home_hint').textContent = total ? 'اختار القسم اللي محتاجه' : 'هذا الحساب لا يملك صلاحية لأي قسم حاليًا. تواصل مع الإدارة.';
+      if (total) loadToday(perms);
+    }
+
+    function money(n) { return Number(n || 0).toLocaleString('ar-EG', { maximumFractionDigits: 0 }) + ' ج.م'; }
+
+    // لوحة "اليوم": أرقام من دالة crm_today_summary (بتحترم الصلاحيات: المندوب أرقامه، الإدارة الكل)
+    async function loadToday(perms) {
+      var box = $('today'), stats = $('stats'); stats.textContent = ''; box.hidden = true;
+      var r = await sb.rpc('crm_today_summary');
+      if (r.error || !r.data) return;
+      var d = r.data, tiles = [];
+      var who = function (scope) { return scope === 'all' ? 'الكل' : 'خاصة بي'; };
+      if ('follow_ups_overdue' in d) {
+        tiles.push({ num: d.follow_ups_overdue, lbl: 'متابعات متأخرة', sub: who(d.scope_follow_ups), href: '../QL/rep-customers.html#followups', alert: d.follow_ups_overdue > 0 });
+        tiles.push({ num: d.follow_ups_today, lbl: 'متابعات اليوم', sub: who(d.scope_follow_ups), href: '../QL/rep-customers.html#followups' });
+      }
+      if ('quotes_open' in d) {
+        var qHref = perms.indexOf('crm.access') >= 0 ? '../QL/rep-crm.html' : '../QL/rep-customers.html';
+        tiles.push({ num: d.quotes_open, lbl: 'عروض مفتوحة', sub: money(d.quotes_open_total) + ' — ' + who(d.scope_quotes), href: qHref });
+        tiles.push({ num: d.accepted_month, lbl: 'مقبولة هذا الشهر', sub: money(d.accepted_month_total) + ' — ' + who(d.scope_quotes), href: qHref });
+      }
+      if ('customers' in d) tiles.push({ num: d.customers, lbl: 'عملاء', sub: who(d.scope_customers), href: '../QL/rep-customers.html' });
+      if ('new_requests' in d) tiles.push({ num: d.new_requests, lbl: 'طلبات جديدة من الموقع', sub: '', href: '../dashboard.html', alert: d.new_requests > 0 });
+      tiles.forEach(function (t) {
+        var a = h('a', { 'class': 'card ql-stat' + (t.alert ? ' is-alert' : ''), href: t.href }, h('span', { 'class': 'num', text: Number(t.num || 0).toLocaleString('ar-EG') }), h('span', { 'class': 'lbl', text: t.lbl }));
+        if (t.sub) a.appendChild(h('span', { 'class': 'sub', text: t.sub }));
+        stats.appendChild(a);
+      });
+      box.hidden = tiles.length === 0;
     }
 
     async function login(e) {

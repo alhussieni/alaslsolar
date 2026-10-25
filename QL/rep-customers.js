@@ -109,6 +109,12 @@ async function updateAuthState(session) {
   $("[data-user-name]").textContent = session.user.email || "";
   $("[data-overview-section]").hidden = !can("reps.activity.read");
   await reloadAll();
+  // رابط من البحث العام: /QL/rep-customers.html?customer=ID
+  const wanted = Number(new URLSearchParams(location.search).get("customer"));
+  if (wanted && customers.some((c) => c.id === wanted)) {
+    await openCustomer(wanted);
+    $("[data-detail-section]").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 async function handleLogin(e) {
