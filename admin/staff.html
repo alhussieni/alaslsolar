@@ -43,9 +43,6 @@
     dialog input:focus { outline: none; border-color: var(--brand); }
     dialog .row { margin-top: var(--space-2); }
     #l_id, #l_pw, #c_login, #c_pw { direction: ltr; text-align: left; }
-    .toolbar-links { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-    .toolbar-links a { color: rgba(255,255,255,.8); text-decoration: none; font-size: 14px; font-weight: 700; }
-    .toolbar-links a:hover { color: #fff; }
   </style>
   <link rel="stylesheet" href="/management/shell/shell.css">
   <script defer src="/management/shell/shell.js"></script>
@@ -79,13 +76,6 @@
   </section>
 
   <div class="dashboard-content hidden" id="app">
-    <div class="dashboard-toolbar">
-      <div><h2 style="margin:0;color:#fff;font-size:18px">إدارة الموظفين</h2><p id="who" style="margin:0"></p></div>
-      <div class="toolbar-links">
-        <a href="../management/"><i class="fa-solid fa-house" aria-hidden="true"></i> بوابة الإدارة</a>
-        <button id="logout" class="btn btn-secondary dark" type="button" style="min-height:44px">تسجيل الخروج</button>
-      </div>
-    </div>
     <div id="msg" role="status"></div>
 
     <section class="dashboard-card">
@@ -304,10 +294,10 @@
 
   async function boot() {
     var s = (await sb.auth.getSession()).data.session;
-    $('login').classList.toggle('hidden', !!s); $('logout').classList.toggle('hidden', !s);
+    $('login').classList.toggle('hidden', !!s);
     $('app').classList.add('hidden'); $('denied').classList.add('hidden');
-    if (!s) { $('who').textContent = ''; return; }
-    currentUser = s.user; $('who').textContent = s.user.email;
+    if (!s) return;
+    currentUser = s.user;
     var p = await sb.rpc('my_permissions');
     var perms = p.data || [];
     if (p.error || perms.indexOf('staff.manage') < 0) { $('denied').classList.remove('hidden'); return; }
@@ -318,7 +308,6 @@
 
   $('l_btn').addEventListener('click', onLogin);
   $('l_pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') onLogin(); });
-  $('logout').addEventListener('click', async function () { await sb.auth.signOut(); users = []; await boot(); });
   $('c_gen').addEventListener('click', function () { $('c_pw').value = genPassword(); });
   $('c_copy').addEventListener('click', function () { copy($('c_pw')); });
   $('p_gen').addEventListener('click', function () { $('p_pw').value = genPassword(); });
