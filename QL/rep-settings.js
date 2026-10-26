@@ -45,8 +45,8 @@ async function updateAuthState(session) {
   if (!session) {
     authPanel.hidden = false;
     repPanel.hidden = true;
-    logoutBtn.hidden = true;
-    userName.textContent = "";
+    if (logoutBtn) logoutBtn.hidden = true;
+    if (userName) userName.textContent = "";
     return;
   }
 
@@ -57,15 +57,15 @@ async function updateAuthState(session) {
     await client.auth.signOut();
     authPanel.hidden = false;
     repPanel.hidden = true;
-    logoutBtn.hidden = true;
+    if (logoutBtn) logoutBtn.hidden = true;
     return;
   }
 
   currentRep = rep;
   authPanel.hidden = true;
   repPanel.hidden = false;
-  logoutBtn.hidden = false;
-  userName.textContent = rep.display_name;
+  if (logoutBtn) logoutBtn.hidden = false;
+  if (userName) userName.textContent = rep.display_name;
   $("#settingsName").value = rep.display_name || "";
 }
 
@@ -105,7 +105,7 @@ async function handleNameSave(e) {
   if (error) { showMsg(msg, "تعذر الحفظ: " + error.message, "error"); return; }
 
   currentRep.display_name = newName;
-  $("[data-user-name]").textContent = newName;
+  if ($("[data-user-name]")) $("[data-user-name]").textContent = newName;
   showMsg(msg, "✅ تم حفظ الاسم بنجاح.", "ok");
 }
 
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!client) return;
 
   $("[data-login-form]").addEventListener("submit", handleLogin);
-  $("[data-logout]").addEventListener("click", handleLogout);
+  $("[data-logout]")?.addEventListener("click", handleLogout);
   $("[data-name-form]").addEventListener("submit", handleNameSave);
   $("[data-password-form]").addEventListener("submit", handlePasswordChange);
 

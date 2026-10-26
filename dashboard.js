@@ -1095,7 +1095,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("projectForm").addEventListener("submit", handleProject);
   document.getElementById("articleForm").addEventListener("submit", handleArticle);
   document.getElementById("faqAddForm")?.addEventListener("submit", handleFaqAdd);
-  document.querySelector("[data-logout]").addEventListener("click", handleLogout);
+  document.querySelector("[data-logout]")?.addEventListener("click", handleLogout);
 
   client.auth.onAuthStateChange((_event, session) => {
     // Supabase silently checks/renews the session whenever the tab regains

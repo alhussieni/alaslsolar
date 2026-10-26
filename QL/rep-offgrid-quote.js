@@ -210,7 +210,7 @@ async function updateAuthState(session) {
   }
   authPanel.hidden = true;
   repPanel.hidden = false;
-  userName.textContent = rep.display_name;
+  if (userName) userName.textContent = rep.display_name;
 
   /* Supabase بيبعت onAuthStateChange تاني (تجديد توكين تلقائي، رجوع فوكس التاب، إلخ)
      مش بس أول تسجيل دخول. من غير الحارس ده، كل مرة الحدث ده يتبعت، loadCatalog()

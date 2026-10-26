@@ -90,8 +90,8 @@ async function updateAuthState(session) {
   const authMsg = $("[data-auth-message]");
 
   if (!session) {
-    authPanel.hidden = false; repPanel.hidden = true; logoutBtn.hidden = true;
-    $("[data-user-name]").textContent = "";
+    authPanel.hidden = false; repPanel.hidden = true; if (logoutBtn) logoutBtn.hidden = true;
+    if ($("[data-user-name]")) $("[data-user-name]").textContent = "";
     return;
   }
 
@@ -101,12 +101,12 @@ async function updateAuthState(session) {
     authMsg.textContent = "هذا الحساب لا يملك صلاحية الوصول للعملاء. تواصل مع الإدارة.";
     authMsg.className = "rq-msg error";
     await client.auth.signOut();
-    authPanel.hidden = false; repPanel.hidden = true; logoutBtn.hidden = true;
+    authPanel.hidden = false; repPanel.hidden = true; if (logoutBtn) logoutBtn.hidden = true;
     return;
   }
 
-  authPanel.hidden = true; repPanel.hidden = false; logoutBtn.hidden = false;
-  $("[data-user-name]").textContent = session.user.email || "";
+  authPanel.hidden = true; repPanel.hidden = false; if (logoutBtn) logoutBtn.hidden = false;
+  if ($("[data-user-name]")) $("[data-user-name]").textContent = session.user.email || "";
   $("[data-overview-section]").hidden = !can("reps.activity.read");
   await reloadAll();
   // رابط من البحث العام: /QL/rep-customers.html?customer=ID
@@ -331,7 +331,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initClient();
   if (!client) { pageMsg("تعذر الاتصال بالخادم.", "error"); return; }
   $("[data-login-form]").addEventListener("submit", handleLogin);
-  $("[data-logout]").addEventListener("click", handleLogout);
+  $("[data-logout]")?.addEventListener("click", handleLogout);
   $("[data-customer-search]").addEventListener("input", renderCustomers);
   $("[data-overview-days]").addEventListener("change", loadOverview);
   $("[data-detail-close]").addEventListener("click", () => { selected = null; $("[data-detail-section]").hidden = true; renderCustomers(); });

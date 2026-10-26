@@ -77,8 +77,8 @@ async function updateAuthState(session) {
   if (!session) {
     authPanel.hidden = false;
     repPanel.hidden = true;
-    logoutBtn.hidden = true;
-    userName.textContent = "";
+    if (logoutBtn) logoutBtn.hidden = true;
+    if (userName) userName.textContent = "";
     stopDraftsPolling();
     return;
   }
@@ -94,15 +94,15 @@ async function updateAuthState(session) {
     await client.auth.signOut();
     authPanel.hidden = false;
     repPanel.hidden = true;
-    logoutBtn.hidden = true;
+    if (logoutBtn) logoutBtn.hidden = true;
     stopDraftsPolling();
     return;
   }
 
   authPanel.hidden = true;
   repPanel.hidden = false;
-  logoutBtn.hidden = false;
-  userName.textContent = isAdmin ? `${rep?.display_name || session.user.email} (${isLegacyAdmin ? "أدمن" : "إدارة"})` : (rep?.display_name || "—");
+  if (logoutBtn) logoutBtn.hidden = false;
+  if (userName) userName.textContent = isAdmin ? `${rep?.display_name || session.user.email} (${isLegacyAdmin ? "أدمن" : "إدارة"})` : (rep?.display_name || "—");
 
   if (!isAdmin && rep && !rep.can_access_crm) {
     repPanel.innerHTML = `<div class="card" style="text-align:center;padding:40px 18px;color:var(--muted)">
@@ -461,7 +461,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!client) return;
 
   $("[data-login-form]").addEventListener("submit", handleLogin);
-  $("[data-logout]").addEventListener("click", handleLogout);
+  $("[data-logout]")?.addEventListener("click", handleLogout);
   $("#crmSearchName").addEventListener("input", renderQuoteList);
   $("#crmSearchPhone").addEventListener("input", renderQuoteList);
   $("#crmDateFrom").addEventListener("change", renderQuoteList);

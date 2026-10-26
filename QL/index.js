@@ -43,7 +43,7 @@ async function updateAuthState(session) {
 
   authPanel.hidden = true;
   repPanel.hidden = false;
-  userName.textContent = rep.display_name;
+  if (userName) userName.textContent = rep.display_name;
 }
 
 async function handleLogin(e) {
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   $("[data-login-form]").addEventListener("submit", handleLogin);
-  $("[data-logout]").addEventListener("click", handleLogout);
+  $("[data-logout]")?.addEventListener("click", handleLogout);
 
   client.auth.onAuthStateChange((_e, session) => updateAuthState(session));
   const { data } = await client.auth.getSession();

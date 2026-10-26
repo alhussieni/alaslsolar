@@ -76,8 +76,8 @@ async function updateAuthState(session) {
   if (!session) {
     authPanel.hidden = false;
     repPanel.hidden = true;
-    logoutBtn.hidden = true;
-    userName.textContent = "";
+    if (logoutBtn) logoutBtn.hidden = true;
+    if (userName) userName.textContent = "";
     return;
   }
 
@@ -88,14 +88,14 @@ async function updateAuthState(session) {
     await client.auth.signOut();
     authPanel.hidden = false;
     repPanel.hidden = true;
-    logoutBtn.hidden = true;
+    if (logoutBtn) logoutBtn.hidden = true;
     return;
   }
 
   authPanel.hidden = true;
   repPanel.hidden = false;
-  logoutBtn.hidden = false;
-  userName.textContent = rep.display_name;
+  if (logoutBtn) logoutBtn.hidden = false;
+  if (userName) userName.textContent = rep.display_name;
 
   if (!rep.can_access_products) {
     repPanel.innerHTML = `<div class="card" style="text-align:center;padding:40px 18px;color:var(--muted)">
@@ -512,7 +512,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   $("[data-login-form]").addEventListener("submit", handleLogin);
-  $("[data-logout]").addEventListener("click", handleLogout);
+  $("[data-logout]")?.addEventListener("click", handleLogout);
   $("#addProductBtn").addEventListener("click", addProductToCart);
   $("#saveQuoteBtn").addEventListener("click", saveQuote);
   $("#installCost").addEventListener("input", updateTotals);

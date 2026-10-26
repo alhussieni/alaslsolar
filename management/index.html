@@ -65,13 +65,7 @@
     </section>
 
     <section class="dashboard-content hidden" id="home">
-      <div class="dashboard-toolbar">
-        <div>
-          <h2>أهلًا بيك، <span id="who"></span></h2>
-          <p id="home_hint">اختار القسم اللي محتاجه</p>
-        </div>
-        <button class="btn btn-secondary dark" type="button" id="logout">تسجيل خروج</button>
-      </div>
+      <p class="form-note" id="home_hint" style="margin:0 0 var(--space-2)">اختار القسم اللي محتاجه</p>
       <div class="ql-group" id="today" hidden>
         <p class="ql-group-title">اليوم</p>
         <div class="ql-stats" id="stats"></div>
@@ -118,7 +112,6 @@
       $('login').classList.toggle('hidden', !!s);
       $('home').classList.toggle('hidden', !s);
       if (!s) return;
-      $('who').textContent = s.user.email || '';
 
       var r = await sb.rpc('my_permissions');
       var box = $('groups'); box.textContent = '';
@@ -184,7 +177,6 @@
 
     if (!sb) { setMsg('تعذر الاتصال بالخادم.'); return; }
     $('login_form').addEventListener('submit', login);
-    $('logout').addEventListener('click', async function () { await sb.auth.signOut(); await render(); });
     render();
   })();
   </script>

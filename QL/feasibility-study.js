@@ -39,7 +39,7 @@ async function updateAuthState(session) {
   const authMsg = $("[data-auth-message]");
 
   if (!session) {
-    authPanel.hidden = false; repPanel.hidden = true; logoutBtn.hidden = true; userName.textContent = "";
+    authPanel.hidden = false; repPanel.hidden = true; if (logoutBtn) logoutBtn.hidden = true; if (userName) userName.textContent = "";
     return;
   }
 
@@ -48,12 +48,12 @@ async function updateAuthState(session) {
     authMsg.textContent = "هذا الحساب غير مفعّل كمندوب. تواصل مع الأدمن.";
     authMsg.className = "form-note error";
     await client.auth.signOut();
-    authPanel.hidden = false; repPanel.hidden = true; logoutBtn.hidden = true;
+    authPanel.hidden = false; repPanel.hidden = true; if (logoutBtn) logoutBtn.hidden = true;
     return;
   }
 
-  authPanel.hidden = true; repPanel.hidden = false; logoutBtn.hidden = false;
-  userName.textContent = rep.display_name;
+  authPanel.hidden = true; repPanel.hidden = false; if (logoutBtn) logoutBtn.hidden = false;
+  if (userName) userName.textContent = rep.display_name;
 
   await loadDefaultsAndQuote();
 }
@@ -679,7 +679,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!client) { $("[data-auth-message]").textContent = "تعذر الاتصال بالخادم."; return; }
 
   $("[data-login-form]").addEventListener("submit", handleLogin);
-  $("[data-logout]").addEventListener("click", handleLogout);
+  $("[data-logout]")?.addEventListener("click", handleLogout);
 
   $("#fsCalcBtn").addEventListener("click", () => {
     const inputs = readInputs();
