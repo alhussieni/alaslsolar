@@ -37,14 +37,13 @@
       { label: 'حاسبة أوف جريد',  href: '/QL/rep-offgrid-quote.html', any: ['ql.access'], key: 'rep-offgrid-quote.html|' },
       { label: 'محطة ري شمسية',   href: '/QL/solar-pump-station.html', any: ['ql.access'], key: 'solar-pump-station.html|' },
       { label: 'عروض المنتجات',   href: '/QL/rep-quotes.html', any: ['ql.access'], key: 'rep-quotes.html|' },
-      { label: 'دراسة جدوى',      href: '/QL/feasibility-study.html', any: ['ql.access'], key: 'feasibility-study.html|' },
-      { label: 'الإعدادات',       href: '/QL/rep-settings.html', any: ['ql.access'], key: 'rep-settings.html|' }
+      { label: 'دراسة جدوى',      href: '/QL/feasibility-study.html', any: ['ql.access'], key: 'feasibility-study.html|' }
     ]
   };
 
   function detectSection(pathname) {
     var p = pathname.toLowerCase();
-    if (p.indexOf('/management') === 0) return 'portal';
+    if (p.indexOf('/management') === 0) return 'portal'; // يشمل /management/account.html
     if (p.indexOf('/admin/staff') === 0) return 'staff';
     if (p.indexOf('/erp') === 0) return 'erp';
     if (/\/dashboard\.html$/.test(p)) return 'dashboard';
@@ -204,7 +203,7 @@
     var who = h('div', { 'class': 'ash-who' }, h('strong', { text: name }), h('span', { text: email }));
     ctx.roles.forEach(function (r) { who.appendChild(h('span', { 'class': 'ash-role', text: ROLE_LABELS[r] || r })); });
     menu.appendChild(who);
-    if (has(ctx.perms, ['ql.access'])) menu.appendChild(h('a', { href: '/QL/rep-settings.html' }, icon('fa-gear'), 'إعدادات الحساب وكلمة المرور'));
+    menu.appendChild(h('a', { href: '/management/account.html' }, icon('fa-user-gear'), 'حسابي: الاسم وكلمة المرور'));
     menu.appendChild(h('a', { href: '/index.html' }, icon('fa-globe'), 'موقع الشركة'));
     var out = h('button', { type: 'button', 'class': 'ash-danger' }, icon('fa-right-from-bracket'), 'تسجيل الخروج');
     out.addEventListener('click', async function () { await client.auth.signOut(); location.href = '/management/'; });
@@ -236,6 +235,7 @@
     render(); // هيكل مبدئي (لوجو + دخول) لحد ما نعرف الجلسة
     window.addEventListener('resize', measure);
     window.addEventListener('hashchange', function () { renderSub(); measure(); });
+    window.addEventListener('alasl:profile-updated', async function () { if (client) { await loadContext(); render(); } });
     client = await getClient();
     if (!client) return;
     await loadContext(); render();

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0b0a">
+  <title>حسابي | الأصل للطاقة الشمسية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../QL/rep-widgets.css">
+  <link rel="stylesheet" href="/management/shell/shell.css">
+  <script defer src="/management/shell/shell.js"></script>
+  <style>
+    .acc-wrap { max-width: 640px; margin: 0 auto; }
+    .acc-meta { display: grid; gap: 6px; margin: 0 0 var(--space-2); font-size: 14px; }
+    .acc-meta div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+    .acc-meta dt { color: var(--muted); font-weight: 700; }
+    .acc-meta dd { margin: 0; direction: ltr; text-align: right; word-break: break-all; }
+    .acc-roles .tag { display: inline-block; padding: 1px 10px; margin-inline-start: 4px; border-radius: 99px; background: var(--brand-soft); color: var(--brand-dark); font-size: 12px; font-weight: 800; }
+    .hint { font-size: 13px; color: var(--muted); margin: var(--space-1) 0 0; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<main class="dashboard-shell">
+  <section class="dashboard-hero">
+    <a class="dashboard-logo" href="../index.html"><img src="../logo-white.png" alt="Al Asl Solar logo"></a>
+    <div class="dashboard-hero-text">
+      <p class="eyebrow" style="margin-bottom:2px">الإدارة</p>
+      <h1>حسابي</h1>
+      <p>الاسم الظاهر وكلمة المرور</p>
+    </div>
+  </section>
+
+  <div class="acc-wrap">
+    <p class="rq-msg" id="msg" role="status"></p>
+
+    <section class="dashboard-card" id="signedout" hidden>
+      <h2>سجّل دخولك أولًا</h2>
+      <p>الصفحة دي للموظفين المسجّلين.</p>
+      <a class="btn btn-primary" href="/management/">تسجيل الدخول</a>
+    </section>
+
+    <section class="dashboard-card" id="notstaff" hidden>
+      <h2>غير مصرح</h2>
+      <p>هذا الحساب غير مسجّل كموظف نشط. تواصل مع الإدارة.</p>
+    </section>
+
+    <div id="app" hidden>
+      <section class="dashboard-card" style="text-align:right">
+        <h2>بياناتي</h2>
+        <dl class="acc-meta">
+          <div><dt>الدخول</dt><dd id="a_login"></dd></div>
+          <div><dt>الأدوار</dt><dd class="acc-roles" id="a_roles" style="direction:rtl"></dd></div>
+        </dl>
+        <form class="admin-form" id="name_form" novalidate>
+          <label for="a_name">الاسم الظاهر (في عروض الأسعار وقوائم النظام)</label>
+          <input id="a_name" type="text" maxlength="80" autocomplete="name" required>
+          <button class="btn btn-primary" type="submit" id="name_btn">حفظ الاسم</button>
+        </form>
+      </section>
+
+      <section class="dashboard-card" style="text-align:right">
+        <h2>تغيير كلمة المرور</h2>
+        <form class="admin-form" id="pw_form" novalidate>
+          <label for="pw_cur">كلمة المرور الحالية</label>
+          <input id="pw_cur" type="password" autocomplete="current-password" required>
+          <label for="pw_new">كلمة المرور الجديدة</label>
+          <input id="pw_new" type="password" autocomplete="new-password" minlength="10" required>
+          <label for="pw_conf">تأكيد كلمة المرور الجديدة</label>
+          <input id="pw_conf" type="password" autocomplete="new-password" minlength="10" required>
+          <p class="hint">10 خانات على الأقل، وتحتوي على حروف وأرقام.</p>
+          <button class="btn btn-primary" type="submit" id="pw_btn">تغيير كلمة المرور</button>
+        </form>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../supabase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  var ROLE_LABELS = { superadmin: 'سوبر أدمن', admin: 'أدمن', sales_manager: 'مدير مناديب', sales_rep: 'مندوب' };
+  var sb = window.getAlaslSupabase ? window.getAlaslSupabase() : null;
+  var session = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function msg(text, kind) { var m = $('msg'); m.textContent = text || ''; m.className = 'rq-msg' + (kind ? ' ' + kind : ''); }
+  function show(id, on) { $(id).hidden = !on; }
+
+  async function load() {
+    session = (await sb.auth.getSession()).data.session;
+    show('signedout', !session); show('app', false); show('notstaff', false);
+    if (!session) return;
+    var uid = session.user.id;
+    var r = await Promise.all([
+      sb.from('staff_profiles').select('display_name, username, email, active').eq('id', uid).maybeSingle(),
+      sb.from('user_roles').select('role_key').eq('user_id', uid)
+    ]);
+    var p = r[0].data;
+    if (!p || !p.active) { show('notstaff', true); return; }
+    $('a_login').textContent = p.username || p.email || session.user.email || '';
+    $('a_name').value = p.display_name || '';
+    var roles = $('a_roles'); roles.textContent = '';
+    (r[1].data || []).forEach(function (x) { var s = document.createElement('span'); s.className = 'tag'; s.textContent = ROLE_LABELS[x.role_key] || x.role_key; roles.appendChild(s); });
+    show('app', true);
+  }
+
+  async function saveName(e) {
+    e.preventDefault(); msg('');
+    var name = $('a_name').value.trim();
+    if (name.length < 2 || name.length > 80) { msg('الاسم لازم يكون من حرفين إلى 80 حرف.', 'error'); return; }
+    $('name_btn').disabled = true;
+    var res = await sb.rpc('update_my_profile', { p_display_name: name });
+    $('name_btn').disabled = false;
+    if (res.error) { msg('تعذر حفظ الاسم.', 'error'); return; }
+    msg('تم حفظ الاسم.', 'ok');
+    window.dispatchEvent(new Event('alasl:profile-updated')); // الشريط العلوي يحدّث الاسم
+  }
+
+  async function changePassword(e) {
+    e.preventDefault(); msg('');
+    var cur = $('pw_cur').value, nw = $('pw_new').value, conf = $('pw_conf').value;
+    if (!cur) { msg('اكتب كلمة المرور الحالية.', 'error'); return; }
+    if (nw.length < 10 || !/[A-Za-z]/.test(nw) || !/[0-9]/.test(nw)) { msg('كلمة المرور لازم تكون 10 خانات على الأقل وتحتوي على حروف وأرقام.', 'error'); return; }
+    if (nw !== conf) { msg('تأكيد كلمة المرور غير مطابق.', 'error'); return; }
+    if (nw === cur) { msg('كلمة المرور الجديدة لازم تختلف عن الحالية.', 'error'); return; }
+    $('pw_btn').disabled = true;
+    // نتأكد من الباسورد الحالي الأول (حماية لو حد سابك فاتح الجلسة)
+    var check = await sb.auth.signInWithPassword({ email: session.user.email, password: cur });
+    if (check.error) { $('pw_btn').disabled = false; msg('كلمة المرور الحالية غير صحيحة.', 'error'); return; }
+    var up = await sb.auth.updateUser({ password: nw });
+    $('pw_btn').disabled = false;
+    if (up.error) { msg('تعذر تغيير كلمة المرور. جرّب كلمة مرور أقوى.', 'error'); return; }
+    $('pw_form').reset();
+    msg('تم تغيير كلمة المرور.', 'ok');
+  }
+
+  if (!sb) { msg('تعذر الاتصال بالخادم.', 'error'); return; }
+  $('name_form').addEventListener('submit', saveName);
+  $('pw_form').addEventListener('submit', changePassword);
+  load();
+  sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_OUT') load(); });
+})();
+</script>
+</body>
+</html>
