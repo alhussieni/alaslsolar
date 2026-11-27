@@ -642,6 +642,7 @@ async function loadProjects() {
           <textarea id="pf_content_${p.id}" style="display:none">${escP(editorContent)}</textarea>
           ${!isHtmlContent ? `<p class="form-note" style="margin-top:4px">⚠️ ده مشروع قديم كان نص عادي — اتحول تلقائيًا لتنسيق قابل للتعديل. راجعه قبل ما تحفظ.</p>` : ''}
         </div>
+        ${projectTranslationsBlock(p)}
         ${p.slug ? `<p style="margin-top:6px;font-size:12px"><a href="../projects/${escP(p.slug)}.html" target="_blank" rel="noopener">🔗 معاينة صفحة المشروع (بعد آخر تحديث أسبوعي)</a></p>` : ''}
 
         <!-- Existing images -->
@@ -693,6 +694,50 @@ async function loadProjects() {
   `}).join('');
 }
 
+// ── Project translations (EN / ES / ZH) ─────────────────────────────────────
+// Columns: title_xx, summary_xx, meta_description_xx, content_xx (xx = en|es|zh)
+// plus meta_description (Arabic). Empty value => NULL => generator falls back to Arabic.
+const PROJECT_LANGS = [['en', 'English'], ['es', 'Español'], ['zh', '中文']];
+
+function projectTranslationsBlock(p) {
+  const lbl = 'font-size:12px;font-weight:700;display:block;margin:6px 0 3px';
+  const blocks = PROJECT_LANGS.map(([l, name]) => `
+    <div style="border:1px solid var(--line);border-radius:var(--radius);padding:var(--space-2);margin-top:var(--space-2)">
+      <div style="font-weight:700;font-size:13px">🌐 ${name}</div>
+      <label style="${lbl}">العنوان</label>
+      <input id="pf_title_${l}_${p.id}" dir="ltr" value="${escP(p['title_' + l] || '')}">
+      <label style="${lbl}">الملخص</label>
+      <textarea id="pf_sum_${l}_${p.id}" rows="2" dir="ltr">${escP(p['summary_' + l] || '')}</textarea>
+      <label style="${lbl}">وصف الميتا (SEO — حتى 155 حرف)</label>
+      <textarea id="pf_meta_${l}_${p.id}" rows="2" dir="ltr">${escP(p['meta_description_' + l] || '')}</textarea>
+      <label style="${lbl}">قصة المشروع الكاملة (HTML)</label>
+      <textarea id="pf_content_${l}_${p.id}" rows="8" dir="ltr">${escP(p['content_' + l] || '')}</textarea>
+    </div>`).join('');
+  return `
+        <details style="margin-top:var(--space-2)">
+          <summary style="cursor:pointer;font-weight:700;font-size:13px">🌐 الترجمات و SEO (EN / ES / ZH)</summary>
+          <p class="form-note" style="margin-top:6px">اللغة اللي تسيبها فاضية بتظهر صفحتها بالنص العربي.</p>
+          <label style="${lbl}">وصف الميتا بالعربي (SEO)</label>
+          <textarea id="pf_meta_ar_${p.id}" rows="2">${escP(p.meta_description || '')}</textarea>
+          ${blocks}
+        </details>`;
+}
+
+function collectProjectTranslations(id) {
+  const out = {};
+  const val = (el) => (el.value || '').trim() || null;
+  const metaAr = document.getElementById('pf_meta_ar_' + id);
+  if (metaAr) out.meta_description = val(metaAr);
+  for (const [l] of PROJECT_LANGS) {
+    [['title', 'pf_title_'], ['summary', 'pf_sum_'], ['meta_description', 'pf_meta_'], ['content', 'pf_content_']]
+      .forEach(([col, prefix]) => {
+        const el = document.getElementById(prefix + l + '_' + id);
+        if (el) out[col + '_' + l] = val(el);
+      });
+  }
+  return out;
+}
+
 function escP(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function toggleProjectEdit(id) {
@@ -735,6 +780,7 @@ async function saveProject(id) {
       sort_order: Number(document.getElementById('pf_sort_' + id)?.value) || 100,
       image_url:  allImgs.find(i => i.position === 'hero')?.url || allImgs[0]?.url || null,
       images:     allImgs,
+      ...collectProjectTranslations(id),
       updated_at: new Date().toISOString(),
     };
     const { error } = await client.from('projects').update(payload).eq('id', id);

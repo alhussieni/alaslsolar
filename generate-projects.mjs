@@ -155,7 +155,12 @@ function buildProjectPage(project, lang) {
   const { dir, hreflang, suffix } = LANGS[lang];
   const slug = project.slug;
   const title = getField(project, "title", lang);
-  const summary = project.meta_description || getField(project, "summary", lang);
+  // Per-language meta description: translated meta, else translated summary, else the
+  // Arabic meta/summary (fallback rule: never empty).
+  const summary =
+    (lang !== "ar" && (project[`meta_description_${lang}`] || project[`summary_${lang}`])) ||
+    project.meta_description ||
+    getField(project, "summary", lang);
   const metaTitle = truncateForMeta(title, 60);
   const metaSummary = truncateForMeta(summary, 155);
   const rawBody = getField(project, "content", lang) || summary;
@@ -262,7 +267,7 @@ ${hreflangLinks}
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="../supabase-config.js"></script>
   <script defer src="../app.js"></script>
-  <script defer src="../article-lang-switcher.js"></script>
+  <script defer src="../project-lang-switcher.js"></script>
 </head>
 <body>
 ${nav(lang)}
