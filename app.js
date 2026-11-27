@@ -2003,7 +2003,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // lives in its own physical file. On these pages we must NOT let a stale
   // localStorage value or the visitor's browser language override it, or the
   // page ends up with a nav/footer in one language and an article body in another.
-  const isStaticArticlePage = !!document.querySelector('script[src*="article-lang-switcher"]');
+  const isStaticArticlePage = !!document.querySelector('script[src*="article-lang-switcher"], script[src*="project-lang-switcher"]');
   const supportedLangs = ["en", "ar", "es", "zh"];
   const pageDeclaredLang = document.documentElement.getAttribute("lang");
 
